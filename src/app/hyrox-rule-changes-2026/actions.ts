@@ -71,7 +71,7 @@ export async function submitRaceCardLead(
     hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || hdrs.get('x-real-ip') || 'unknown';
   const userAgent = hdrs.get('user-agent') || '';
 
-  if (isCaptureRateLimited(ip, 'race-card')) {
+  if (await isCaptureRateLimited(ip, 'race-card')) {
     return {
       status: 'error',
       message: 'Too many attempts. Please wait a little while and try again.',

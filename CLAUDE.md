@@ -72,6 +72,18 @@ the wire format between this site and `hyroxedgeai`, it belongs in
 
 ## Known constraints
 
-- `maxInstances: 1` in `apphosting.yaml` is load-bearing. The capture rate limiter
-  (`src/lib/rate-limit.ts`) keeps its state in an in-process `Map`, so N instances
-  would allow N times the intended limit. Move it to Firestore before raising this.
+- `maxInstances: 1` in `apphosting.yaml` is no longer load-bearing. The capture rate
+  limiter (`src/lib/rate-limit.ts`) holds its window in Firestore, shared across
+  instances, with a deny-only in-process cache in front of it. It fails open if
+  Firestore is unreachable, on the grounds that a lost signup is permanent and an
+  unthrottled burst is not.
+
+  The one thing to check before raising it: `LEAD_TOKEN_SECRET` must be set. Unset,
+  `src/lib/lead-tokens.ts` falls back to a per-process random secret, so a
+  confirmation link minted by one instance fails on another — which presents as an
+  intermittently broken email rather than as a missing secret.
+
+- Expired rate-limit windows are swept by `/api/cron/marketing-maintenance` on its
+  hourly run. Documents also carry `expiresAt`, so a Firestore TTL policy on the
+  `rateLimits` collection would do the same job with no code; the cron sweep exists
+  so the collection stays bounded whether or not that policy was ever configured.

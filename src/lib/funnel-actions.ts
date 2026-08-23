@@ -107,7 +107,7 @@ export async function submitFunnelLead(
     hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || hdrs.get('x-real-ip') || 'unknown';
   const userAgent = hdrs.get('user-agent') || '';
 
-  if (isCaptureRateLimited(ip, 'funnel')) {
+  if (await isCaptureRateLimited(ip, 'funnel')) {
     return { status: 'error', message: 'Too many attempts. Please wait a little while and try again.' };
   }
 

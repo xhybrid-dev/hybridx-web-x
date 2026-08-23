@@ -63,7 +63,7 @@ export async function submitEngineLead(
     'unknown';
   const userAgent = hdrs.get('user-agent') || '';
 
-  if (isCaptureRateLimited(ip, 'engine-guide')) {
+  if (await isCaptureRateLimited(ip, 'engine-guide')) {
     return {
       status: 'error',
       message: 'Too many attempts. Please wait a little while and try again.',

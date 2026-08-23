@@ -28,6 +28,7 @@
 import { NextResponse } from 'next/server';
 import { drainOutbox } from '@/lib/lead-outbox';
 import { refreshComplaintMirror } from '@/lib/suppression-mirror';
+import { pruneRateLimits } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -47,10 +48,15 @@ export async function GET(request: Request) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  // Independent, so one failing must not skip the other. The outbox protects
+  // Independent, so one failing must not skip the others. The outbox protects
   // leads and the mirror protects the sending domain; neither is worth
-  // sacrificing to the other's bad day.
-  const [outbox, mirror] = await Promise.allSettled([drainOutbox(), refreshComplaintMirror()]);
+  // sacrificing to the other's bad day, and neither is worth sacrificing to a
+  // housekeeping sweep.
+  const [outbox, mirror, limits] = await Promise.allSettled([
+    drainOutbox(),
+    refreshComplaintMirror(),
+    pruneRateLimits(),
+  ]);
 
   const result = {
     outbox:
@@ -61,9 +67,13 @@ export async function GET(request: Request) {
       mirror.status === 'fulfilled'
         ? mirror.value
         : { error: String((mirror.reason as Error)?.message ?? mirror.reason) },
+    rateLimits:
+      limits.status === 'fulfilled'
+        ? limits.value
+        : { error: String((limits.reason as Error)?.message ?? limits.reason) },
   };
 
-  if (outbox.status === 'rejected' || mirror.status === 'rejected') {
+  if (outbox.status === 'rejected' || mirror.status === 'rejected' || limits.status === 'rejected') {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

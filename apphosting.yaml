@@ -6,8 +6,15 @@ buildConfig:
   buildCommand: 'npm run build'
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
+  # Safe to raise. This was pinned at 1 because the capture rate limiter kept
+  # its window in an in-process Map, so N instances silently allowed N times the
+  # intended limit. That window now lives in Firestore (src/lib/rate-limit.ts),
+  # shared by every instance.
+  #
+  # One condition before raising it: LEAD_TOKEN_SECRET must be set. Unset, each
+  # instance mints its own random signing secret, so a confirmation link issued
+  # by one instance fails verification on another — intermittently, and looking
+  # like a broken email rather than a missing secret.
   maxInstances: 1
 
 env:
