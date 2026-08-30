@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { isValidLeadSource } from '../leads';
 import { hashEmail } from '../suppression-mirror';
+import { ATHX_SOURCE, ATHX_TAG } from '../athx-campaign';
 
 /**
  * Two rules in this file are shared with the mailing system in the app repo,
@@ -79,5 +80,41 @@ describe('funnel slugs must match the mailing system', () => {
   it('agrees on the exact length boundary', () => {
     expect(isValidLeadSource('a'.repeat(49))).toBe(true);
     expect(isValidLeadSource('a'.repeat(50))).toBe(false);
+  });
+});
+
+describe('the ATHX 2027 funnel agrees with the mailing system', () => {
+  // The app declares `magnet-athx-guide` with `aliases: ['athx_2027_guide']`
+  // in lib/marketing/sources.ts. That alias is the only thing joining this
+  // funnel to its route, and nothing fails loudly if the two drift: leads keep
+  // being captured, keep being forwarded, and quietly land as unclassified —
+  // where the launch campaign's audience filter does not see them. The funnel
+  // would look healthy right up to the send that reaches nobody.
+
+  it('sends a slug the app will accept rather than file as unclassified', () => {
+    expect(isValidLeadSource(ATHX_SOURCE)).toBe(true);
+  });
+
+  it('sends a slug spelled exactly as the app aliases it', () => {
+    // Pinned as a literal on purpose. Importing the constant proves only that
+    // this file agrees with itself; the string is what has to match the entry
+    // in the app's registry.
+    expect(ATHX_SOURCE).toBe('athx_2027_guide');
+  });
+
+  it('sends a tag the app will keep rather than silently drop', () => {
+    // bridge-contract.ts filters on /^[a-z0-9:-]{1,40}$/ and drops what fails,
+    // without failing the request. An underscored tag would arrive as no tag,
+    // and the cohort would be invisible to any segment built on it.
+    const TAG_PATTERN = /^[a-z0-9:-]{1,40}$/;
+    expect(TAG_PATTERN.test(ATHX_TAG)).toBe(true);
+  });
+
+  it('does not reuse the slug spelling as the tag', () => {
+    // The two rules differ by one character class: slugs allow underscores,
+    // tags do not. Passing the slug through as a tag is the easy mistake, and
+    // it fails silently on the far side.
+    expect(ATHX_TAG).not.toBe(ATHX_SOURCE);
+    expect(ATHX_TAG).toBe('athx-2027-guide');
   });
 });

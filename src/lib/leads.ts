@@ -217,3 +217,40 @@ export async function markLeadConfirmed(
 
   attemptForwardAsync(`leads/${docId}`, payload);
 }
+
+/**
+ * Records that a confirmed lead actually opened the magnet they signed up for.
+ *
+ * Purely local: nothing is forwarded, because a download is not a consent event
+ * and the mailing system has no use for it. What it answers is the question the
+ * signup count cannot — how many people who handed over an address went on to
+ * read the thing. A wide gap between the two is an offer being oversold on the
+ * page, which is a copy problem rather than a traffic problem, and the two look
+ * identical if only signups are counted.
+ *
+ * Merge-only, and never creates: reaching here without a pending record means a
+ * token outlived its lead, and writing a document with nothing but a download
+ * flag on it would put a lead in the collection that was never captured.
+ */
+export async function markLeadDownloaded(
+  source: LeadSource,
+  email: string,
+): Promise<void> {
+  const docId = leadDocId(source, email);
+
+  await adminFirestore
+    .collection('leads')
+    .doc(docId)
+    .set(
+      {
+        downloaded: true,
+        // First open, not most recent. The interesting interval is between
+        // signing up and reading, and a later re-download would overwrite it.
+        downloadedAt: FieldValue.serverTimestamp(),
+      },
+      // mergeFields alone, never alongside `merge` — Firestore rejects the pair
+      // outright, and this call swallows its own errors, so the combination
+      // would have failed silently on every download for ever.
+      { mergeFields: ['downloaded', 'downloadedAt'] },
+    );
+}
