@@ -348,12 +348,25 @@ export function createArticleSchema({
   url,
   datePublished,
   dateModified,
+  // Defaults to the site's original topic set. A caller on a page about a
+  // *different* competition — ATHX, say — must override this: the default
+  // would inject "Hyrox" into that page's structured data, which is exactly
+  // the kind of unintended mention a page built to never say that name is
+  // trying to avoid. JSON-LD is invisible on the rendered page, so a mismatch
+  // here would not show up in a visual review — only in a validator or in
+  // whatever an AI system extracts from the page's own markup.
+  about = [
+    { '@type': 'Thing', name: 'Hyrox' },
+    { '@type': 'Thing', name: 'Hybrid Training' },
+    { '@type': 'Thing', name: 'Fitness Training Plans' },
+  ],
 }: {
   title: string;
   description: string;
   url: string;
   datePublished: string;
   dateModified?: string;
+  about?: { '@type': string; name: string }[];
 }) {
   return {
     '@context': 'https://schema.org',
@@ -379,11 +392,7 @@ export function createArticleSchema({
     },
     image: `${SITE_CONFIG.url}/og-default.png`,
     inLanguage: 'en-GB',
-    about: [
-      { '@type': 'Thing', name: 'Hyrox' },
-      { '@type': 'Thing', name: 'Hybrid Training' },
-      { '@type': 'Thing', name: 'Fitness Training Plans' },
-    ],
+    about,
   };
 }
 
