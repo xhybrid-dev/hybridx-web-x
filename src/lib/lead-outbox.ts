@@ -60,10 +60,44 @@ export interface OutboxFields {
   forwardLastError?: string;
 }
 
-/** The outbox fields for a freshly captured lead, to merge into its document. */
+/**
+ * Drop keys whose value is `undefined`.
+ *
+ * Firestore rejects an entire document containing one — not the field, the
+ * write — and this payload is the one place optional values reach a document
+ * unflattened. `ForwardLeadInput` is deliberately built with `undefined` for
+ * absent optionals rather than `null`, because it is also serialised to JSON
+ * for the bridge, where `undefined` disappears and `null` would arrive as an
+ * explicit "no name" and overwrite one already on the subscriber.
+ *
+ * So the two consumers want different things from the same object, and this is
+ * what reconciles them. Shallow on purpose: every optional on this payload is a
+ * top-level key, and a deep walk would be scope for a problem that does not
+ * exist.
+ */
+function withoutUndefined(payload: ForwardLeadInput): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => value !== undefined),
+  );
+}
+
+/**
+ * The outbox fields for a freshly captured lead, to merge into its document.
+ *
+ * The payload is stripped of undefined values here, at the single point where
+ * it becomes Firestore data.
+ *
+ * It was not, and that lost leads silently. A magnet form with no first-name
+ * field — which is every well-designed one, since each extra field costs
+ * conversions — produces `name: undefined`, Firestore refuses the whole
+ * document, and the capture actions catch that and log it rather than failing
+ * the visitor. So the guide still arrived, the person saw a success screen, and
+ * nothing was ever recorded or forwarded to the mailing system. A funnel in that
+ * state looks healthy from every angle except the subscriber count.
+ */
 export function pendingOutbox(payload: ForwardLeadInput): Record<string, unknown> {
   return {
-    forwardPayload: payload,
+    forwardPayload: withoutUndefined(payload),
     forwarded: false,
     forwardAttempts: 0,
     forwardNextAttemptAt: Timestamp.now(),

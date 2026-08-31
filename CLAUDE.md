@@ -91,6 +91,29 @@ the funnel in the prompt narrows the journey to that route.
 `scripts/seed-journeys.ts` exists for the drips that predate the console; a new
 campaign does not need it.
 
+## Running a magnet funnel locally
+
+`npm run dev` is fine: with no mail credentials `getEmailProvider()` returns
+`none`, and in development `sendEmail` logs a warning and discards the message
+rather than failing. Capture forms report success and the lead path runs.
+
+**A production build run locally does not do that.** `next start` sets
+`NODE_ENV=production`, where `sendEmail` refuses to discard mail silently and
+throws — so every magnet form shows *"We could not send that just now"*, which
+reads like a bug in the funnel and is really an absent transport. That refusal
+is deliberate: silently dropping mail once turned a misconfigured deploy into
+subscribers who never received what they asked for.
+
+To exercise the real send path locally, put the Brevo values in `.env` (or any
+SMTP host — `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`) and set
+`LEAD_TOKEN_SECRET` so confirmation links survive a restart.
+
+When it happens on the deployed site instead, `GET /api/admin/email-check`
+signed in as an admin reports which transport resolved and which credentials
+are present, and the server log line names the provider and the underlying
+error — `provider: none` means configuration, anything else is the relay's own
+rejection.
+
 ## Testing
 
 ```bash
