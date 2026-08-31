@@ -57,10 +57,18 @@ import {
 
 const PATH = '/athx-2027';
 
-const TITLE = 'What Is ATHX? Zones, Scoring & 2027 UK Dates';
+// One title, used everywhere — the document title, the H1, the social cards
+// and the Article schema's headline. There used to be two: this SEO-shaped
+// string for <title>, and a punchier "Three zones. One score. No hiding a
+// weak one." for the H1 and social cards. Splitting them meant the thing a
+// visitor actually reads was a hook rather than an answer, on a page whose
+// job is to be the answer. "What is ATHX?" is also, verbatim, the title of
+// the guide this page gives away (private/what-is-athx.pdf) — matching it
+// costs nothing and means the search result, the page a visitor lands on, and
+// the file they download all say the same thing.
+const TITLE = 'What is ATHX?';
 const DESCRIPTION =
-  'What is ATHX? The adidas-backed hybrid competition explained: three zones, real scoring rules, 2027 UK dates, and a free pacing calculator.';
-const HOOK_TITLE = 'Three zones. One score. No hiding a weak one.';
+  'ATHX is a hybrid fitness competition backed by adidas: three judged zones, one score, in 20+ cities for 2027. Zones, scoring, and the 2027 UK dates.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -96,14 +104,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `https://hybridx.club${PATH}` },
   openGraph: {
-    title: HOOK_TITLE,
+    title: TITLE,
     description: DESCRIPTION,
     type: 'website',
     url: `https://hybridx.club${PATH}`,
   },
   twitter: {
     card: 'summary_large_image',
-    title: HOOK_TITLE,
+    title: TITLE,
     description: DESCRIPTION,
   },
 };
@@ -133,7 +141,7 @@ const faqSchema = createFAQSchema(ATHX_FAQS as unknown as { question: string; an
 
 const breadcrumbSchema = createBreadcrumbSchema([
   { name: 'Home', url: '/' },
-  { name: 'ATHX 2027', url: PATH },
+  { name: 'What is ATHX?', url: PATH },
 ]);
 
 const toolSchema = createWebApplicationSchema({
@@ -147,7 +155,7 @@ const toolSchema = createWebApplicationSchema({
 // Marks the sections worth reading aloud or extracting whole — the direct
 // "what is ATHX" answer and the FAQ — for voice assistants and AI answer
 // engines that support SpeakableSpecification.
-const speakableSchema = createSpeakableSchema(['h1', '#what-is-athx', '#faq']);
+const speakableSchema = createSpeakableSchema(['h1', '#how-athx-works', '#faq']);
 
 const INSIGHT_CARDS = [
   {
@@ -220,7 +228,7 @@ export default function AthxFunnelPage() {
             <div className={styles.heroGrid}>
               <div>
                 <p className={styles.eyebrow}>HybridX Club · ATHX 2027</p>
-                <h1 className={styles.h1}>{HOOK_TITLE}</h1>
+                <h1 className={styles.h1}>{TITLE}</h1>
                 <p className={styles.standfirst}>
                   ATHX is the hybrid fitness competition backed by adidas — three judged zones in
                   one session, ranked on placings rather than raw numbers, in more than twenty
@@ -242,10 +250,16 @@ export default function AthxFunnelPage() {
           </div>
         </header>
 
-        {/* ── What is ATHX? ─────────────────────────────────────────── */}
-        <section className={styles.section} id="what-is-athx">
+        {/* ── How ATHX works ────────────────────────────────────────── */}
+        {/* Heading deliberately doesn't repeat the H1. "What is ATHX?" is
+            answered once, in the hero's standfirst, immediately under the H1
+            asking it — the direct-question-then-direct-answer pairing an AI
+            answer engine or a featured snippet is most likely to lift
+            verbatim. Restating the question here would bury that pairing
+            under a second, weaker copy of itself. */}
+        <section className={styles.section} id="how-athx-works">
           <div className={styles.container}>
-            <h2 className={styles.h2}>What is ATHX?</h2>
+            <h2 className={styles.h2}>How ATHX works</h2>
             <hr className={styles.rule} />
 
             <p className={`${styles.body} ${styles.lead}`}>
