@@ -73,6 +73,10 @@ export async function saveLead(input: LeadInput): Promise<void> {
     source: input.source,
     consent: true,
     consentMethod: `magnet:${input.source}`,
+    // The form said signing up means ongoing email, which is what `implied`
+    // records. Sent so a route registered from this funnel's first lead is
+    // labelled correctly without anyone having to configure it.
+    consentPolicy: 'implied',
     utm: input.utm,
     tags: input.tags,
   };
@@ -132,6 +136,10 @@ export async function upsertPendingLead(input: LeadInput): Promise<void> {
     source: input.source,
     consent: false,
     consentMethod: `magnet:${input.source}:pending`,
+    // Stated, not inferred. `consent: false` here means "not yet", and a route
+    // registered from this lead alone would read it as "never" — which is the
+    // one posture the mailing system's unattended-funnel warning skips.
+    consentPolicy: 'confirmed',
     utm: input.utm,
     tags: input.tags,
   };
@@ -194,6 +202,10 @@ export async function markLeadConfirmed(
     source,
     consent: true,
     consentMethod: `magnet:${source}:confirmed`,
+    // Still `confirmed`: the posture describes the funnel, not this moment.
+    // Sending `implied` on the grant would relabel the route as one that never
+    // asked twice, on the strength of somebody proving that it did.
+    consentPolicy: 'confirmed',
     tags,
   };
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import styles from '../athx.module.css';
 import AthxConfirmDownload from '@/components/athx/AthxConfirmDownload';
 import { verifyLeadToken } from '@/lib/lead-tokens';
-import { ATHX_SOURCE } from '@/lib/athx-campaign';
+import { ATHX_MAGNET } from '@/lib/athx-magnet';
 
 /*
  * Where the emailed download link lands.
@@ -46,7 +46,7 @@ export default async function AthxConfirmPage({
   searchParams: Promise<{ token?: string; error?: string }>;
 }) {
   const { token, error } = await searchParams;
-  const verified = verifyLeadToken(token, ATHX_SOURCE);
+  const verified = verifyLeadToken(token, ATHX_MAGNET.slug);
 
   // `error` carries a reason back from the download route when a token failed
   // there, so a stale link explains itself instead of redirecting into a page

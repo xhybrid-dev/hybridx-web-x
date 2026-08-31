@@ -2,10 +2,8 @@
 
 import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Download, Loader2 } from 'lucide-react';
-import {
-  submitEngineLead,
-  type EngineLeadState,
-} from '@/app/build-a-bigger-engine/actions';
+import { useMagnetCapture } from '@/hooks/use-magnet-capture';
+import { ENGINE_MAGNET } from '@/lib/engine-magnet';
 import Heartbeat from './Heartbeat';
 import { trackEvent } from '@/lib/analytics';
 
@@ -20,37 +18,16 @@ interface EngineLeadFormProps {
   className?: string;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function EngineLeadForm({
   variant = 'dark',
   formId,
   placement,
   className = '',
 }: EngineLeadFormProps) {
-  const initialState: EngineLeadState = { status: '', message: '' };
-  const [state, formAction, isPending] = useActionState(submitEngineLead, initialState);
+  const capture = useMagnetCapture(ENGINE_MAGNET.slug, placement);
   const formRef = useRef<HTMLFormElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-
-  const [clientError, setClientError] = useState('');
-  const [utm, setUtm] = useState<Record<string, string>>({});
-  const startedRef = useRef(false);
   const viewedRef = useRef(false);
-  const leadFiredRef = useRef(false);
-
-  // Capture src + utm_* params once on mount.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const next: Record<string, string> = {};
-    const src = params.get('src');
-    if (src) next.src = src;
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((k) => {
-      const v = params.get(k);
-      if (v) next[k] = v;
-    });
-    setUtm(next);
-  }, []);
 
   // Fire view_lead_form when the form first scrolls into view.
   useEffect(() => {
@@ -61,7 +38,7 @@ export default function EngineLeadForm({
         entries.forEach((entry) => {
           if (entry.isIntersecting && !viewedRef.current) {
             viewedRef.current = true;
-            trackEvent('view_lead_form', { placement });
+            trackEvent('view_lead_form', { placement, magnet: ENGINE_MAGNET.slug });
             obs.disconnect();
           }
         });
@@ -72,19 +49,8 @@ export default function EngineLeadForm({
     return () => obs.disconnect();
   }, [placement]);
 
-  // Fire generate_lead once on success.
-  useEffect(() => {
-    if (state.status === 'success' && !leadFiredRef.current) {
-      leadFiredRef.current = true;
-      trackEvent('generate_lead', { placement, currency: 'USD', value: 0 });
-    }
-    if (state.status === 'error') {
-      trackEvent('lead_submit_error', { placement, message: state.message });
-    }
-  }, [state, placement]);
-
   // ---- Success state ----------------------------------------------------
-  if (state.status === 'success') {
+  if (capture.succeeded) {
     const dark = variant !== 'light';
     return (
       <div
@@ -109,9 +75,9 @@ export default function EngineLeadForm({
           No email? Check your spam or promotions tab, then grab it directly below.
         </p>
 
-        {state.pdfUrl && (
+        {capture.assetUrl && (
           <a
-            href={state.pdfUrl}
+            href={capture.assetUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent('pdf_download_click', { placement })}
@@ -140,26 +106,7 @@ export default function EngineLeadForm({
   const dark = variant === 'dark';
   const band = variant === 'band';
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    const form = e.currentTarget;
-    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim() || '';
-    if (!EMAIL_RE.test(email)) {
-      e.preventDefault();
-      setClientError('That email looks incomplete. Please check and try again.');
-      return;
-    }
-    setClientError('');
-    trackEvent('lead_submit_attempt', { placement });
-  }
-
-  function handleFocus() {
-    if (!startedRef.current) {
-      startedRef.current = true;
-      trackEvent('lead_form_start', { placement });
-    }
-  }
-
-  const errorMsg = clientError || (state.status === 'error' ? state.message : '');
+  const errorMsg = capture.error;
   const errorId = `${formId}-error`;
 
   // Field styling per surface.
@@ -172,8 +119,8 @@ export default function EngineLeadForm({
     <div ref={sectionRef} data-engine-form className={className}>
       <form
         ref={formRef}
-        action={formAction}
-        onSubmit={handleSubmit}
+        action={capture.formAction}
+        onSubmit={capture.onSubmit}
         className="w-full"
         noValidate
         aria-describedby={errorMsg ? errorId : undefined}
@@ -191,12 +138,9 @@ export default function EngineLeadForm({
         </div>
 
         {/* Hidden tracking fields. */}
-        <input type="hidden" name="src" value={utm.src || ''} />
-        <input type="hidden" name="utm_source" value={utm.utm_source || ''} />
-        <input type="hidden" name="utm_medium" value={utm.utm_medium || ''} />
-        <input type="hidden" name="utm_campaign" value={utm.utm_campaign || ''} />
-        <input type="hidden" name="utm_content" value={utm.utm_content || ''} />
-        <input type="hidden" name="utm_term" value={utm.utm_term || ''} />
+        {Object.entries(capture.hiddenFields).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="flex-1">
@@ -211,7 +155,7 @@ export default function EngineLeadForm({
               autoComplete="email"
               required
               placeholder="you@email.com"
-              onFocus={handleFocus}
+              onFocus={capture.onFocus}
               aria-invalid={errorMsg ? true : undefined}
               aria-describedby={errorMsg ? errorId : undefined}
               className={`h-14 w-full rounded-[14px] px-5 font-body text-base outline-none transition-colors duration-150 focus:ring-4 focus:ring-engine-crimson/20 ${inputClasses}`}
@@ -219,10 +163,10 @@ export default function EngineLeadForm({
           </div>
           <button
             type="submit"
-            disabled={isPending}
+            disabled={capture.isPending}
             className="inline-flex h-14 items-center justify-center gap-2 rounded-[14px] bg-engine-crimson px-7 font-archivo font-extrabold uppercase tracking-wide text-engine-paper shadow-lg transition-all duration-150 hover:bg-engine-crimsonD hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-engine-heart disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isPending ? (
+            {capture.isPending ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" /> Sending...
               </>

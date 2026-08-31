@@ -53,7 +53,7 @@ export default function EnduranceCalculator() {
     if (noted) return;
     setNoted(true);
     markCalculatorUsed();
-    trackEvent('athx_calculator_used', { magnet: 'what-is-athx' });
+    trackEvent('athx_calculator_used', { magnet: 'athx_2027_guide' });
   }
 
   return (

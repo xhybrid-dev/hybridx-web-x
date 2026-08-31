@@ -9,8 +9,9 @@ import { AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import { verifyLeadToken } from '@/lib/lead-tokens';
 import { markLeadConfirmed } from '@/lib/leads';
 import ConfirmedDownload from '@/components/hyrox-rules/ConfirmedDownload';
+import { magnetDownloadPath, requireMagnet } from '@/lib/magnets';
 
-const SOURCE = 'hyrox_rules_card';
+const MAGNET = requireMagnet('hyrox_rules_card');
 
 export const metadata: Metadata = {
   title: 'Your race day rules card',
@@ -43,13 +44,13 @@ export default async function ConfirmRaceCardPage({
   searchParams: Promise<{ token?: string; error?: string }>;
 }) {
   const { token, error } = await searchParams;
-  const verified = verifyLeadToken(token, SOURCE);
+  const verified = verifyLeadToken(token, MAGNET.slug);
 
   // Record the confirmation. Best effort: a Firestore problem must not stand
   // between a confirmed subscriber and the file they came for.
   if (verified.valid) {
     try {
-      await markLeadConfirmed(SOURCE, verified.email, ['hyrox-rules-card-2026']);
+      await markLeadConfirmed(MAGNET.slug, verified.email, [MAGNET.tag]);
     } catch (err) {
       console.error('[race-card] Failed to mark lead confirmed:', err);
     }
@@ -86,7 +87,7 @@ export default async function ConfirmRaceCardPage({
                   you need it again closer to your race.
                 </p>
 
-                <ConfirmedDownload downloadUrl={`/api/race-card/download?token=${encodeURIComponent(token ?? '')}`} />
+                <ConfirmedDownload downloadUrl={magnetDownloadPath(MAGNET.slug, token ?? '')} />
 
                 <p className="mt-6 flex items-start gap-2 font-body text-sm leading-relaxed text-white/60">
                   <Printer className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />

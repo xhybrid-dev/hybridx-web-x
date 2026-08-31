@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useActionState, useEffect, useRef, useState } from 'react';
 import styles from '@/app/athx-2027/athx.module.css';
-import { trackEvent } from '@/lib/analytics';
-import { submitAthxLead, type AthxLeadState } from '@/app/athx-2027/actions';
-import { wasCalculatorUsed } from '@/components/athx/calc-usage';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { useMagnetCapture } from '@/hooks/use-magnet-capture';
+import { ATHX_MAGNET } from '@/lib/athx-magnet';
+import { useCalculatorUsed } from '@/components/athx/calc-usage';
 
 interface AthxGuideFormProps {
   /** Which form on the page. Recorded on the lead, and segmented on later. */
@@ -16,93 +13,36 @@ interface AthxGuideFormProps {
 }
 
 /**
- * The email capture. Rendered twice on the page with different framing, and
- * both instances post to the same action under different placements, so "did
- * anybody convert below the fold" is answerable.
+ * The ATHX email capture.
  *
- * Confirmed opt-in: submitting sends a link rather than the file. The success
- * state says so plainly, because the one way to lose somebody here is to let
- * them believe a download already happened.
+ * Rendered twice on the page with different framing; both post through the same
+ * action under different placements, so "did anybody convert below the fold" is
+ * answerable.
+ *
+ * Behaviour — validation, honeypot, UTM capture, analytics, pending state —
+ * comes from useMagnetCapture, which every magnet on the site shares. What is
+ * left here is this funnel's markup and its copy, which is the only part that
+ * was ever specific to it.
  *
  * One field. Nothing else is asked for, because nothing else is needed to send
  * a guide, and every extra field costs conversions the launch email will miss.
  */
 export default function AthxGuideForm({ placement, label, support }: AthxGuideFormProps) {
-  const initialState: AthxLeadState = { status: '', message: '' };
-  const [state, formAction, isPending] = useActionState(submitAthxLead, initialState);
-
-  const [clientError, setClientError] = useState('');
-  const [tracking, setTracking] = useState<Record<string, string>>({});
-  const [calcUsed, setCalcUsed] = useState(false);
-  const startedRef = useRef(false);
-  const sentRef = useRef(false);
+  const capture = useMagnetCapture(ATHX_MAGNET.slug, placement);
+  // Subscribed, not sampled at submit time: see calc-usage.ts for why reading
+  // it in the handler recorded false on every lead.
+  const calcUsed = useCalculatorUsed();
 
   const fieldId = `athx-email-${placement}`;
   const errorId = `athx-error-${placement}`;
 
-  // Capture src + utm_* once on mount, so paid, social and gym traffic stay
-  // separable on the lead record rather than all reading as "direct".
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const next: Record<string, string> = {};
-    const src = params.get('src');
-    if (src) next.src = src;
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((key) => {
-      const value = params.get(key);
-      if (value) next[key] = value;
-    });
-    setTracking(next);
-  }, []);
-
-  useEffect(() => {
-    if (state.status === 'success' && !sentRef.current) {
-      sentRef.current = true;
-      // Not generate_lead: that fires on the confirm page, so the conversion
-      // metric counts confirmed subscribers rather than submitted addresses.
-      // The gap between the two events is the confirmation rate.
-      trackEvent('lead_pending_confirmation', {
-        placement,
-        magnet: 'what-is-athx',
-        calc_used: calcUsed,
-      });
-    }
-    if (state.status === 'error') {
-      trackEvent('lead_submit_error', { placement, message: state.message });
-    }
-  }, [state, placement, calcUsed]);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    const form = event.currentTarget;
-    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim() || '';
-
-    if (!EMAIL_RE.test(email)) {
-      event.preventDefault();
-      setClientError('That email looks incomplete. Please check and try again.');
-      return;
-    }
-
-    setClientError('');
-    // Read at submit time rather than on mount: the whole question is whether
-    // they used the calculator *before* signing up.
-    setCalcUsed(wasCalculatorUsed());
-    trackEvent('lead_submit_attempt', { placement, magnet: 'what-is-athx' });
-  }
-
-  function handleFocus() {
-    if (startedRef.current) return;
-    startedRef.current = true;
-    trackEvent('lead_form_start', { placement, magnet: 'what-is-athx' });
-  }
-
-  const errorMessage = clientError || (state.status === 'error' ? state.message : '');
-
-  if (state.status === 'success') {
+  if (capture.succeeded) {
     return (
       <div className={styles.sent} role="status" aria-live="polite">
         <p className={styles.formLabel}>Check your inbox</p>
         <p className={styles.formSupport}>
           We have sent the download link to{' '}
-          <strong style={{ color: '#ffffff' }}>{state.email || 'your inbox'}</strong>. Click the
+          <strong style={{ color: '#ffffff' }}>{capture.email || 'your inbox'}</strong>. Click the
           button in that email and the guide opens straight away.
         </p>
         <ol className={styles.sentSteps}>
@@ -123,7 +63,7 @@ export default function AthxGuideForm({ placement, label, support }: AthxGuideFo
       <p className={styles.formLabel}>{label}</p>
       <p className={styles.formSupport}>{support}</p>
 
-      <form action={formAction} onSubmit={handleSubmit} noValidate>
+      <form action={capture.formAction} onSubmit={capture.onSubmit} noValidate>
         {/* Honeypot. Off-screen rather than display:none, and hidden from
             assistive technology so it is never announced to a real person. */}
         <div className={styles.honeypot} aria-hidden="true">
@@ -137,14 +77,12 @@ export default function AthxGuideForm({ placement, label, support }: AthxGuideFo
           />
         </div>
 
-        <input type="hidden" name="placement" value={placement} />
-        <input type="hidden" name="calcUsed" value={String(calcUsed)} />
-        <input type="hidden" name="src" value={tracking.src || ''} />
-        <input type="hidden" name="utm_source" value={tracking.utm_source || ''} />
-        <input type="hidden" name="utm_medium" value={tracking.utm_medium || ''} />
-        <input type="hidden" name="utm_campaign" value={tracking.utm_campaign || ''} />
-        <input type="hidden" name="utm_content" value={tracking.utm_content || ''} />
-        <input type="hidden" name="utm_term" value={tracking.utm_term || ''} />
+        {Object.entries(capture.hiddenFields).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
+        {/* Whether the calculator was touched before this form was submitted.
+            The number that decides whether the calculator stays on the page. */}
+        <input type="hidden" name="calcUsed" value={String(calcUsed)} readOnly />
 
         <label className={styles.fieldLabel} htmlFor={fieldId}>
           Email address
@@ -158,17 +96,17 @@ export default function AthxGuideForm({ placement, label, support }: AthxGuideFo
           autoComplete="email"
           required
           placeholder="you@email.com"
-          onFocus={handleFocus}
-          aria-invalid={errorMessage ? true : undefined}
-          aria-describedby={errorMessage ? errorId : undefined}
+          onFocus={capture.onFocus}
+          aria-invalid={capture.error ? true : undefined}
+          aria-describedby={capture.error ? errorId : undefined}
         />
 
-        <button type="submit" className={styles.submit} disabled={isPending}>
-          {isPending ? 'Sending…' : 'Send me the guide'}
+        <button type="submit" className={styles.submit} disabled={capture.isPending}>
+          {capture.isPending ? 'Sending…' : 'Send me the guide'}
         </button>
 
         <div id={errorId} className={styles.errorSlot} aria-live="polite">
-          {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
+          {capture.error ? <p className={styles.error}>{capture.error}</p> : null}
         </div>
 
         <p className={styles.micro}>

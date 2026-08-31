@@ -58,6 +58,39 @@
   only authorises running maintenance. A scheduler job should not be able to do the
   former by holding the latter, which is why they are separate secrets.
 
+## Adding a lead magnet or campaign
+
+A magnet is a page that trades a file for an email address. All three on the site
+run on one set of machinery, declared in `src/lib/magnets.ts`; adding one is an
+entry there plus the page. It used to be five copied files per funnel, which is
+how a magnet ends up wired to another magnet's slug — leads filing under the
+wrong funnel while every download token is rejected, with nothing that looks
+broken.
+
+1. **Add the entry** to `MAGNETS` in `src/lib/magnets.ts`. `delivery: 'confirmed'`
+   pairs with a gated asset in `private/`; `delivery: 'immediate'` pairs with a
+   public one under `public/`. `src/lib/__tests__/magnets.test.ts` checks the
+   pairing, the slug and tag rules, that the file exists, and that the email
+   button clears 4.5:1 against its accent.
+2. **Build the page.** Pages are deliberately bespoke — a generic renderer would
+   have made the ATHX pacing calculator impossible. Use `useMagnetCapture(slug,
+   placement)` for the form behaviour and write your own markup; see
+   `src/components/athx/AthxGuideForm.tsx` for the shortest example.
+3. **Confirmed opt-in only**: add a confirm page that renders a component
+   calling `confirmMagnet.bind(null, slug)`. It must *not* confirm on render —
+   Outlook Safe Links and Gmail prefetch every URL in an inbound message, so a
+   GET that grants consent is a double opt-in a scanner can complete.
+4. **Nothing to do in the app repo.** The mailing system auto-registers an
+   unseen slug on the first lead, and `/admin/marketing/routes` gives it a
+   label, tags and a journey. Declaring it in that repo's `sources.ts` is
+   optional and only worth it for a funnel meant to be permanent.
+
+The campaign itself is built in the console at `/admin/marketing/studio` on
+app.hybridx.club — describe it, review the drafts, test-send, activate. Naming
+the funnel in the prompt narrows the journey to that route.
+`scripts/seed-journeys.ts` exists for the drips that predate the console; a new
+campaign does not need it.
+
 ## Testing
 
 ```bash

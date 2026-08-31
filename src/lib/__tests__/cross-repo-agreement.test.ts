@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { isValidLeadSource } from '../leads';
 import { hashEmail } from '../suppression-mirror';
-import { ATHX_SOURCE, ATHX_TAG } from '../athx-campaign';
+import { requireMagnet } from '../magnets';
 
 /**
  * Two rules in this file are shared with the mailing system in the app repo,
@@ -84,6 +86,8 @@ describe('funnel slugs must match the mailing system', () => {
 });
 
 describe('the ATHX 2027 funnel agrees with the mailing system', () => {
+  const { slug: ATHX_SOURCE, tag: ATHX_TAG } = requireMagnet('athx_2027_guide');
+
   // The app declares `magnet-athx-guide` with `aliases: ['athx_2027_guide']`
   // in lib/marketing/sources.ts. That alias is the only thing joining this
   // funnel to its route, and nothing fails loudly if the two drift: leads keep
@@ -116,5 +120,37 @@ describe('the ATHX 2027 funnel agrees with the mailing system', () => {
     // it fails silently on the far side.
     expect(ATHX_TAG).not.toBe(ATHX_SOURCE);
     expect(ATHX_TAG).toBe('athx-2027-guide');
+  });
+});
+
+
+describe('consent posture travels with the lead, not just the answer', () => {
+  // The app's bridge-contract.ts accepts an optional `consentPolicy` of
+  // 'implied' | 'explicit' | 'confirmed' | 'none', and route-store.ts uses it
+  // when registering a funnel it has never seen. Send a spelling it does not
+  // know and zod drops the field, silently restoring the old inference — which
+  // records a double opt-in funnel as granting no consent at all.
+  const POLICIES = ['implied', 'explicit', 'confirmed', 'none'];
+
+  const leadsSource = readFileSync(join(process.cwd(), 'src/lib/leads.ts'), 'utf8');
+  const sent = [...leadsSource.matchAll(/consentPolicy: '([a-z]+)'/g)].map((m) => m[1]);
+
+  it('sends a posture on every forward, so no route falls back to the inference', () => {
+    // Three forwards: saveLead, upsertPendingLead, markLeadConfirmed.
+    expect(sent).toHaveLength(3);
+  });
+
+  it('sends only postures the app declares', () => {
+    for (const policy of sent) {
+      expect(POLICIES, `"${policy}" is not in the app's enum`).toContain(policy);
+    }
+  });
+
+  it('calls the confirmed opt-in path confirmed, on both halves', () => {
+    // upsertPendingLead and markLeadConfirmed are the two halves of one funnel.
+    // If the grant half sent `implied`, clicking the confirmation link would
+    // relabel the route as one that never asked twice.
+    expect(sent.filter((p) => p === 'confirmed')).toHaveLength(2);
+    expect(sent.filter((p) => p === 'implied')).toHaveLength(1);
   });
 });

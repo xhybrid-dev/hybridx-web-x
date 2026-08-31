@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useState } from 'react';
 import styles from '@/app/athx-2027/athx.module.css';
 import { trackEvent } from '@/lib/analytics';
-import { confirmAthxGuide, type AthxConfirmState } from '@/app/athx-2027/confirm/actions';
+import { confirmMagnet, type MagnetConfirmState } from '@/lib/magnet-actions';
+import { ATHX_MAGNET } from '@/lib/athx-magnet';
 
 const STORAGE_KEY = 'athx-guide-download-url';
 
@@ -20,8 +21,13 @@ const STORAGE_KEY = 'athx-guide-download-url';
  * has no business outliving the session on a shared machine.
  */
 export default function AthxConfirmDownload({ token }: { token: string }) {
-  const initialState: AthxConfirmState = { status: '', message: '' };
-  const [state, formAction, isPending] = useActionState(confirmAthxGuide, initialState);
+  const initialState: MagnetConfirmState = { status: '', message: '' };
+  // The magnet is bound server-side rather than posted, so which asset this
+  // page can unlock is not something the form gets a say in.
+  const [state, formAction, isPending] = useActionState(
+    confirmMagnet.bind(null, ATHX_MAGNET.slug),
+    initialState,
+  );
   const [storedUrl, setStoredUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,7 +47,7 @@ export default function AthxConfirmDownload({ token }: { token: string }) {
     }
     // The conversion that counts. Fired here rather than on submission, so the
     // metric counts confirmed subscribers rather than typed addresses.
-    trackEvent('generate_lead', { magnet: 'what-is-athx', method: 'confirmed_opt_in' });
+    trackEvent('generate_lead', { magnet: ATHX_MAGNET.slug, method: 'confirmed_opt_in' });
   }, [state]);
 
   const downloadUrl = state.downloadUrl || storedUrl;
@@ -61,7 +67,7 @@ export default function AthxConfirmDownload({ token }: { token: string }) {
           href={downloadUrl}
           target="_blank"
           rel="noopener"
-          onClick={() => trackEvent('magnet_download', { magnet: 'what-is-athx' })}
+          onClick={() => trackEvent('magnet_download', { magnet: ATHX_MAGNET.slug })}
         >
           Download What is ATHX?
         </a>
