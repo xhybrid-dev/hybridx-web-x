@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useActionState, useEffect, useRef, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { ArrowRight, Loader2, MailCheck } from 'lucide-react';
-import { submitRaceCardLead, type RaceCardLeadState } from '@/app/hyrox-rule-changes-2026/actions';
 import { trackEvent } from '@/lib/analytics';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { useMagnetCapture } from '@/hooks/use-magnet-capture';
+import { RACE_CARD_MAGNET } from '@/lib/race-card-magnet';
 
 const CARD_CONTENTS = [
   'The completion standard for all eight stations, so you know what “finished” means before a judge has to tell you',
@@ -19,41 +18,24 @@ const CARD_CONTENTS = [
 /**
  * Email gate for the printable race day rules card.
  *
- * Confirmed opt-in: submitting sends a confirmation link rather than the
- * file. The card lives behind a signed token at /api/race-card/download, so
- * clicking that link is the only route to it — which is what makes the
- * address real rather than merely well formed.
+ * Confirmed opt-in: submitting sends a confirmation link rather than the file.
+ * The card lives behind a signed token, so clicking that link is the only route
+ * to it — which is what makes the address real rather than merely well formed.
  *
- * Shares the VO2max funnel's server-action shape otherwise: honeypot, rate
- * limiting and UTM forwarding on the action side.
+ * Capture behaviour comes from useMagnetCapture, shared with every other magnet
+ * on the site. This file kept its own copy of it until the registry landed:
+ * honeypot, UTM capture, validation, analytics and pending state, written out
+ * again here and again on the ATHX funnel, differing only in a string.
  */
 export default function RaceCardGate({ placement = 'rules_2026' }: { placement?: string }) {
-  const initialState: RaceCardLeadState = { status: '', message: '' };
-  const [state, formAction, isPending] = useActionState(submitRaceCardLead, initialState);
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const capture = useMagnetCapture(RACE_CARD_MAGNET.slug, placement);
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+  const viewedRef = React.useRef(false);
 
-  const [clientError, setClientError] = useState('');
-  const [utm, setUtm] = useState<Record<string, string>>({});
-  const startedRef = useRef(false);
-  const viewedRef = useRef(false);
-  const leadFiredRef = useRef(false);
-
-  // Capture src + utm_* params once on mount, so gym, social and community
-  // traffic stay separable in the lead record.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const next: Record<string, string> = {};
-    const src = params.get('src');
-    if (src) next.src = src;
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((k) => {
-      const v = params.get(k);
-      if (v) next[k] = v;
-    });
-    setUtm(next);
-  }, []);
-
-  // Fire view_lead_form when the gate first scrolls into view.
-  useEffect(() => {
+  // Fire view_lead_form when the gate first scrolls into view. Kept local: this
+  // is the only capture form on the site inside a scrolling article, and the
+  // impression is what makes its conversion rate mean anything.
+  React.useEffect(() => {
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
     const obs = new IntersectionObserver(
@@ -61,7 +43,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
         entries.forEach((entry) => {
           if (entry.isIntersecting && !viewedRef.current) {
             viewedRef.current = true;
-            trackEvent('view_lead_form', { placement, magnet: 'hyrox-race-day-card' });
+            trackEvent('view_lead_form', { placement, magnet: RACE_CARD_MAGNET.slug });
             obs.disconnect();
           }
         });
@@ -72,40 +54,8 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
     return () => obs.disconnect();
   }, [placement]);
 
-  useEffect(() => {
-    if (state.status === 'success' && !leadFiredRef.current) {
-      leadFiredRef.current = true;
-      // Not generate_lead — that fires on the confirm page, so the conversion
-      // metric counts confirmed subscribers rather than submitted addresses.
-      // The gap between these two events is the confirmation rate.
-      trackEvent('lead_pending_confirmation', { placement, magnet: 'hyrox-race-day-card' });
-    }
-    if (state.status === 'error') {
-      trackEvent('lead_submit_error', { placement, message: state.message });
-    }
-  }, [state, placement]);
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    const form = e.currentTarget;
-    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim() || '';
-    if (!EMAIL_RE.test(email)) {
-      e.preventDefault();
-      setClientError('That email looks incomplete. Please check and try again.');
-      return;
-    }
-    setClientError('');
-    trackEvent('lead_submit_attempt', { placement, magnet: 'hyrox-race-day-card' });
-  }
-
-  function handleFocus() {
-    if (!startedRef.current) {
-      startedRef.current = true;
-      trackEvent('lead_form_start', { placement, magnet: 'hyrox-race-day-card' });
-    }
-  }
-
-  const errorMsg = clientError || (state.status === 'error' ? state.message : '');
-  const succeeded = state.status === 'success';
+  const errorMsg = capture.error;
+  const succeeded = capture.succeeded;
 
   return (
     <div
@@ -143,7 +93,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
               <h3 className="mb-2 font-headline text-2xl font-extrabold">One click to go</h3>
               <p className="mb-4 font-body text-white/75">
                 We have sent a confirmation link to{' '}
-                <strong className="text-white">{state.email || 'your inbox'}</strong>. Click it and
+                <strong className="text-white">{capture.email || 'your inbox'}</strong>. Click it and
                 the card downloads straight away.
               </p>
               <p className="mb-6 font-body text-sm leading-relaxed text-white/50">
@@ -190,7 +140,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
                 ))}
               </ul>
 
-              <form action={formAction} onSubmit={handleSubmit} noValidate>
+              <form action={capture.formAction} onSubmit={capture.onSubmit} noValidate>
                 {/* Honeypot: hidden from users + assistive tech, catches bots. */}
                 <div
                   className="absolute left-[-9999px] top-[-9999px] h-0 w-0 overflow-hidden"
@@ -200,13 +150,10 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
                   <input id="race-card-company" type="text" name="company" tabIndex={-1} autoComplete="off" />
                 </div>
 
-                {/* Hidden tracking fields. */}
-                <input type="hidden" name="src" value={utm.src || ''} />
-                <input type="hidden" name="utm_source" value={utm.utm_source || ''} />
-                <input type="hidden" name="utm_medium" value={utm.utm_medium || ''} />
-                <input type="hidden" name="utm_campaign" value={utm.utm_campaign || ''} />
-                <input type="hidden" name="utm_content" value={utm.utm_content || ''} />
-                <input type="hidden" name="utm_term" value={utm.utm_term || ''} />
+                {/* Placement and attribution, gathered by the shared hook. */}
+                {Object.entries(capture.hiddenFields).map(([name, value]) => (
+                  <input key={name} type="hidden" name={name} value={value} />
+                ))}
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
@@ -222,7 +169,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
                       name="firstName"
                       autoComplete="given-name"
                       placeholder="Alex"
-                      onFocus={handleFocus}
+                      onFocus={capture.onFocus}
                       className="h-14 w-full rounded-xl border-2 border-transparent bg-white/95 px-4 py-3 font-body text-base text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-accent"
                     />
                   </div>
@@ -237,7 +184,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
                       id="race-card-raceDate"
                       type="date"
                       name="raceDate"
-                      onFocus={handleFocus}
+                      onFocus={capture.onFocus}
                       className="h-14 w-full rounded-xl border-2 border-transparent bg-white/95 px-4 py-3 font-body text-base text-black outline-none transition-colors focus:border-accent"
                     />
                   </div>
@@ -258,7 +205,7 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
                     autoComplete="email"
                     required
                     placeholder="you@email.com"
-                    onFocus={handleFocus}
+                    onFocus={capture.onFocus}
                     aria-invalid={errorMsg ? true : undefined}
                     aria-describedby={errorMsg ? 'race-card-error' : undefined}
                     className="h-14 w-full rounded-xl border-2 border-transparent bg-white/95 px-4 py-3 font-body text-base text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-accent"
@@ -267,10 +214,10 @@ export default function RaceCardGate({ placement = 'rules_2026' }: { placement?:
 
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={capture.isPending}
                   className="mt-4 inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-accent px-7 font-headline text-base font-extrabold text-black transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                 >
-                  {isPending ? (
+                  {capture.isPending ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> Sending...
                     </>
