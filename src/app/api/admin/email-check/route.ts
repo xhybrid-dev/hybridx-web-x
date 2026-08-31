@@ -4,6 +4,7 @@ import {
   getEmailProvider,
   sendEmail,
   describeResendKey,
+  describeSmtpAuth,
   EMAIL_FROM,
   EMAIL_REPLY_TO,
 } from '@/lib/email/service';
@@ -32,6 +33,7 @@ function configSnapshot() {
       LEAD_TOKEN_SECRET: Boolean(process.env.LEAD_TOKEN_SECRET),
     },
     resendKey: describeResendKey(),
+    smtpAuth: describeSmtpAuth(),
     smtpHost: process.env.SMTP_HOST || null,
     smtpPort: process.env.SMTP_PORT || null,
   };
@@ -80,6 +82,23 @@ export async function GET() {
   if (snapshot.resendKey?.hadSurroundingWhitespace) {
     notes.push(
       'RESEND_API_KEY had surrounding whitespace (usually a trailing newline from setting the secret via a file or pipe). It is trimmed before use, but worth re-saving cleanly.'
+    );
+  }
+  if (snapshot.smtpAuth.userHadSurroundingWhitespace || snapshot.smtpAuth.passwordHadSurroundingWhitespace) {
+    notes.push(
+      'SMTP_USER or SMTP_PASSWORD had surrounding whitespace (usually a trailing newline from ' +
+        '`echo` instead of `echo -n` when setting the secret). Both are trimmed before use, but ' +
+        'the untrimmed value already reached Brevo on any instance that built its transporter ' +
+        'before this diagnostic ran — restart is not enough on its own; a fresh deploy is, since ' +
+        'the transporter is cached per instance for its lifetime. Worth re-saving both cleanly ' +
+        'regardless: a value that merely looks right can still be the one Brevo is rejecting.'
+    );
+  }
+  if (snapshot.provider === 'smtp' && !snapshot.smtpAuth.userHadSurroundingWhitespace && !snapshot.smtpAuth.passwordHadSurroundingWhitespace) {
+    notes.push(
+      'SMTP_USER and SMTP_PASSWORD carry no surrounding whitespace, so a "535 Authentication ' +
+        'failed" from Brevo despite this clean report means the credential value itself is wrong ' +
+        'or has been rotated in Brevo since it was last set here — not a formatting problem.'
     );
   }
 
