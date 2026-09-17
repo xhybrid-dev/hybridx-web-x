@@ -6,8 +6,15 @@ buildConfig:
   buildCommand: 'npm run build'
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
+  # Safe to raise. This was pinned at 1 because the capture rate limiter kept
+  # its window in an in-process Map, so N instances silently allowed N times the
+  # intended limit. That window now lives in Firestore (src/lib/rate-limit.ts),
+  # shared by every instance.
+  #
+  # One condition before raising it: LEAD_TOKEN_SECRET must be set. Unset, each
+  # instance mints its own random signing secret, so a confirmation link issued
+  # by one instance fails verification on another — intermittently, and looking
+  # like a broken email rather than a missing secret.
   maxInstances: 1
 
 env:
@@ -16,8 +23,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Brevo SMTP relay — the same transport and sending domain the app
+  # (app.hybridx.club) uses. Consolidated so both properties build one sender
+  # reputation instead of two, and so deliverability is diagnosed in one place.
   - variable: SMTP_HOST
-    value: smtp.gmail.com
+    value: smtp-relay.brevo.com
     availability:
       - RUNTIME
   - variable: SMTP_PORT
@@ -33,8 +43,12 @@ env:
     availability:
       - RUNTIME
   # ── Email deliverability ──────────────────────────────────────────────────
-  # Send from the dedicated subdomain train.hybridx.club (authenticate it in
-  # Resend with SPF + DKIM + DMARC). Replies go to the monitored root mailbox.
+  # Send from the dedicated subdomain train.hybridx.club, authenticated in Brevo
+  # with SPF + DKIM + DMARC. Replies go to the monitored root mailbox.
+  #
+  # Keep this aligned with the app's MARKETING_EMAIL_FROM domain: reputation is
+  # built per sending domain, so two properties on two domains means warming
+  # and defending two reputations for one brand.
   - variable: EMAIL_FROM
     value: '"HybridX" <info@train.hybridx.club>'
     availability:
@@ -43,22 +57,52 @@ env:
     value: training@hybridx.club
     availability:
       - RUNTIME
-  # Resend API key. When set, all mail goes through Resend instead of Gmail SMTP.
-  # TEMPORARILY DISABLED: the App Hosting backend's service account doesn't yet
-  # have access to this secret, which fails the whole build in the preparer step
-  # ("Misconfigured Secret" / PermissionDenied). Mail falls back to Gmail SMTP
-  # while this is commented out. To re-enable, first grant access:
-  #   firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend <backend-id>
-  # (find the backend id with: firebase apphosting:backends:list)
-  # then uncomment the block below.
+  # Resend API key. RETIRED — leaving this set overrides the Brevo SMTP config
+  # above, because getEmailProvider() prefers Resend whenever the key is
+  # present. Remove the secret binding (and the secret) once a Brevo send has
+  # been verified in production; until then it is the rollback path.
   # - variable: RESEND_API_KEY
   #   secret: RESEND_API_KEY
   #   availability:
   #     - RUNTIME
+
+  # ── Marketing bridge ──────────────────────────────────────────────────────
+  # Where the mailing system lives, and the shared secret used to push captured
+  # leads into it and read the shared suppression list. Without these the site
+  # still captures leads locally, but nothing can nurture them.
+  - variable: MARKETING_APP_URL
+    value: https://app.hybridx.club
+    availability:
+      - RUNTIME
+  - variable: LEAD_BRIDGE_SECRET
+    secret: LEAD_BRIDGE_SECRET
+    availability:
+      - RUNTIME
   # Comma-separated allow-list for the /admin/leads dashboard. Only Firebase
   # Auth users with one of these emails can view the leads collection.
   - variable: ADMIN_EMAILS
     value: jdlee9900@gmail.com
+    availability:
+      - RUNTIME
+  # HMAC key signing the confirmed-opt-in download links for the HYROX race
+  # day rules card (src/lib/lead-tokens.ts). Any long random string works:
+  #   openssl rand -hex 32
+  # If this is unset the app falls back to a per-process random secret, which
+  # means confirmation links stop working after each restart.
+  - variable: LEAD_TOKEN_SECRET
+    secret: LEAD_TOKEN_SECRET
+    availability:
+      - RUNTIME
+  # Bearer secret for /api/cron/marketing-maintenance, which drains the lead
+  # outbox and refreshes the complainant mirror. Deliberately NOT
+  # LEAD_BRIDGE_SECRET: that credential is held to push leads into the mailing
+  # system, and a scheduler job should not be able to do that by holding this
+  # one. Any long random string:
+  #   openssl rand -hex 32
+  # Unset, the endpoint refuses to run rather than being open — it triggers
+  # cross-project writes, so a missing configuration has only one safe reading.
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
     availability:
       - RUNTIME
   - variable: GOOGLE_SERVICE_ACCOUNT_EMAIL
@@ -75,5 +119,11 @@ env:
       - RUNTIME
   - variable: SMTP_PASSWORD
     secret: SMTP_PASSWORD
+    availability:
+      - RUNTIME
+  # Gemini API key powering the "Describe it, let AI build it" feature on the
+  # Treadmill FIT/TCX Generator (src/ai/flows/parse-treadmill-workout-flow.ts).
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
     availability:
       - RUNTIME

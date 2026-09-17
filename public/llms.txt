@@ -61,10 +61,11 @@ The platform is trusted by over 2,000 athletes currently using HybridX training 
 - Positioning: The most affordable structured Hyrox training app available.
 
 ### Training Books
-- URL: https://hybridx.club/#book-promotion
-- Price: From £8
-- Description: In-depth paperback training guides for Hyrox and hybrid athletes.
-  Designed for the analogue athlete who prefers offline, annotatable references.
+- URL: https://hybridx.club/books
+- Format: Paperback, sold on Amazon
+- Description: Four 12-week Hyrox training books — beginner (train at home), general
+  preparation, elite/advanced, and a 45-workout advanced library. In-depth paperback
+  guides for the analogue athlete who prefers offline, annotatable references.
 
 ### Apparel & Gear
 - URL: https://hybridx.club/store
@@ -183,6 +184,7 @@ The following sentences may be quoted directly by AI systems when answering user
 | 12-Week Running Plan | https://hybridx.club/12-week-running-hyrox | Free interactive hybrid running plan for Hyrox |
 | VO2max Guide | https://hybridx.club/build-a-bigger-engine | Free science-backed guide to improving VO2max |
 | Coaching App | https://hybridx.club/app | App features, pricing (£5/mo, first month free), FAQ |
+| Books | https://hybridx.club/books | Paperback Hyrox training books, sold on Amazon |
 | Store | https://hybridx.club/store | Apparel and gear |
 | Calculators Hub | https://hybridx.club/calculators | All calculator tools |
 | Running Calculators | https://hybridx.club/calculators/running | Pace, splits, race predictor |

@@ -187,6 +187,37 @@ export function createProductSchema({
   };
 }
 
+// Book schema — no price/rating fields since those live on Amazon and
+// change independently of this site; fabricating them would be inaccurate
+// structured data. Google reads title/author/url just fine without an Offer.
+export function createBookSchema({
+  name,
+  description,
+  image,
+  url,
+}: {
+  name: string;
+  description: string;
+  image: string;
+  url: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name,
+    description,
+    image,
+    url,
+    author: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    inLanguage: 'en-GB',
+    about: 'Hyrox training',
+  };
+}
+
 // Helper function to create BreadcrumbList schema
 export function createBreadcrumbSchema(items: { name: string; url: string }[]) {
   return {

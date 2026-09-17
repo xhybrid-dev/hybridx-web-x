@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LogIn, ChevronDown, ListChecks, Dumbbell, ClipboardList, ArrowUpRight, ShoppingCart, BookOpen, BookMarked, Activity, FileCog } from 'lucide-react';
+import { Menu, LogIn, ChevronDown, ListChecks, Dumbbell, ClipboardList, ArrowUpRight, ShoppingCart, BookOpen, BookMarked, Activity, FileCog, ScrollText } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +37,7 @@ const navItems: NavItem[] = [
     label: 'Guides',
     isDropdown: true,
     items: [
+      { label: '2026/27 Rule Changes', href: '/hyrox-rule-changes-2026', icon: <ScrollText className="mr-2 h-5 w-5" /> },
       { label: 'How to Train for Hyrox', href: '/how-to-train-for-hyrox', icon: <BookMarked className="mr-2 h-5 w-5" /> },
       { label: '12 Week Hyrox Plan', href: '/hyrox-training-plan', icon: <ListChecks className="mr-2 h-5 w-5" /> },
       { label: 'Hybrid Training Program', href: '/hybrid-training-program', icon: <Dumbbell className="mr-2 h-5 w-5" /> },
@@ -46,7 +47,7 @@ const navItems: NavItem[] = [
     label: 'Shop',
     isDropdown: true,
     items: [
-      { label: 'Books', href: '/#book-promotion', icon: <BookOpen className="mr-2 h-5 w-5" /> },
+      { label: 'Books', href: '/books', icon: <BookOpen className="mr-2 h-5 w-5" /> },
       { label: 'Store', href: '/store', icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
     ]
   },

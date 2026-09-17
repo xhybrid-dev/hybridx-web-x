@@ -26,6 +26,7 @@ const footerColumns = [
     heading: 'HybridX',
     links: [
       { label: 'The App — £5/mo', href: '/app' },
+      { label: 'Books', href: '/books' },
       { label: 'Store', href: '/store' },
       { label: 'FAQ', href: '/#faq' },
       { label: 'Privacy Policy', href: '/privacy-policy' },

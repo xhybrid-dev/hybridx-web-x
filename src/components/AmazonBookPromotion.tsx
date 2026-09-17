@@ -2,43 +2,10 @@
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpenCheck, ShoppingCart, ArrowUpRight } from 'lucide-react';
+import { BookOpenCheck, ShoppingCart, ArrowUpRight, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
-
-const books = [
-  {
-    id: 'hyrox-12-week-prep',
-    title: "Hyrox 12 Week Training Plan for Hyrox Race Preparation",
-    description: "Excel in Hyrox with this comprehensive 12-week guide. Master movements, optimize running, and build strength with expert advice and progressive strategies. Ideal for all levels.",
-    imageUrl: "https://m.media-amazon.com/images/S/aplus-media-library-service-media/d555d4e2-4284-4579-a41f-2af4bec009bd.__CR250,0,500,666_PT0_SX300_V1___.png",
-    amazonUrl: "https://amzn.to/3SSh8sz",
-    ctaText: "Get Your Copy",
-  },
-  {
-    id: 'elite-hyrox-training-plan',
-    title: "Elite Hyrox Training Plan - 12 Week Training Plan for Hyrox Race Preparation",
-    description: "Achieve elite Hyrox performance with this 12-week plan. Focuses on optimizing energy systems to build high-level anaerobic power and aerobic capacity for peak race-day results.",
-    imageUrl: "https://m.media-amazon.com/images/S/aplus-media-library-service-media/b9871c7d-2cc7-4004-8416-c3e18450520e.__CR350,0,1400,1400_PT0_SX300_V1___.png",
-    amazonUrl: "https://amzn.to/44jOd74",
-    ctaText: "Get Your Copy",
-  },
-  {
-    id: 'train-for-hyrox-at-home',
-    title: "Train for Hyrox at Home - 12 Week Training Plan",
-    description: "Conquer Hyrox from home with this 12-week beginner plan. Train for all Hyrox stations and 8km running using minimal equipment. Build functional strength and endurance for your first event.",
-    imageUrl: "https://m.media-amazon.com/images/I/61kK7bA85OL._SY466_.jpg",
-    amazonUrl: "https://amzn.to/445PMV1",
-    ctaText: "Get Your Copy",
-  },
-  {
-    id: 'advanced-hyrox-workouts',
-    title: "45 Advanced Hyrox Workouts",
-    description: "For experienced Hyrox competitors ready to elevate their training. This guide provides 45 advanced workouts designed to push your limits and help you achieve your best performance.",
-    imageUrl: "https://m.media-amazon.com/images/I/612iiof3NPL._SY466_.jpg",
-    amazonUrl: "https://amzn.to/4livuyq",
-    ctaText: "Get Your Copy",
-  }
-];
+import { books } from '@/lib/books';
 
 export default function AmazonBookPromotion() {
   return (
@@ -88,7 +55,7 @@ export default function AmazonBookPromotion() {
                         event="cta_book_click"
                         eventParams={{ book_id: book.id, location: 'book_promotion' }}
                       >
-                        <ShoppingCart className="mr-2 h-5 w-5" /> {book.ctaText} <ArrowUpRight className="ml-1.5 h-4 w-4" />
+                        <ShoppingCart className="mr-2 h-5 w-5" /> Get Your Copy <ArrowUpRight className="ml-1.5 h-4 w-4" />
                       </TrackedLink>
                     </Button>
                   </CardFooter>
@@ -96,6 +63,14 @@ export default function AmazonBookPromotion() {
               </div>
             </Card>
           ))}
+        </div>
+        <div className="mt-10 text-center">
+          <Link
+            href="/books"
+            className="inline-flex items-center text-sm font-headline font-semibold text-foreground/80 hover:text-accent transition-colors"
+          >
+            See all books &amp; details <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>

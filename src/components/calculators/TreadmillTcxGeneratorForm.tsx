@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowDown,
   ArrowUp,
@@ -16,11 +17,13 @@ import {
   Loader2,
   Plus,
   Repeat as RepeatIcon,
+  Sparkles,
   Trash2,
   UploadCloud,
   X,
 } from 'lucide-react';
 import { generateFit } from '@/lib/fit';
+import { parseTreadmillWorkout } from '@/ai/flows/parse-treadmill-workout-flow';
 import { useToast } from '@/hooks/use-toast';
 import {
   type BlockDraft,
@@ -367,6 +370,11 @@ export default function TreadmillTcxGeneratorForm() {
   const [sensorAlign, setSensorAlign] = useState<SensorAlign>('stretch');
   const [showSplits, setShowSplits] = useState(false);
   const [fitExporting, setFitExporting] = useState(false);
+  const [aiDescription, setAiDescription] = useState('');
+  const [aiReferencePace, setAiReferencePace] = useState('');
+  const [aiReferencePaceLabel, setAiReferencePaceLabel] = useState('easy pace');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAssumptions, setAiAssumptions] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -470,6 +478,36 @@ export default function TreadmillTcxGeneratorForm() {
     if (!tpl) return;
     if (blocks.length && !window.confirm('Replace the current workout with this template?')) return;
     setBlocks(tpl.build());
+  };
+
+  /* ---------- AI: describe the workout in plain language ---------- */
+
+  const handleAiGenerate = async () => {
+    const description = aiDescription.trim();
+    if (!description || aiLoading) return;
+    if (blocks.length && !window.confirm('Replace the current workout with the AI-generated one?')) return;
+
+    setAiLoading(true);
+    setAiAssumptions([]);
+    try {
+      const result = await parseTreadmillWorkout({
+        description,
+        unit,
+        referencePace: aiReferencePace.trim() || undefined,
+        referencePaceLabel: aiReferencePace.trim() ? aiReferencePaceLabel.trim() || undefined : undefined,
+      });
+      setBlocks(result.segments.map((s) => seg({ name: s.name, mode: s.mode, value: s.value, pace: s.pace, incline: String(s.incline) })));
+      setAiAssumptions(result.assumptions);
+      toast({ title: 'Workout generated', description: result.summary });
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Could not generate workout',
+        description: err instanceof Error ? err.message : 'Something went wrong talking to the AI model.',
+      });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   /* ---------- unit switch converts displayed values ---------- */
@@ -615,6 +653,69 @@ export default function TreadmillTcxGeneratorForm() {
           </Button>
         ))}
       </div>
+
+      {/* AI describe */}
+      <Card className="border-accent/50 bg-accent/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <Sparkles className="h-4 w-4 text-accent" /> Describe it, let AI build it
+            <span className="ml-auto rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-body font-semibold normal-case tracking-normal text-accent">
+              Powered by Gemini
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Textarea
+            value={aiDescription}
+            onChange={(e) => setAiDescription(e.target.value)}
+            placeholder={'e.g. "Treadmill progressive incline. 40 min: start 2%, raise +1% every 5 min up to 8%, then drop back down. Steady RPE — the incline does the work. (RPE 6)"'}
+            className="min-h-[84px] bg-background/70 text-sm"
+            aria-label="Describe your workout in plain language"
+          />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label className={fieldLabelClass}>
+                Your reference pace /{unit} <span className="normal-case">(optional, grounds RPE/effort language)</span>
+              </Label>
+              <Input
+                value={aiReferencePace}
+                onChange={(e) => setAiReferencePace(e.target.value)}
+                placeholder="e.g. 6:00"
+                className={`mt-1 ${monoInputClass}`}
+                aria-label={`Reference pace, minutes per ${unit}`}
+              />
+            </div>
+            <div>
+              <Label className={fieldLabelClass}>What that pace is</Label>
+              <Input
+                value={aiReferencePaceLabel}
+                onChange={(e) => setAiReferencePaceLabel(e.target.value)}
+                placeholder="e.g. easy pace, 10K pace"
+                className="mt-1 bg-background/70"
+                aria-label="What the reference pace represents"
+                disabled={!aiReferencePace.trim()}
+              />
+            </div>
+          </div>
+          <Button type="button" onClick={handleAiGenerate} disabled={!aiDescription.trim() || aiLoading} className="w-full sm:w-auto">
+            {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {aiLoading ? 'Building workout…' : 'Generate workout'}
+          </Button>
+          {aiAssumptions.length > 0 && (
+            <div className="rounded-md border border-yellow-600/40 bg-yellow-500/10 p-2.5 text-xs leading-relaxed text-yellow-700 dark:text-yellow-400">
+              <p className="mb-1 font-semibold">The AI made some assumptions — review before exporting:</p>
+              <ul className="list-inside list-disc space-y-0.5">
+                {aiAssumptions.map((a, i) => (
+                  <li key={i}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            AI drafts the segments below into the normal editable builder — nothing exports until you review it.
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.5fr_1fr]">
         {/* -------- builder column -------- */}
@@ -993,8 +1094,9 @@ export default function TreadmillTcxGeneratorForm() {
                 </div>
               )}
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Everything runs in your browser — the workout and any attached file never leave this page. Your draft
-                is autosaved locally.
+                The builder and file export run entirely in your browser — your workout and any attached file never
+                leave this page (the AI &ldquo;describe it&rdquo; box is the one exception: that text is sent to
+                Gemini to generate segments). Your draft is autosaved locally.
               </p>
             </CardContent>
           </Card>

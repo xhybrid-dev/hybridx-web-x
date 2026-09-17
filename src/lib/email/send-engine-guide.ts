@@ -111,6 +111,8 @@ export async function sendEngineGuideEmail({
     // Marketing/list mail: give recipients an easy opt-out. This is a strong
     // positive signal to Gmail and Yahoo. Upgrade to a one-click HTTPS endpoint
     // once an unsubscribe route exists (see EMAIL_SETUP notes).
-    listUnsubscribe: '<mailto:training@hybridx.club?subject=Unsubscribe>',
+    // Unsubscribe headers are attached by sendEmail: a signed one-click
+    // HTTPS endpoint whose opt-out reaches the shared suppression list,
+    // with the mailto retained as a fallback for older clients.
   });
 }

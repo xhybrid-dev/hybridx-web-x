@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { SITE_CONFIG } from '@/lib/seo';
 import { sendEngineGuideEmail } from '@/lib/email/send-engine-guide';
 import { saveLead } from '@/lib/leads';
+import { isCaptureRateLimited } from '@/lib/rate-limit';
 
 // Public path to the lead magnet (served from /public).
 const PDF_PATH = '/build-a-bigger-engine/HybridX-Build-A-Bigger-Engine-VO2max-Guide.pdf';
@@ -29,23 +30,6 @@ const LeadSchema = z.object({
   firstName: z.string().trim().max(80).optional(),
 });
 
-// Very small in-memory rate limiter. App Hosting runs a single instance here, so this
-// is a cheap first line of defence. Swap for Firestore / Redis if traffic grows.
-const RATE_LIMIT = 8; // submissions
-const RATE_WINDOW_MS = 60 * 60 * 1000; // per hour per IP
-const hits = new Map<string, { count: number; windowStart: number }>();
-
-function isRateLimited(ip: string): boolean {
-  if (!ip || ip === 'unknown') return false;
-  const now = Date.now();
-  const entry = hits.get(ip);
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    hits.set(ip, { count: 1, windowStart: now });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT;
-}
 
 export async function submitEngineLead(
   _prevState: EngineLeadState,
@@ -79,7 +63,7 @@ export async function submitEngineLead(
     'unknown';
   const userAgent = hdrs.get('user-agent') || '';
 
-  if (isRateLimited(ip)) {
+  if (await isCaptureRateLimited(ip, 'engine-guide')) {
     return {
       status: 'error',
       message: 'Too many attempts. Please wait a little while and try again.',
@@ -87,12 +71,15 @@ export async function submitEngineLead(
   }
 
   const source = (formData.get('src') as string) || 'direct';
+  // Prefixed keys, matching the mailing system's contract. The bare spelling
+  // (`source`, `medium`) was silently dropped on arrival for months, because
+  // the two sides had each declared their own shape and neither knew.
   const utm = {
-    source: (formData.get('utm_source') as string) || '',
-    medium: (formData.get('utm_medium') as string) || '',
-    campaign: (formData.get('utm_campaign') as string) || '',
-    content: (formData.get('utm_content') as string) || '',
-    term: (formData.get('utm_term') as string) || '',
+    utm_source: (formData.get('utm_source') as string) || '',
+    utm_medium: (formData.get('utm_medium') as string) || '',
+    utm_campaign: (formData.get('utm_campaign') as string) || '',
+    utm_content: (formData.get('utm_content') as string) || '',
+    utm_term: (formData.get('utm_term') as string) || '',
   };
 
   const pdfUrl = `${SITE_CONFIG.url}${PDF_PATH}`;
@@ -104,6 +91,7 @@ export async function submitEngineLead(
       email,
       name: firstName,
       extra: { magnet: 'build-a-bigger-engine', tag: ESP_TAG, src: source },
+      tags: [ESP_TAG],
       utm,
       ip,
       userAgent,

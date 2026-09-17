@@ -127,6 +127,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/books`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/vdot`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
@@ -162,6 +168,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/hyrox-rule-changes-2026`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.95,
     },
   ];
 

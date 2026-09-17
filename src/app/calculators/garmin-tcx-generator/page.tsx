@@ -76,7 +76,12 @@ export default function GarminTcxGeneratorPage() {
             <div>
               <h2 className="text-2xl font-bold font-headline text-primary mb-4">How to Use the Generator</h2>
               <ol className="list-decimal list-inside space-y-2 text-muted-foreground font-body">
-                <li>Pick a starting template — time intervals, distance intervals, steady state — or build from blank.</li>
+                <li>
+                  Pick a starting template — time intervals, distance intervals, steady state — build from blank, or
+                  describe the session in plain English and let AI draft it (e.g. &ldquo;40 min progressive incline,
+                  raise 1% every 5 min from 2% to 8%, then back down, steady RPE 6&rdquo;). Add your easy-pace number
+                  alongside the description so effort language like RPE gets grounded to a real pace.
+                </li>
                 <li>Set each segment&apos;s duration or distance, pace, and treadmill incline. Use repeat blocks for interval sets.</li>
                 <li>
                   Optionally attach the GPX or TCX file your watch recorded: the heart rate and cadence stream is
@@ -126,8 +131,21 @@ export default function GarminTcxGeneratorPage() {
                 <div>
                   <h3 className="font-headline font-semibold text-lg mb-1">Is my data uploaded anywhere?</h3>
                   <p className="text-muted-foreground font-body">
-                    No. Everything — the workout builder, the file parsing, and the TCX generation — runs entirely in
-                    your browser. Your watch file and workout never leave your device.
+                    The workout builder, watch-file parsing, and FIT/TCX generation all run entirely in your browser
+                    — your attached watch file and finished workout never leave your device. The one exception is the
+                    optional &ldquo;Describe it, let AI build it&rdquo; box: the text you type there (and the
+                    reference pace, if you add one) is sent to Google&apos;s Gemini model to turn into segments. Skip
+                    that box and build manually or from a template if you&apos;d rather nothing leaves your browser.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-headline font-semibold text-lg mb-1">How accurate is the AI-generated workout?</h3>
+                  <p className="text-muted-foreground font-body">
+                    It&apos;s a starting draft, not a final answer — it lands in the same editable builder as every
+                    other segment, so nothing exports without you seeing it first. Ambiguous instructions (like an
+                    incline ramp that doesn&apos;t divide evenly into the stated duration, or effort language with no
+                    reference pace attached) get resolved with a reasonable assumption, which is listed under the
+                    generate button so you can check and adjust it before exporting.
                   </p>
                 </div>
                 <div>

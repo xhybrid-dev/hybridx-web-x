@@ -13,6 +13,7 @@ const SOURCE_LABELS: Record<string, string> = {
   free_hyrox_plan: 'Free Hyrox Plan',
   sign_up: 'Sign Up Page',
   build_a_bigger_engine: 'Build a Bigger Engine',
+  hyrox_rules_card: 'Race Day Rules Card',
 };
 
 interface LeadRow {
@@ -62,6 +63,7 @@ export default async function AdminLeadsPage({
     { label: 'Free Hyrox Plan', value: 'free_hyrox_plan' },
     { label: 'Sign Up Page', value: 'sign_up' },
     { label: 'Build a Bigger Engine', value: 'build_a_bigger_engine' },
+    { label: 'Race Day Rules Card', value: 'hyrox_rules_card' },
   ];
 
   return (
