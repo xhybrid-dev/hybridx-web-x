@@ -73,6 +73,10 @@ export async function saveLead(input: LeadInput): Promise<void> {
     source: input.source,
     consent: true,
     consentMethod: `magnet:${input.source}`,
+    // The form said signing up means ongoing email, which is what `implied`
+    // records. Sent so a route registered from this funnel's first lead is
+    // labelled correctly without anyone having to configure it.
+    consentPolicy: 'implied',
     utm: input.utm,
     tags: input.tags,
   };
@@ -132,6 +136,10 @@ export async function upsertPendingLead(input: LeadInput): Promise<void> {
     source: input.source,
     consent: false,
     consentMethod: `magnet:${input.source}:pending`,
+    // Stated, not inferred. `consent: false` here means "not yet", and a route
+    // registered from this lead alone would read it as "never" — which is the
+    // one posture the mailing system's unattended-funnel warning skips.
+    consentPolicy: 'confirmed',
     utm: input.utm,
     tags: input.tags,
   };
@@ -194,6 +202,10 @@ export async function markLeadConfirmed(
     source,
     consent: true,
     consentMethod: `magnet:${source}:confirmed`,
+    // Still `confirmed`: the posture describes the funnel, not this moment.
+    // Sending `implied` on the grant would relabel the route as one that never
+    // asked twice, on the strength of somebody proving that it did.
+    consentPolicy: 'confirmed',
     tags,
   };
 
@@ -216,4 +228,41 @@ export async function markLeadConfirmed(
     );
 
   attemptForwardAsync(`leads/${docId}`, payload);
+}
+
+/**
+ * Records that a confirmed lead actually opened the magnet they signed up for.
+ *
+ * Purely local: nothing is forwarded, because a download is not a consent event
+ * and the mailing system has no use for it. What it answers is the question the
+ * signup count cannot — how many people who handed over an address went on to
+ * read the thing. A wide gap between the two is an offer being oversold on the
+ * page, which is a copy problem rather than a traffic problem, and the two look
+ * identical if only signups are counted.
+ *
+ * Merge-only, and never creates: reaching here without a pending record means a
+ * token outlived its lead, and writing a document with nothing but a download
+ * flag on it would put a lead in the collection that was never captured.
+ */
+export async function markLeadDownloaded(
+  source: LeadSource,
+  email: string,
+): Promise<void> {
+  const docId = leadDocId(source, email);
+
+  await adminFirestore
+    .collection('leads')
+    .doc(docId)
+    .set(
+      {
+        downloaded: true,
+        // First open, not most recent. The interesting interval is between
+        // signing up and reading, and a later re-download would overwrite it.
+        downloadedAt: FieldValue.serverTimestamp(),
+      },
+      // mergeFields alone, never alongside `merge` — Firestore rejects the pair
+      // outright, and this call swallows its own errors, so the combination
+      // would have failed silently on every download for ever.
+      { mergeFields: ['downloaded', 'downloadedAt'] },
+    );
 }

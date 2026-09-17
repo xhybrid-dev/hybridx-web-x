@@ -175,6 +175,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.95,
     },
+    {
+      // The ATHX 2027 pre-launch funnel. Its /confirm page is deliberately
+      // absent: it is a per-address utility page and carries noindex.
+      url: `${baseUrl}/athx-2027`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
   ];
 
   return routes;

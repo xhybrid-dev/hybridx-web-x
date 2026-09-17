@@ -80,6 +80,69 @@ describe('pendingOutbox', () => {
     const entry = pendingOutbox(payload) as { forwardNextAttemptAt: { toMillis(): number } };
     expect(entry.forwardNextAttemptAt.toMillis()).toBeLessThanOrEqual(Date.now() + 1000);
   });
+
+  // Firestore refuses an entire document containing `undefined` — not the
+  // field, the write. The payload carries `undefined` for absent optionals
+  // deliberately, because it is also serialised to JSON for the bridge, where
+  // `null` would arrive as an explicit "no name" and overwrite one already on
+  // the subscriber. So this is where the two consumers are reconciled.
+  //
+  // Before they were, a magnet form with no first-name field — which is every
+  // well-designed one — made every write fail. The capture actions catch and log
+  // that rather than failing the visitor, so the guide arrived, the success
+  // screen showed, and the lead was never recorded or forwarded. The funnel
+  // looked healthy from every angle except the subscriber count.
+  describe('undefined values, which Firestore rejects outright', () => {
+    const minimal = {
+      email: 'athlete@hybridx.club',
+      name: undefined,
+      source: 'athx_2027_guide',
+      consent: false,
+      consentMethod: 'magnet:athx_2027_guide:pending',
+      consentPolicy: 'confirmed' as const,
+      utm: undefined,
+      tags: undefined,
+    };
+
+    it('drops every undefined key from the stored payload', () => {
+      const entry = pendingOutbox(minimal) as { forwardPayload: Record<string, unknown> };
+      const stored = entry.forwardPayload;
+
+      expect(Object.values(stored).some((v) => v === undefined)).toBe(false);
+      for (const absent of ['name', 'utm', 'tags']) {
+        expect(absent in stored, absent).toBe(false);
+      }
+    });
+
+    it('keeps everything that was actually supplied', () => {
+      const entry = pendingOutbox(minimal) as { forwardPayload: Record<string, unknown> };
+      expect(entry.forwardPayload).toEqual({
+        email: 'athlete@hybridx.club',
+        source: 'athx_2027_guide',
+        consent: false,
+        consentMethod: 'magnet:athx_2027_guide:pending',
+        consentPolicy: 'confirmed',
+      });
+    });
+
+    it('keeps a false consent, which is not the same as an absent one', () => {
+      // The value most at risk from a careless truthiness filter, and the one
+      // that decides whether somebody may be mailed before they confirm.
+      const entry = pendingOutbox(minimal) as { forwardPayload: Record<string, unknown> };
+      expect(entry.forwardPayload.consent).toBe(false);
+      expect('consent' in entry.forwardPayload).toBe(true);
+    });
+
+    it('produces a document Firestore would accept', () => {
+      // The assertion that matters: the real client walks the whole document
+      // and throws on the first undefined it finds, naming the field path.
+      const entry = pendingOutbox(minimal);
+      const offenders = Object.entries(entry.forwardPayload as Record<string, unknown>)
+        .filter(([, value]) => value === undefined)
+        .map(([key]) => `forwardPayload.${key}`);
+      expect(offenders).toEqual([]);
+    });
+  });
 });
 
 describe('attemptForward', () => {

@@ -131,12 +131,38 @@ function getTransporter(): nodemailer.Transporter {
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        // .trim() matters here for exactly the reason it matters on
+        // RESEND_API_KEY above: a secret set by piping through `echo` instead
+        // of `echo -n` picks up a trailing newline, and the relay then rejects
+        // the login outright. Brevo's own error for this is indistinguishable
+        // from a genuinely wrong credential — "535 5.7.8 Authentication
+        // failed" either way — which is what made this one take a live log
+        // line to diagnose instead of a glance at this file, and cost every
+        // ATHX lead a send until it was traced back to a stray whitespace this
+        // getter never guarded against, unlike the Resend key beside it.
+        user: process.env.SMTP_USER?.trim(),
+        pass: process.env.SMTP_PASSWORD?.trim(),
       },
     });
   }
   return transporter;
+}
+
+/**
+ * Shape of the configured SMTP credentials, for diagnostics. Mirrors
+ * describeResendKey(): reports only what is needed to spot a malformed value,
+ * never enough to use it.
+ */
+export function describeSmtpAuth(): {
+  userHadSurroundingWhitespace: boolean;
+  passwordHadSurroundingWhitespace: boolean;
+} {
+  const rawUser = process.env.SMTP_USER ?? '';
+  const rawPass = process.env.SMTP_PASSWORD ?? '';
+  return {
+    userHadSurroundingWhitespace: rawUser !== rawUser.trim(),
+    passwordHadSurroundingWhitespace: rawPass !== rawPass.trim(),
+  };
 }
 
 export type EmailProvider = 'resend' | 'smtp' | 'none';

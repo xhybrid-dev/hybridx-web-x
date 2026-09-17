@@ -74,6 +74,17 @@ export interface ForwardLeadInput {
    */
   consent: boolean;
   consentMethod?: string;
+  /**
+   * How this funnel obtains consent, as opposed to what this one submission
+   * answered. Read by the mailing system only when it is registering the route
+   * for the first time.
+   *
+   * Worth sending from a confirmed opt-in magnet in particular: its first lead
+   * carries `consent: false`, and a route inferred from that alone is recorded
+   * as granting no consent at all — which excludes it from the console's
+   * warning about funnels that no journey is acting on.
+   */
+  consentPolicy?: 'implied' | 'explicit' | 'confirmed' | 'none';
   utm?: Record<string, string>;
   tags?: string[];
 }
