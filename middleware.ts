@@ -2,9 +2,49 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/*
+ * race.hybridx.club is this same app. The subdomain's root is served from
+ * /race by rewrite (the address bar keeps the subdomain), /race on the
+ * subdomain folds back to its root, and every other page on the subdomain goes
+ * to the same path on the main site, so the rest of hybridx.club is never
+ * indexed twice. Static files, /_next and /api are outside the matcher below
+ * and are served as they are on either host.
+ *
+ * Matched on the first label, so http://race.localhost:9002 works in
+ * development exactly as the real subdomain does.
+ */
+const RACE_PREFIX = 'race.';
+const RACE_PATH = '/race';
+
+function requestHost(request: NextRequest) {
+  // App Hosting sits behind a proxy; the host the visitor typed is forwarded.
+  const raw = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
+  return raw.split(',')[0].trim().toLowerCase();
+}
+
+function routeRaceSubdomain(request: NextRequest): NextResponse | null {
+  const host = requestHost(request);
+  if (!host.startsWith(RACE_PREFIX)) return null;
+
+  const { pathname, search } = request.nextUrl;
+
+  if (pathname === '/') {
+    return NextResponse.rewrite(new URL(`${RACE_PATH}${search}`, request.url));
+  }
+
+  const proto = request.headers.get('x-forwarded-proto')?.split(',')[0].trim() ?? request.nextUrl.protocol.replace(':', '');
+
+  if (pathname === RACE_PATH || pathname === `${RACE_PATH}/`) {
+    return NextResponse.redirect(`${proto}://${host}/${search}`, 308);
+  }
+
+  const mainHost = host.slice(RACE_PREFIX.length);
+  return NextResponse.redirect(`${proto}://${mainHost}${pathname}${search}`, 308);
+}
+
 export function middleware(request: NextRequest) {
   // Clone the response to add headers
-  const response = NextResponse.next();
+  const response = routeRaceSubdomain(request) ?? NextResponse.next();
 
   const isDevelopment = process.env.NODE_ENV === 'development';
 
