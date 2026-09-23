@@ -1,13 +1,22 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Poppins } from 'next/font/google';
 import { buildSegments } from '@/lib/race-content';
 import styles from './LiveWatch.module.css';
 
 /*
  * The hero's watch: the race screen of HybridX Race, redrawn in SVG from the
- * simulator captures in public/race/ and played as a fast-forwarded race.
+ * simulator captures in public/race/ and played as a fast-forwarded race,
+ * inside UNA's own product render of the watch.
+ *
+ * The render (public/race/una-watch-teal.png) is cropped from the watch
+ * mockups in the UNA SDK's Figma resource pack
+ * (Docs/Templates/Figma-UI-Kit/). Its screen is transparent, so the SVG sits
+ * underneath and shows through; the percentages in LiveWatch.module.css place
+ * it on that circle. The render carries the UNA logo, which UNA's
+ * TRADEMARK.md does not license — see the note in app/race/page.tsx.
  *
  * The layout, labels and colours follow the real screen (public/race/run.png,
  * station.png, split.png, summary.png); the typeface is Poppins, which is what
@@ -291,33 +300,33 @@ export default function LiveWatch() {
 
   return (
     <div ref={rootRef} className={`${styles.frame} ${poppins.className}`}>
-      <span className={`${styles.button} ${styles.l1}`} aria-hidden="true" />
-      <span className={`${styles.button} ${styles.l2}`} aria-hidden="true" />
-      <span className={`${styles.button} ${styles.r1}`} aria-hidden="true" />
-      <span className={`${styles.button} ${styles.r2} ${pressing ? styles.pressed : ''}`} aria-hidden="true" />
-      <div className={styles.watch}>
-      <div className={styles.bezel}>
-        <svg
-          viewBox="0 0 480 480"
-          className={styles.screen}
-          role="img"
-          aria-label="HybridX Race on a UNA Watch: the race screen, showing the current segment, its time, total race time and heart rate."
-        >
-          <defs>
-            <clipPath id="watch-face">
-              <circle cx="240" cy="240" r="240" />
-            </clipPath>
-          </defs>
-          <g clipPath="url(#watch-face)">
-            <rect width="480" height="480" fill="#000" />
-            {phase.kind === 'race' && <RaceFace index={phase.index} seconds={phase.seconds} />}
-            {phase.kind === 'split' && <SplitFace index={phase.index} />}
-            {phase.kind === 'summary' && <SummaryFace />}
-          </g>
-        </svg>
-        <span className={styles.glass} aria-hidden="true" />
-      </div>
-      </div>
+      <svg
+        viewBox="0 0 480 480"
+        className={styles.screen}
+        role="img"
+        aria-label="HybridX Race on a UNA Watch: the race screen, showing the current run or station, its time, total race time and heart rate."
+      >
+        <defs>
+          <clipPath id="watch-face">
+            <circle cx="240" cy="240" r="240" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#watch-face)">
+          <rect width="480" height="480" fill="#000" />
+          {phase.kind === 'race' && <RaceFace index={phase.index} seconds={phase.seconds} />}
+          {phase.kind === 'split' && <SplitFace index={phase.index} />}
+          {phase.kind === 'summary' && <SummaryFace />}
+        </g>
+      </svg>
+      <Image
+        src="/race/una-watch-teal.png"
+        alt=""
+        fill
+        priority
+        sizes="(max-width: 600px) 84vw, 430px"
+        className={styles.render}
+      />
+      <span className={`${styles.press} ${pressing ? styles.pressing : ''}`} aria-hidden="true" />
     </div>
   );
 }

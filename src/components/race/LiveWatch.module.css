@@ -1,87 +1,53 @@
 /*
- * The hero watch. A round case with four buttons — two a side, as on the
- * UNA Watch — around the SVG screen. Sized by its container; every length
- * inside is a share of the watch's own width (cqw), so it scales as one piece.
+ * The hero watch: UNA's product render with the race screen showing through
+ * its transparent display.
+ *
+ * Geometry is measured from the cropped render (1144 x 1576 at source): the
+ * display is a circle of radius 367 centred at (571.5, 800.5). The SVG is
+ * drawn a few pixels larger (radius 372) so no background shows at the rim;
+ * the render's bezel covers the overlap.
  */
 
-.frame,
-.frame * {
-  box-sizing: border-box;
-}
-
 .frame {
-  container-type: inline-size;
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
-}
-
-.watch {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  padding: 6.5cqw;
-  background:
-    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.22), transparent 42%),
-    conic-gradient(from 210deg, #2b2f33, #0d0f10 20%, #3a3f44 38%, #121416 55%, #2a2e32 75%, #0d0f10 88%, #2b2f33);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    inset 0 -1.2cqw 2cqw rgba(0, 0, 0, 0.6),
-    0 6cqw 12cqw -3cqw rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(0, 0, 0, 0.6);
-}
-
-.bezel {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  padding: 2.4cqw;
-  background: #030303;
-  box-shadow:
-    inset 0 0 0 0.5cqw #16191b,
-    inset 0 0.6cqw 1.2cqw rgba(255, 255, 255, 0.06);
+  aspect-ratio: 1144 / 1576;
 }
 
 .screen {
+  position: absolute;
+  left: 17.439%;
+  top: 27.189%;
+  width: 65.035%;
+  aspect-ratio: 1;
   display: block;
-  width: 100%;
-  height: 100%;
   border-radius: 50%;
 }
 
-/* A faint reflection across the glass. */
-.glass {
-  position: absolute;
-  inset: 2.4cqw;
-  border-radius: 50%;
+.render {
+  object-fit: contain;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 38%);
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55));
 }
 
-.button {
+/* A flash on the lower right-hand button when a split is pressed. */
+.press {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 4.2cqw;
-  height: 11cqw;
-  border-radius: 1.4cqw;
-  background: linear-gradient(90deg, #15181a, #4a5056 55%, #1d2023);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-  transform: translate(-50%, -50%) rotate(var(--a)) translateX(49.6cqw);
-  transition: transform 120ms ease-out, filter 120ms ease-out;
+  left: 97.5%;
+  top: 66.5%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  background: radial-gradient(closest-side, rgba(237, 136, 53, 0.95), rgba(237, 136, 53, 0));
+  opacity: 0;
+  transition: opacity 160ms ease-out, transform 160ms ease-out;
+  pointer-events: none;
 }
 
-.r1 { --a: -30deg; }
-.r2 { --a: 30deg; }
-.l1 { --a: 210deg; }
-.l2 { --a: 150deg; }
-
-.pressed {
-  transform: translate(-50%, -50%) rotate(var(--a)) translateX(48.2cqw);
-  filter: brightness(1.6) drop-shadow(0 0 1.4cqw rgba(255, 154, 26, 0.9));
+.pressing {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 /* ── Screen type, in the SVG's 480-unit space ─────────────────────────── */
@@ -107,7 +73,7 @@
 }
 
 .big {
-  font-size: 98px;
+  font-size: 96px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -158,4 +124,10 @@
 
 .marker {
   transition: transform 200ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press {
+    display: none;
+  }
 }

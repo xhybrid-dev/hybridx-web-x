@@ -17,10 +17,21 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  * section and every call to action that isn't "train with HybridX" goes to
  * unawatch.com.
  *
+ * Written for athletes, not developers: no SDK, FIT or simulator talk in the
+ * visible copy.
+ *
+ * UNA's trademark notice (TRADEMARK.md in github.com/UNAWatch/una-sdk) allows
+ * nominative use — "for UNA Watch" — but nothing implying endorsement,
+ * sponsorship or affiliation. So there is no "HybridX × UNA" lockup: the brands
+ * meet in UNA's palette (teal #358d98 from the SDK docs' own stylesheet) and in
+ * UNA's product render in the hero, and the page always says "for UNA Watch".
+ * The render carries the UNA logo, and the MIT licence on the SDK does not
+ * cover logos, so that image needs UNA's permission before this goes live.
+ *
  * Honesty constraints, all deliberate:
  *   - The app is not in the UNA store yet, so nothing here says "download".
  *     The status line is "coming to UNA Watch".
- *   - The watch screens are simulator captures and say so.
+ *   - The watch screens are pre-release captures and say so.
  *   - Claims about UNA are limited to what UNA says publicly about itself:
  *     modular, repairable and upgradable, open platform, from Scotland.
  *     No battery figures, no specs that could change before Jon hears them.
@@ -31,13 +42,12 @@ import RaceBuilder from '@/components/race/RaceBuilder';
 
 const URL_CANONICAL = 'https://race.hybridx.club';
 const UNA_URL = 'https://unawatch.com';
-const UNA_SDK_URL = 'https://github.com/UNAWatch/una-sdk';
 const HYBRIDX_URL = 'https://hybridx.club';
 const HYBRIDX_APP_URL = 'https://hybridx.club/app';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
 const DESCRIPTION =
-  'One button per split. Every run and every station recorded as its own lap, with heart rate, and exported to Strava and Garmin Connect. Built for UNA Watch by HybridX.';
+  'One button per split. Every run and every station timed as its own lap, with heart rate, and sent to Strava and Garmin Connect. The HYROX-format race timer for UNA Watch, by HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -59,7 +69,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: URL_CANONICAL },
   openGraph: {
-    title: 'HybridX Race × UNA Watch',
+    title: 'HybridX Race for UNA Watch',
     description: DESCRIPTION,
     type: 'website',
     url: URL_CANONICAL,
@@ -68,7 +78,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HybridX Race × UNA Watch',
+    title: 'HybridX Race for UNA Watch',
     description: DESCRIPTION,
   },
 };
@@ -86,7 +96,7 @@ const appSchema = {
 
 const STATS = [
   { value: '16', label: 'laps in a full race' },
-  { value: '31', label: 'with Roxzone split out' },
+  { value: '31', label: 'with the Roxzone timed too' },
   { value: '3', label: 'presses to the start line' },
   { value: '1', label: 'button to split' },
 ];
@@ -95,7 +105,7 @@ const FEATURES = [
   {
     kicker: 'The split',
     title: 'One thumb. Two seconds.',
-    body: 'Press at the transition. The split is stamped at the press itself, the watch confirms what just ended, then gets out of the way. A buzz tells you run or station without looking.',
+    body: 'Press at the transition. The split lands the instant you press, the watch shows what you just finished, then gets out of the way. A buzz tells you run or station without looking.',
     accent: 'lemon',
   },
   {
@@ -107,19 +117,19 @@ const FEATURES = [
   {
     kicker: 'Undo',
     title: 'Take it back, exactly',
-    body: 'Split on the way into the Roxzone instead of out? Undo it. The two laps merge with their heart-rate data intact, as if you never pressed.',
+    body: 'Pressed on the way into the Roxzone instead of out? Undo it. The times either side are put back exactly as they were, as if you never pressed.',
     accent: 'orchid',
   },
   {
     kicker: 'Heart rate',
     title: 'Per lap, not per race',
-    body: 'From the wrist or a chest strap, recorded lap by lap — so the sled and the run are told apart afterwards.',
+    body: 'From the wrist or a chest strap, lap by lap — so afterwards you can see what the sleds cost you, separately from the runs.',
     accent: 'red',
   },
   {
     kicker: 'Safety net',
     title: 'It never loses a race',
-    body: 'Lying on the floor after the wall balls? It saves itself after sixty seconds. Leave the app mid-race and the clock keeps running in the background.',
+    body: 'Lying on the floor after the wall balls? It saves your race by itself after a minute. Leave the app mid-race and the clock keeps running.',
     accent: 'teal',
   },
 ];
@@ -127,15 +137,15 @@ const FEATURES = [
 const SCREENS = [
   { src: '/race/start.png', title: 'Start', caption: 'Start race is already under your thumb. No sign-in, no GPS lock.' },
   { src: '/race/on-your-marks.png', title: 'On your marks', caption: 'Shows the race you are about to run, and waits as long as you do.' },
-  { src: '/race/run.png', title: 'Run', caption: 'Cyan for a run. Segment time big, race time beneath, next station named.' },
-  { src: '/race/station.png', title: 'Station', caption: 'Lemon for a station. Heart rate and zone, live from the wrist.' },
+  { src: '/race/run.png', title: 'Run', caption: 'Blue for a run. This lap’s time big, race time beneath, next station named.' },
+  { src: '/race/station.png', title: 'Station', caption: 'Yellow for a station. Heart rate and zone, live from the wrist.' },
   { src: '/race/split.png', title: 'Split', caption: 'Confirms what just ended and its time, then gets out of the way.' },
   { src: '/race/summary.png', title: 'Summary', caption: 'Where the time went, before you have found your phone.' },
 ];
 
 const ROADMAP = [
   { tag: 'Next', title: 'Custom simulations', body: 'Choose the stations, the run distance and the rounds. Relay format for pairs.' },
-  { tag: 'Then', title: 'Target pacing', body: 'A target finish from your HybridX coaching, pushed to the watch through the UNA app.' },
+  { tag: 'Then', title: 'Target pacing', body: 'A target finish from your HybridX coaching, sent straight to your watch.' },
   { tag: 'Later', title: 'Outdoor sims with GPS', body: 'Runs that end themselves at the set distance.' },
 ];
 
@@ -147,14 +157,14 @@ function Arrow() {
   );
 }
 
-function Lockup({ small = false }: { small?: boolean }) {
+// The app's own wordmark: HybridX's mark, "RACE", and a nominative "for UNA
+// Watch". Deliberately not a HybridX × UNA co-brand; see the note at the top.
+function Wordmark({ large = false }: { large?: boolean }) {
   return (
-    <span className={`${styles.lockup} ${small ? styles.lockupSmall : ''}`}>
+    <span className={`${styles.wordmark} ${large ? styles.wordmarkLarge : ''}`}>
       <Image src="/Icon Logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
-      <span className={styles.lockupX} aria-hidden="true">
-        ×
-      </span>
-      <span className={styles.unaWord}>UNA</span>
+      <span className={styles.wordRace}>Race</span>
+      <span className={styles.wordFor}>for UNA Watch</span>
     </span>
   );
 }
@@ -175,8 +185,7 @@ export default function RacePage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <a href="#top" className={styles.brand} aria-label="HybridX Race for UNA Watch, back to top">
-            <Lockup small />
-            <span className={styles.brandName}>Race</span>
+            <Wordmark />
           </a>
           <nav className={styles.navLinks} aria-label="Page">
             <a href="#format">The race</a>
@@ -206,9 +215,9 @@ export default function RacePage() {
                   <span className={styles.gradientText}>One button.</span>
                 </h1>
                 <p className={styles.lead}>
-                  HybridX Race is the HYROX-format race timer for UNA Watch. Press at every
-                  transition, and every run and every station lands as its own lap — timed,
-                  heart-rate tracked, and ready for Strava and Garmin Connect.
+                  HybridX Race is the HYROX-format race timer for UNA Watch. Press once at every
+                  transition, and every run and every station is timed as its own lap, with your
+                  heart rate — then sent to Strava and Garmin Connect.
                 </p>
                 <div className={styles.ctaRow}>
                   <a href={UNA_URL} className={styles.btnPrimary} target="_blank" rel="noopener">
@@ -250,9 +259,9 @@ export default function RacePage() {
                 <span className={styles.dim}> Your race is sixteen.</span>
               </h2>
               <p className={styles.sectionLead}>
-                Eight 1 km runs and eight stations, alternating. The format lives in the app, not
-                in your head: full race or either half, with the real round numbers in both, and
-                Roxzone transitions split out if you want them.
+                Eight 1 km runs and eight stations, one after another. The watch knows the order,
+                so you don’t have to: race it in full or train either half, and time your Roxzone
+                transitions separately if you want to. Try it:
               </p>
             </div>
             <div className={`${styles.glassPanel} ${styles.reveal}`}>
@@ -278,9 +287,9 @@ export default function RacePage() {
                   <p className={styles.kicker}>Strava &amp; Garmin Connect</p>
                   <h3 className={styles.h3}>Lands as a race, not a blob</h3>
                   <p>
-                    A standard FIT activity with one lap per segment, plus fields that say what
-                    each lap was — run, station or Roxzone, and which round. Your splits arrive
-                    named and in order.
+                    Most watches save a race as one long workout. HybridX Race sends it to Strava
+                    and Garmin Connect as sixteen laps, each run and each station in order — so
+                    you can see exactly where the time went.
                   </p>
                 </div>
                 <div className={styles.lapChart} aria-hidden="true">
@@ -331,7 +340,7 @@ export default function RacePage() {
             ))}
           </ol>
           <div className={styles.container}>
-            <p className={styles.footnote}>Screens captured from the UNA Watch simulator.</p>
+            <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
           </div>
         </section>
 
@@ -347,17 +356,14 @@ export default function RacePage() {
                   you can fix.
                 </h2>
                 <p className={styles.sectionLead}>
-                  UNA Watch is the modular GPS sports watch from Scotland — repairable,
-                  upgradable, and open to developers. HybridX Race is built natively on its SDK,
-                  not ported onto it: a watch that lasts as long as your training does, running
-                  an app that understands the race you actually do.
+                  UNA Watch is the modular GPS sports watch from Scotland: a watch you can repair
+                  and upgrade rather than replace, open to apps made for the sport you actually
+                  do. HybridX Race is made for it from the ground up — a watch that lasts as long
+                  as your training does, running an app that understands your race.
                 </p>
                 <div className={styles.ctaRow}>
                   <a href={UNA_URL} className={styles.btnTeal} target="_blank" rel="noopener">
                     Explore UNA Watch <Arrow />
-                  </a>
-                  <a href={UNA_SDK_URL} className={styles.btnGhost} target="_blank" rel="noopener">
-                    The open SDK <Arrow />
                   </a>
                 </div>
               </div>
@@ -380,8 +386,8 @@ export default function RacePage() {
                   <span className={styles.unaIcon} aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14" /></svg>
                   </span>
-                  <strong>Open platform</strong>
-                  <span>An open SDK, so specialist apps like this one can exist.</span>
+                  <strong>Made for your sport</strong>
+                  <span>Open to specialist apps like this one, not just the big names.</span>
                 </li>
               </ul>
             </div>
@@ -399,9 +405,9 @@ export default function RacePage() {
                   <span className={styles.dim}> An input to your training.</span>
                 </h2>
                 <p className={styles.sectionLead}>
-                  Every lap carries what it was, so a finished race can flow straight back into
-                  HybridX — splits mapped to segments without guessing, and pacing targets sent
-                  back out to the watch. Here is where it goes next.
+                  Every lap knows whether it was a run, a station or a Roxzone. Next, we’re
+                  joining that up with HybridX coaching: your race comes back to your plan, and
+                  your targets go out to your wrist. Here’s what’s coming.
                 </p>
               </div>
               <ol className={styles.roadmap}>
@@ -420,9 +426,9 @@ export default function RacePage() {
         {/* ── Final call ────────────────────────────────────────────────── */}
         <section className={styles.final}>
           <div className={styles.container}>
-            <Lockup />
+            <Wordmark large />
             <h2 className={styles.finalTitle}>
-              Race it on <span className={styles.gradientText}>UNA.</span>
+              Race it on <span className={styles.gradientText}>UNA Watch.</span>
             </h2>
             <p className={styles.finalLead}>
               HybridX Race is coming to the UNA app store. Get the watch, and be on the start line
@@ -443,10 +449,10 @@ export default function RacePage() {
       <footer className={styles.footer}>
         <div className={`${styles.container} ${styles.footerInner}`}>
           <p>
-            HybridX Race is an independent app by{' '}
-            <a href={HYBRIDX_URL}>HybridX</a>, built with the open UNA Watch SDK. UNA and UNA
-            Watch are trademarks of their owner. HYROX is a trademark of its owner; HybridX Race
-            is not affiliated with or endorsed by HYROX.
+            HybridX Race is an independent app for UNA Watch, made by{' '}
+            <a href={HYBRIDX_URL}>HybridX</a>. It is not made, endorsed or sponsored by UNA Watch
+            Ltd or by HYROX. UNA and UNA Watch are trademarks of UNA Watch Ltd; HYROX is a
+            trademark of its owner.
           </p>
           <nav className={styles.footerLinks} aria-label="Footer">
             <a href={HYBRIDX_URL}>hybridx.club</a>

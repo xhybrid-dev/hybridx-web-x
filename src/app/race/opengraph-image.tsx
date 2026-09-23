@@ -20,16 +20,15 @@ export default function OpengraphImage() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '64px 72px',
-          background: 'radial-gradient(60% 80% at 85% 10%, #3b3413 0%, #050506 60%), #050506',
+          background: 'radial-gradient(60% 80% at 85% 10%, #1b3f44 0%, #050506 60%), #050506',
           color: '#f5f5f5',
           fontFamily: 'sans-serif',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: 30, letterSpacing: 6 }}>
           <span style={{ fontWeight: 700 }}>HYBRIDX</span>
-          <span style={{ color: '#6f6f6f' }}>×</span>
-          <span>UNA</span>
-          <span style={{ marginLeft: 18, color: '#fadb5c', fontWeight: 700 }}>RACE</span>
+          <span style={{ color: '#fadb5c', fontWeight: 700 }}>RACE</span>
+          <span style={{ marginLeft: 12, fontSize: 24, letterSpacing: 1, color: '#76b7c1' }}>for UNA Watch</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', fontSize: 96, fontWeight: 700, lineHeight: 1, letterSpacing: -3 }}>
           <span>Sixteen efforts.</span>

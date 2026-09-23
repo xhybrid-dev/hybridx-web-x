@@ -23,8 +23,12 @@
   --cyan: #5ce8f0; /* run */
   --lemon: #f5e663; /* station */
   --orchid: #e08cf5; /* Roxzone */
-  --teal: #1fb5a8; /* UNA highlight, lifted for the web */
-  --teal-deep: #0b5c58;
+  /* UNA's own palette, from the SDK docs stylesheet (Docs/_static/custom.css). */
+  --teal: #358d98; /* UNA primary */
+  --teal-light: #76b7c1;
+  --teal-lighter: #c3e5e9;
+  --teal-deep: #174146;
+  --una-orange: #ed8835; /* UNA secondary */
   --red: #ff5a4a;
 
   --display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
@@ -82,7 +86,7 @@
   pointer-events: none;
   background:
     radial-gradient(40% 50% at 78% 30%, rgba(250, 219, 92, 0.16), transparent 70%),
-    radial-gradient(45% 55% at 12% 18%, rgba(31, 181, 168, 0.2), transparent 70%),
+    radial-gradient(45% 55% at 12% 18%, rgba(53, 141, 152, 0.2), transparent 70%),
     radial-gradient(30% 40% at 60% 70%, rgba(92, 232, 240, 0.08), transparent 70%);
   filter: blur(10px);
 }
@@ -137,17 +141,6 @@
   gap: 12px;
 }
 
-.brandName {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  padding-left: 12px;
-  border-left: 1px solid var(--line);
-  color: var(--yellow);
-}
-
 .navLinks {
   display: flex;
   gap: 28px;
@@ -172,65 +165,67 @@
   font-weight: 600;
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(31, 181, 168, 0.5);
-  color: #bff5ef;
-  background: rgba(31, 181, 168, 0.1);
+  border: 1px solid rgba(53, 141, 152, 0.5);
+  color: var(--teal-lighter);
+  background: rgba(53, 141, 152, 0.12);
   transition: background 160ms ease, border-color 160ms ease;
 }
 
 .navCta:hover {
-  background: rgba(31, 181, 168, 0.22);
+  background: rgba(53, 141, 152, 0.22);
   border-color: var(--teal);
 }
 
-/* ── Lockup: the HybridX X, ×, UNA ─────────────────────────────────────── */
+/* ── Wordmark: the HybridX X, RACE, "for UNA Watch" ──────────────────── */
 
-.lockup {
+.wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .xMark {
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   /* The mark is supplied dark on transparent; reversed for a dark page. */
   filter: invert(1);
 }
 
-.lockupX {
+.wordRace {
   font-family: var(--display);
-  font-size: 22px;
-  color: var(--dim);
-  line-height: 1;
-}
-
-.unaWord {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 26px;
-  letter-spacing: 0.32em;
-  margin-right: -0.32em;
-  line-height: 1;
-  color: var(--text);
-}
-
-.lockupSmall {
-  gap: 9px;
-}
-
-.lockupSmall .xMark {
-  width: 24px;
-  height: 24px;
-}
-
-.lockupSmall .lockupX {
+  font-weight: 700;
   font-size: 15px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--yellow);
 }
 
-.lockupSmall .unaWord {
-  font-size: 16px;
+.wordFor {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.wordmarkLarge {
+  gap: 14px;
+}
+
+.wordmarkLarge .xMark {
+  width: 40px;
+  height: 40px;
+}
+
+.wordmarkLarge .wordRace {
+  font-size: 24px;
+}
+
+.wordmarkLarge .wordFor {
+  font-size: 15px;
+  padding-left: 14px;
 }
 
 /* ── Hero ───────────────────────────────────────────────────────────────── */
@@ -338,13 +333,13 @@
 
 .btnTeal {
   background: var(--teal);
-  color: #03201e;
-  box-shadow: 0 10px 30px -10px rgba(31, 181, 168, 0.7);
+  color: #fff;
+  box-shadow: 0 10px 30px -10px rgba(53, 141, 152, 0.7);
 }
 
 .btnTeal:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 6px rgba(31, 181, 168, 0.16), 0 14px 36px -10px rgba(31, 181, 168, 0.8);
+  box-shadow: 0 0 0 6px rgba(53, 141, 152, 0.16), 0 14px 36px -10px rgba(53, 141, 152, 0.8);
 }
 
 .btnGhost {
@@ -378,7 +373,7 @@
   transform: translate(-50%, -54%);
   border-radius: 50%;
   background:
-    conic-gradient(from 0deg, rgba(92, 232, 240, 0.28), rgba(245, 230, 99, 0.25), rgba(224, 140, 245, 0.22), rgba(31, 181, 168, 0.28), rgba(92, 232, 240, 0.28));
+    conic-gradient(from 0deg, rgba(92, 232, 240, 0.28), rgba(245, 230, 99, 0.25), rgba(224, 140, 245, 0.22), rgba(53, 141, 152, 0.28), rgba(92, 232, 240, 0.28));
   filter: blur(60px);
   opacity: 0.55;
   animation: spin 24s linear infinite;
@@ -677,11 +672,11 @@
   align-items: center;
   padding: clamp(28px, 5vw, 64px);
   border-radius: 32px;
-  border: 1px solid rgba(31, 181, 168, 0.3);
+  border: 1px solid rgba(53, 141, 152, 0.3);
   background:
-    radial-gradient(80% 100% at 100% 0%, rgba(31, 181, 168, 0.28), transparent 60%),
-    radial-gradient(60% 80% at 0% 100%, rgba(11, 92, 88, 0.45), transparent 70%),
-    #061312;
+    radial-gradient(80% 100% at 100% 0%, rgba(53, 141, 152, 0.28), transparent 60%),
+    radial-gradient(60% 80% at 0% 100%, rgba(23, 65, 70, 0.45), transparent 70%),
+    #07191b;
   overflow: hidden;
 }
 
@@ -699,7 +694,7 @@
 }
 
 .unaPanel .eyebrow {
-  color: #7fe3d8;
+  color: var(--teal-light);
 }
 
 .unaPanel .sectionLead {
@@ -747,8 +742,8 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(31, 181, 168, 0.16);
-  color: #7fe3d8;
+  background: rgba(53, 141, 152, 0.16);
+  color: var(--teal-light);
 }
 
 .unaIcon svg {
@@ -830,7 +825,7 @@
   height: 800px;
   transform: translate(-50%, -55%);
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(250, 219, 92, 0.18), rgba(31, 181, 168, 0.12) 55%, transparent);
+  background: radial-gradient(closest-side, rgba(250, 219, 92, 0.18), rgba(53, 141, 152, 0.12) 55%, transparent);
   z-index: -1;
 }
 
@@ -990,7 +985,7 @@
   }
 
   .watchFloat {
-    width: min(340px, 84vw);
+    width: min(300px, 76vw);
   }
 
   .stat {
@@ -1004,9 +999,6 @@
     padding: 0 20px;
   }
 
-  .brandName {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
