@@ -1,0 +1,265 @@
+/* The race builder, in the page's palette (see app/race/race.module.css). */
+
+.builder,
+.builder * {
+  box-sizing: border-box;
+}
+
+.builder {
+  --run: #5ce8f0;
+  --station: #f5e663;
+  --rox: #e08cf5;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #fff;
+}
+
+.tabOn {
+  background: #fadb5c;
+  color: #0a0a0a;
+}
+
+.tabOn:hover {
+  color: #0a0a0a;
+}
+
+.switch {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: #d4d4d4;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.track {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 180ms ease;
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 180ms ease;
+}
+
+.switchOn .track {
+  background: var(--rox);
+}
+
+.switchOn .thumb {
+  transform: translateX(16px);
+}
+
+.count {
+  margin: 0 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.countNumber {
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.countLabel {
+  color: #8f8f8f;
+  font-size: 14px;
+}
+
+.strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.lap {
+  --c: var(--run);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 84px;
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.03);
+  border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+  overflow: hidden;
+  animation: lap-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.lap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c);
+  box-shadow: 0 0 12px var(--c);
+}
+
+.lapIndex {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #767676;
+  font-variant-numeric: tabular-nums;
+}
+
+.lapLabel {
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--c);
+  line-height: 1.2;
+}
+
+.lapWork {
+  margin-top: auto;
+  font-size: 12px;
+  color: #a3a3a3;
+}
+
+.run { --c: var(--run); }
+.station { --c: var(--station); }
+.rox { --c: var(--rox); }
+
+.legend {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 16px 0 0;
+  padding: 0;
+  font-size: 13px;
+  color: #a3a3a3;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend li::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes lap-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (max-width: 640px) {
+  .count {
+    margin-left: 0;
+  }
+  .strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .lap {
+    min-height: 68px;
+    padding: 10px 8px 8px;
+    border-radius: 10px;
+  }
+  .lap::before {
+    left: 8px;
+    right: 8px;
+  }
+  .lapIndex {
+    display: none;
+  }
+  .lapLabel {
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  .lapWork {
+    font-size: 11px;
+  }
+  .tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lap {
+    animation: none;
+  }
+}
