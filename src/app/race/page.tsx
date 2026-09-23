@@ -94,17 +94,10 @@ const appSchema = {
   publisher: { '@type': 'Organization', name: 'HybridX', url: HYBRIDX_URL },
 };
 
-const STATS = [
-  { value: '16', label: 'laps in a full race' },
-  { value: '31', label: 'with the Roxzone timed too' },
-  { value: '3', label: 'presses to the start line' },
-  { value: '1', label: 'button to split' },
-];
-
 const FEATURES = [
   {
     kicker: 'The split',
-    title: 'One thumb. Two seconds.',
+    title: 'Your split time, just when you need it',
     body: 'Press at the transition. The split lands the instant you press, the watch shows what you just finished, then gets out of the way. A buzz tells you run or station without looking.',
     accent: 'lemon',
   },
@@ -210,9 +203,7 @@ export default function RacePage() {
                   Coming to UNA Watch
                 </p>
                 <h1 className={styles.h1}>
-                  Sixteen efforts.
-                  <br />
-                  <span className={styles.gradientText}>One button.</span>
+                  Track your Hyrox <span className={styles.gradientText}>with UNA</span>
                 </h1>
                 <p className={styles.lead}>
                   HybridX Race is the HYROX-format race timer for UNA Watch. Press once at every
@@ -237,15 +228,6 @@ export default function RacePage() {
                 <p className={styles.watchNote}>A race, fast-forwarded. Illustrative times.</p>
               </div>
             </div>
-
-            <dl className={styles.stats}>
-              {STATS.map((s) => (
-                <div key={s.label} className={styles.stat}>
-                  <dt className={styles.statLabel}>{s.label}</dt>
-                  <dd className={styles.statValue}>{s.value}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
         </section>
 
@@ -255,8 +237,8 @@ export default function RacePage() {
             <div className={styles.sectionHead}>
               <p className={styles.eyebrow}>The race, as it is scored</p>
               <h2 className={styles.h2}>
-                A generic timer records one effort.
-                <span className={styles.dim}> Your race is sixteen.</span>
+                Your watch records one effort.
+                <span className={styles.dim}> This records all your splits.</span>
               </h2>
               <p className={styles.sectionLead}>
                 Eight 1 km runs and eight stations, one after another. The watch knows the order,
