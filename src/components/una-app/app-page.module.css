@@ -1,10 +1,13 @@
 /*
- * src/app/race/race.module.css
+ * src/components/una-app/app-page.module.css
  *
- * race.hybridx.club: HybridX's black and yellow, meeting the watch's own
- * colours — cyan for a run, lemon for a station, orchid for the Roxzone — and
- * the teal the UNA interface highlights with. Dark regardless of the site
- * theme; every surface states its own background.
+ * The shared look of the HybridX apps' pages for UNA Watch
+ * (race.hybridx.club, streak.hybridx.club): HybridX's black and yellow,
+ * meeting each watch app's own colours and UNA's teal. Dark regardless of the
+ * site theme; every surface states its own background.
+ *
+ * A page can retint itself by setting --accent-gradient (and any palette
+ * variable) on a class alongside .page; see app/streak/streak.module.css.
  *
  * Motion is progressive: reveals use scroll-driven animations where the
  * browser has them, and are simply visible where it doesn't. Reduced motion
@@ -30,6 +33,17 @@
   --teal-deep: #174146;
   --una-orange: #ed8835; /* UNA secondary */
   --red: #ff5a4a;
+  --lime: #b6f23d; /* Streak: "you did it" */
+  --amber: #f5a524; /* Streak: at risk */
+
+  --accent-gradient: linear-gradient(100deg, var(--yellow) 0%, var(--lemon) 35%, var(--cyan) 100%);
+
+  /* Theme hooks. Race keeps these defaults; a sibling page retints them. */
+  --brand: var(--yellow); /* focus rings, the app's name, eyebrows, primary buttons */
+  --brand-ink: #0a0a0a; /* text on a --brand fill */
+  --brand-glow: rgba(250, 219, 92, 0.6);
+  --brand-soft: rgba(250, 219, 92, 0.14);
+  --nav-bg: rgba(5, 5, 6, 0.6);
 
   --display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   --body: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
@@ -60,7 +74,7 @@
 }
 
 .page :focus-visible {
-  outline: 2px solid var(--yellow);
+  outline: 2px solid var(--brand);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -122,7 +136,7 @@
   padding: 12px 0;
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  background: rgba(5, 5, 6, 0.6);
+  background: var(--nav-bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -159,6 +173,8 @@
 
 .navCta {
   display: inline-flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
   align-items: center;
   gap: 6px;
   font-size: 14px;
@@ -198,7 +214,7 @@
   font-size: 15px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--yellow);
+  color: var(--brand);
 }
 
 .wordFor {
@@ -282,7 +298,7 @@
 }
 
 .gradientText {
-  background: linear-gradient(100deg, var(--yellow) 0%, var(--lemon) 35%, var(--cyan) 100%);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -321,14 +337,14 @@
 }
 
 .btnPrimary {
-  background: var(--yellow);
-  color: #0a0a0a;
-  box-shadow: 0 0 0 0 rgba(250, 219, 92, 0), 0 10px 30px -10px rgba(250, 219, 92, 0.6);
+  background: var(--brand);
+  color: var(--brand-ink);
+  box-shadow: 0 10px 30px -10px var(--brand-glow);
 }
 
 .btnPrimary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 6px rgba(250, 219, 92, 0.14), 0 14px 36px -10px rgba(250, 219, 92, 0.7);
+  box-shadow: 0 0 0 6px var(--brand-soft), 0 14px 36px -10px var(--brand-glow);
 }
 
 .btnTeal {
@@ -409,7 +425,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--yellow);
+  color: var(--brand);
   margin-bottom: 16px;
 }
 
@@ -485,6 +501,9 @@
 .card[data-accent='orchid'] { --c: var(--orchid); }
 .card[data-accent='red'] { --c: var(--red); }
 .card[data-accent='teal'] { --c: var(--teal); }
+.card[data-accent='lime'] { --c: var(--lime); }
+.card[data-accent='amber'] { --c: var(--amber); }
+.card[data-accent='yellow'] { --c: var(--yellow); }
 
 .kicker {
   font-size: 12px;
@@ -944,6 +963,13 @@
     padding: 0 20px;
   }
 
+}
+
+@media (max-width: 420px) {
+  /* The nav has room for the app's name or "for UNA Watch", not both. */
+  .navInner .wordFor {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

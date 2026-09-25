@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 // The social card for race.hybridx.club: the headline over the sixteen laps in
 // the watch's run and station colours. Rendered once at build time.
 
-export const alt = 'HybridX Race for UNA Watch: sixteen efforts, one button.';
+export const alt = 'HybridX Race for UNA Watch: track your Hyrox with UNA.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -31,8 +31,8 @@ export default function OpengraphImage() {
           <span style={{ marginLeft: 12, fontSize: 24, letterSpacing: 1, color: '#76b7c1' }}>for UNA Watch</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', fontSize: 96, fontWeight: 700, lineHeight: 1, letterSpacing: -3 }}>
-          <span>Sixteen efforts.</span>
-          <span style={{ color: '#fadb5c' }}>One button.</span>
+          <span>Track your Hyrox</span>
+          <span style={{ color: '#fadb5c' }}>with UNA</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 120 }}>
           {BARS.map((h, i) => (
