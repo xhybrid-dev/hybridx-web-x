@@ -1,0 +1,36 @@
+/*
+ * The Streak hero watch: UNA's product render with the demo recording showing
+ * through its transparent display.
+ *
+ * Render geometry (cropped source, 1144 x 1576): display circle radius 367
+ * centred at (571.5, 800.5); see components/race/LiveWatch.module.css.
+ *
+ * The recording is 520 px square with its display circle at radius 240. Scaled
+ * so that circle lands at radius ~372 (just under the bezel), the video is
+ * 806 source px wide: left 14.73%, top 25.22%, width 70.45% of the render.
+ * clip-path trims the recording's square corners and its grey rim.
+ */
+
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1144 / 1576;
+}
+
+.screen {
+  position: absolute;
+  left: 14.73%;
+  top: 25.22%;
+  width: 70.45%;
+  aspect-ratio: 1;
+  display: block;
+  object-fit: cover;
+  background: #000;
+  clip-path: circle(45.8% at 50% 50%);
+}
+
+.render {
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55));
+}

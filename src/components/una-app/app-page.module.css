@@ -1,10 +1,13 @@
 /*
- * src/app/race/race.module.css
+ * src/components/una-app/app-page.module.css
  *
- * race.hybridx.club: HybridX's black and yellow, meeting the watch's own
- * colours — cyan for a run, lemon for a station, orchid for the Roxzone — and
- * the teal the UNA interface highlights with. Dark regardless of the site
- * theme; every surface states its own background.
+ * The shared look of the HybridX apps' pages for UNA Watch
+ * (race.hybridx.club, streak.hybridx.club): HybridX's black and yellow,
+ * meeting each watch app's own colours and UNA's teal. Dark regardless of the
+ * site theme; every surface states its own background.
+ *
+ * A page can retint itself by setting --accent-gradient (and any palette
+ * variable) on a class alongside .page; see app/streak/streak.module.css.
  *
  * Motion is progressive: reveals use scroll-driven animations where the
  * browser has them, and are simply visible where it doesn't. Reduced motion
@@ -30,6 +33,10 @@
   --teal-deep: #174146;
   --una-orange: #ed8835; /* UNA secondary */
   --red: #ff5a4a;
+  --lime: #b6f23d; /* Streak: "you did it" */
+  --amber: #f5a524; /* Streak: at risk */
+
+  --accent-gradient: linear-gradient(100deg, var(--yellow) 0%, var(--lemon) 35%, var(--cyan) 100%);
 
   --display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   --body: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
@@ -159,6 +166,8 @@
 
 .navCta {
   display: inline-flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
   align-items: center;
   gap: 6px;
   font-size: 14px;
@@ -282,7 +291,7 @@
 }
 
 .gradientText {
-  background: linear-gradient(100deg, var(--yellow) 0%, var(--lemon) 35%, var(--cyan) 100%);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -485,6 +494,9 @@
 .card[data-accent='orchid'] { --c: var(--orchid); }
 .card[data-accent='red'] { --c: var(--red); }
 .card[data-accent='teal'] { --c: var(--teal); }
+.card[data-accent='lime'] { --c: var(--lime); }
+.card[data-accent='amber'] { --c: var(--amber); }
+.card[data-accent='yellow'] { --c: var(--yellow); }
 
 .kicker {
   font-size: 12px;
@@ -944,6 +956,13 @@
     padding: 0 20px;
   }
 
+}
+
+@media (max-width: 420px) {
+  /* The nav has room for the app's name or "for UNA Watch", not both. */
+  .navInner .wordFor {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,15 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import styles from './race.module.css';
+import styles from '@/components/una-app/app-page.module.css';
+import {
+  AppFooter,
+  Arrow,
+  HYBRIDX_APP_URL,
+  HYBRIDX_URL,
+  UNA_URL,
+  UnaSection,
+  Wordmark,
+} from '@/components/una-app/Chrome';
 import LiveWatch from '@/components/race/LiveWatch';
 import RaceBuilder from '@/components/race/RaceBuilder';
 
@@ -11,8 +20,9 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  * Served at /race on hybridx.club and at the root of race.hybridx.club; the
  * middleware rewrites the subdomain's "/" here. Canonical is the subdomain.
  *
- * Standalone like the ATHX funnel: no site header or footer, its own CSS
- * module, dark whatever the site theme is. It sells two things at once — the
+ * Standalone like the ATHX funnel: no site header or footer, dark whatever
+ * the site theme is. Styles and the shared parts (wordmark, UNA section,
+ * footer) live in components/una-app/, shared with the Streak page. It sells two things at once — the
  * app, and the watch it runs on — and the second one quietly: UNA gets its own
  * section and every call to action that isn't "train with HybridX" goes to
  * unawatch.com.
@@ -20,13 +30,10 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  * Written for athletes, not developers: no SDK, FIT or simulator talk in the
  * visible copy.
  *
- * UNA's trademark notice (TRADEMARK.md in github.com/UNAWatch/una-sdk) allows
- * nominative use — "for UNA Watch" — but nothing implying endorsement,
- * sponsorship or affiliation. So there is no "HybridX × UNA" lockup: the brands
- * meet in UNA's palette (teal #358d98 from the SDK docs' own stylesheet) and in
- * UNA's product render in the hero, and the page always says "for UNA Watch".
- * The render carries the UNA logo, and the MIT licence on the SDK does not
- * cover logos, so that image needs UNA's permission before this goes live.
+ * Branding follows UNA's trademark notice; see components/una-app/Chrome.tsx.
+ * The hero's watch is UNA's product render, which carries the UNA logo; the
+ * MIT licence on the SDK does not cover logos, so that image needs UNA's
+ * permission before this goes live.
  *
  * Honesty constraints, all deliberate:
  *   - The app is not in the UNA store yet, so nothing here says "download".
@@ -41,9 +48,6 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  */
 
 const URL_CANONICAL = 'https://race.hybridx.club';
-const UNA_URL = 'https://unawatch.com';
-const HYBRIDX_URL = 'https://hybridx.club';
-const HYBRIDX_APP_URL = 'https://hybridx.club/app';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
 const DESCRIPTION =
@@ -142,26 +146,6 @@ const ROADMAP = [
   { tag: 'Later', title: 'Outdoor sims with GPS', body: 'Runs that end themselves at the set distance.' },
 ];
 
-function Arrow() {
-  return (
-    <svg className={styles.arrow} viewBox="0 0 16 16" aria-hidden="true">
-      <path d="M4.5 11.5l7-7M5.5 4.5h6v6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-// The app's own wordmark: HybridX's mark, "RACE", and a nominative "for UNA
-// Watch". Deliberately not a HybridX × UNA co-brand; see the note at the top.
-function Wordmark({ large = false }: { large?: boolean }) {
-  return (
-    <span className={`${styles.wordmark} ${large ? styles.wordmarkLarge : ''}`}>
-      <Image src="/Icon Logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
-      <span className={styles.wordRace}>Race</span>
-      <span className={styles.wordFor}>for UNA Watch</span>
-    </span>
-  );
-}
-
 export default function RacePage() {
   return (
     <div id="top" className={styles.page}>
@@ -178,7 +162,7 @@ export default function RacePage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <a href="#top" className={styles.brand} aria-label="HybridX Race for UNA Watch, back to top">
-            <Wordmark />
+            <Wordmark app="Race" />
           </a>
           <nav className={styles.navLinks} aria-label="Page">
             <a href="#format">The race</a>
@@ -326,55 +310,10 @@ export default function RacePage() {
           </div>
         </section>
 
-        {/* ── UNA ───────────────────────────────────────────────────────── */}
-        <section id="una" className={styles.section}>
-          <div className={styles.container}>
-            <div className={`${styles.unaPanel} ${styles.reveal}`}>
-              <div className={styles.unaCopy}>
-                <p className={styles.eyebrow}>Why UNA Watch</p>
-                <h2 className={styles.h2}>
-                  Built for a watch
-                  <br />
-                  you can fix.
-                </h2>
-                <p className={styles.sectionLead}>
-                  UNA Watch is the modular GPS sports watch from Scotland: a watch you can repair
-                  and upgrade rather than replace, open to apps made for the sport you actually
-                  do. HybridX Race is made for it from the ground up — a watch that lasts as long
-                  as your training does, running an app that understands your race.
-                </p>
-                <div className={styles.ctaRow}>
-                  <a href={UNA_URL} className={styles.btnTeal} target="_blank" rel="noopener">
-                    Explore UNA Watch <Arrow />
-                  </a>
-                </div>
-              </div>
-              <ul className={styles.unaPoints}>
-                <li>
-                  <span className={styles.unaIcon} aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z" /></svg>
-                  </span>
-                  <strong>Repairable</strong>
-                  <span>Designed to be opened and fixed, not replaced.</span>
-                </li>
-                <li>
-                  <span className={styles.unaIcon} aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><path d="M16.5 13v7M13 16.5h7" /></svg>
-                  </span>
-                  <strong>Modular</strong>
-                  <span>Hardware that upgrades with you.</span>
-                </li>
-                <li>
-                  <span className={styles.unaIcon} aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14" /></svg>
-                  </span>
-                  <strong>Made for your sport</strong>
-                  <span>Open to specialist apps like this one, not just the big names.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
+        <UnaSection
+          appName="HybridX Race"
+          pitch="a watch that lasts as long as your training does, running an app that understands your race."
+        />
 
         {/* ── Coaching loop ─────────────────────────────────────────────── */}
         <section className={styles.section}>
@@ -408,7 +347,7 @@ export default function RacePage() {
         {/* ── Final call ────────────────────────────────────────────────── */}
         <section className={styles.final}>
           <div className={styles.container}>
-            <Wordmark large />
+            <Wordmark app="Race" large />
             <h2 className={styles.finalTitle}>
               Race it on <span className={styles.gradientText}>UNA Watch.</span>
             </h2>
@@ -428,23 +367,7 @@ export default function RacePage() {
         </section>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={`${styles.container} ${styles.footerInner}`}>
-          <p>
-            HybridX Race is an independent app for UNA Watch, made by{' '}
-            <a href={HYBRIDX_URL}>HybridX</a>. It is not made, endorsed or sponsored by UNA Watch
-            Ltd or by HYROX. UNA and UNA Watch are trademarks of UNA Watch Ltd; HYROX is a
-            trademark of its owner.
-          </p>
-          <nav className={styles.footerLinks} aria-label="Footer">
-            <a href={HYBRIDX_URL}>hybridx.club</a>
-            <a href={UNA_URL} target="_blank" rel="noopener">
-              unawatch.com
-            </a>
-            <a href={`${HYBRIDX_URL}/privacy-policy`}>Privacy</a>
-          </nav>
-        </div>
-      </footer>
+      <AppFooter appName="HybridX Race" mentionsHyrox />
     </div>
   );
 }

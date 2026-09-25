@@ -1,0 +1,225 @@
+/* "Try a week", in the Streak palette (see app/streak/streak.module.css). */
+
+.planner,
+.planner * {
+  box-sizing: border-box;
+}
+
+.planner {
+  --lime: #b6f23d;
+  --amber: #f5a524;
+  --cyan: #5ce8f0;
+  --teal: #358d98;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+}
+
+.controls {
+  display: grid;
+  gap: 22px;
+}
+
+.control {
+  display: grid;
+  gap: 10px;
+}
+
+.controlLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8f8f8f;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stepper button {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.stepper button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.stepper output {
+  min-width: 44px;
+  text-align: center;
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.day:hover {
+  color: #fff;
+}
+
+.dayOn {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+/* ── The readout: the home screen's lower half, on a round face ───────── */
+
+.readout {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.face {
+  width: min(300px, 70vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: #000;
+  box-shadow:
+    0 0 0 10px #151719,
+    0 0 0 11px rgba(255, 255, 255, 0.12),
+    0 30px 60px -20px rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
+
+.pipsRow {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  color: #fff;
+}
+
+.pips {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transition: background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.done {
+  background: var(--lime);
+  transform: scale(1.05);
+}
+
+.todo {
+  border: 2px solid #8a8a8a;
+}
+
+.bonus {
+  background: var(--cyan);
+  width: 12px;
+  height: 12px;
+  align-self: center;
+}
+
+.thisWeek {
+  white-space: nowrap;
+}
+
+.coach {
+  margin: 0;
+  font-size: 17px;
+  color: #a8a8a8;
+  min-height: 1.4em;
+}
+
+.face[data-mood='done'] .coach {
+  color: var(--lime);
+}
+
+.face[data-mood='atRisk'] .coach {
+  color: var(--amber);
+}
+
+.moodTag {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a3a3a3;
+}
+
+.moodTag[data-mood='done'] {
+  color: var(--lime);
+}
+
+.moodTag[data-mood='atRisk'] {
+  color: var(--amber);
+}
+
+.moodDetail {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #6f6f6f;
+}
+
+@media (max-width: 760px) {
+  .planner {
+    grid-template-columns: 1fr;
+  }
+
+  .readout {
+    order: -1;
+  }
+}

@@ -1,0 +1,143 @@
+/*
+ * src/app/streak/streak.module.css
+ *
+ * The Streak page's own parts, on top of the shared look in
+ * components/una-app/app-page.module.css. The app's palette is teal and lime:
+ * lime means "you did it", as on the watch (DESIGN.md §2).
+ */
+
+/* Doubled class so the retint wins whatever order the two sheets load in. */
+.theme.theme {
+  --accent-gradient: linear-gradient(100deg, var(--lime) 0%, #7fe3a6 50%, var(--teal-light) 100%);
+}
+
+/* ── How it works ─────────────────────────────────────────────────────── */
+
+.steps {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(53, 141, 152, 0.14), transparent 60%),
+    var(--panel);
+}
+
+.step p {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.stepNum {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--lime);
+}
+
+.tryPanel {
+  margin-top: 8px;
+}
+
+.panelTitle {
+  font-family: var(--display);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+}
+
+.panelTitle span {
+  color: var(--dim);
+}
+
+/* ── Shields ──────────────────────────────────────────────────────────── */
+
+.trio {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 48px);
+}
+
+.trio li {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  text-align: center;
+}
+
+.trio li > div {
+  width: min(260px, 100%);
+}
+
+/* ── The glance sketch ────────────────────────────────────────────────── */
+
+.glance {
+  align-self: start;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: min(440px, 100%);
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.9);
+}
+
+.glanceMark {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+}
+
+.glanceText {
+  display: grid;
+  gap: 2px;
+}
+
+.glanceText strong {
+  font-family: var(--display);
+  font-size: 24px;
+  line-height: 1.15;
+  color: #2fe04a;
+}
+
+.glanceText span {
+  font-size: 18px;
+  color: #fff;
+}
+
+.glanceText small {
+  font-size: 13px;
+  color: #a8a8a8;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .steps,
+  .trio {
+    grid-template-columns: 1fr;
+  }
+
+  .trio li > div {
+    width: min(240px, 70vw);
+  }
+}
