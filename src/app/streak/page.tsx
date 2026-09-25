@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { Fraunces, IBM_Plex_Mono } from 'next/font/google';
 import base from '@/components/una-app/app-page.module.css';
 import {
   AppFooter,
@@ -13,6 +14,7 @@ import {
 import StreakWatch from '@/components/streak/StreakWatch';
 import WeekPlanner from '@/components/streak/WeekPlanner';
 import ClimbLadder from '@/components/streak/ClimbLadder';
+import { Contours, Peak, Ridges, Stars } from '@/components/streak/Terrain';
 import { BADGES, DEFAULT_MIN_MINUTES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
 import styles from './streak.module.css';
 
@@ -24,9 +26,18 @@ import styles from './streak.module.css';
  * the middleware rewrites the subdomain's "/" here. Canonical is the
  * subdomain.
  *
- * The Race page's sibling: same shared look and parts (components/una-app/),
- * retinted to the Streak app's own teal and lime (streak.module.css). Written
- * for athletes, not developers.
+ * The Race page's sibling, deliberately not its twin. They share the
+ * HybridX mark, UNA's teal, the watch render, the UNA section and the footer
+ * (components/una-app/). Everything else is Streak's own, and mountaineering:
+ *   - an alpine night-to-dawn palette (navy, snow, glacier teal, summit lime)
+ *     where Race is black and neon;
+ *   - Fraunces, an editorial serif, for headlines where Race uses Space
+ *     Grotesk, and IBM Plex Mono for trail-map labels;
+ *   - ridges, contour lines and stars where Race has a grid and a glow;
+ *   - a centred hero rising over the ridges, a route down the page with camps
+ *     as section markers, a kit list, a grid of screens, and a sunrise at the
+ *     summit — where Race has a split hero, a bento and a scrolling strip.
+ * Written for athletes, not developers.
  *
  * Every rule the page states — the mountains, shields, badges, the coach's
  * words — comes from lib/streak-content.ts, which mirrors the watch app, and
@@ -91,61 +102,68 @@ const appSchema = {
   publisher: { '@type': 'Organization', name: 'HybridX', url: HYBRIDX_URL },
 };
 
+// Streak's own type: an editorial serif for headlines, a mono for map labels.
+const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-plex-mono',
+  display: 'swap',
+});
+
 const STEPS = [
   {
-    n: '01',
     title: 'Set your week',
     body: 'Choose how many sessions make a week, from one to seven — three to start. Pick the day your week begins, and whether everything counts or just one kind of training.',
   },
   {
-    n: '02',
     title: 'Just train',
     body: `Run, ride, lift, row, race. Every session your watch records counts by itself — anything over ${DEFAULT_MIN_MINUTES} minutes, so an accidental start never does. Trained without the watch? Add it by hand.`,
   },
   {
-    n: '03',
     title: 'Climb',
     body: 'Hit your target and the week is banked: one step up the mountain. Keep going, and the steps add up to summits.',
   },
 ];
 
-const FEATURES = [
+// The kit list. Icons are simple line drawings in the page's own stroke.
+const KIT = [
   {
-    kicker: 'Every app counts',
-    title: 'Whatever recorded it',
+    title: 'Every app counts',
     body: 'A run from one app, a strength session from another, a race from HybridX Race. If your watch recorded it, it counts towards your week.',
-    accent: 'cyan',
+    icon: <path d="M4 7h16M4 12h16M4 17h10" />,
   },
   {
-    kicker: 'Your coach',
-    title: 'Always on your side',
+    title: 'A coach on your side',
     body: '“1 more · 3 days left.” “Week banked. Rest up.” Short, warm, and it tells you what’s left. Never a telling-off.',
-    accent: 'amber',
+    icon: <path d="M4 5h16v10H9l-5 4z" />,
   },
   {
-    kicker: 'Leave one out',
-    title: 'Oops, that was the warm-up',
+    title: 'Leave one out',
     body: 'Started a recording by accident? Leave it out of your week in two presses, and put it back just as easily.',
-    accent: 'lime',
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M8 12h8" />
+      </>
+    ),
   },
   {
-    kicker: 'Trophy case',
-    title: 'Everything you’ve earned',
+    title: 'A trophy case',
     body: `Every summit, badges from ${BADGES[0].name} at ${BADGES[0].sessions} sessions to ${BADGES[BADGES.length - 1].name} at ${BADGES[BADGES.length - 1].sessions}, your best week and your longest streak.`,
-    accent: 'yellow',
+    icon: <path d="M8 4h8v5a4 4 0 0 1-8 0zM12 13v4M8 20h8M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4" />,
   },
   {
-    kicker: 'Your rules',
-    title: 'Set it up your way',
+    title: 'Your rules',
     body: 'Your target, the day your week starts, what counts, the shortest session that counts, and one a day if you’d rather. A new target starts next week, never mid-week.',
-    accent: 'teal',
+    icon: <path d="M5 6h14M5 12h14M5 18h14M9 4v4M15 10v4M11 16v4" />,
   },
 ];
 
 const SHIELD_SCREENS = [
-  { src: '/streak/shield-offer.png', title: 'Life happens.', caption: 'Missed a week? The watch offers a shield. Spend it, or don’t — your call.' },
-  { src: '/streak/streak-saved.png', title: 'Streak saved.', caption: 'The streak carries on as if the week never slipped.' },
-  { src: '/streak/fresh-start.png', title: 'Fresh start.', caption: 'No shields left? No scolding. It tells you what you kept, and starts again today.' },
+  { tag: 'Missed a week', src: '/streak/shield-offer.png', title: 'Life happens.', caption: 'The watch offers a shield. Spend it, or don’t — your call.' },
+  { tag: 'Spend a shield', src: '/streak/streak-saved.png', title: 'Streak saved.', caption: 'The streak carries on as if the week never slipped.' },
+  { tag: 'Or start fresh', src: '/streak/fresh-start.png', title: 'Fresh start.', caption: 'No scolding. It tells you what you kept, and starts again today.' },
 ];
 
 const SCREENS = [
@@ -156,6 +174,24 @@ const SCREENS = [
   { src: '/streak/settings.png', title: 'Settings', caption: 'Your target, your week, your rules.' },
   { src: '/streak/summit.png', title: 'Summit', caption: 'Reach the top and the whole screen celebrates.' },
 ];
+
+// The hero's ridges: far and mid behind the watch, near in front of its strap.
+const RIDGES_BACK = [
+  { seed: 11, baseY: 120, amp: 70, fill: '#10283d' },
+  { seed: 23, baseY: 170, amp: 60, fill: '#0c1f31' },
+];
+const RIDGES_FRONT = [{ seed: 37, baseY: 190, amp: 40, fill: '#07111c' }];
+
+/** A camp on the route: the section's marker on the trail, and its name. */
+function Camp({ camp, label }: { camp: string; label: string }) {
+  return (
+    <p className={styles.camp}>
+      <span className={styles.campPin} aria-hidden="true" />
+      <span className={styles.campName}>{camp}</span>
+      <span className={styles.campLabel}>{label}</span>
+    </p>
+  );
+}
 
 // A sketch of the glance, the small card on the watch's glances screen. The
 // wording and layout follow the app's own glance (DESIGN.md §8).
@@ -179,14 +215,12 @@ function GlanceCard() {
 
 export default function StreakPage() {
   return (
-    <div id="top" className={`${base.page} ${styles.theme}`}>
+    <div id="top" className={`${base.page} ${styles.theme} ${fraunces.variable} ${plexMono.variable}`}>
       <script
         id="streak-app-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
       />
-
-      <div className={base.aurora} aria-hidden="true" />
       <div className={base.grain} aria-hidden="true" />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
@@ -208,211 +242,205 @@ export default function StreakPage() {
       </header>
 
       <main>
-        {/* ── Hero ──────────────────────────────────────────────────────── */}
-        <section className={base.hero}>
-          <div className={base.container}>
-            <div className={base.heroGrid}>
-              <div>
-                <p className={base.pill}>
-                  <span className={base.pulse} aria-hidden="true" />
-                  Coming to UNA Watch
+        {/* ── Hero: a night sky, and the watch rising over the ridges ──── */}
+        <section className={styles.hero}>
+          <Stars className={styles.stars} />
+          <Contours className={styles.heroContours} />
+          <div className={`${base.container} ${styles.heroCopy}`}>
+            <p className={base.pill}>
+              <span className={base.pulse} aria-hidden="true" />
+              Coming to UNA Watch
+            </p>
+            <h1 className={styles.h1}>
+              Build your streak <em>with UNA</em>
+            </h1>
+            <p className={styles.lead}>
+              HybridX Streak counts your training in weeks, not days. Set your own target — three
+              sessions a week, say — and every session your watch records counts by itself. Hit your
+              target, and you take a step up the mountain.
+            </p>
+            <div className={`${base.ctaRow} ${styles.center}`}>
+              <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">
+                Discover UNA Watch <Arrow />
+              </a>
+              <a href="#how" className={base.btnGhost}>
+                See how it works
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.heroScene}>
+            <Ridges className={styles.ridgesBack} layers={RIDGES_BACK} />
+            <div className={styles.heroWatch}>
+              <StreakWatch />
+            </div>
+            <Ridges className={styles.ridgesFront} layers={RIDGES_FRONT} />
+          </div>
+          <p className={styles.heroNote}>The app’s own screens: a few months, in forty seconds.</p>
+        </section>
+
+        {/* ── The route: each section is a camp on the way up ─────────── */}
+        <div className={styles.route}>
+          <section id="how" className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Base camp" label="How it works" />
+                <h2 className={styles.h2}>
+                  Most streaks want every day. <em>This one wants your week.</em>
+                </h2>
+                <p className={styles.sectionLead}>
+                  Training three or four times a week is a great habit, and a daily streak punishes
+                  it. HybridX Streak counts the weeks you hit your own target, so rest days are part
+                  of the plan, not a threat to it.
                 </p>
-                <h1 className={base.h1}>
-                  Build your streak <span className={base.gradientText}>with UNA</span>
-                </h1>
-                <p className={base.lead}>
-                  HybridX Streak counts your training in weeks, not days. Set your own target —
-                  three sessions a week, say — and every session your watch records counts by
-                  itself. Hit your target, and you take a step up the mountain.
-                </p>
-                <div className={base.ctaRow}>
-                  <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">
-                    Discover UNA Watch <Arrow />
-                  </a>
-                  <a href="#how" className={base.btnGhost}>
-                    See how it works
-                  </a>
-                </div>
               </div>
 
-              <div className={base.heroWatch}>
-                <div className={base.watchHalo} aria-hidden="true" />
-                <div className={base.watchFloat}>
-                  <StreakWatch />
-                </div>
-                <p className={base.watchNote}>The app’s own screens: a few months, in forty seconds.</p>
+              <ol className={styles.trail}>
+                {STEPS.map((s, i) => (
+                  <li key={s.title} className={base.reveal}>
+                    <span className={styles.trailMark} aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <h3 className={styles.h3}>{s.title}</h3>
+                    <p>{s.body}</p>
+                  </li>
+                ))}
+              </ol>
+
+              <div className={`${styles.mapPanel} ${base.reveal}`}>
+                <Contours className={styles.panelContours} rings={8} />
+                <p className={styles.panelTitle}>
+                  Try a week. <em>The watch always tells you what’s left.</em>
+                </p>
+                <WeekPlanner />
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── How it works ──────────────────────────────────────────────── */}
-        <section id="how" className={base.section}>
-          <div className={base.container}>
-            <div className={base.sectionHead}>
-              <p className={base.eyebrow}>How it works</p>
-              <h2 className={base.h2}>
-                Most streaks want every day.
-                <span className={base.dim}> This one wants your week.</span>
-              </h2>
-              <p className={base.sectionLead}>
-                Training three or four times a week is a great habit, and a daily streak punishes
-                it. HybridX Streak counts the weeks you hit your own target, so rest days are part
-                of the plan, not a threat to it.
-              </p>
+          <section id="climb" className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Camp I" label="The climb" />
+                <h2 className={styles.h2}>
+                  Every week you hit is a step up. <em>A missed week never takes you back down.</em>
+                </h2>
+                <p className={styles.sectionLead}>
+                  Your weeks add up to five mountains, from Arthur’s Seat to Everest. Your streak
+                  counts the weeks in a row; your climb counts every week you’ve ever completed. A
+                  tough month can end a streak, but it can’t take a summit away.
+                </p>
+              </div>
+              <div className={`${styles.mapPanel} ${base.reveal}`}>
+                <ClimbLadder />
+              </div>
             </div>
+          </section>
 
-            <ol className={styles.steps}>
-              {STEPS.map((s) => (
-                <li key={s.n} className={`${styles.step} ${base.reveal}`}>
-                  <span className={styles.stepNum}>{s.n}</span>
-                  <h3 className={base.h3}>{s.title}</h3>
-                  <p>{s.body}</p>
-                </li>
-              ))}
-            </ol>
-
-            <div className={`${base.glassPanel} ${styles.tryPanel} ${base.reveal}`}>
-              <p className={styles.panelTitle}>
-                Try a week. <span>The watch always tells you what’s left.</span>
-              </p>
-              <WeekPlanner />
+          <section className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Camp II" label="Shields" />
+                <h2 className={styles.h2}>
+                  Life happens. <em>Your streak can survive it.</em>
+                </h2>
+                <p className={styles.sectionLead}>
+                  Every {SHIELD_EVERY} weeks you complete earns a shield, and you can hold{' '}
+                  {MAX_SHIELDS === 2 ? 'two' : MAX_SHIELDS}. Miss a week and the watch asks whether
+                  to spend one. It’s always your choice, never automatic. Out of shields? It’s a
+                  fresh start, and your climb is kept.
+                </p>
+              </div>
+              <ol className={styles.shields}>
+                {SHIELD_SCREENS.map((s) => (
+                  <li key={s.src} className={base.reveal}>
+                    <span className={styles.shieldTag}>{s.tag}</span>
+                    <div className={styles.dial}>
+                      <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} />
+                    </div>
+                    <h3 className={styles.h3}>{s.title}</h3>
+                    <p>{s.caption}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── The climb ─────────────────────────────────────────────────── */}
-        <section id="climb" className={base.section}>
-          <div className={base.container}>
-            <div className={base.sectionHead}>
-              <p className={base.eyebrow}>The climb</p>
-              <h2 className={base.h2}>
-                Every week you hit is a step up.
-                <span className={base.dim}> A missed week never takes you back down.</span>
-              </h2>
-              <p className={base.sectionLead}>
-                Your weeks add up to five mountains, from Arthur’s Seat to Everest. Your streak
-                counts the weeks in a row; your climb counts every week you’ve ever completed. A
-                tough month can end a streak, but it can’t take a summit away.
-              </p>
-            </div>
-            <div className={`${base.glassPanel} ${base.reveal}`}>
-              <ClimbLadder />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Shields ───────────────────────────────────────────────────── */}
-        <section className={base.section}>
-          <div className={base.container}>
-            <div className={base.sectionHead}>
-              <p className={base.eyebrow}>Shields</p>
-              <h2 className={base.h2}>
-                Life happens.
-                <span className={base.dim}> Your streak can survive it.</span>
-              </h2>
-              <p className={base.sectionLead}>
-                Every {SHIELD_EVERY} weeks you complete earns a shield, and you can hold{' '}
-                {MAX_SHIELDS === 2 ? 'two' : MAX_SHIELDS}. Miss a week and the watch asks whether
-                to spend one. It’s always your choice, never automatic. Out of shields? It’s a fresh
-                start, and your climb is kept.
-              </p>
-            </div>
-            <ol className={styles.trio}>
-              {SHIELD_SCREENS.map((s) => (
-                <li key={s.src} className={base.reveal}>
-                  <div className={base.screenDial}>
-                    <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} className={base.screenImg} />
-                  </div>
-                  <p className={base.screenTitle}>{s.title}</p>
-                  <p className={base.screenCaption}>{s.caption}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* ── Features ──────────────────────────────────────────────────── */}
-        <section id="features" className={base.section}>
-          <div className={base.container}>
-            <div className={base.sectionHead}>
-              <p className={base.eyebrow}>Made for real training weeks</p>
-              <h2 className={base.h2}>
-                The details that <span className={base.nowrap}>keep you going.</span>
-              </h2>
-            </div>
-
-            <div className={base.bento}>
-              <article className={`${base.card} ${base.cardWide} ${base.reveal}`} data-accent="lime">
-                <div className={base.cardCopy}>
-                  <p className={base.kicker}>At a glance</p>
-                  <h3 className={base.h3}>Your week, without opening a thing</h3>
+          <section id="kit" className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Camp III" label="Kit list" />
+                <h2 className={styles.h2}>
+                  Packed for real training weeks. <em>Nothing you don’t need.</em>
+                </h2>
+              </div>
+              <div className={styles.kitGrid}>
+                <div className={`${styles.kitFeature} ${base.reveal}`}>
+                  <p className={styles.kitKicker}>At a glance</p>
+                  <h3 className={styles.h3}>Your week, without opening a thing</h3>
                   <p>
                     HybridX Streak sits on your watch’s glances screen too: your streak, this
-                    week’s sessions, and what’s next, right where you check the time.
+                    week’s sessions and what’s next, right where you check the time.
                   </p>
+                  <GlanceCard />
                 </div>
-                <GlanceCard />
-              </article>
-
-              {FEATURES.map((f) => (
-                <article key={f.title} className={`${base.card} ${base.reveal}`} data-accent={f.accent}>
-                  <p className={base.kicker}>{f.kicker}</p>
-                  <h3 className={base.h3}>{f.title}</h3>
-                  <p>{f.body}</p>
-                </article>
-              ))}
+                <ul className={styles.kit}>
+                  {KIT.map((k) => (
+                    <li key={k.title} className={base.reveal}>
+                      <svg viewBox="0 0 24 24" className={styles.kitIcon} aria-hidden="true">
+                        {k.icon}
+                      </svg>
+                      <div>
+                        <h3 className={styles.kitTitle}>{k.title}</h3>
+                        <p>{k.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── Screens ───────────────────────────────────────────────────── */}
-        <section id="screens" className={base.section}>
-          <div className={base.container}>
-            <div className={base.sectionHead}>
-              <p className={base.eyebrow}>On the wrist</p>
-              <h2 className={base.h2}>
-                One mountain.
-                <span className={base.dim}> Everything else, one press away.</span>
-              </h2>
+          <section id="screens" className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Camp IV" label="On the wrist" />
+                <h2 className={styles.h2}>
+                  One mountain. <em>Everything else, one press away.</em>
+                </h2>
+              </div>
+              <ol className={styles.screens}>
+                {SCREENS.map((s) => (
+                  <li key={s.src} className={base.reveal}>
+                    <div className={styles.dial}>
+                      <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} />
+                    </div>
+                    <h3 className={styles.h3}>{s.title}</h3>
+                    <p>{s.caption}</p>
+                  </li>
+                ))}
+              </ol>
+              <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
             </div>
-          </div>
-          <ol className={base.screens}>
-            {SCREENS.map((s, i) => (
-              <li key={s.src} className={base.screen}>
-                <div className={base.screenDial}>
-                  <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} className={base.screenImg} />
-                </div>
-                <p className={base.screenTitle}>
-                  <span className={base.screenNum}>{String(i + 1).padStart(2, '0')}</span>
-                  {s.title}
-                </p>
-                <p className={base.screenCaption}>{s.caption}</p>
-              </li>
-            ))}
-          </ol>
-          <div className={base.container}>
-            <p className={base.footnote}>Pre-release screens. The finished app may differ slightly.</p>
-          </div>
-        </section>
+          </section>
+        </div>
 
         <UnaSection
           appName="HybridX Streak"
           pitch="a watch built to last for years, keeping a streak that can last for years too."
         />
 
-        {/* ── Final call ────────────────────────────────────────────────── */}
-        <section className={base.final}>
-          <div className={base.container}>
-            <Wordmark app="Streak" large />
-            <h2 className={base.finalTitle}>
-              Start climbing <span className={base.gradientText}>with UNA.</span>
+        {/* ── Summit: the sky warms to dawn ─────────────────────────────── */}
+        <section className={styles.summit}>
+          <div className={`${base.container} ${styles.summitCopy}`}>
+            <p className={styles.campSummit}>Summit</p>
+            <h2 className={styles.summitTitle}>
+              Start climbing <em>with UNA.</em>
             </h2>
-            <p className={base.finalLead}>
+            <p className={styles.lead}>
               HybridX Streak is coming to the UNA app store. Get the watch, and your first week
               starts the day you install it.
             </p>
-            <div className={`${base.ctaRow} ${base.ctaCenter}`}>
+            <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">
                 Get UNA Watch <Arrow />
               </a>
@@ -420,7 +448,11 @@ export default function StreakPage() {
                 Train with HybridX
               </a>
             </div>
+            <div className={styles.summitMark}>
+              <Wordmark app="Streak" large />
+            </div>
           </div>
+          <Peak className={styles.peak} />
         </section>
       </main>
 

@@ -16,7 +16,7 @@
   width: 100%;
   height: auto;
   border-radius: 20px;
-  background: radial-gradient(120% 90% at 50% 0%, #0b1416 0%, #000 70%);
+  background: linear-gradient(180deg, #050c15 0%, #0a1a2a 100%);
 }
 
 .halo {
@@ -51,8 +51,8 @@
 }
 
 .names strong {
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
-  font-size: 15px;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 16px;
   color: #8f8f8f;
 }
 
@@ -69,6 +69,13 @@
   color: #a3a3a3;
 }
 
+.names small {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #647a8b;
+}
+
 .control {
   display: grid;
   gap: 12px;
@@ -78,16 +85,17 @@
 }
 
 .label {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8f8f8f;
+  color: #76b7c1;
 }
 
 .label output {
   margin-left: 8px;
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 20px;
   letter-spacing: 0;
   color: #fff;
@@ -102,8 +110,10 @@
 
 .line {
   margin: 0;
-  font-size: 18px;
-  color: #d4d4d4;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 20px;
+  font-style: italic;
+  color: #eef4f8;
 }
 
 @media (max-width: 640px) {

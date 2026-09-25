@@ -1,126 +1,528 @@
 /*
  * src/app/streak/streak.module.css
  *
- * The Streak page's own parts, on top of the shared look in
- * components/una-app/app-page.module.css. The app's palette is teal and lime:
- * lime means "you did it", as on the watch (DESIGN.md §2).
+ * HybridX Streak's own look: an alpine night that warms to dawn at the
+ * summit. It sits on top of the shared components/una-app/app-page.module.css
+ * (used for the nav, buttons, UNA section and footer) and retints that sheet
+ * through its theme hooks; everything else on the page is drawn from here.
+ *
+ * Palette: night navy, snow, glacier teal (UNA's), and lime — which, as on
+ * the watch, means "you did it" (DESIGN.md §2). Dawn amber and rose appear
+ * only at the summit.
  */
 
 /* Doubled class so the retint wins whatever order the two sheets load in. */
 .theme.theme {
-  --accent-gradient: linear-gradient(100deg, var(--lime) 0%, #7fe3a6 50%, var(--teal-light) 100%);
+  --bg: #07111c;
+  --night: #050c15;
+  --ridge: #0c1f31;
+  --panel: rgba(150, 200, 225, 0.045);
+  --line: rgba(170, 210, 230, 0.14);
+  --text: #eef4f8;
+  --muted: #9db0bf;
+  --dim: #647a8b;
+  --snow: #eef4f8;
+  --glacier: #76b7c1;
+  --dawn: #ff9d5c;
+  --rose: #e98aa0;
+
+  --display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  --mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --brand: var(--lime);
+  --brand-ink: #0d1a05;
+  --brand-glow: rgba(182, 242, 61, 0.4);
+  --brand-soft: rgba(182, 242, 61, 0.16);
+  --nav-bg: rgba(7, 17, 28, 0.72);
+  --accent-gradient: linear-gradient(100deg, var(--lime) 0%, var(--teal-lighter) 100%);
 }
 
-/* ── How it works ─────────────────────────────────────────────────────── */
+.center {
+  justify-content: center;
+}
 
-.steps {
+/* ── Type ─────────────────────────────────────────────────────────────── */
+
+.h1,
+.h2,
+.h3,
+.summitTitle {
+  font-family: var(--display);
+  font-weight: 600;
+  color: var(--snow);
+  margin: 0;
+}
+
+/* The second half of a headline: italic, in glacier teal. */
+.h1 em,
+.h2 em,
+.summitTitle em,
+.panelTitle em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--glacier);
+}
+
+.h1 {
+  font-size: clamp(44px, 6.2vw, 84px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 auto 20px;
+  max-width: 13ch;
+}
+
+.h1 em {
+  display: block;
+  color: var(--lime);
+}
+
+.h2 {
+  font-size: clamp(30px, 4vw, 50px);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+.h2 em {
+  display: block;
+}
+
+.h3 {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.lead {
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 36em;
+  margin: 0 auto;
+}
+
+.sectionLead {
+  margin-top: 18px;
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 40em;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(32px, 4.5vw, 64px);
+  background: linear-gradient(180deg, var(--night) 0%, #081624 55%, var(--bg) 100%);
+  text-align: center;
+}
+
+.stars {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 70%;
+  pointer-events: none;
+}
+
+.stars circle[data-twinkle] {
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+.stars circle[data-twinkle]:nth-of-type(3n) {
+  animation-delay: 1.3s;
+}
+
+.heroContours {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: rgba(118, 183, 193, 0.07);
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroScene {
+  position: relative;
+  margin-top: clamp(24px, 3.5vw, 40px);
+  display: flex;
+  justify-content: center;
+}
+
+.ridgesBack,
+.ridgesFront {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.ridgesBack {
+  bottom: 0;
+  height: 62%;
+}
+
+.ridgesFront {
+  bottom: 0;
+  height: 20%;
+  z-index: 2;
+}
+
+.heroWatch {
+  position: relative;
+  z-index: 1;
+  width: min(330px, 70vw);
+  /* The near ridge (in front) hides the lower strap, so the watch rises over it. */
+}
+
+.heroNote {
+  position: relative;
+  z-index: 3;
+  margin: 0;
+  padding: 8px 16px 48px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+
+/* ── The route: a trail down the page, with a camp at each section ────── */
+
+.route {
+  position: relative;
+}
+
+.route::before {
+  /* The trail: dashed, in the left margin, only where there's room for it. */
+  content: '';
+  position: absolute;
+  top: 40px;
+  bottom: 80px;
+  left: calc((100% - 1180px) / 2 - 40px);
+  border-left: 2px dashed rgba(118, 183, 193, 0.28);
+  display: none;
+}
+
+.section {
+  position: relative;
+  padding: clamp(56px, 7vw, 96px) 0;
+}
+
+.head {
+  position: relative;
+  max-width: 800px;
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.camp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.campPin {
+  display: none;
+}
+
+.campName {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+.campLabel {
+  color: var(--glacier);
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+@media (min-width: 1320px) {
+  .route::before {
+    display: block;
+  }
+
+  .campPin {
+    display: block;
+    position: absolute;
+    left: -48px;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--lime);
+    box-shadow: 0 0 0 5px rgba(182, 242, 61, 0.12);
+  }
+}
+
+/* ── Base camp: the three steps, as a trail ───────────────────────────── */
+
+.trail {
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0 0 28px;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 32px;
+  position: relative;
 }
 
-.step {
+.trail::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  right: 22px;
+  border-top: 2px dashed rgba(118, 183, 193, 0.35);
+}
+
+.trail li {
   position: relative;
   display: grid;
   align-content: start;
   gap: 10px;
-  padding: 28px;
-  border-radius: 24px;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(120% 80% at 0% 0%, rgba(53, 141, 152, 0.14), transparent 60%),
-    var(--panel);
 }
 
-.step p {
+.trail p {
+  margin: 0;
   color: var(--muted);
   font-size: 15px;
 }
 
-.stepNum {
-  font-family: var(--display);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+.trailMark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--lime);
   color: var(--lime);
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 15px;
 }
 
-.tryPanel {
-  margin-top: 8px;
+/* ── Map panels: a topographic card for the interactive pieces ────────── */
+
+.mapPanel {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(22px, 3vw, 36px);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #0b1a29 0%, #09151f 100%);
+  box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.9);
+}
+
+.mapPanel > * {
+  position: relative;
+}
+
+.panelContours {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: rgba(118, 183, 193, 0.08);
+  pointer-events: none;
 }
 
 .panelTitle {
   font-family: var(--display);
   font-size: clamp(20px, 2.2vw, 26px);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 24px;
+  font-weight: 600;
+  margin: 0 0 24px;
 }
 
-.panelTitle span {
-  color: var(--dim);
-}
+/* ── Camp II: shields, as a small flow ────────────────────────────────── */
 
-/* ── Shields ──────────────────────────────────────────────────────────── */
-
-.trio {
+.shields {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(20px, 4vw, 48px);
+  counter-reset: shield;
 }
 
-.trio li {
+.shields li {
   display: grid;
   align-content: start;
   justify-items: center;
+  gap: 10px;
   text-align: center;
 }
 
-.trio li > div {
-  width: min(260px, 100%);
+.shields p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 26em;
+}
+
+.shieldTag {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glacier);
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+/* A watch face with a thin snow rim and a glacier glow. */
+.dial {
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 6px;
+  margin-bottom: 8px;
+  background: linear-gradient(160deg, rgba(238, 244, 248, 0.5), rgba(118, 183, 193, 0.15) 45%, rgba(238, 244, 248, 0.25));
+  box-shadow: 0 20px 50px -20px rgba(53, 141, 152, 0.55);
+  transition: transform 250ms ease;
+}
+
+.dial img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #000;
+}
+
+.shields li:hover .dial,
+.screens li:hover .dial {
+  transform: translateY(-4px);
+}
+
+/* ── Camp III: the kit list ───────────────────────────────────────────── */
+
+.kitGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: start;
+}
+
+.kitFeature {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 14px;
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 18px;
+  border: 1px solid rgba(182, 242, 61, 0.25);
+  background:
+    radial-gradient(90% 70% at 0% 0%, rgba(182, 242, 61, 0.08), transparent 60%),
+    #0a1826;
+}
+
+.kitFeature p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.kitKicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lime) !important;
+}
+
+.kit {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kit li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 18px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.kit li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.kit p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.kitIcon {
+  width: 26px;
+  height: 26px;
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--glacier);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kitTitle {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--snow);
 }
 
 /* ── The glance sketch ────────────────────────────────────────────────── */
 
 .glance {
-  align-self: start;
   display: flex;
   align-items: center;
   gap: 18px;
-  width: min(440px, 100%);
+  margin-top: 8px;
   padding: 18px 22px;
-  border-radius: 18px;
+  border-radius: 14px;
   background: #000;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.9);
 }
 
 .glanceMark {
   flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
 }
 
 .glanceText {
   display: grid;
   gap: 2px;
+  text-align: left;
 }
 
 .glanceText strong {
-  font-family: var(--display);
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.15;
   color: #2fe04a;
 }
 
 .glanceText span {
-  font-size: 18px;
+  font-size: 17px;
   color: #fff;
 }
 
@@ -129,15 +531,171 @@
   color: #a8a8a8;
 }
 
+/* ── Camp IV: the screens, as a grid ──────────────────────────────────── */
+
+.screens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 40px);
+}
+
+.screens li {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  text-align: center;
+}
+
+.screens p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 24em;
+}
+
+.footnote {
+  margin: 32px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* ── Summit: the sky warms to dawn ────────────────────────────────────── */
+
+.summit {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(80px, 10vw, 140px);
+  text-align: center;
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    #0d1d33 30%,
+    #2a2745 55%,
+    #6b3f55 72%,
+    #c86a5a 86%,
+    var(--dawn) 100%
+  );
+}
+
+.summitCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.campSummit {
+  margin: 0 0 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.summitTitle {
+  font-size: clamp(48px, 8vw, 104px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin-bottom: 22px;
+}
+
+.summitTitle em {
+  color: var(--snow);
+}
+
+.summit .lead {
+  color: #c8d4de;
+}
+
+.summitMark {
+  margin-top: 48px;
+}
+
+.peak {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: clamp(180px, 26vw, 360px);
+  margin-top: -40px;
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────── */
+
+@keyframes twinkle {
+  50% {
+    opacity: 0.1;
+  }
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
 @media (max-width: 860px) {
-  .steps,
-  .trio {
+  .kitFeature {
+    position: static;
+  }
+
+  .trail,
+  .shields,
+  .kitGrid {
     grid-template-columns: 1fr;
   }
 
-  .trio li > div {
-    width: min(240px, 70vw);
+  .trail::before {
+    top: 22px;
+    bottom: 22px;
+    left: 21px;
+    right: auto;
+    border-top: 0;
+    border-left: 2px dashed rgba(118, 183, 193, 0.35);
+  }
+
+  .trail li {
+    padding-left: 64px;
+  }
+
+  .trailMark {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .screens {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dial {
+    width: min(220px, 100%);
+  }
+}
+
+@media (max-width: 480px) {
+  .screens {
+    gap: 28px 14px;
+  }
+
+  .screens p {
+    font-size: 13px;
+  }
+
+  .h3 {
+    font-size: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars circle[data-twinkle] {
+    animation: none;
+  }
+
+  .dial {
+    transition: none;
   }
 }

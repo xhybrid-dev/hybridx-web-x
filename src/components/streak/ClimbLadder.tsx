@@ -24,10 +24,19 @@ const PEAKS = [
 ];
 const BASE = 300;
 
+// Real heights, for the labels. Not from the watch, which only needs weeks.
+const HEIGHTS: Record<string, string> = {
+  "Arthur's Seat": '251 m',
+  Snowdon: '1,085 m',
+  'Ben Nevis': '1,345 m',
+  'Mont Blanc': '4,806 m',
+  Everest: '8,849 m',
+};
+
 // Mountains still ahead are drawn in the watch's far-range greys; climbed and
 // current ones in its teal, with white and grey snow.
 const LIT = { sun: '#1ba7a0', shade: '#0e5f5b', snow: '#ffffff', snowShade: '#a9a9a9' };
-const AHEAD = { sun: '#2b3033', shade: '#1f2326', snow: '#4a4f53', snowShade: '#3a3e42' };
+const AHEAD = { sun: '#1d3347', shade: '#152838', snow: '#3b5163', snowShade: '#2c4052' };
 const MAX_WEEKS = 120;
 
 export default function ClimbLadder() {
@@ -101,7 +110,6 @@ export default function ClimbLadder() {
         />
         <circle cx={climberX} cy={climberY} r="15" fill="none" stroke="#b6f23d" strokeOpacity="0.45" className={styles.halo} />
         <circle cx={climberX} cy={climberY} r="9" fill="#b6f23d" stroke="#fff" strokeWidth="3" />
-        <rect x="0" y={BASE} width="1000" height="20" fill="#000" />
       </svg>
 
       <ol className={styles.names}>
@@ -109,6 +117,7 @@ export default function ClimbLadder() {
           <li key={c.name} className={i < summited ? styles.nameDone : i === pos.climb ? styles.nameNow : ''}>
             <strong>{c.name}</strong>
             <span>{c.summitAt} weeks</span>
+            <small>{HEIGHTS[c.name]}</small>
           </li>
         ))}
       </ol>
