@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import base from '@/components/una-app/app-page.module.css';
+import FilmPlayer from '@/components/una-app/FilmPlayer';
 import {
   AppFooter,
   Arrow,
@@ -15,7 +16,6 @@ import Manifesto from '@/components/trail/Manifesto';
 import TrailSimulator from '@/components/trail/TrailSimulator';
 import OffCourseStory from '@/components/trail/OffCourseStory';
 import AlongTheLine from '@/components/trail/AlongTheLine';
-import Film from '@/components/trail/Film';
 import RouteRail from '@/components/trail/RouteRail';
 import { DataScreen, GpxStream, RouteListScreen, UsbTree } from '@/components/trail/Steps';
 import styles from './trail.module.css';
@@ -288,7 +288,7 @@ export default function TrailPage() {
                 Follow the line. <em>Two and a half minutes, <span className={styles.nowrap}>sound on.</span></em>
               </h2>
             </div>
-            <Film />
+            <FilmPlayer base="/trail" title="Follow the line" accent="#ff55ff" ink="#14001a" />
           </div>
         </section>
 

@@ -11,6 +11,7 @@ import {
   UnaSection,
   Wordmark,
 } from '@/components/una-app/Chrome';
+import FilmPlayer from '@/components/una-app/FilmPlayer';
 import StreakWatch from '@/components/streak/StreakWatch';
 import WeekPlanner from '@/components/streak/WeekPlanner';
 import ClimbLadder from '@/components/streak/ClimbLadder';
@@ -233,6 +234,7 @@ export default function StreakPage() {
             <a href="#how">How it works</a>
             <a href="#climb">The climb</a>
             <a href="#screens">Screens</a>
+            <a href="#film">The film</a>
             <a href="#una">UNA Watch</a>
           </nav>
           <a href={UNA_URL} className={base.navCta} target="_blank" rel="noopener">
@@ -420,6 +422,18 @@ export default function StreakPage() {
                 ))}
               </ol>
               <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
+            </div>
+          </section>
+
+          <section id="film" className={styles.section}>
+            <div className={base.container}>
+              <div className={styles.head}>
+                <Camp camp="Camp V" label="The film" />
+                <h2 className={styles.h2}>
+                  The climb. <em>Two and a half minutes, sound on.</em>
+                </h2>
+              </div>
+              <FilmPlayer base="/streak" title="The climb" accent="#b6f23d" ink="#0d1a05" />
             </div>
           </section>
         </div>

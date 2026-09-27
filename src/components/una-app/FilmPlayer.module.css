@@ -1,11 +1,19 @@
+/*
+ * The film player shared by the three app pages. Each page sets its colour
+ * with --film-accent (and --film-ink for the play arrow).
+ */
+
 .frame {
+  --film-accent: #ff55ff;
+  --film-ink: #14001a;
+  --film-glow: rgba(255, 85, 255, 0.35);
   position: relative;
   aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: #000;
-  box-shadow: 0 40px 100px -40px rgba(255, 85, 255, 0.35);
+  box-shadow: 0 40px 100px -40px var(--film-glow);
 }
 
 .video {
@@ -47,8 +55,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #ff55ff;
-  box-shadow: 0 0 0 10px rgba(255, 85, 255, 0.18), 0 0 60px rgba(255, 85, 255, 0.6);
+  background: var(--film-accent);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--film-accent) 20%, transparent), 0 0 60px color-mix(in srgb, var(--film-accent) 60%, transparent);
   transition: transform 200ms ease;
 }
 
@@ -60,7 +68,7 @@
   width: 34px;
   height: 34px;
   margin-left: 4px;
-  fill: #14001a;
+  fill: var(--film-ink);
 }
 
 .caption {
@@ -79,9 +87,41 @@
 }
 
 .caption span {
-  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-family: var(--mono, ui-monospace), ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #9ba1a8;
+}
+
+/* A note under the film, e.g. Race's "example race" line. */
+.frame + p {
+  margin-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .play {
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--film-accent) 20%, transparent), 0 0 36px color-mix(in srgb, var(--film-accent) 55%, transparent);
+  }
+
+  .play svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 3px;
+  }
+
+  .caption {
+    left: 14px;
+    bottom: 10px;
+  }
+
+  .caption strong {
+    font-size: 15px;
+  }
+
+  .caption span {
+    font-size: 9px;
+  }
 }
