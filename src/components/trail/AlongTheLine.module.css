@@ -1,0 +1,94 @@
+.wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ahead,
+.done {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ahead {
+  stroke: #ff55ff;
+  filter: drop-shadow(0 0 8px rgba(255, 85, 255, 0.7));
+}
+
+.done {
+  stroke: #aa00aa;
+}
+
+.cross {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+}
+
+.halo {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1.5;
+}
+
+.runner {
+  fill: #fff;
+  filter: drop-shadow(0 0 10px #fff);
+}
+
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 32px;
+}
+
+.readouts p {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.label {
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6e747c;
+}
+
+.value {
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: clamp(18px, 2vw, 24px);
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.value span:first-child {
+  color: #ff55ff;
+}
+
+.crowRow {
+  text-align: right;
+}
+
+.crowValue {
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: clamp(18px, 2vw, 24px);
+  color: #6e747c;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .crowRow {
+    text-align: left;
+  }
+}

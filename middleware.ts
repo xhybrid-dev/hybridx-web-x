@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /*
- * The app subdomains — race.hybridx.club, streak.hybridx.club — are this same
+ * The app subdomains — race., streak. and trail.hybridx.club — are this same
  * app. A subdomain's root is served from its page by rewrite (the address bar
  * keeps the subdomain), the page's own path on the subdomain folds back to its
  * root, and every other page on the subdomain goes to the same path on the
@@ -17,6 +17,7 @@ import type { NextRequest } from 'next/server';
 const APP_SUBDOMAINS: Record<string, string> = {
   race: '/race',
   streak: '/streak',
+  trail: '/trail',
 };
 
 function requestHost(request: NextRequest) {
@@ -105,8 +106,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, sitemap.xml, robots.txt (public files)
-     * - and common image, video and asset extensions
+     * - and common image, video and asset extensions (and .gpx, for Trail's demo route)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.webp|.*\\.mp4|.*\\.webm).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.webp|.*\\.mp4|.*\\.webm|.*\\.gpx).*)',
   ],
 };

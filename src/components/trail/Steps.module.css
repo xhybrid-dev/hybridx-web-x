@@ -1,0 +1,240 @@
+/* How-it-works visuals, in the film's style: mono, grey, one orchid accent. */
+
+.code,
+.tree {
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #0a0a0e;
+  overflow: hidden;
+}
+
+.codeHead {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #6e747c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.codeBody {
+  height: 190px;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.codeScroll {
+  padding: 8px 14px;
+  animation: stream 26s linear infinite;
+}
+
+.codeScroll p {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.75;
+  color: #5d636b;
+  white-space: nowrap;
+}
+
+.codeScroll .codeHot {
+  color: #ff55ff;
+  text-shadow: 0 0 8px rgba(255, 85, 255, 0.6);
+}
+
+@keyframes stream {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.tree {
+  padding: 14px 16px;
+}
+
+.treeHead,
+.treeFoot {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #6e747c;
+}
+
+.tree ul {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 2;
+  color: #c7ccd1;
+}
+
+.l1 { padding-left: 18px; }
+.l2 { padding-left: 36px; }
+.l3 { padding-left: 54px; }
+
+.copying {
+  color: #ff55ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar {
+  position: relative;
+  flex: 0 0 70px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 85, 255, 0.2);
+  overflow: hidden;
+}
+
+.bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ff55ff;
+  transform-origin: left;
+  animation: copy 3.2s ease-in-out infinite;
+}
+
+@keyframes copy {
+  0% { transform: scaleX(0); }
+  70%, 100% { transform: scaleX(1); }
+}
+
+.dimmed {
+  color: #50555c;
+}
+
+/* ── A concept watch screen, drawn in HTML ────────────────────────────── */
+
+.watchFace {
+  position: relative;
+  width: min(250px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: 0 0 0 10px #1a1c20, 0 0 0 11px rgba(255, 255, 255, 0.14), 0 30px 60px -20px rgba(0, 0, 0, 0.9);
+  font-family: var(--font-trail-poppins), 'Poppins', sans-serif;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.faceTitle {
+  margin: 8.5cqw 0 0;
+  font-size: 7.5cqw;
+  font-style: italic;
+}
+
+.faceRule {
+  display: block;
+  width: 58%;
+  height: 2px;
+  margin: 2cqw auto 0;
+  background: #555;
+}
+
+.menuItem {
+  margin: 5cqw 0;
+  font-size: 7cqw;
+  font-weight: 500;
+  color: #fff;
+}
+
+.menuSel {
+  display: grid;
+  gap: 0.5cqw;
+  padding: 3.5cqw 0;
+  background: #005555;
+}
+
+.menuSel strong {
+  font-size: 10cqw;
+  font-weight: 600;
+}
+
+.menuSel span {
+  font-size: 6cqw;
+  font-style: italic;
+}
+
+.bigNum {
+  margin: 5cqw 0 0;
+  font-size: 17cqw;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.unit {
+  margin: 0;
+  font-size: 5.5cqw;
+  color: #aaa;
+}
+
+.pair {
+  display: flex;
+  justify-content: center;
+  gap: 8cqw;
+  margin-top: 3cqw;
+}
+
+.pair p {
+  margin: 0;
+  display: grid;
+}
+
+.pair strong {
+  font-size: 9.5cqw;
+  font-weight: 500;
+}
+
+.pair span {
+  font-size: 5.5cqw;
+  color: #aaa;
+}
+
+.hr {
+  margin: 3cqw 0 0;
+  font-size: 7cqw;
+  font-weight: 500;
+}
+
+.lap {
+  margin: 1.5cqw 0 0;
+  font-size: 5.5cqw;
+  color: #ff55ff;
+}
+
+.hintR1,
+.hintR2 {
+  position: absolute;
+  width: 3cqw;
+  height: 12cqw;
+  border-radius: 2cqw;
+}
+
+.hintR1 {
+  right: 5cqw;
+  top: 18cqw;
+  background: #fff;
+  transform: rotate(-30deg);
+}
+
+.hintR2 {
+  right: 5cqw;
+  bottom: 18cqw;
+  background: #ffaa00;
+  transform: rotate(30deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codeScroll,
+  .bar::after {
+    animation: none;
+  }
+}

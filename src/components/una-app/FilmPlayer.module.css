@@ -1,0 +1,127 @@
+/*
+ * The film player shared by the three app pages. Each page sets its colour
+ * with --film-accent (and --film-ink for the play arrow).
+ */
+
+.frame {
+  --film-accent: #ff55ff;
+  --film-ink: #14001a;
+  --film-glow: rgba(255, 85, 255, 0.35);
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #000;
+  box-shadow: 0 40px 100px -40px var(--film-glow);
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+}
+
+.poster {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: #000;
+  cursor: pointer;
+}
+
+.posterImg {
+  object-fit: cover;
+  transition: transform 600ms ease, opacity 300ms ease;
+  opacity: 0.85;
+}
+
+.poster:hover .posterImg {
+  transform: scale(1.02);
+  opacity: 1;
+}
+
+.play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--film-accent);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--film-accent) 20%, transparent), 0 0 60px color-mix(in srgb, var(--film-accent) 60%, transparent);
+  transition: transform 200ms ease;
+}
+
+.poster:hover .play {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.play svg {
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  fill: var(--film-ink);
+}
+
+.caption {
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  color: #fff;
+}
+
+.caption strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.caption span {
+  font-family: var(--mono, ui-monospace), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9ba1a8;
+}
+
+/* A note under the film, e.g. Race's "example race" line. */
+.frame + p {
+  margin-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .play {
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--film-accent) 20%, transparent), 0 0 36px color-mix(in srgb, var(--film-accent) 55%, transparent);
+  }
+
+  .play svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 3px;
+  }
+
+  .caption {
+    left: 14px;
+    bottom: 10px;
+  }
+
+  .caption strong {
+    font-size: 15px;
+  }
+
+  .caption span {
+    font-size: 9px;
+  }
+}

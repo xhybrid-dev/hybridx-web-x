@@ -10,6 +10,7 @@ import {
   UnaSection,
   Wordmark,
 } from '@/components/una-app/Chrome';
+import FilmPlayer from '@/components/una-app/FilmPlayer';
 import LiveWatch from '@/components/race/LiveWatch';
 import RaceBuilder from '@/components/race/RaceBuilder';
 
@@ -168,6 +169,7 @@ export default function RacePage() {
             <a href="#format">The race</a>
             <a href="#features">Features</a>
             <a href="#screens">Screens</a>
+            <a href="#film">The film</a>
             <a href="#una">UNA Watch</a>
           </nav>
           <a href={UNA_URL} className={styles.navCta} target="_blank" rel="noopener">
@@ -307,6 +309,21 @@ export default function RacePage() {
           </ol>
           <div className={styles.container}>
             <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
+          </div>
+        </section>
+
+        {/* ── The film ──────────────────────────────────────────────────── */}
+        <section id="film" className={styles.section}>
+          <div className={styles.container}>
+            <div className={styles.sectionHead}>
+              <p className={styles.eyebrow}>The film</p>
+              <h2 className={styles.h2}>
+                Sixteen.
+                <span className={styles.dim}> A race in two and a half minutes.</span>
+              </h2>
+            </div>
+            <FilmPlayer base="/race" title="Sixteen" accent="#fadb5c" ink="#0a0a0a" />
+            <p className={styles.footnote}>The race times in the film are an example race, not pacing advice.</p>
           </div>
         </section>
 

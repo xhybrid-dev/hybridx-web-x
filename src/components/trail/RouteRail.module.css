@@ -1,0 +1,59 @@
+.rail {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  z-index: 30;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #6e747c;
+}
+
+.svg {
+  width: 44px;
+  height: 56vh;
+  overflow: visible;
+}
+
+.area {
+  fill: rgba(255, 255, 255, 0.03);
+}
+
+.line {
+  fill: none;
+  stroke: rgba(155, 161, 168, 0.35);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.areaDone {
+  fill: rgba(255, 85, 255, 0.12);
+}
+
+.lineDone {
+  fill: none;
+  stroke: #ff55ff;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.dot {
+  fill: #fff;
+  filter: drop-shadow(0 0 4px #ff55ff);
+}
+
+.km {
+  color: #ff55ff;
+}
+
+@media (min-width: 1280px) {
+  .rail {
+    display: flex;
+  }
+}

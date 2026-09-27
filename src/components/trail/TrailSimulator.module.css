@@ -1,0 +1,329 @@
+/* The Trail simulator: the map, the watch and its controls, the readouts. */
+
+.sim,
+.sim * {
+  box-sizing: border-box;
+}
+
+.sim {
+  --orchid: #ff55ff;
+  --amber: #ffaa00;
+  --line: rgba(255, 255, 255, 0.09);
+  --mute: #6e747c;
+  --soft: #9ba1a8;
+  --mono: var(--font-trail-mono), ui-monospace, monospace;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+/* ── The map ──────────────────────────────────────────────────────────── */
+
+.mapPane {
+  position: relative;
+  min-height: 460px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #07070a;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.dragging {
+  border-color: var(--orchid);
+  box-shadow: 0 0 0 4px rgba(255, 85, 255, 0.18);
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mapHud {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--mute);
+  pointer-events: none;
+}
+
+.statusTag {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orchid);
+  background: rgba(255, 85, 255, 0.1);
+  border: 1px solid rgba(255, 85, 255, 0.35);
+  transition: all 200ms ease;
+}
+
+.statusOff {
+  color: #1a1000;
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.dropHint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(255, 85, 255, 0.12);
+  pointer-events: none;
+}
+
+/* ── The watch and its controls ───────────────────────────────────────── */
+
+.side {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: radial-gradient(90% 60% at 50% 20%, rgba(255, 85, 255, 0.08), transparent 70%), #09090c;
+}
+
+.watch {
+  width: min(260px, 70%);
+}
+
+.controls {
+  width: 100%;
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.group {
+  display: grid;
+  gap: 8px;
+}
+
+.groupLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--soft);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.chip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.chipOn {
+  color: #14001a;
+  background: var(--orchid);
+  border-color: var(--orchid);
+}
+
+.chipOn:hover {
+  color: #14001a;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.wander,
+.play,
+.choose {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 200ms ease, background 150ms ease;
+}
+
+.wander {
+  flex: 1;
+  color: #1a1000;
+  background: var(--amber);
+  box-shadow: 0 10px 28px -12px rgba(255, 170, 0, 0.7);
+}
+
+.wander:hover {
+  transform: translateY(-1px);
+}
+
+.play {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+}
+
+/* ── Readouts and "your own route" ────────────────────────────────────── */
+
+.readouts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.stats > div {
+  padding: 16px 18px;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  margin: -1px 0 0 -1px;
+}
+
+.stats dt {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 6px;
+}
+
+.stats dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.own {
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 85, 255, 0.4);
+  background: rgba(255, 85, 255, 0.04);
+}
+
+.ownTitle {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ownBody {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+.ownActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.choose {
+  color: #14001a;
+  background: var(--orchid);
+  box-shadow: 0 10px 28px -12px rgba(255, 85, 255, 0.7);
+}
+
+.choose:hover {
+  transform: translateY(-1px);
+}
+
+.link {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--orchid);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.fileName {
+  margin: 12px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--soft);
+  word-break: break-all;
+}
+
+.error {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--amber);
+}
+
+@media (max-width: 900px) {
+  .sim,
+  .readouts {
+    grid-template-columns: 1fr;
+  }
+
+  .mapPane {
+    min-height: 340px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
