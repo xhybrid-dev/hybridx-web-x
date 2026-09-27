@@ -1,0 +1,108 @@
+/* The Trail hero: a map at night, full bleed, with the copy and the watch over it. */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: min(100svh, 980px);
+  display: flex;
+  align-items: center;
+  background: #050507;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 7, 0.94) 0%, rgba(5, 5, 7, 0.86) 36%, rgba(5, 5, 7, 0.4) 52%, rgba(5, 5, 7, 0) 64%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(5, 5, 7, 0.9) 100%),
+    linear-gradient(180deg, transparent 75%, #050507 100%);
+}
+
+.hud {
+  position: absolute;
+  inset: 88px 24px 20px;
+  pointer-events: none;
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #6e747c;
+}
+
+.hud > span {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.hudTL { top: 0; left: 0; }
+.hudTR { top: 0; right: 0; }
+.hudBL { bottom: 0; left: 0; }
+.hudBR { bottom: 0; right: 0; color: #ff55ff; font-size: 13px; }
+
+.hudTL::before,
+.hudTR::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 10px;
+  border: 1px solid currentColor;
+  vertical-align: 1px;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: calc(1180px + 2 * clamp(16px, 4vw, 32px));
+  margin: 0 auto;
+  padding: 120px clamp(16px, 4vw, 32px) 80px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(24px, 5vw, 72px);
+  align-items: center;
+}
+
+.copy {
+  max-width: 620px;
+}
+
+.watch {
+  justify-self: center;
+  width: min(360px, 100%);
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    padding-top: 96px;
+    text-align: left;
+  }
+
+  .watch {
+    order: -1;
+    width: min(300px, 72vw);
+  }
+
+  .vignette {
+    background:
+      linear-gradient(180deg, rgba(5, 5, 7, 0.2) 0%, rgba(5, 5, 7, 0.75) 55%, #050507 100%);
+  }
+
+  .hudTR,
+  .hudBL {
+    display: none;
+  }
+
+  .hud {
+    inset: 76px 16px 16px;
+  }
+}

@@ -24,6 +24,7 @@ export const HYBRIDX_APP_URL = 'https://hybridx.club/app';
 export const UNA_APPS = [
   { name: 'HybridX Race', href: `${HYBRIDX_URL}/race` },
   { name: 'HybridX Streak', href: `${HYBRIDX_URL}/streak` },
+  { name: 'HybridX Trail', href: `${HYBRIDX_URL}/trail` },
 ] as const;
 
 export function Arrow() {
