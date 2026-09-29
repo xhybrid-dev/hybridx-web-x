@@ -12,6 +12,11 @@
 //      sending domain answerable locally, so a form submission does not pay for
 //      a cross-project round trip.
 //
+//   3. **Plan finder upkeep.** Rolls up each settled day of tracked visits
+//      into one hx_rollups document for the admin, and removes step-5 note
+//      text once it is 90 days old (src/lib/plan-finder/store.ts). Both catch
+//      up on missed days by themselves.
+//
 // Both are safe to run repeatedly and safe to miss: the outbox is keyed on
 // per-lead state and the mirror is a full replacement. A skipped run delays
 // work, it does not corrupt anything.
@@ -29,6 +34,7 @@ import { NextResponse } from 'next/server';
 import { drainOutbox } from '@/lib/lead-outbox';
 import { refreshComplaintMirror } from '@/lib/suppression-mirror';
 import { pruneRateLimits } from '@/lib/rate-limit';
+import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -52,10 +58,12 @@ export async function GET(request: Request) {
   // leads and the mirror protects the sending domain; neither is worth
   // sacrificing to the other's bad day, and neither is worth sacrificing to a
   // housekeeping sweep.
-  const [outbox, mirror, limits] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
+    runDailyRollups(),
+    blankOldNotes(),
   ]);
 
   const result = {
@@ -71,9 +79,17 @@ export async function GET(request: Request) {
       limits.status === 'fulfilled'
         ? limits.value
         : { error: String((limits.reason as Error)?.message ?? limits.reason) },
+    planFinderRollups:
+      rollups.status === 'fulfilled'
+        ? rollups.value
+        : { error: String((rollups.reason as Error)?.message ?? rollups.reason) },
+    planFinderNotes:
+      notes.status === 'fulfilled'
+        ? notes.value
+        : { error: String((notes.reason as Error)?.message ?? notes.reason) },
   };
 
-  if (outbox.status === 'rejected' || mirror.status === 'rejected' || limits.status === 'rejected') {
+  if ([outbox, mirror, limits, rollups, notes].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 
