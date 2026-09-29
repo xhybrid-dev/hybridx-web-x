@@ -75,6 +75,12 @@ export interface PlanFinderRootProps {
   captureNote?: boolean;
   privacyHref?: string;
   siteVersion?: string;
+  /**
+   * false: track the page only, never open the finder. The experiment's
+   * control arm uses this, so shared #plan= links and tiles cannot pull a
+   * control visitor into the finder.
+   */
+  finder?: boolean;
 }
 
 export default function PlanFinderRoot({
@@ -85,6 +91,7 @@ export default function PlanFinderRoot({
   captureNote = PLAN_FINDER.captureNote,
   privacyHref = PLAN_FINDER.privacyHref,
   siteVersion = PLAN_FINDER.siteVersion,
+  finder = true,
 }: PlanFinderRootProps) {
   const [tracker, setTracker] = useState<Tracker>(offTracker);
   const [request, setRequest] = useState<OpenRequest | null>(null);
@@ -138,6 +145,7 @@ export default function PlanFinderRoot({
       if (bypass) entry.hidden = true;
     }
 
+    if (!finder) return;
     const shared = readHash();
     if (shared) {
       open({ source: 'hash', step: 6, hash: shared });
@@ -181,6 +189,7 @@ export default function PlanFinderRoot({
 
   // Triggers on the page: tiles, [data-open] buttons, story prompts, the skip link.
   useEffect(() => {
+    if (!finder) return;
     const onClick = (e: MouseEvent) => {
       const target = e.target as Element | null;
       const skipLink = target?.closest?.('[data-skip="bar"]');
@@ -225,7 +234,7 @@ export default function PlanFinderRoot({
       document.removeEventListener('focusin', prefetch);
       document.removeEventListener('touchstart', prefetch);
     };
-  }, [open, skip]);
+  }, [open, skip, finder]);
 
   const S = funnel.copy.skipWhy;
   const strip =

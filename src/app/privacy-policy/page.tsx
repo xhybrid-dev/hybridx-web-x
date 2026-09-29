@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             <CardHeader className="text-center pb-8">
               <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
-                Last Updated: June 26, 2024
+                Last Updated: September 29, 2026
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -91,15 +91,34 @@ export default function PrivacyPolicyPage() {
                 </div>
               </section>
 
+              <section id="plan-finder">
+                <h2 className="text-2xl font-headline text-primary mb-3">6. The Plan Finder</h2>
+                <p className="text-muted-foreground">
+                  Our plan finder asks five questions and recommends a plan, book or tool. If you accept analytics in our cookie banner, we save your answers (your goal, your experience, where you train, what has got in the way and how you like to follow a plan) together with a few facts about your visit: the website you came from, whether you are on a phone, tablet or computer, which parts of the page you looked at, and which links you clicked. If your browser sends a Global Privacy Control or Do Not Track signal, the plan finder saves none of this, whatever you choose in the banner.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  We do not save your name, email address, IP address or any identifier stored on your device with these answers. Each page load gets a new random number that is kept only while the page is open, so we cannot tell who you are or recognise you when you come back. A race date is saved only as a range of weeks, never as a date. We use this information to see how people use the site and to improve our plans and our website.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  If you type a note in the plan finder, we remove email addresses, phone numbers, links and postcodes from it before it is saved, and we delete the note after 90 days. Please leave out health details. Once a month, the notes from that month, without anything else about you, may be sent to an AI service (Anthropic) to summarise the common themes for us. The rest of the plan finder data is deleted after 400 days; only totals are kept after that.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  If you choose to send us a message through the plan finder&apos;s &quot;Talk to us&quot; form, we use your name, email address and message to reply to you. They are kept separately from the answers above and are never linked to them, and we keep them for up to 12 months after we last dealt with your message. You can ask us what we hold about you, or ask us to delete it, at training@hybridx.club. Because the plan finder answers cannot be linked to a person, we cannot look them up for you.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  The site runs on Google Firebase App Hosting, the plan finder information is stored in Google Firebase, messages to us are delivered by Brevo, and the monthly note summary uses Anthropic. They process this information on our behalf.
+                </p>
+              </section>
+
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">6. Security of Your Information</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">7. Security of Your Information</h2>
                 <p className="text-muted-foreground">
                   We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">7. Contact Us</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">8. Contact Us</h2>
                 <p className="text-muted-foreground">
                   If you have questions or comments about this Privacy Policy, please contact us at: training@hybridx.club
                 </p>

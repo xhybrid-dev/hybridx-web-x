@@ -1,11 +1,156 @@
-# Entry funnel: repo findings (step 0)
+# Entry funnel: findings, status and launch steps
 
-Step 0 of the entry-funnel handover brief (`CLAUDE_CODE_BRIEF.md` in the
-`hybridx-entry-funnel` package): what the repo actually is, so the
-build follows it instead of the package's assumptions. Everything here was
-read from the code on 29 September 2026. Where the package assumes something
-the repo contradicts, the repo wins and the difference is listed under
-[Where the brief does not match the repo](#where-the-brief-does-not-match-the-repo).
+The plan finder in front of the homepage, built from the handover package in
+`handover/entry-funnel/` (start with its `CLAUDE_CODE_BRIEF.md`). This file
+has three parts: [status and launch steps](#status), the owner's
+[decisions](#decisions), and the [step 0 findings](#step-0-findings) about the repo (read from
+the code on 29 September 2026), which the build follows wherever the package
+assumed something else.
+
+<a id="status"></a>
+## Status
+
+| Phase | Built | Gate | Result |
+| --- | --- | --- | --- |
+| P1 Data and routing | `src/lib/plan-finder/` (`funnel.json`, `events.schema.json`, `routing.ts`) | docs/08 A1, A2, A5, A6 | Passed. All 73,728 answer combinations match an independent statement of the docs/02 tables, primary and extras, and match the reference exactly |
+| Consent banner | `src/components/consent/`, `src/lib/consent.ts`, privacy policy section 5 | Owner's decision 1 | Built. GA4 and the tracker wait for Accept; Reject and Accept are equal; the choice can be changed from the footer or the privacy policy |
+| P2 Entry UI | `EntrySection`, `PlanFinderRoot`, `PlanFinderDialog`, `/start` | docs/08 A, B, F | Passed, except B8 (no header button, by decision). The homepage's `<main>`, title, description, canonical, `<h1>` and all eight JSON-LD objects render identically with and without the entry |
+| P3 Tracker, collector, talk | `tracker.ts`, `page-tracking.ts`, `collect-core.ts`, `/api/collect`, `/api/talk` | docs/08 C | Passed locally, except C10 (needs the real Firestore) and the email half of C13 (needs the real mail transport). C7 is not exercised: the note is kept, by decision 2 |
+| P4 Rollups and admin | `analytics/`, `store.ts`, `monthly-review.ts`, `/admin/plan-finder`, CSV export | docs/08 D | Passed on demo data and with an in-memory Firestore. D10 runs once `ANTHROPIC_API_KEY` exists (below) |
+| P5 Privacy and retention | Policy section 6, note blanking in the hourly job, TTL `expireAt` on every batch and message | docs/08 E | **Needs the owner**: sign-off, the two TTL commands, the region check |
+| P6 Experiment | `PLAN_FINDER_MODE` in `apphosting.yaml` and the 50/50 rewrite in `middleware.ts` | docs/08 F7 | Built and checked on a local production build: about half of loads get each arm, `/` is sent `private, no-store` so the CDN cannot pin one arm, and LCP and CLS are no worse. **Ships as `off`** |
+
+How it was checked: 141 unit tests (`npx vitest run src/lib/__tests__/plan-finder-*`),
+255 browser checks against the running site
+(`handover/entry-funnel/scripts/check-next.js`, which also audits the brand
+rules at 1440, 820 and 390 wide), and `tsc` plus a production `next build`.
+The site's other tests were not run in this session.
+
+### Merging changes two things at once
+
+- **The consent banner and the change to Google Analytics go live on merge**,
+  whatever `PLAN_FINDER_MODE` says. From then on GA counts only visitors who
+  accept, so expect its numbers to drop.
+- **The plan finder does not**: `PLAN_FINDER_MODE` ships as `off`, so `/`
+  looks as it does today. `/start` and `/admin/plan-finder` exist, and the
+  tracker records `/start` visits from people who accept.
+
+### Before switching it on (owner)
+
+1. Click the ATHX 2027 and ULTRA STRENGTH links on a result (or in
+   `src/lib/plan-finder/funnel.json`). They could not be opened from here,
+   and both ids are one character shorter than an Amazon ASIN.
+2. Read privacy policy sections 5 and 6 with whoever handles compliance, and
+   sign off docs/08 section E. The wording is a draft adapted from docs/06; it
+   is not legal advice. Note that the Ecwid store widget on the homepage loads
+   without asking and may set its own cookies; the banner does not cover it.
+3. Turn on the retention the policy promises (raw batches 400 days, messages
+   12 months):
+
+   ```bash
+   gcloud firestore fields ttls update expireAt --collection-group=hx_batches --enable-ttl --project=hybridx-hub
+   gcloud firestore fields ttls update expireAt --collection-group=hx_leads --enable-ttl --project=hybridx-hub
+   ```
+4. Check the Firestore region in the Firebase console (a UK or EU region is
+   preferable, docs/06).
+5. Record the homepage's Search Console queries, positions and Core Web
+   Vitals, as the before picture (docs/08 F5, F6).
+6. After the merge deploys: open `/start`, accept analytics, answer the
+   questions and send a Talk to us message. Then check
+   `/admin/plan-finder/health` (batches arriving), `/admin/plan-finder/leads`
+   (the message) and the training@hybridx.club inbox (the email).
+
+### Switching it on
+
+Set `PLAN_FINDER_MODE` to `"experiment"` in `apphosting.yaml` and deploy. It
+is a plain value, not a secret, so it cannot fail the build. Agree the stop
+rule first (docs/03 suggests at least four weeks and 300 visits per arm), and
+read the result on `/admin/plan-finder/entry`. `"on"` shows the entry to
+everyone; `"off"` removes it again.
+
+### The monthly review (optional)
+
+It stays dormant until the backend has an Anthropic API key. Create the secret
+and grant it **before** adding the binding, or every deploy fails (`CLAUDE.md`):
+
+```bash
+echo -n "<key>" | firebase apphosting:secrets:set ANTHROPIC_API_KEY --project hybridx-hub
+firebase apphosting:secrets:grantaccess ANTHROPIC_API_KEY --project hybridx-hub --backend studio
+```
+
+then add to `apphosting.yaml` and deploy:
+
+```yaml
+  - variable: ANTHROPIC_API_KEY
+    secret: ANTHROPIC_API_KEY
+    availability:
+      - RUNTIME
+```
+
+On the day it runs, the maintenance job can take longer than Cloud
+Scheduler's default three-minute deadline. The review still finishes, but the
+scheduler's history shows a failure unless the deadline is raised:
+`gcloud scheduler jobs update http marketing-maintenance --attempt-deadline=300s --location=us-central1 --project=hybridx-hub`.
+
+### Not verified here
+
+- Writes and reads against the real Firestore, the real email transport and
+  the real Anthropic API (every one of them is tested against a stand-in).
+- App Hosting's CDN honouring `private, no-store` on `/` (checked on a local
+  `next start`, which is what App Hosting runs, but not behind its CDN).
+- The two book links, and whether `link.amazon` links carry the affiliate tag
+  (they are recorded as `amazon`, not `amazon-affiliate`).
+
+### Changes to the brief's design
+
+- Rolling up a day reads the day either side, not just the day and the next:
+  the sketch in `examples/rollup-job.example.ts` counts a visit that crosses
+  midnight twice.
+- `/api/collect` limits each address to 60 batches in ten minutes, in memory,
+  with the IP hashed under a per-process salt and never stored: App Hosting has
+  no firewall layer for this.
+- The tracker also waits for consent (decision 1). Accepting mid-visit starts
+  the record with a `page_view` from that moment.
+- Tracking contract: `finder_open.source` gains `link` (`/start?goal=`) and
+  `dialog_close.reason` gains `back` (the Back button closes the dialog).
+- The entry's largest paint is the faint X mark; it is preloaded so the entry
+  paints as fast as the plain homepage.
+- Admin charts carry one series each in the theme's primary colour. The brand
+  allows no second hue, so comparisons are tables, and the goal-by-format grid
+  uses a grey ramp that passes the ordinal colour checks in both themes.
+
+### Noticed, not changed
+
+- The site header throws a React hydration mismatch in development on several
+  pages (a Radix dropdown against a link), and its logo `<Image>` warns about
+  its size. Both predate this work.
+- The homepage JSON-LD is injected by `next/script`, so it is not in the raw
+  HTML; crawlers that run JavaScript see it. Unchanged.
+- The Speakable schema's `h2` selector now also matches the entry's headings.
+- The race, streak and trail subdomains share the banner, but the choice is
+  stored per subdomain, so each asks once.
+
+<a id="decisions"></a>
+## Decisions
+
+Answered by the owner on 29 September 2026: "a) Build a banner", the two
+book links, and "continue otherwise with defaults".
+
+| # | Question | Decision |
+| --- | --- | --- |
+| 1 | Consent route | **Build a consent banner, on every page, covering Google Analytics as well as the plan-finder tracker.** GA4 and the tracker both wait for "Accept" |
+| 2 | Keep the scrubbed free-text note | Yes (default) |
+| 3 | Launch as a 50/50 experiment for four weeks | Yes (default) |
+| 4 | Who may see the admin analytics and the leads inbox | The existing `ADMIN_EMAILS` list (default; one address today) |
+| 5 | ATHX 2027 and ULTRA STRENGTH links | `https://link.amazon/B073SX15W` and `https://link.amazon/B0bvDfu46`, supplied by the owner. **Not opened from here** (the sandbox cannot reach Amazon), and both ids are nine characters where an ASIN is ten, so click both before launch. No other titles in the routing yet (default) |
+| 6 | Stand-alone `/start` | Yes, `noindex` (default) |
+| 7 | Where Talk-to-us messages go | `hx_leads`, not the marketing `leads` collection, plus an email to training@hybridx.club (default) |
+| 8 | "Email me this plan" | No (default) |
+| 9 | Retention | 400 days raw, notes blanked at 90, leads 12 months, rollups kept (default) |
+| – | "Find your plan" button in the site-wide header (docs/08 B8) | Not added: the header stays unchanged (docs/03). Open for the owner |
+| – | Inter 500 | Not loaded site-wide; the entry uses Inter 400 and 600 (default) |
+
+# Step 0 findings
 
 ## Stack
 
@@ -187,10 +332,10 @@ training@hybridx.club.
 | Rate limiting on `/api/collect` in a Vercel Firewall rule, so IP addresses never enter app code | No firewall layer in the repo. The site's own limiter hashes the IP in app code | `/api/collect` gets size caps and bot filtering; `/api/talk` reuses `isCaptureRateLimited`, as the magnet and funnel forms do. A per-IP limit on `/api/collect` means reading the IP in code, hashed and never stored with a batch |
 | Vercel cron for the daily rollup | Cloud Scheduler plus a bearer-authenticated route | Run the rollup from the existing hourly maintenance route (re-rolling yesterday is idempotent), so no new scheduler job or secret is needed |
 | "Check Vercel log settings" | Cloud Logging on Cloud Run | The routes must simply never log request bodies |
-| A cookie banner may exist | None, and GA4 already runs without one | With the default "gate on consent", the new tracker would stay off until a banner is built |
-| A monthly Claude review with `ANTHROPIC_API_KEY` | No Anthropic key; the site uses Genkit with a Gemini key | A new secret binding. Follow the create-then-grant steps in `CLAUDE.md` before it lands in `apphosting.yaml` |
+| A cookie banner may exist | None, and GA4 already ran without one | Built one (decision 1); GA4 and the tracker now wait for it |
+| A monthly Claude review with `ANTHROPIC_API_KEY` | No Anthropic key; the site uses Genkit with a Gemini key | Built, dormant until the key exists; the binding is left out of `apphosting.yaml` until the secret is created and granted (steps above) |
 | `?entry=off` and the tab-session skip handled after load | A static page | Hide the entry with a tiny inline script right after it, before first paint, or skipped visitors see it flash and shift (the CSP already allows inline scripts) |
-| Brand audit passes on `/` | The existing homepage breaks the palette and type rules | Scope the audit to `#hx-entry` and `dialog#finder`, and run it whole on `/start` |
+| Brand audit passes on `/` | The existing homepage breaks the palette and type rules | The audit in `scripts/check-next.js` covers what the plan finder adds: the entry, the dialog, the skip strip and the consent banner |
 | `middleware.ts` split for the experiment | The same file already does subdomain routing and CSP | Add the A/control rewrite for `/` there, after the subdomain check |
 
 ## The reference package in this repo
@@ -209,35 +354,3 @@ imports do not resolve) and Vitest would pick up the `node:test` files, so the
 deploy would fail. If the package is committed for reference, put it under
 `handover/entry-funnel/` and exclude that path in both `tsconfig.json` and
 `vitest.config.ts`.
-
-## Plan
-
-Each phase ends at the brief's gate. I report to the owner when each gate passes.
-
-| Phase | What I build | Gate |
-| --- | --- | --- |
-| **P1** Data and routing | `src/lib/plan-finder/`: `funnel.json`, `events.schema.json`, `routing.ts` (same behaviour, typed), and Vitest ports of the exhaustive routing test, golden examples, `funnel.json` integrity, and the missing `raceWeeks()` test (A6). The package goes into `handover/entry-funnel/`, excluded from build and tests | All 73,728 combinations match the independent oracle; no rule differs from docs/02 |
-| **P2** Entry UI | Entry section (Server Component, black, `<h2>`), skip link, inline pre-paint hide, `#hx-home` wrapper, finder dialog (client, loaded on first click), `/start` with `?goal=` and `noindex`, Back button closes the dialog. Tracking stays off | docs/08 A, B and F; audit at 1440, 820 and 390, scoped as above |
-| **P3** Tracker and collector | `src/lib/plan-finder/tracker.ts`, `POST /api/collect` on `collect-core`, `hx_batches` with `expireAt`, `POST /api/talk` storing to `hx_leads` and emailing the owner | docs/08 C, including zero requests with no endpoint, GPC and DNT |
-| **P4** Rollups and admin | Daily rollup in the hourly maintenance route, `/admin/plan-finder/*` pages using the existing auth and shadcn kit, built on seed data first | docs/08 D |
-| **P5** Privacy | Policy wording, TTL on `hx_batches` and `hx_leads`, note blanking, the consent route | Owner signs off docs/08 E. No launch before this |
-| **P6** Experiment | 50/50 rewrite of `/` in `middleware.ts` | Owner decides after four weeks |
-
-## Decisions
-
-Answered by the owner on 29 September 2026: "a) Build a banner", the two
-book links, and "continue otherwise with defaults".
-
-| # | Question | Decision |
-| --- | --- | --- |
-| 1 | Consent route | **Build a consent banner, on every page, covering Google Analytics as well as the plan-finder tracker.** GA4 and the tracker both wait for "Accept" |
-| 2 | Keep the scrubbed free-text note | Yes (default) |
-| 3 | Launch as a 50/50 experiment for four weeks | Yes (default) |
-| 4 | Who may see the admin analytics and the leads inbox | The existing `ADMIN_EMAILS` list (default; one address today) |
-| 5 | ATHX 2027 and ULTRA STRENGTH links | `https://link.amazon/B073SX15W` and `https://link.amazon/B0bvDfu46`, supplied by the owner. **Not opened from here** (the sandbox cannot reach Amazon), and both ids are nine characters where an ASIN is ten, so click both before launch. No other titles in the routing yet (default) |
-| 6 | Stand-alone `/start` | Yes, `noindex` (default) |
-| 7 | Where Talk-to-us messages go | `hx_leads`, not the marketing `leads` collection, plus an email to training@hybridx.club (default) |
-| 8 | "Email me this plan" | No (default) |
-| 9 | Retention | 400 days raw, notes blanked at 90, leads 12 months, rollups kept (default) |
-| – | "Find your plan" button in the site-wide header (docs/08 B8) | Not added: the header stays unchanged (docs/03). Open for the owner |
-| – | Inter 500 | Not loaded site-wide; the entry uses Inter 400 and 600 (default) |

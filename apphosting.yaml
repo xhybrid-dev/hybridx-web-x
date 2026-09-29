@@ -18,6 +18,17 @@ runConfig:
   maxInstances: 1
 
 env:
+  # The plan finder on the homepage (src/lib/plan-finder/launch.ts):
+  #   off        the homepage alone (/start still works)
+  #   on         the plan finder in front of the homepage for everyone
+  #   experiment half of visits get it, half the plain homepage (docs/03, P6)
+  # Read when the site is built and in middleware, so it needs both. Switch it
+  # on only after the privacy section of ENTRY_FUNNEL_NOTES.md is signed off.
+  - variable: PLAN_FINDER_MODE
+    value: "off"
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: GOOGLE_SHEET_ID
     value: 1IcVFTlCACocbeSbeDmN9HhIS2gC47pQj1JUe7grynnk
     availability:

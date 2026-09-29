@@ -4,6 +4,7 @@
  * run against a live dev or production server. The reference's own test.js checks the
  * plain-HTML reference; this checks the real site.
  *
+ *   PLAN_FINDER_MODE=on npm run dev          (from the repo root; the entry must be on for every load)
  *   cd handover/entry-funnel && npm install
  *   CHROMIUM_PATH=/path/to/chrome node scripts/check-next.js http://localhost:3000
  *

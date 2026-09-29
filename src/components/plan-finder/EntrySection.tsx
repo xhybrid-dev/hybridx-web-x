@@ -10,8 +10,11 @@
 // Tiles open the dialog through PlanFinderRoot. Without JavaScript they are
 // hidden and plain links take their place.
 
+import { preload } from 'react-dom';
 import { ArrowRight, Check } from 'lucide-react';
 import { funnel } from '@/lib/plan-finder/content';
+
+const XMARK = '/plan-finder/hybridx-x-mark.jpg';
 
 const H = funnel.copy.hero;
 
@@ -22,6 +25,10 @@ const HIDE_BEFORE_PAINT = `(function(){try{var e=document.getElementById('hx-ent
 
 export default function EntrySection({ mode }: { mode: 'entry' | 'page' }) {
   const entry = mode === 'entry';
+  // The faint X behind the headline is the section's largest paint. It is only
+  // 5 KB, but as a CSS background it would start downloading after the
+  // stylesheet; preloading fetches it alongside, so the entry paints at once.
+  preload(XMARK, { as: 'image', fetchPriority: 'high' });
   const Heading = entry ? 'h2' : 'h1';
   const [before, after] = H.title.split(H.titleHighlight);
 

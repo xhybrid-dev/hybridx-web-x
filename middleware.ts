@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { CONTROL_PATH, planFinderMode } from '@/lib/plan-finder/launch';
 
 /*
  * The app subdomains — race., streak. and trail.hybridx.club — are this same
@@ -48,9 +49,28 @@ function routeAppSubdomain(request: NextRequest): NextResponse | null {
   return NextResponse.redirect(`${proto}://${mainHost}${pathname}${search}`, 308);
 }
 
+/*
+ * The plan finder experiment (PLAN_FINDER_MODE=experiment): each page load of
+ * the main site's "/" is served either the homepage with the plan finder in
+ * front (arm A) or the homepage alone (control), at random, with no cookie.
+ * Both answers must reach the visitor uncached: a shared cache in front of
+ * this middleware would otherwise hand one arm to everybody.
+ */
+function routeExperiment(request: NextRequest): NextResponse | null {
+  const { pathname, search } = request.nextUrl;
+  // The control page is only ever reached through the rewrite below.
+  if (pathname === CONTROL_PATH) return NextResponse.redirect(new URL('/' + search, request.url), 307);
+  if (pathname !== '/' || planFinderMode() !== 'experiment') return null;
+  const response = Math.random() < 0.5
+    ? NextResponse.rewrite(new URL(CONTROL_PATH + search, request.url))
+    : NextResponse.next();
+  response.headers.set('Cache-Control', 'private, no-store');
+  return response;
+}
+
 export function middleware(request: NextRequest) {
   // Clone the response to add headers
-  const response = routeAppSubdomain(request) ?? NextResponse.next();
+  const response = routeAppSubdomain(request) ?? routeExperiment(request) ?? NextResponse.next();
 
   const isDevelopment = process.env.NODE_ENV === 'development';
 

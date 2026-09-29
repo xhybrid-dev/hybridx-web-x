@@ -3,7 +3,10 @@ rules_version = '2';
 // All reads/writes to `leads` go through the Admin SDK on the server
 // (server actions + /admin/leads, both gated by the ADMIN_EMAILS allow-list).
 // No client ever talks to Firestore directly, so client access is denied
-// entirely as a defense-in-depth default.
+// entirely as a defense-in-depth default. That includes the plan finder's
+// collections (hx_batches, hx_rollups, hx_leads, hx_insights, hx_meta), which
+// only /api/collect, /api/talk, the maintenance job and /admin/plan-finder
+// touch, all through the Admin SDK.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
