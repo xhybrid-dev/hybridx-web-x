@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { Metadata } from 'next';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/privacy-policy' },
@@ -75,11 +76,19 @@ export default function PrivacyPolicyPage() {
                 </ul>
               </section>
 
-              <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">5. Cookies and Tracking Technologies</h2>
+              <section id="cookies">
+                <h2 className="text-2xl font-headline text-primary mb-3">5. Cookies and Analytics</h2>
                 <p className="text-muted-foreground">
-                  We may use cookies and other tracking technologies on the Site to help customize the Site and improve your experience. When you access the Site, your personal information is not collected through the use of tracking technology. Most browsers are set to accept cookies by default. You can remove or reject cookies, but be aware that such action could affect the availability and functionality of the Site.
+                  We ask before using analytics. The first time you visit, a banner asks whether you accept. If you accept, we load Google Analytics, which sets its own cookies (named <code>_ga</code> and <code>_ga_</code> followed by an id) to count visits and see which pages are used, and our plan finder records anonymous statistics about how it is used. If you reject, neither runs, and the site works the same.
                 </p>
+                <p className="text-muted-foreground mt-4">
+                  Your choice is kept in your browser&apos;s local storage, not in a cookie, so that we do not ask again on every page. It holds no identifier. You can change or withdraw your choice at any time; withdrawing it removes the Google Analytics cookies from this site.
+                </p>
+                <div className="mt-4">
+                  <ConsentSettingsButton className="inline-flex min-h-11 items-center rounded-lg border border-primary px-5 font-headline font-bold text-primary hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors">
+                    Change cookie settings
+                  </ConsentSettingsButton>
+                </div>
               </section>
 
               <section>
