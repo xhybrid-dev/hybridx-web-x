@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Instagram } from 'lucide-react';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 const footerColumns = [
   {
@@ -55,6 +56,11 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
+                {col.heading === 'HybridX' && (
+                  <li>
+                    <ConsentSettingsButton className="text-sm text-muted-foreground hover:text-accent transition-colors font-body text-left" />
+                  </li>
+                )}
               </ul>
             </nav>
           ))}

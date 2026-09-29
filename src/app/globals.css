@@ -147,3 +147,78 @@
     transition: none;
   }
 }
+
+/* ── Plan finder: entry section above the homepage, /start, and the dialog ──
+   Brand rules (handover/entry-funnel/docs/07): yellow #FADB5C, black and
+   white only; Space Grotesk 500/700 and Inter 400/600/700 (Inter 500 is not
+   loaded on this site); nothing under 12px; one letter-spacing, 0.12em, for
+   uppercase labels; yellow text only on black. The focus ring is yellow with
+   a black ring behind it, so it shows on white, black and yellow. */
+@layer components {
+  .hx-focus {
+    @apply focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-hx-yellow focus-visible:shadow-[0_0_0_3px_#000];
+  }
+  .hx-label {
+    @apply font-body text-xs font-semibold uppercase leading-snug tracking-[0.12em];
+  }
+  .hx-chip {
+    @apply hx-label inline-flex min-h-7 items-center rounded bg-hx-yellow px-3 text-black;
+  }
+  .hx-btn {
+    @apply hx-focus inline-flex min-h-12 items-center justify-center gap-2.5 rounded-lg border-2 border-hx-yellow bg-hx-yellow px-6 text-center font-headline text-base font-bold leading-tight text-black transition-colors hover:border-white hover:bg-white;
+  }
+  .hx-btn[aria-disabled='true'] {
+    @apply cursor-not-allowed border-hx-line bg-hx-line text-hx-mute hover:border-hx-line hover:bg-hx-line;
+  }
+  .hx-btn-lg {
+    @apply min-h-14 px-7;
+  }
+  .hx-btn-ghost {
+    @apply bg-transparent text-hx-yellow hover:border-hx-yellow hover:bg-hx-yellow hover:text-black;
+  }
+  .hx-btn-line {
+    @apply border border-hx-mute bg-transparent font-body font-semibold text-white hover:border-white hover:bg-white hover:text-black;
+  }
+  .hx-ulink {
+    @apply hx-focus inline-flex min-h-11 items-center font-semibold text-white underline decoration-hx-yellow decoration-2 underline-offset-[5px] hover:decoration-white;
+  }
+  .hx-pill {
+    @apply rounded-full border border-hx-line bg-black px-3.5 py-2 text-sm leading-snug text-white;
+  }
+  .hx-pill-btn {
+    @apply hx-pill hx-focus inline-flex min-h-11 cursor-pointer items-center font-body hover:border-hx-yellow aria-pressed:border-hx-yellow aria-pressed:bg-hx-yellow aria-pressed:text-black;
+  }
+  .hx-opt {
+    @apply hx-focus flex w-full flex-col justify-between gap-2.5 rounded-xl border border-hx-line bg-hx-card px-5 py-4 text-left font-body text-base leading-snug text-white transition-colors hover:border-hx-yellow aria-pressed:border-hx-yellow aria-pressed:bg-hx-yellow aria-pressed:text-black;
+  }
+  .hx-input {
+    @apply hx-focus min-h-[52px] w-full rounded-[10px] border border-hx-ctl bg-black px-4 font-body text-base text-white [color-scheme:dark] placeholder:text-hx-mute placeholder:opacity-100 hover:border-white aria-[invalid=true]:border-2 aria-[invalid=true]:border-hx-yellow;
+  }
+  .hx-h1 {
+    @apply font-headline text-[clamp(40px,4.6vw,64px)] font-bold leading-[1.05] tracking-[-0.025em] [text-wrap:balance];
+  }
+  .hx-h2 {
+    @apply font-headline text-[clamp(32px,3.6vw,52px)] font-bold leading-[1.08] tracking-[-0.025em] [text-wrap:balance];
+  }
+}
+
+/* The finder is a native <dialog>, full screen and black. */
+dialog.hx-finder[open] {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+dialog.hx-finder::backdrop {
+  background: #000;
+}
+html.hx-lock {
+  overflow: hidden;
+}
+#hx-home:focus {
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hx-finder *,
+  #hx-entry * {
+    transition: none !important;
+  }
+}

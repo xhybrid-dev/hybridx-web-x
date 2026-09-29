@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import ConsentBanner from '@/components/consent/ConsentBanner';
+import GoogleAnalytics from '@/components/consent/GoogleAnalytics';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { SITE_CONFIG, createOrganizationSchema, createWebSiteSchema, createSportsOrganizationSchema } from '@/lib/seo';
@@ -125,25 +127,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsOrgSchema) }}
         />
-
-        {/* Google tag (gtag.js) */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-XKH1WYE7CQ"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-XKH1WYE7CQ', {
-              linker: { domains: ['hybridx.club', 'app.hybridx.club'] }
-            });
-          `}
-        </Script>
       </head>
       <body className="font-body antialiased">
+        {/* First in the page so keyboard and screen reader users meet it first;
+            fixed to the bottom of the screen, so it never moves the layout. */}
+        <ConsentBanner />
+        <GoogleAnalytics />
         <ThemeProvider
           defaultTheme="light"
           storageKey="hybridx-ui-theme"

@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { Metadata } from 'next';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/privacy-policy' },
@@ -20,7 +21,7 @@ export default function PrivacyPolicyPage() {
             <CardHeader className="text-center pb-8">
               <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
-                Last Updated: June 26, 2024
+                Last Updated: September 29, 2026
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -75,22 +76,49 @@ export default function PrivacyPolicyPage() {
                 </ul>
               </section>
 
-              <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">5. Cookies and Tracking Technologies</h2>
+              <section id="cookies">
+                <h2 className="text-2xl font-headline text-primary mb-3">5. Cookies and Analytics</h2>
                 <p className="text-muted-foreground">
-                  We may use cookies and other tracking technologies on the Site to help customize the Site and improve your experience. When you access the Site, your personal information is not collected through the use of tracking technology. Most browsers are set to accept cookies by default. You can remove or reject cookies, but be aware that such action could affect the availability and functionality of the Site.
+                  We ask before using analytics. The first time you visit, a banner asks whether you accept. If you accept, we load Google Analytics, which sets its own cookies (named <code>_ga</code> and <code>_ga_</code> followed by an id) to count visits and see which pages are used, and our plan finder records anonymous statistics about how it is used. If you reject, neither runs, and the site works the same.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  Your choice is kept in your browser&apos;s local storage, not in a cookie, so that we do not ask again on every page. It holds no identifier. You can change or withdraw your choice at any time; withdrawing it removes the Google Analytics cookies from this site.
+                </p>
+                <div className="mt-4">
+                  <ConsentSettingsButton className="inline-flex min-h-11 items-center rounded-lg border border-primary px-5 font-headline font-bold text-primary hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors">
+                    Change cookie settings
+                  </ConsentSettingsButton>
+                </div>
+              </section>
+
+              <section id="plan-finder">
+                <h2 className="text-2xl font-headline text-primary mb-3">6. The Plan Finder</h2>
+                <p className="text-muted-foreground">
+                  Our plan finder asks five questions and recommends a plan, book or tool. If you accept analytics in our cookie banner, we save your answers (your goal, your experience, where you train, what has got in the way and how you like to follow a plan) together with a few facts about your visit: the website you came from, whether you are on a phone, tablet or computer, which parts of the page you looked at, and which links you clicked. If your browser sends a Global Privacy Control or Do Not Track signal, the plan finder saves none of this, whatever you choose in the banner.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  We do not save your name, email address, IP address or any identifier stored on your device with these answers. Each page load gets a new random number that is kept only while the page is open, so we cannot tell who you are or recognise you when you come back. A race date is saved only as a range of weeks, never as a date. We use this information to see how people use the site and to improve our plans and our website.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  If you type a note in the plan finder, we remove email addresses, phone numbers, links and postcodes from it before it is saved, and we delete the note after 90 days. Please leave out health details. Once a month, the notes from that month, without anything else about you, may be sent to an AI service (Anthropic) to summarise the common themes for us. The rest of the plan finder data is deleted after 400 days; only totals are kept after that.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  If you choose to send us a message through the plan finder&apos;s &quot;Talk to us&quot; form, we use your name, email address and message to reply to you. They are kept separately from the answers above and are never linked to them, and we keep them for up to 12 months after we last dealt with your message. You can ask us what we hold about you, or ask us to delete it, at training@hybridx.club. Because the plan finder answers cannot be linked to a person, we cannot look them up for you.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  The site runs on Google Firebase App Hosting, the plan finder information is stored in Google Firebase, messages to us are delivered by Brevo, and the monthly note summary uses Anthropic. They process this information on our behalf.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">6. Security of Your Information</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">7. Security of Your Information</h2>
                 <p className="text-muted-foreground">
                   We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">7. Contact Us</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">8. Contact Us</h2>
                 <p className="text-muted-foreground">
                   If you have questions or comments about this Privacy Policy, please contact us at: training@hybridx.club
                 </p>
