@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BACK_ON_COURSE_M,
   buildRoute,
   distanceM,
   distanceToSegmentM,
+  findTurns,
+  fromMetres,
   locate,
-  OFF_COURSE_M,
-  offCourseStep,
+  OffCourse,
   parseGpx,
+  scaleFor,
   toLocal,
+  turnName,
   type GpxPoint,
 } from '../trail-route';
 import { figureEight, RIDGE_LOOP } from '../trail-terrain';
@@ -179,20 +181,95 @@ describe('following the line', () => {
     expect(Math.abs(halfway.along - route.length * 0.5)).toBeLessThan(50);
   });
 
-  it('alerts past the threshold and clears only well back inside it', () => {
-    expect(offCourseStep(false, OFF_COURSE_M - 1).off).toBe(false);
-    expect(offCourseStep(false, OFF_COURSE_M + 1).off).toBe(true);
-    // Hovering just inside the threshold doesn't flicker the alert off...
-    expect(offCourseStep(true, OFF_COURSE_M - 5).off).toBe(true);
-    // ...only coming properly back does.
-    expect(offCourseStep(true, BACK_ON_COURSE_M - 1).off).toBe(false);
-  });
-
   it('turns a GPX into local metres from its start', () => {
     const b = buildRoute(parseGpx(SHORT_ROUTE).points);
     const local = toLocal(b.points, 'x');
     expect(local.pts[0]).toEqual([0, 0]);
     expect(local.length).toBeCloseTo(1000, 0);
+  });
+});
+
+// The watch's own alert cases (hybridx-trail NOTES T1.2, OffCourseTest.cpp),
+// one fix a second.
+describe('OffCourse', () => {
+  /** Feeds one fix a second; returns the events that weren't 'none', with their times. */
+  function run(a: OffCourse, from: number, secs: number, offM: number, opts = {}) {
+    const out: [number, string][] = [];
+    for (let t = from; t < from + secs; t++) {
+      const e = a.update(t, offM, opts);
+      if (e !== 'none') out.push([t, e]);
+    }
+    return out;
+  }
+
+  it('says nothing while you walk to the start', () => {
+    const a = new OffCourse();
+    expect(run(a, 0, 600, 800, { everLocked: false })).toEqual([]);
+    expect(a.state).toBe('notStarted');
+  });
+
+  it('buzzes after 5 s more than 50 m off, reminds every minute, and clears after 3 s within 30 m', () => {
+    const a = new OffCourse();
+    run(a, 0, 10, 5);
+    const off = run(a, 10, 130, 80);
+    expect(off[0]).toEqual([15, 'wentOff']);
+    expect(off.slice(1)).toEqual([
+      [75, 'stillOff'],
+      [135, 'stillOff'],
+    ]);
+    expect(run(a, 140, 10, 20)).toEqual([[143, 'backOn']]);
+  });
+
+  it('ignores a GPS spike under trees', () => {
+    const a = new OffCourse();
+    run(a, 0, 10, 5);
+    expect([...run(a, 10, 4, 90), ...run(a, 14, 5, 5), ...run(a, 19, 4, 90)]).toEqual([]);
+  });
+
+  it('never fires on a switchback wobbling 35-48 m off, and wobbling doesn’t clear an alert', () => {
+    const a = new OffCourse();
+    run(a, 0, 10, 5);
+    const wobble = (from: number) => Array.from({ length: 60 }, (_, i) => a.update(from + i, 35 + ((i * 7) % 14)));
+    expect(wobble(10).every((e) => e === 'none')).toBe(true);
+    run(a, 70, 10, 80);
+    expect(a.state).toBe('off');
+    expect(wobble(80).filter((e) => e === 'backOn')).toEqual([]);
+    expect(a.state).toBe('off');
+  });
+
+  it('ignores bad fixes, and one restarts the count', () => {
+    const a = new OffCourse();
+    run(a, 0, 10, 5);
+    run(a, 10, 4, 80);
+    a.update(14, 80, { precisionM: 40 });
+    // The count restarts at the next good fix (15 s), so the alert is 5 s after it.
+    expect(run(a, 15, 5, 80)).toEqual([]);
+    expect(run(a, 20, 1, 80)).toEqual([[20, 'wentOff']]);
+  });
+
+  it('buzzes once at the finish, then never again', () => {
+    const a = new OffCourse();
+    run(a, 0, 10, 5);
+    expect(a.update(10, 5, { finished: true })).toBe('finished');
+    expect(run(a, 11, 300, 500)).toEqual([]);
+  });
+});
+
+describe('the map', () => {
+  it('names a round distance on the scale bar, as the watch does', () => {
+    // 150 m to the edge of a 240 px screen: 1.25 m a pixel, so 100 m fits 96 px.
+    expect(scaleFor(150 / 120).label).toBe('100 m');
+    expect(scaleFor(3500 / 120).label).toBe('2 km');
+  });
+
+  it('finds the turns on a square, and names them', () => {
+    const sq = fromMetres([[0, 0], [0, 400], [400, 400], [400, 0]], 'square');
+    const turns = findTurns(sq);
+    expect(turns).toHaveLength(2);
+    expect(turns.map((t) => turnName(t.angleDeg))).toEqual(['Right', 'Right']);
+    expect(Math.abs(turns[0].along - 400)).toBeLessThanOrEqual(10);
+    expect(turnName(-120)).toBe('Sharp left');
+    expect(turnName(170)).toBe('U-turn');
   });
 });
 

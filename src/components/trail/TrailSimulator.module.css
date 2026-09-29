@@ -157,6 +157,22 @@
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+.chip:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.zoomLevel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 132px;
+  font-family: var(--font-trail-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--orchid);
+}
+
 .chipOn {
   color: #14001a;
   background: var(--orchid);

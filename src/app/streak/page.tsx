@@ -16,7 +16,7 @@ import StreakWatch from '@/components/streak/StreakWatch';
 import WeekPlanner from '@/components/streak/WeekPlanner';
 import ClimbLadder from '@/components/streak/ClimbLadder';
 import { Contours, Peak, Ridges, Stars } from '@/components/streak/Terrain';
-import { BADGES, DEFAULT_MIN_MINUTES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
+import { BADGES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
 import styles from './streak.module.css';
 
 /*
@@ -47,10 +47,12 @@ import styles from './streak.module.css';
  * Honesty constraints:
  *   - The app is not in the UNA store yet: "coming to UNA Watch".
  *   - Screens are pre-release and say so.
- *   - Automatic counting reads other apps' recordings. It works in the
- *     simulator; the check on a real watch (Gate 0) is still to run. If it
- *     fails, the hero's "counts by itself" and the "Every app counts" card
- *     need rewording before this goes live.
+ *   - No automatic counting. It worked in the simulator, but Gate 0 on a
+ *     real watch (28 September 2026) closed NOT GO: an app can't read other
+ *     apps' recordings. So on a watch, sessions are logged by hand, and the
+ *     page says so. If UNA opens that up, the automatic wording can return.
+ *   - The hero recording, from the simulator, shows sessions with minutes
+ *     ("+1 Run · 32 min"), as a recorded session would; flagged to Jon.
  *   - The hero's watch is UNA's product render, which needs UNA's permission
  *     (see the Race page).
  */
@@ -59,7 +61,7 @@ const URL_CANONICAL = 'https://streak.hybridx.club';
 
 const TITLE = 'HybridX Streak — the weekly training streak for UNA Watch';
 const DESCRIPTION =
-  'Set your own weekly target and every session your watch records counts by itself. Hit it and you climb a mountain, one week at a time. The weekly training streak for UNA Watch, by HybridX.';
+  'Set your own weekly target and log each session on your watch in a few presses. Hit it and you climb a mountain, one week at a time. The weekly training streak for UNA Watch, by HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -118,8 +120,8 @@ const STEPS = [
     body: 'Choose how many sessions make a week, from one to seven — three to start. Pick the day your week begins, and whether everything counts or just one kind of training.',
   },
   {
-    title: 'Just train',
-    body: `Run, ride, lift, row, race. Every session your watch records counts by itself — anything over ${DEFAULT_MIN_MINUTES} minutes, so an accidental start never does. Trained without the watch? Add it by hand.`,
+    title: 'Train, then log it',
+    body: 'Run, ride, lift, row, race. Then log it on your watch: pick the kind of session and whether it was today or yesterday. A few presses, and it counts.',
   },
   {
     title: 'Climb',
@@ -130,8 +132,8 @@ const STEPS = [
 // The kit list. Icons are simple line drawings in the page's own stroke.
 const KIT = [
   {
-    title: 'Every app counts',
-    body: 'A run from one app, a strength session from another, a race from HybridX Race. If your watch recorded it, it counts towards your week.',
+    title: 'Logged in seconds',
+    body: 'Run, strength, ride, walk, row, hybrid, a workout or anything else. Choose it, choose today or yesterday, done. Your phone can stay in your bag.',
     icon: <path d="M4 7h16M4 12h16M4 17h10" />,
   },
   {
@@ -140,8 +142,8 @@ const KIT = [
     icon: <path d="M4 5h16v10H9l-5 4z" />,
   },
   {
-    title: 'Leave one out',
-    body: 'Started a recording by accident? Leave it out of your week in two presses, and put it back just as easily.',
+    title: 'Undo a log',
+    body: 'Logged the wrong thing, or logged it twice? Find it in this week’s list and undo it.',
     icon: (
       <>
         <circle cx="12" cy="12" r="8" />
@@ -156,7 +158,7 @@ const KIT = [
   },
   {
     title: 'Your rules',
-    body: 'Your target, the day your week starts, what counts, the shortest session that counts, and one a day if you’d rather. A new target starts next week, never mid-week.',
+    body: 'Your target, the day your week starts, what counts, and one a day if you’d rather — set on the watch or from the UNA app on your phone. A new target starts next week, never mid-week.',
     icon: <path d="M5 6h14M5 12h14M5 18h14M9 4v4M15 10v4M11 16v4" />,
   },
 ];
@@ -169,8 +171,8 @@ const SHIELD_SCREENS = [
 
 const SCREENS = [
   { src: '/streak/home.png', title: 'Home', caption: 'Your mountain, your streak and this week’s sessions, together.' },
-  { src: '/streak/this-week.png', title: 'This week', caption: 'Every session so far — and why one didn’t count, if it didn’t.' },
-  { src: '/streak/log.png', title: 'Log a session', caption: 'Trained without your watch? Add it for today or yesterday.' },
+  { src: '/streak/menu.png', title: 'Menu', caption: 'This week’s sessions, and logging a new one, a press away.' },
+  { src: '/streak/log.png', title: 'Log a session', caption: 'Pick what you did, then today or yesterday. That’s it.' },
   { src: '/streak/trophy.png', title: 'Trophy case', caption: 'Every summit and badge, and how close the next one is.' },
   { src: '/streak/settings.png', title: 'Settings', caption: 'Your target, your week, your rules.' },
   { src: '/streak/summit.png', title: 'Summit', caption: 'Reach the top and the whole screen celebrates.' },
@@ -258,7 +260,7 @@ export default function StreakPage() {
             </h1>
             <p className={styles.lead}>
               HybridX Streak counts your training in weeks, not days. Set your own target — three
-              sessions a week, say — and every session your watch records counts by itself. Hit your
+              sessions a week, say — and log each session on your watch in a few presses. Hit your
               target, and you take a step up the mountain.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>

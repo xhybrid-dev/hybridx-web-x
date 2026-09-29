@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BACK_ON_COURSE_M,
   fromMetres,
+  CONFIRM_BACK_S,
+  CONFIRM_OFF_S,
   locate,
-  offCourseStep,
+  OffCourse,
   OFF_COURSE_M,
   pointAt,
   type LocalRoute,
@@ -18,9 +20,10 @@ import styles from './OffCourseStory.module.css';
  * along a trail, down the wrong fork, out past the 50 m line, and back.
  *
  * The runner's distance from the line is measured, not scripted (locate), and
- * the alert follows the same rule as the simulator (offCourseStep: on past
- * 50 m, off again only back inside 35 m), replayed from the start of the trail
- * to wherever the scroll has got to, so scrolling back up unwinds it exactly.
+ * the alert is the watch's own rule (OffCourse, ported from the app: more than
+ * 50 m for 5 seconds to alert, back within 30 m for 3 seconds to clear), fed a
+ * runner at 3 m/s and replayed from the start of the trail to wherever the
+ * scroll has got to, so scrolling back up unwinds it exactly.
  */
 
 type P = [number, number];
@@ -56,10 +59,19 @@ function runnerAt(trail: LocalRoute, s: number): P {
   return [here.x - Math.cos(here.heading) * lat, here.y + Math.sin(here.heading) * lat];
 }
 
+/** The runner's pace for the replay, metres per second. */
+const RUN_SPEED = 3;
+
 const STEPS = [
   { title: 'A fork in the path.', body: 'In the mist, both look right. You take the wrong one.' },
-  { title: 'Fifty metres out, it buzzes.', body: 'A buzz on your wrist and a banner on the map: how far you are from the line.' },
-  { title: 'Head back. It tells you when you’re on it.', body: 'Once you’re properly back, a second buzz, and “Back on course”. No chatter on switchbacks.' },
+  {
+    title: 'Fifty metres out, it buzzes.',
+    body: 'Past 50 m for five seconds, your wrist buzzes and the map jumps up with a banner: how far you are from the line, and an arrow pointing back to it. Stay off and it reminds you every minute.',
+  },
+  {
+    title: 'Head back. It tells you when you’re on it.',
+    body: 'Back within 30 m for three seconds, a second buzz and “Back on course”. A wobbly GPS fix or a tight switchback won’t set it off.',
+  },
 ];
 
 export default function OffCourseStory() {
@@ -118,7 +130,7 @@ export default function OffCourseStory() {
   // Replay the alert from the start to here, so the state is the same up or down.
   const s = p * trail.length;
   const state = useMemo(() => {
-    let off = false;
+    const alert = new OffCourse();
     let lastChange = -Infinity;
     let everOff = false;
     let along = 0;
@@ -126,18 +138,20 @@ export default function OffCourseStory() {
       const [x, y] = runnerAt(trail, t);
       const loc = locate(trail, x, y, along);
       along = loc.along;
-      const step = offCourseStep(off, loc.off);
-      if (step.changed) {
-        off = step.off;
+      const ev = alert.update(t / RUN_SPEED, loc.off);
+      if (ev === 'wentOff' || ev === 'backOn') {
         lastChange = t;
-        if (off) everOff = true;
+        if (ev === 'wentOff') everOff = true;
       }
     }
+    const off = alert.state === 'off';
     const [x, y] = runnerAt(trail, s);
     const loc = locate(trail, x, y, along);
-    const banner: 'off' | 'back' | null = off ? 'off' : everOff && s - lastChange < 160 ? 'back' : null;
+    // "Back on course" shows for 4 seconds, as on the watch.
+    const banner: 'off' | 'back' | null = off ? 'off' : everOff && s - lastChange < 4 * RUN_SPEED ? 'back' : null;
     const step = off ? 1 : everOff ? 2 : 0;
-    return { x, y, off, offM: loc.off, along: loc.along, banner, step };
+    const near = pointAt(trail, loc.along);
+    return { x, y, off, offM: loc.off, along: loc.along, banner, step, backTo: [near.x, near.y] as P };
   }, [s, trail]);
 
   useEffect(() => {
@@ -151,12 +165,11 @@ export default function OffCourseStory() {
       you: [state.x, state.y],
       heading: here.heading,
       headingUp: true,
-      radiusM: 260,
-      scaleLabel: '100 m',
-      scaleM: 100,
+      radiusM: 250,
       banner: state.banner,
       bannerP: 1,
       offByM: state.offM,
+      backTo: state.backTo,
     });
   }, [state, s, trail]);
 
@@ -185,7 +198,7 @@ export default function OffCourseStory() {
           </ol>
           <p className={styles.readout} aria-live="polite">
             <span className={styles.readoutNum}>{Math.round(state.offM)} m</span>
-            <span className={styles.readoutLabel}>from the line · alert at {OFF_COURSE_M} m, clears at {BACK_ON_COURSE_M} m</span>
+            <span className={styles.readoutLabel}>from the line · alert past {OFF_COURSE_M} m for {CONFIRM_OFF_S} s, clears within {BACK_ON_COURSE_M} m for {CONFIRM_BACK_S} s</span>
           </p>
         </div>
 

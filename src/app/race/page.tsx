@@ -40,6 +40,11 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  *   - The app is not in the UNA store yet, so nothing here says "download".
  *     The status line is "coming to UNA Watch".
  *   - The watch screens are pre-release captures and say so.
+ *   - Strava is the UNA app's export (the manifest's stravaExport). Garmin
+ *     Connect is claimed only for an uploaded file, which is what was tested:
+ *     named laps with distance and pace. There is no Garmin sync.
+ *   - The sims (run distance 100 m to 1 km) are built; the roadmap keeps only
+ *     what isn't: custom stations and rounds, relay, target pacing, GPS.
  *   - Claims about UNA are limited to what UNA says publicly about itself:
  *     modular, repairable and upgradable, open platform, from Scotland.
  *     No battery figures, no specs that could change before Jon hears them.
@@ -52,7 +57,7 @@ const URL_CANONICAL = 'https://race.hybridx.club';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
 const DESCRIPTION =
-  'One button per split. Every run and every station timed as its own lap, with heart rate, and sent to Strava and Garmin Connect. The HYROX-format race timer for UNA Watch, by HybridX.';
+  'One button per split. Every run and every station timed as its own lap, with heart rate, and exported to Strava. Race it in full, or train it as a sim with shorter runs. The HYROX-format race timer for UNA Watch, by HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -109,7 +114,7 @@ const FEATURES = [
   {
     kicker: 'Split lock',
     title: 'Fumble-proof',
-    body: 'After every split the button locks for 1 to 10 seconds — your choice. Sweaty hands on a sled handle press twice; the second press is quietly ignored.',
+    body: 'After every split the button locks for 1 to 10 seconds — your choice, set on the watch or from the UNA app on your phone. Sweaty hands on a sled handle press twice; the second press is quietly ignored.',
     accent: 'cyan',
   },
   {
@@ -127,7 +132,7 @@ const FEATURES = [
   {
     kicker: 'Safety net',
     title: 'It never loses a race',
-    body: 'Lying on the floor after the wall balls? It saves your race by itself after a minute. Leave the app mid-race and the clock keeps running.',
+    body: 'Lying on the floor after the wall balls? It saves your race by itself after a minute. Leave the app mid-race and the clock keeps running; come back within five minutes and carry on.',
     accent: 'teal',
   },
 ];
@@ -142,7 +147,7 @@ const SCREENS = [
 ];
 
 const ROADMAP = [
-  { tag: 'Next', title: 'Custom simulations', body: 'Choose the stations, the run distance and the rounds. Relay format for pairs.' },
+  { tag: 'Next', title: 'Custom simulations', body: 'Choose the stations and the rounds. Relay format for pairs.' },
   { tag: 'Then', title: 'Target pacing', body: 'A target finish from your HybridX coaching, sent straight to your watch.' },
   { tag: 'Later', title: 'Outdoor sims with GPS', body: 'Runs that end themselves at the set distance.' },
 ];
@@ -194,7 +199,7 @@ export default function RacePage() {
                 <p className={styles.lead}>
                   HybridX Race is the HYROX-format race timer for UNA Watch. Press once at every
                   transition, and every run and every station is timed as its own lap, with your
-                  heart rate — then sent to Strava and Garmin Connect.
+                  heart rate — then exported to Strava through the UNA app.
                 </p>
                 <div className={styles.ctaRow}>
                   <a href={UNA_URL} className={styles.btnPrimary} target="_blank" rel="noopener">
@@ -228,8 +233,9 @@ export default function RacePage() {
               </h2>
               <p className={styles.sectionLead}>
                 Eight 1 km runs and eight stations, one after another. The watch knows the order,
-                so you don’t have to: race it in full or train either half, and time your Roxzone
-                transitions separately if you want to. Try it:
+                so you don’t have to: race it in full or train either half, shorten the runs to
+                anything from 100 m for a sim, and time your Roxzone transitions separately if you
+                want to. Try it:
               </p>
             </div>
             <div className={`${styles.glassPanel} ${styles.reveal}`}>
@@ -252,12 +258,17 @@ export default function RacePage() {
             <div className={styles.bento}>
               <article className={`${styles.card} ${styles.cardWide} ${styles.reveal}`}>
                 <div className={styles.cardCopy}>
-                  <p className={styles.kicker}>Strava &amp; Garmin Connect</p>
+                  <p className={styles.kicker}>Strava</p>
                   <h3 className={styles.h3}>Lands as a race, not a blob</h3>
                   <p>
-                    Most watches save a race as one long workout. HybridX Race sends it to Strava
-                    and Garmin Connect as sixteen laps, each run and each station in order — so
-                    you can see exactly where the time went.
+                    Most watches save a race as one long workout. HybridX Race saves it as sixteen
+                    laps, each run and each station in order with its own time, distance, pace and
+                    heart rate, and the UNA app sends it to Strava — so you can see exactly where
+                    the time went.
+                  </p>
+                  <p>
+                    It’s a standard activity file, too: upload it to Garmin Connect and every lap
+                    is there by name — RUN 1/8, SKIERG, SLED PUSH.
                   </p>
                 </div>
                 <div className={styles.lapChart} aria-hidden="true">

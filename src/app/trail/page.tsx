@@ -17,7 +17,7 @@ import TrailSimulator from '@/components/trail/TrailSimulator';
 import OffCourseStory from '@/components/trail/OffCourseStory';
 import AlongTheLine from '@/components/trail/AlongTheLine';
 import RouteRail from '@/components/trail/RouteRail';
-import { DataScreen, GpxStream, RouteListScreen, UsbTree } from '@/components/trail/Steps';
+import { GpxStream, RealScreen, UsbTree } from '@/components/trail/Steps';
 import styles from './trail.module.css';
 
 /*
@@ -34,17 +34,23 @@ import styles from './trail.module.css';
  * off-course alert is a scroll-driven scene, and the page's own scroll runs
  * the demo loop's elevation profile down the right-hand edge.
  *
- * Honesty constraints — Trail is at phase T0 (the probe) of its brief:
- *   - The status says "in development", not "coming", and a section says
- *     exactly where the build is, from the brief's phases.
- *   - Watch screens are concept designs from the film, and are labelled so.
+ * Honesty constraints — the app is built (T0 to T3 of its brief) and in field
+ * testing on the watch, not yet released:
+ *   - The status says "coming to UNA Watch", and a section says exactly where
+ *     the build is.
+ *   - The watch screens in the stills are the app's own, captured in the UNA
+ *     simulator (hybridx-trail docs/screens/). The animated watch is drawn by
+ *     the page after the real map screen, and the footnote says so.
  *   - What the page computes is real: a visitor's GPX is read, thinned and
- *     measured by lib/trail-route.ts, which mirrors the watch's core and is
- *     tested against the watch's own test cases. Along-the-line tracking and
- *     the off-course rule are the brief's v1 features; their tuning is T1's.
+ *     measured by lib/trail-route.ts, which mirrors the watch's core, and the
+ *     off-course alert, the zoom levels, the scale bar and the turn finder are
+ *     ports of the app's own, tested against its test cases.
  *   - The Ridge loop is made up (the film's), and the page says it's a demo.
- *   - The brief's limits are stated plainly: no maps, no turn-by-turn, no
- *     rerouting; routes over USB for v1.
+ *   - The limits are stated plainly: no map tiles, no street names, no
+ *     rerouting. Routes go on over USB, from a laptop or a phone; sending one
+ *     from the phone over Bluetooth works in testing only, and says so.
+ *   - No Strava or Garmin Connect claim: the app has no store manifest yet, so
+ *     the page says only that the run is saved as a normal run.
  *   - The watch render carries UNA's logo: permission needed before launch,
  *     as for the other two pages.
  */
@@ -53,7 +59,7 @@ const URL_CANONICAL = 'https://trail.hybridx.club';
 
 const TITLE = 'HybridX Trail — follow the line on UNA Watch';
 const DESCRIPTION =
-  'Breadcrumb navigation for UNA Watch. Plan a route anywhere that exports a GPX, put it on your watch, and follow the line, with a buzz if you leave it. Try it with your own route.';
+  'Breadcrumb navigation for UNA Watch. Plan a route anywhere that exports a GPX, put it on your watch, and follow the line: a buzz before each turn, and another if you leave it. Try it with your own route.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -106,27 +112,64 @@ const STEPS = [
   },
   {
     n: '02',
-    title: 'Copy it over USB',
-    body: 'Plug the watch in and drop the file in its Routes folder. It’s a night-before job, as the watch can’t be worn while it’s plugged in. Sending routes from your phone is planned.',
+    title: 'Put it on your watch',
+    body: 'Plug the watch into a laptop, or into your phone with a USB-C cable, and drop the file in its Routes folder. Sending a route from your phone with a tap, over Bluetooth, works in testing and is on its way.',
     visual: <UsbTree />,
   },
   {
     n: '03',
     title: 'Pick a route and run',
-    body: 'Choose it from the list, with its distance and climb, and start. The map, your run and your heart rate, all in one app.',
-    visual: <RouteListScreen />,
+    body: 'Choose it from the list, with its distance and climb, check its shape, and start. The map, your run and your heart rate, all in one app.',
+    visual: <RealScreen name="routes" alt="The watch's route list: No route, a plain run, and a route called Llyn y Fan Fach, 1.19 km, 275 m up." />,
   },
 ];
 
+const FACES = [
+  {
+    screen: 'map',
+    alt: 'The map screen: the route as a magenta line, you as an arrow, north marked, a 100 m scale bar and the distance to the start.',
+    title: 'The line, and you on it',
+    body: 'Heading up or north up. Zoom with the watch’s up and down buttons, from 60 m to 3.5 km to the edge of the screen, or the whole route. Before you reach the route, it tells you how far away the start is.',
+  },
+  {
+    screen: 'nav',
+    alt: 'The navigation screen: 25 m to go, 0.75 km done of a 0.78 km route, on course, 1 m from the line.',
+    title: 'What’s left, and what’s next',
+    body: 'Distance to go, done and the whole route, and how far you are from the line. The watch finds the turns itself: the map names the next from 400 m out, “Right 120 m”, and 50 m before it, a buzz. One for left, two for right; sharp bends and U-turns get it twice.',
+  },
+  {
+    screen: 'off-course',
+    alt: 'The navigation screen with the yellow Off course banner, 24 m from the line.',
+    title: 'The way back',
+    body: 'Stray 50 m for five seconds and it buzzes and jumps to the map, with an arrow pointing to the nearest part of the route and the distance to it. Back within 30 m, a second buzz: “Back on course”.',
+  },
+  {
+    screen: 'elevation',
+    alt: 'The elevation screen: the route’s profile, 0 m to climb, no more climbs, and now 280 m.',
+    title: 'The climb still to come',
+    body: 'For routes with height in them: the profile, the climbing left, the next climb, “+95 m in 218 m”, and the height you’re at now.',
+  },
+];
+
+const SCREENS = [
+  { screen: 'start', title: 'Start', caption: 'Pick a route, or run without one.' },
+  { screen: 'preview', title: 'The route', caption: 'Its shape, distance and climb before you go.' },
+  { screen: 'whole', title: 'The whole route', caption: 'Zoomed right out to see it all.' },
+  { screen: 'run', title: 'Run', caption: 'Distance, pace, time, heart rate, lap.' },
+  { screen: 'lap', title: 'Lap', caption: 'Heart rate zone, lap pace, distance and time.' },
+  { screen: 'summary', title: 'Saved', caption: 'Your distance and the line you ran.' },
+];
+
 const PHASES = [
-  { tag: 'Now', title: 'The groundwork', body: 'Reading a GPX on the watch, GPS and compass. In the simulator it reads a 5,001-point test route and keeps 1,001 points, 10 m apart. The run on a real watch is next.' },
-  { tag: 'Next', title: 'The route engine', body: 'Following the line, the off-course alert and drawing the map, tested on loops, out-and-backs and figure-of-eights.' },
-  { tag: 'Then', title: 'The app', body: 'The run recording, the screens and the off-course banner.' },
-  { tag: 'Then', title: 'On the watch', body: 'A field test on a local loop, with a deliberate wrong turn.' },
+  { tag: 'Done', title: 'Reading routes', body: 'On the watch, a real 50 km route: 1,418 points read and 1,190 kept, 10 m apart, in a third of a second.' },
+  { tag: 'Done', title: 'The route engine', body: 'Following the line, the off-course alert, the map and the turns, checked by 135 automated tests.' },
+  { tag: 'Done', title: 'The app', body: 'Six screens: map, navigation, elevation, run, lap and status.' },
+  { tag: 'Now', title: 'On the watch', body: 'Field testing on real runs.' },
+  { tag: 'Next', title: 'Routes from your phone', body: 'A GPX on your phone, a tap, and it’s on the watch. Working in testing.' },
   { tag: 'Last', title: 'Release', body: 'Into the UNA app store.' },
 ];
 
-const LATER = ['Follow a route in reverse', 'Back to the start', 'A breadcrumb of where you’ve been', 'The climb still to come', 'Routes from your phone'];
+const LATER = ['Follow a route in reverse', 'Guidance back to the start', 'A breadcrumb of where you’ve been'];
 
 export default function TrailPage() {
   return (
@@ -160,15 +203,15 @@ export default function TrailPage() {
         <TrailHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />
-            In development for UNA Watch
+            Coming to UNA Watch
           </p>
           <h1 className={styles.h1}>
             Follow the line <em>with UNA</em>
           </h1>
           <p className={styles.lead}>
             HybridX Trail puts your route on your wrist. Plan it in OS Maps, Komoot, Strava or
-            anything that exports a GPX, copy it to your watch, and follow the line. Leave it, and
-            your wrist buzzes.
+            anything that exports a GPX, copy it to your watch, and follow the line. A buzz before
+            each turn, and another if you leave it.
           </p>
           <div className={base.ctaRow}>
             <a href="#try" className={base.btnPrimary}>
@@ -218,21 +261,47 @@ export default function TrailPage() {
                 Take it for a run. <em>Bring your own route.</em>
               </h2>
               <p className={styles.sectionLead}>
-                This is the line the watch would draw, following a runner round a demo loop,
-                fast-forwarded. Change the zoom, turn the map, and press <strong>Wander off</strong>{' '}
-                to see what happens when you leave the line. Or drop in a GPX of your own.
+                The watch’s map screen, following a runner round a demo loop, fast-forwarded. Zoom
+                in and out, turn the map, watch the turns get called, and press{' '}
+                <strong>Wander off</strong> to see what happens when you leave the line. Or drop in
+                a GPX of your own.
               </p>
             </div>
             <TrailSimulator />
             <p className={styles.footnote}>
-              The watch screens are concept designs: the app’s real screens are still being made.
-              Reading your file, the points kept and the distances use the watch’s own rules.
+              The watch here is drawn by this page, after the app’s real map screen; the real
+              screens are below. Reading your file, the points kept, the distances, the zoom levels,
+              the turns and the off-course alert all use the app’s own rules. Fast-forwarded about
+              ten times, so the buzzes come quicker than on a run.
             </p>
           </div>
         </section>
 
         {/* ── Off course ────────────────────────────────────────────────── */}
         <OffCourseStory />
+
+        {/* ── On the way round ──────────────────────────────────────────── */}
+        <section id="features" className={styles.section}>
+          <div className={base.container}>
+            <div className={styles.head}>
+              <p className={styles.kicker}>On the way round</p>
+              <h2 className={styles.h2}>
+                Eyes on the trail. <em>The watch minds the line.</em>
+              </h2>
+            </div>
+            <ol className={styles.faces}>
+              {FACES.map((f) => (
+                <li key={f.screen} className={base.reveal}>
+                  <div className={styles.faceShot}>
+                    <RealScreen name={f.screen} alt={f.alt} size={220} />
+                  </div>
+                  <h3 className={styles.h3}>{f.title}</h3>
+                  <p>{f.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
         {/* ── Along the line ────────────────────────────────────────────── */}
         <section id="along" className={styles.section}>
@@ -258,8 +327,8 @@ export default function TrailPage() {
         <section className={styles.section}>
           <div className={`${base.container} ${styles.split} ${styles.splitRev}`}>
             <div className={`${styles.runVisual} ${base.reveal}`}>
-              <DataScreen />
-              <p className={styles.visualNote}>Concept design · illustrative numbers</p>
+              <RealScreen name="run" alt="The run screen: 0.21 km, 3:50 per km, 42 seconds, 161 bpm, lap 1." />
+              <p className={styles.visualNote}>The run screen, from the app</p>
             </div>
             <div>
               <p className={styles.kicker}>It’s a run, too</p>
@@ -267,15 +336,37 @@ export default function TrailPage() {
                 Your route and your run, <em>in one app.</em>
               </h2>
               <p className={styles.sectionLead}>
-                Time, distance, pace, heart rate and laps, recorded as a normal run and saved for
-                Strava and Garmin Connect. The map is one more screen, a press away.
+                Time, distance, pace, heart rate and laps, saved as a normal run. The map is one
+                more screen, a press away, and it comes to you when you need it.
               </p>
               <ul className={styles.ticks}>
-                <li>Zoom from 200 m to the whole route</li>
-                <li>Heading up or north up</li>
+                <li>Map, navigation, elevation, run, lap and status screens</li>
+                <li>One press flips between the map and your numbers</li>
+                <li>No route? It’s a plain run, too</li>
                 <li>No phone signal needed: the route lives on the watch</li>
               </ul>
             </div>
+          </div>
+        </section>
+
+        {/* ── The real screens ──────────────────────────────────────────── */}
+        <section id="screens" className={styles.section}>
+          <div className={base.container}>
+            <div className={styles.head}>
+              <p className={styles.kicker}>The screens</p>
+              <h2 className={styles.h2}>
+                From start to saved. <em>As they look on the watch.</em>
+              </h2>
+            </div>
+            <ol className={styles.gallery}>
+              {SCREENS.map((sc) => (
+                <li key={sc.screen} className={base.reveal}>
+                  <RealScreen name={sc.screen} alt={`The ${sc.title.toLowerCase()} screen`} size={200} />
+                  <strong>{sc.title}</strong>
+                  <span>{sc.caption}</span>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
@@ -298,12 +389,12 @@ export default function TrailPage() {
             <div className={styles.head}>
               <p className={styles.kicker}>Where it’s up to</p>
               <h2 className={styles.h2}>
-                Built one gate at a time. <em>Here’s the route.</em>
+                Built one gate at a time. <em>Nearly at the finish.</em>
               </h2>
             </div>
             <ol className={styles.phases}>
-              {PHASES.map((p, i) => (
-                <li key={p.title} className={`${i === 0 ? styles.phaseNow : ''} ${base.reveal}`}>
+              {PHASES.map((p) => (
+                <li key={p.title} className={`${p.tag === 'Now' ? styles.phaseNow : p.tag === 'Done' ? styles.phaseDone : ''} ${base.reveal}`}>
                   <span className={styles.phaseTag}>{p.tag}</span>
                   <strong>{p.title}</strong>
                   <span>{p.body}</span>
@@ -330,8 +421,8 @@ export default function TrailPage() {
               Follow the line <em>with UNA.</em>
             </h2>
             <p className={styles.lead}>
-              HybridX Trail is in development for UNA Watch. Get the watch now, and be ready when
-              the line is.
+              HybridX Trail is coming to UNA Watch. Get the watch now, and be ready when the line
+              is.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">

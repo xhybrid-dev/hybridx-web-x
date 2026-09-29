@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { contours, bounds, RIDGE_LOOP, type Contours } from '@/lib/trail-terrain';
-import { pointAt, slice, formatDistance } from '@/lib/trail-route';
+import { findTurns, pointAt, slice, formatDistance, turnName } from '@/lib/trail-route';
 import { COLOUR, drawContours, fitCanvas, glowLine } from './draw';
 import TrailWatch, { type TrailWatchHandle } from './TrailWatch';
 import styles from './TrailHero.module.css';
@@ -11,7 +11,8 @@ import styles from './TrailHero.module.css';
  * The hero: a topographic map at night, full width, with the Ridge loop in
  * orchid and a runner following it, fast-forwarded. The camera drifts with the
  * runner. On the right, the watch shows the same run as the map screen would:
- * heading-up, 200 m scale, the line behind in purple and ahead in orchid.
+ * heading-up at the 400 m zoom level, the line behind in purple and ahead in
+ * magenta, and the next turn named once it's within 400 m.
  *
  * The contours are vectors, drawn into a cache canvas a little bigger than the
  * view and redrawn only when the camera drifts past its margin, so each frame
@@ -37,6 +38,7 @@ export default function TrailHero({ children }: { children: ReactNode }) {
     const route = RIDGE_LOOP;
     const b = bounds(route, 3200);
     const topo: Contours = contours(b.x0, b.y0, b.x1, b.y1, 60, 25);
+    const turns = findTurns(route);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let cache: { canvas: HTMLCanvasElement; x0: number; y0: number; k: number; w: number; h: number } | null = null;
@@ -131,13 +133,14 @@ export default function TrailHero({ children }: { children: ReactNode }) {
       // The watch at 30 fps is plenty.
       if (now - lastWatch > 33) {
         lastWatch = now;
+        const next = turns.find((turn) => turn.along > s);
+        const inM = next ? next.along - s : Infinity;
         watchRef.current?.draw(route, {
           along: s,
           headingUp: true,
           radiusM: 400,
-          scaleLabel: '200 m',
-          scaleM: 200,
           toGoM: route.length - s,
+          turnAhead: next && inM <= 400 ? { name: turnName(next.angleDeg), inM } : null,
         });
       }
     };
