@@ -1,0 +1,513 @@
+{
+  "_readme": "The contract between the browser tracker, the collector and the admin analytics. The collector accepts ONLY what is listed here: unknown events and unknown properties are dropped, never stored. Add an event here first, then in the tracker, then in the metrics. Type vocabulary: enum, int, bool, string (max chars), path, hostname, slug, note (free text: scrubbed, capped), enumArray, stringArray, answers (the plan finder answers object). Every property is optional unless \"required\": true. Every event also carries n (name), t (client epoch ms) and q (per page load sequence number, starting at 0) next to its props.",
+  "version": 1,
+  "limits": {
+    "maxBodyBytes": 32768,
+    "maxBatchEvents": 50,
+    "maxString": 120,
+    "maxNoteChars": 500,
+    "maxArrayItems": 12,
+    "clockSkewMs": 86400000
+  },
+  "envelope": {
+    "v": {
+      "type": "int",
+      "min": 1,
+      "max": 1,
+      "required": true
+    },
+    "sid": {
+      "type": "slug",
+      "min": 12,
+      "max": 40,
+      "required": true,
+      "note": "Random per page load. Held in memory only. Never derived from IP, user agent or any stored identifier."
+    },
+    "ctx": {
+      "type": "ctx",
+      "required": true
+    },
+    "events": {
+      "type": "events",
+      "required": true
+    }
+  },
+  "ctx": {
+    "site": {
+      "type": "slug",
+      "max": 20,
+      "note": "Site build version"
+    },
+    "route": {
+      "type": "slug",
+      "max": 20,
+      "note": "routing.js VERSION"
+    },
+    "catalog": {
+      "type": "slug",
+      "max": 20,
+      "note": "funnel.json catalogVersion"
+    },
+    "mode": {
+      "type": "enum",
+      "values": [
+        "entry",
+        "page"
+      ],
+      "note": "entry = the funnel sits above the homepage; page = the stand-alone plan finder page"
+    },
+    "variant": {
+      "type": "enum",
+      "values": [
+        "A",
+        "B",
+        "control"
+      ],
+      "note": "Optional experiment arm. control = no entry section shown"
+    },
+    "path": {
+      "type": "path",
+      "max": 120,
+      "note": "Pathname only. No query string, no hash"
+    },
+    "ref": {
+      "type": "hostname",
+      "max": 100,
+      "note": "Referrer hostname only. Empty for direct"
+    },
+    "utm": {
+      "type": "utm",
+      "note": "Only utm_source, utm_medium, utm_campaign, utm_content, utm_term, each a slug"
+    },
+    "vw": {
+      "type": "enum",
+      "values": [
+        "phone",
+        "tablet",
+        "desktop"
+      ],
+      "note": "Viewport bucket: <640, <1024, otherwise"
+    },
+    "lang": {
+      "type": "slug",
+      "max": 10
+    }
+  },
+  "events": {
+    "page_view": {
+      "note": "Sent once per page load, after consent state is known",
+      "props": {}
+    },
+    "entry_shown": {
+      "note": "The entry funnel section rendered for this visitor",
+      "props": {}
+    },
+    "entry_skip": {
+      "note": "The visitor chose to go straight to the existing homepage",
+      "props": {
+        "from": {
+          "type": "enum",
+          "values": [
+            "bar",
+            "dialog",
+            "startToday"
+          ]
+        },
+        "step": {
+          "type": "int",
+          "min": 0,
+          "max": 8,
+          "note": "0 = skipped before opening the questions"
+        },
+        "ms": {
+          "type": "int",
+          "min": 0,
+          "max": 3600000,
+          "note": "Time since page load"
+        }
+      }
+    },
+    "skip_reason": {
+      "note": "Optional one-tap answer after skipping",
+      "props": {
+        "reason": {
+          "type": "enum",
+          "values": [
+            "know",
+            "toomany",
+            "notfor",
+            "browsing",
+            "other"
+          ]
+        }
+      }
+    },
+    "finder_open": {
+      "props": {
+        "source": {
+          "type": "enum",
+          "values": [
+            "tile",
+            "nav",
+            "prompt",
+            "band",
+            "section",
+            "hash",
+            "entry"
+          ]
+        },
+        "step": {
+          "type": "int",
+          "min": 1,
+          "max": 8
+        }
+      }
+    },
+    "q_view": {
+      "props": {
+        "step": {
+          "type": "int",
+          "min": 1,
+          "max": 8,
+          "required": true
+        }
+      }
+    },
+    "q_answer": {
+      "note": "One event when the visitor leaves a step with an answer, or picks an auto-advance option",
+      "props": {
+        "step": {
+          "type": "int",
+          "min": 1,
+          "max": 5,
+          "required": true
+        },
+        "key": {
+          "type": "enum",
+          "values": [
+            "goal",
+            "level",
+            "place",
+            "obst",
+            "format",
+            "note",
+            "race"
+          ],
+          "required": true
+        },
+        "value": {
+          "type": "valueOrNote",
+          "note": "Option id, array of option ids for obst, race-weeks bucket for race, scrubbed text for note"
+        },
+        "ms": {
+          "type": "int",
+          "min": 0,
+          "max": 3600000,
+          "note": "Time on the step"
+        }
+      }
+    },
+    "q_back": {
+      "props": {
+        "step": {
+          "type": "int",
+          "min": 1,
+          "max": 8
+        }
+      }
+    },
+    "q_jump": {
+      "props": {
+        "from": {
+          "type": "int",
+          "min": 1,
+          "max": 8
+        },
+        "to": {
+          "type": "int",
+          "min": 1,
+          "max": 8
+        }
+      }
+    },
+    "dialog_close": {
+      "props": {
+        "step": {
+          "type": "int",
+          "min": 1,
+          "max": 8,
+          "required": true
+        },
+        "reason": {
+          "type": "enum",
+          "values": [
+            "button",
+            "esc",
+            "backdrop",
+            "pagehide"
+          ],
+          "required": true
+        },
+        "result": {
+          "type": "bool",
+          "note": "A result had been shown in this session"
+        },
+        "ms": {
+          "type": "int",
+          "min": 0,
+          "max": 3600000,
+          "note": "Time the dialog was open"
+        }
+      }
+    },
+    "result_view": {
+      "props": {
+        "answers": {
+          "type": "answers",
+          "required": true
+        },
+        "primary": {
+          "type": "slug",
+          "max": 20,
+          "required": true
+        },
+        "secondary": {
+          "type": "stringArray",
+          "max": 2,
+          "itemMax": 20
+        },
+        "trace": {
+          "type": "stringArray",
+          "max": 12,
+          "itemMax": 60,
+          "note": "Rules that fired, from routing.js"
+        },
+        "weeks": {
+          "type": "int",
+          "min": 0,
+          "max": 104,
+          "note": "Weeks to race, 0 when not given"
+        }
+      }
+    },
+    "result_click": {
+      "props": {
+        "product": {
+          "type": "slug",
+          "max": 20,
+          "required": true
+        },
+        "slot": {
+          "type": "enum",
+          "values": [
+            "primary",
+            "secondary"
+          ],
+          "required": true
+        },
+        "dest": {
+          "type": "slug",
+          "max": 30,
+          "note": "Catalog destinationType"
+        },
+        "affiliate": {
+          "type": "bool"
+        }
+      }
+    },
+    "result_restart": {
+      "props": {}
+    },
+    "result_feedback": {
+      "props": {
+        "fit": {
+          "type": "enum",
+          "values": [
+            "yes",
+            "partly",
+            "no"
+          ],
+          "required": true
+        },
+        "reasons": {
+          "type": "enumArray",
+          "values": [
+            "wrong",
+            "else",
+            "basic",
+            "advanced",
+            "price",
+            "format"
+          ],
+          "max": 6
+        }
+      }
+    },
+    "talk_open": {
+      "props": {
+        "from": {
+          "type": "enum",
+          "values": [
+            "result",
+            "band",
+            "nav",
+            "dialog"
+          ]
+        }
+      }
+    },
+    "talk_invalid": {
+      "note": "Which fields failed validation. Values are never sent",
+      "props": {
+        "fields": {
+          "type": "enumArray",
+          "values": [
+            "name",
+            "email",
+            "goal"
+          ],
+          "max": 3
+        }
+      }
+    },
+    "talk_submit": {
+      "note": "Outcome only. The message itself goes to the talk endpoint, never here",
+      "props": {
+        "ok": {
+          "type": "bool",
+          "required": true
+        },
+        "attached": {
+          "type": "bool"
+        }
+      }
+    },
+    "section_view": {
+      "props": {
+        "id": {
+          "type": "slug",
+          "max": 40,
+          "required": true
+        }
+      }
+    },
+    "scroll_depth": {
+      "props": {
+        "pct": {
+          "type": "enum",
+          "values": [
+            25,
+            50,
+            75,
+            100
+          ],
+          "required": true
+        }
+      }
+    },
+    "cta_click": {
+      "props": {
+        "id": {
+          "type": "slug",
+          "max": 40,
+          "required": true
+        },
+        "kind": {
+          "type": "enum",
+          "values": [
+            "nav",
+            "footer",
+            "tool",
+            "section",
+            "startToday",
+            "hero"
+          ]
+        },
+        "host": {
+          "type": "hostname",
+          "max": 100
+        }
+      }
+    },
+    "faq_open": {
+      "props": {
+        "i": {
+          "type": "int",
+          "min": 0,
+          "max": 40,
+          "required": true
+        }
+      }
+    },
+    "page_hide": {
+      "note": "Last event of a page load. Sent with sendBeacon",
+      "props": {
+        "ms": {
+          "type": "int",
+          "min": 0,
+          "max": 86400000,
+          "note": "Visible time"
+        },
+        "scroll": {
+          "type": "int",
+          "min": 0,
+          "max": 100,
+          "note": "Deepest scroll, percent"
+        },
+        "step": {
+          "type": "int",
+          "min": 0,
+          "max": 8,
+          "note": "Step showing when the visitor left, 0 if the dialog was closed"
+        },
+        "result": {
+          "type": "bool"
+        }
+      }
+    }
+  },
+  "answerValues": {
+    "goal": [
+      "first",
+      "faster",
+      "athx",
+      "xenom",
+      "ultra",
+      "hybrid"
+    ],
+    "level": [
+      "new",
+      "regular",
+      "raced",
+      "compete"
+    ],
+    "place": [
+      "home",
+      "gym",
+      "both"
+    ],
+    "obst": [
+      "structure",
+      "generic",
+      "run",
+      "plateau",
+      "injury",
+      "time",
+      "options",
+      "none"
+    ],
+    "format": [
+      "free",
+      "paper",
+      "phone",
+      "tools"
+    ],
+    "race": [
+      "none",
+      "1-4",
+      "5-11",
+      "12-23",
+      "24+"
+    ]
+  }
+}

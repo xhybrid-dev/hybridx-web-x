@@ -1,0 +1,19 @@
+// EXAMPLE. Merge into the repo's existing firestore.rules, do not replace it.
+//
+// The browser never talks to these collections. The collector, the rollup job and the admin pages all
+// use the Admin SDK on the server, which bypasses these rules. So the safest rule is to deny everything
+// from clients. If the existing admin reads Firestore directly from the browser with a custom claim,
+// use the second form for hx_rollups and hx_insights only. Never open hx_batches or hx_leads to clients.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Raw tracked batches, talk-form leads: server only.
+    match /hx_batches/{id} { allow read, write: if false; }
+    match /hx_leads/{id}   { allow read, write: if false; }
+
+    // Aggregates and monthly reviews: server only, or admins if the admin reads client-side.
+    match /hx_rollups/{day}   { allow read: if request.auth != null && request.auth.token.admin == true; allow write: if false; }
+    match /hx_insights/{month} { allow read: if request.auth != null && request.auth.token.admin == true; allow write: if false; }
+  }
+}

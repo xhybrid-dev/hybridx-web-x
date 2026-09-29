@@ -1,0 +1,28 @@
+<!-- HERO / ENTRY FUNNEL. Built by build.js from data/funnel.json. Tokens: %%...%% -->
+%%HERO_OPEN%%
+  <span class="xmark" aria-hidden="true"></span>
+%%ENTRY_BAR%%
+  <div class="wrap hero__grid">
+    <div>
+      <div class="hero__meta"><span class="chip">%%H_CHIP%%</span><span>%%H_META%%</span></div>
+      <%%H_TAG%% class="h1"%%H_ID%%>%%H_TITLE%%</%%H_TAG%%>
+      <p class="lead">%%H_LEAD%%</p>
+      <ul class="ticks">
+%%H_TICKS%%
+      </ul>
+    </div>
+    <div class="qcard" role="group" aria-labelledby="q1t">
+      <div class="qcard__top"><span class="label">Station 01 of 05</span><div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+      <h2 id="q1t">%%H_Q1T%%</h2>
+      <p class="qcard__help">%%H_Q1HELP%%</p>
+      <div class="tiles" data-js>
+%%H_TILES%%
+      </div>
+      <noscript>
+        <p class="qcard__help">The plan finder needs JavaScript. You can go straight to a <a href="https://hybridx.club/free-hyrox-plan" style="text-decoration:underline">free plan</a>, the <a href="https://hybridx.club/books" style="text-decoration:underline">books</a>, the <a href="https://app.hybridx.club" style="text-decoration:underline">app</a> or the <a href="https://hybridx.club/calculators" style="text-decoration:underline">free tools</a>.</p>
+        <style>[data-js]{display:none}</style>
+      </noscript>
+      <p class="qcard__foot">%%H_START%% <a href="https://hybridx.club/free-hyrox-plan" target="_blank" rel="noopener">%%H_STARTLINK%%</a></p>
+    </div>
+  </div>
+</section>

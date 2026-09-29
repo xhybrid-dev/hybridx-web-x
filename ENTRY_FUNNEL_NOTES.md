@@ -193,6 +193,14 @@ training@hybridx.club.
 | Brand audit passes on `/` | The existing homepage breaks the palette and type rules | Scope the audit to `#hx-entry` and `dialog#finder`, and run it whole on `/start` |
 | `middleware.ts` split for the experiment | The same file already does subdomain routing and CSP | Add the A/control rewrite for `/` there, after the subdomain check |
 
+## The reference package in this repo
+
+`handover/entry-funnel/` is the package as supplied, minus its screenshots and
+test fonts (6 MB, kept in the original zip). Its build and browser tests need
+those fonts, so run them from the zip, not from here. The X-mark JPEG carried
+GPS location data in its EXIF block; it was stripped here, in `public/`, and in
+the two `dist/` pages that embed it.
+
 ## Hazard for later sessions
 
 The handover package contains `examples/*.ts` and `*.test.js` files. Dropped
@@ -217,19 +225,19 @@ Each phase ends at the brief's gate. I report to the owner when each gate passes
 
 ## Decisions
 
-Recorded as they are made. Defaults from the brief apply until the owner says
-otherwise.
+Answered by the owner on 29 September 2026: "a) Build a banner", the two
+book links, and "continue otherwise with defaults".
 
-| # | Question | Status |
+| # | Question | Decision |
 | --- | --- | --- |
-| 1 | Consent route: build a banner, rely on the statistical exception with an opt-out, or launch with tracking off | **Open.** No banner exists |
-| 2 | Keep the scrubbed free-text note | Open (default: yes) |
-| 3 | Launch as a 50/50 experiment for four weeks | Open (default: yes) |
-| 4 | Who may see the admin analytics and the leads inbox | Open. Today: one allow-listed address |
-| 5 | Real links for ATHX 2027 and ULTRA STRENGTH; other titles in the routing | **Open.** Not in the repo. Default: no other titles yet |
-| 6 | Stand-alone `/start` | Open (default: yes, `noindex`) |
-| 7 | Where Talk-to-us messages go | Open (default: `hx_leads`, not the marketing `leads` collection, plus an email to training@hybridx.club) |
-| 8 | "Email me this plan" | Open (default: no) |
-| 9 | Retention | Open (default: 400 days raw, notes blanked at 90, leads 12 months, rollups kept) |
-| – | Add a "Find your plan" button to the site-wide header (docs/08 B8) | Open, P2. It changes every page's header |
-| – | Load Inter 500 site-wide, or use 400 and 600 in the entry | Open, P2. Default: 400 and 600, no site-wide change |
+| 1 | Consent route | **Build a consent banner, on every page, covering Google Analytics as well as the plan-finder tracker.** GA4 and the tracker both wait for "Accept" |
+| 2 | Keep the scrubbed free-text note | Yes (default) |
+| 3 | Launch as a 50/50 experiment for four weeks | Yes (default) |
+| 4 | Who may see the admin analytics and the leads inbox | The existing `ADMIN_EMAILS` list (default; one address today) |
+| 5 | ATHX 2027 and ULTRA STRENGTH links | `https://link.amazon/B073SX15W` and `https://link.amazon/B0bvDfu46`, supplied by the owner. **Not opened from here** (the sandbox cannot reach Amazon), and both ids are nine characters where an ASIN is ten, so click both before launch. No other titles in the routing yet (default) |
+| 6 | Stand-alone `/start` | Yes, `noindex` (default) |
+| 7 | Where Talk-to-us messages go | `hx_leads`, not the marketing `leads` collection, plus an email to training@hybridx.club (default) |
+| 8 | "Email me this plan" | No (default) |
+| 9 | Retention | 400 days raw, notes blanked at 90, leads 12 months, rollups kept (default) |
+| – | "Find your plan" button in the site-wide header (docs/08 B8) | Not added: the header stays unchanged (docs/03). Open for the owner |
+| – | Inter 500 | Not loaded site-wide; the entry uses Inter 400 and 600 (default) |

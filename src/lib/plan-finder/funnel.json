@@ -1,0 +1,655 @@
+{
+  "_readme": "Canonical content and options for the HybridX plan finder. Routing logic lives in routing.js and reads the option ids and catalog ids in this file. Change copy, labels and links here; change rules in routing.js and update routing.test.js.",
+  "version": "1.0.0",
+  "catalogVersion": "2026-09-29.2",
+  "currency": "GBP",
+  "stations": [
+    "Goal",
+    "Starting point",
+    "What got in the way",
+    "How you train",
+    "Anything else"
+  ],
+  "steps": {
+    "1": {
+      "title": "What are you training for?",
+      "help": "Choose the one that fits best. It decides which questions come next.",
+      "hint": "Choose an option to continue"
+    },
+    "2": {
+      "title": "Where are you starting from?",
+      "help": "Tell us your experience and where you train, so the plan fits your week and your equipment.",
+      "hint": "Choose one option in each group to continue"
+    },
+    "3": {
+      "title": "What has got in the way before?",
+      "help": "Choose as many as apply. This is how we pick the extras that go with your main recommendation.",
+      "hint": null
+    },
+    "4": {
+      "title": "How do you want to follow your plan?",
+      "help": "Your answer decides the format, so we never send you to one you do not want.",
+      "hint": "Choose an option to continue"
+    },
+    "5": {
+      "title": "Anything else we should know?",
+      "help": "A race date or a specific need helps. You can skip this question.",
+      "hint": null
+    }
+  },
+  "goals": [
+    {
+      "id": "first",
+      "label": "My first Hyrox",
+      "sub": "I have a race in mind and want a clear place to start",
+      "word": "your first Hyrox"
+    },
+    {
+      "id": "faster",
+      "label": "A faster Hyrox time",
+      "sub": "I have raced before and want to go quicker",
+      "word": "a faster Hyrox time"
+    },
+    {
+      "id": "athx",
+      "label": "ATHX 2027",
+      "sub": "Strength, endurance and MetCon X",
+      "word": "ATHX 2027"
+    },
+    {
+      "id": "xenom",
+      "label": "XENOM",
+      "sub": "The ten-event Decathlon of Fitness",
+      "word": "XENOM"
+    },
+    {
+      "id": "ultra",
+      "label": "A trail ultra or marathon",
+      "sub": "Long runs with strength that supports them",
+      "word": "a trail ultra or marathon"
+    },
+    {
+      "id": "hybrid",
+      "label": "General hybrid fitness",
+      "sub": "Stronger and fitter, with no race required",
+      "word": "general hybrid fitness"
+    }
+  ],
+  "levels": [
+    {
+      "id": "new",
+      "label": "I am new to structured training",
+      "word": "are new to structured training"
+    },
+    {
+      "id": "regular",
+      "label": "I train regularly without a plan",
+      "word": "train regularly without a plan"
+    },
+    {
+      "id": "raced",
+      "label": "I have raced before",
+      "word": "have raced before"
+    },
+    {
+      "id": "compete",
+      "label": "I compete for podiums or age-group places",
+      "word": "compete for podiums or age-group places"
+    }
+  ],
+  "places": [
+    {
+      "id": "home",
+      "label": "At home",
+      "word": "you train at home"
+    },
+    {
+      "id": "gym",
+      "label": "In a gym",
+      "word": "you train in a gym"
+    },
+    {
+      "id": "both",
+      "label": "Both",
+      "word": "you train at home and in a gym"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "structure",
+      "label": "I lose motivation without structure"
+    },
+    {
+      "id": "generic",
+      "label": "Plans felt too generic"
+    },
+    {
+      "id": "run",
+      "label": "Running is my weak spot"
+    },
+    {
+      "id": "plateau",
+      "label": "I have hit a plateau"
+    },
+    {
+      "id": "injury",
+      "label": "Injury or overtraining slowed me down"
+    },
+    {
+      "id": "time",
+      "label": "I have too little time"
+    },
+    {
+      "id": "options",
+      "label": "There are too many options to choose from"
+    },
+    {
+      "id": "none",
+      "label": "Nothing yet, this is my first attempt"
+    }
+  ],
+  "formats": [
+    {
+      "id": "free",
+      "label": "Free to start",
+      "sub": "A personalised PDF plan and free tools",
+      "word": "free to start"
+    },
+    {
+      "id": "paper",
+      "label": "On paper",
+      "sub": "A paperback you can write in, from £8",
+      "word": "on paper"
+    },
+    {
+      "id": "phone",
+      "label": "On my phone",
+      "sub": "The app, £5 a month with a 14-day free trial",
+      "word": "on your phone"
+    },
+    {
+      "id": "tools",
+      "label": "Just tools and guides",
+      "sub": "Calculators and free guides only",
+      "word": "as tools and guides"
+    }
+  ],
+  "catalog": {
+    "free": {
+      "id": "free",
+      "status": "live",
+      "destinationType": "free-plan-form",
+      "kind": "FREE PLAN",
+      "badge": "PDF",
+      "head": "the free 12-week Hyrox plan",
+      "title": "Free 12-week Hyrox plan",
+      "meta": "Personalised PDF from your race and dates",
+      "price": "Free",
+      "cta": "Get your free plan",
+      "href": "https://hybridx.club/free-hyrox-plan",
+      "affiliate": false
+    },
+    "app": {
+      "id": "app",
+      "status": "live",
+      "destinationType": "app",
+      "kind": "THE APP",
+      "badge": "APP",
+      "head": "the HybridX app",
+      "title": "The HybridX app",
+      "meta": "Daily workouts, tracking and Edge Coach",
+      "price": "£5/month, 14-day free trial",
+      "cta": "Start your free trial",
+      "href": "https://app.hybridx.club",
+      "affiliate": false
+    },
+    "home": {
+      "id": "home",
+      "status": "live",
+      "destinationType": "amazon-affiliate",
+      "kind": "PAPERBACK",
+      "badge": "PAPERBACK",
+      "head": "Train for Hyrox at Home",
+      "title": "Train for Hyrox at Home",
+      "meta": "Beginner, 12 weeks, minimal equipment",
+      "price": "On Amazon",
+      "cta": "View on Amazon",
+      "href": "https://amzn.to/445PMV1",
+      "affiliate": true
+    },
+    "twelve": {
+      "id": "twelve",
+      "status": "live",
+      "destinationType": "amazon-affiliate",
+      "kind": "PAPERBACK",
+      "badge": "PAPERBACK",
+      "head": "the Hyrox 12 Week Training Plan",
+      "title": "Hyrox 12 Week Training Plan",
+      "meta": "All levels, all 8 stations, race-week taper",
+      "price": "On Amazon",
+      "cta": "View on Amazon",
+      "href": "https://amzn.to/3SSh8sz",
+      "affiliate": true
+    },
+    "elite": {
+      "id": "elite",
+      "status": "live",
+      "destinationType": "amazon-affiliate",
+      "kind": "PAPERBACK",
+      "badge": "PAPERBACK",
+      "head": "the Elite Hyrox Training Plan",
+      "title": "Elite Hyrox Training Plan",
+      "meta": "Advanced, energy-system work, race simulation",
+      "price": "On Amazon",
+      "cta": "View on Amazon",
+      "href": "https://amzn.to/44jOd74",
+      "affiliate": true
+    },
+    "athx": {
+      "id": "athx",
+      "status": "live",
+      "destinationType": "amazon",
+      "kind": "PAPERBACK",
+      "badge": "PAPERBACK",
+      "head": "the ATHX 2027 training book",
+      "title": "ATHX 2027 training book",
+      "meta": "Men's and women's editions",
+      "price": "On Amazon",
+      "cta": "View on Amazon",
+      "href": "https://link.amazon/B073SX15W",
+      "affiliate": false
+    },
+    "ultra": {
+      "id": "ultra",
+      "status": "live",
+      "destinationType": "amazon",
+      "kind": "PAPERBACK",
+      "badge": "PAPERBACK",
+      "head": "ULTRA STRENGTH",
+      "title": "ULTRA STRENGTH",
+      "meta": "16-week hilly 50K plan",
+      "price": "On Amazon",
+      "cta": "View on Amazon",
+      "href": "https://link.amazon/B0bvDfu46",
+      "affiliate": false
+    },
+    "vdot": {
+      "id": "vdot",
+      "status": "live",
+      "destinationType": "tool",
+      "kind": "FREE TOOL",
+      "badge": "TOOL",
+      "head": "the VDOT Calculator",
+      "title": "VDOT Calculator",
+      "meta": "Training paces from any race result",
+      "price": "Free",
+      "cta": "Use it free",
+      "href": "https://hybridx.club/vdot",
+      "affiliate": false
+    },
+    "rtp": {
+      "id": "rtp",
+      "status": "live",
+      "destinationType": "tool",
+      "kind": "FREE TOOL",
+      "badge": "TOOL",
+      "head": "the Race Time Predictor",
+      "title": "Race Time Predictor",
+      "meta": "Predict 5K to marathon times",
+      "price": "Free",
+      "cta": "Use it free",
+      "href": "https://hybridx.club/calculators/race-time-predictor",
+      "affiliate": false
+    },
+    "run12": {
+      "id": "run12",
+      "status": "live",
+      "destinationType": "guide",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "the 12-Week Running Plan for Hyrox",
+      "title": "12-Week Running Plan for Hyrox",
+      "meta": "Threshold, intervals and compromised running",
+      "price": "Free",
+      "cta": "Open the guide",
+      "href": "https://hybridx.club/12-week-running-hyrox",
+      "affiliate": false
+    },
+    "vo2": {
+      "id": "vo2",
+      "status": "live",
+      "destinationType": "guide",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "Build a Bigger Engine",
+      "title": "Build a Bigger Engine",
+      "meta": "The VO2max guide",
+      "price": "Free",
+      "cta": "Open the guide",
+      "href": "https://hybridx.club/build-a-bigger-engine",
+      "affiliate": false
+    }
+  },
+  "copy": {
+    "hero": {
+      "chip": "Plan finder",
+      "meta": "Five questions, about a minute, free",
+      "title": "What do you want from your training?",
+      "titleHighlight": "your training?",
+      "lead": "Tell us your goal, where you are now and what has held you back. We will match you to the plan, book or tool that fits, and if nothing fits, you can talk to us directly.",
+      "ticks": [
+        "Free to use",
+        "No sign-up needed"
+      ],
+      "q1Help": "Choose the one that fits best. Your answer decides which questions come next.",
+      "startTodayLine": "Want to start today instead?",
+      "startTodayLink": "Get the free 12-week plan"
+    },
+    "skip": {
+      "label": "Skip to the homepage",
+      "hint": "You can skip the questions at any time."
+    },
+    "result": {
+      "chip": "Your result",
+      "headPrefix": "Start with",
+      "alsoUseful": "Also useful for you",
+      "changeAnswers": "Change my answers",
+      "noFit": "None of this quite fits what you are after?",
+      "talkCta": "Talk to us directly"
+    },
+    "talk": {
+      "chip": "Talk to us",
+      "title": "Tell us what you are after.",
+      "titleHighlight": "after.",
+      "help": "If the plans, books and tools do not match what you need, send us a message. Tell us your goal and what is in the way, and we will talk it through with you directly.",
+      "note": "We will reply by email. Please leave out health details.",
+      "attachLabel": "Attach my plan finder answers, so we do not ask twice."
+    },
+    "privacy": {
+      "note": "Shown under the step 5 text box. Pick the line that matches what the tracker is really doing.",
+      "tickOn": "Answers saved without your name",
+      "tickOff": "Answers stay on your device",
+      "trackingOn": "Your answers are saved without your name or email, to help us improve the plans. Please leave out health details.",
+      "trackingOnNoNote": "Your choices are saved without your name or email, to help us improve the plans. What you type in this box is not saved. Please leave out health details.",
+      "trackingOff": "Please leave out health details. Nothing you type here is sent anywhere unless you choose to message us.",
+      "linkLabel": "How we use this"
+    },
+    "entry": {
+      "chip": "Plan finder",
+      "skipLabel": "Skip to the homepage",
+      "continueLabel": "Continue to the homepage",
+      "demoBanner": "Demo only. Your existing homepage appears here, unchanged."
+    },
+    "skipWhy": {
+      "title": "Skipped the questions? Tell us why, if you like.",
+      "options": [
+        {
+          "id": "know",
+          "label": "I know what I want"
+        },
+        {
+          "id": "toomany",
+          "label": "Too many questions"
+        },
+        {
+          "id": "notfor",
+          "label": "This is not what I came for"
+        },
+        {
+          "id": "browsing",
+          "label": "Just looking around"
+        },
+        {
+          "id": "other",
+          "label": "Something else"
+        }
+      ],
+      "thanks": "Thank you. This helps us improve the page.",
+      "dismiss": "Close"
+    },
+    "feedback": {
+      "title": "Did this fit what you were after?",
+      "fit": [
+        {
+          "id": "yes",
+          "label": "Yes"
+        },
+        {
+          "id": "partly",
+          "label": "Partly"
+        },
+        {
+          "id": "no",
+          "label": "Not really"
+        }
+      ],
+      "whyTitle": "What was missing? Choose any that apply.",
+      "reasons": [
+        {
+          "id": "wrong",
+          "label": "Not the right product for me"
+        },
+        {
+          "id": "else",
+          "label": "I wanted something else"
+        },
+        {
+          "id": "basic",
+          "label": "Too basic for me"
+        },
+        {
+          "id": "advanced",
+          "label": "Too advanced for me"
+        },
+        {
+          "id": "price",
+          "label": "The price"
+        },
+        {
+          "id": "format",
+          "label": "Not the format I asked for"
+        }
+      ],
+      "send": "Send",
+      "thanks": "Thank you. This helps us improve the plan finder."
+    }
+  },
+  "proof": [
+    {
+      "value": "2,000+",
+      "label": "athletes trained with HybridX"
+    },
+    {
+      "value": "1,800",
+      "label": "paperback books sold"
+    },
+    {
+      "value": "200+",
+      "label": "members using the app"
+    }
+  ],
+  "prompts": [
+    {
+      "id": "first",
+      "text": "I have my first race booked and I do not know where to start.",
+      "tag": "Sets your goal: my first Hyrox",
+      "sets": {
+        "goal": "first"
+      }
+    },
+    {
+      "id": "faster",
+      "text": "I train hard, but my finish time has stopped improving.",
+      "tag": "Sets your goal: a faster Hyrox time",
+      "sets": {
+        "goal": "faster"
+      }
+    },
+    {
+      "id": "run",
+      "text": "My running falls apart halfway through the race.",
+      "tag": "Adds a running plan and the VDOT calculator",
+      "sets": {
+        "obstacles": [
+          "run"
+        ]
+      }
+    },
+    {
+      "id": "home",
+      "text": "I train at home, or somewhere with very little equipment.",
+      "tag": "Sets where you train: at home",
+      "sets": {
+        "place": "home"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "Treadmill FIT/TCX Generator",
+      "text": "Rebuild a treadmill session and export a Garmin-ready file, real heart rate included.",
+      "isNew": true,
+      "href": "https://hybridx.club/calculators/garmin-tcx-generator"
+    },
+    {
+      "name": "VDOT Calculator",
+      "text": "Turn any race result into precise training paces for all five zones.",
+      "href": "https://hybridx.club/vdot"
+    },
+    {
+      "name": "Race Time Predictor",
+      "text": "Predict your 5K, 10K, half and marathon times from a recent performance.",
+      "href": "https://hybridx.club/calculators/race-time-predictor"
+    },
+    {
+      "name": "Pace Calculator",
+      "text": "Work out pace, finish time or distance in seconds.",
+      "href": "https://hybridx.club/calculators/pace-calculator"
+    },
+    {
+      "name": "Heart Rate Zone Calculator",
+      "text": "Find your five training zones with the Karvonen method.",
+      "href": "https://hybridx.club/calculators/heart-rate-zone-calculator"
+    },
+    {
+      "name": "1RM Calculator",
+      "text": "Estimate your one-rep max from any set and load your strength sessions.",
+      "href": "https://hybridx.club/calculators/one-rep-max-calculator"
+    }
+  ],
+  "faq": [
+    {
+      "q": "What exactly happens in a Hyrox race?",
+      "a": "You run 1 km, then complete one functional station, and repeat that eight times, so the race is 8 km of running and 8 stations. The stations come in the same order every time: SkiErg, sled push, sled pull, burpee broad jumps, rowing, farmers carry, sandbag lunges and wall balls. Weights change by division, and the format is the same at every event."
+    },
+    {
+      "q": "What is a good Hyrox time for a beginner?",
+      "a": "Published benchmarks put typical first-timer finishes at roughly 1:40 to 1:55 for men and 1:55 to 2:10 for women, and averages across all finishers sit at about 1:35 for men and 1:50 for women. Your time depends on your division, your running and how well you pace the stations, so for a first race a finish is a better target than a number."
+    },
+    {
+      "q": "How many weeks do I need to train for Hyrox?",
+      "a": "Twelve weeks is a common length for a first race if you already exercise a few times a week. If you are starting from very little, allow more time to build a base first. The free plan and the paperback plans from HybridX are built around 12 weeks, and the plan finder picks between them from your experience."
+    },
+    {
+      "q": "What is compromised running and why does it matter for Hyrox?",
+      "a": "Compromised running is running while your legs and breathing are already loaded from the station before, such as a sled push or wall balls. Every kilometre of a Hyrox race is run this way, so you will be slower than on a fresh run. Practising it in training, as the free 12-week running plan does, is how you keep the pace from falling apart halfway through."
+    },
+    {
+      "q": "How do I access the HybridX app and what does it include?",
+      "a": "Go to app.hybridx.club to start. The app costs £5 a month and the first 14 days are free. It includes daily workouts, a program library, progress tracking and Edge Coach."
+    },
+    {
+      "q": "Do I have to sign up to use the plan finder?",
+      "a": "No. There is no sign-up, and the plan finder gives you your result straight away. If nothing it suggests fits, you can send us a message instead."
+    }
+  ],
+  "links": {
+    "nav": [
+      {
+        "label": "Free plan",
+        "href": "https://hybridx.club/free-hyrox-plan"
+      },
+      {
+        "label": "The app",
+        "href": "https://hybridx.club/app"
+      },
+      {
+        "label": "Books",
+        "href": "https://hybridx.club/books"
+      },
+      {
+        "label": "Free tools",
+        "href": "https://hybridx.club/calculators"
+      },
+      {
+        "label": "Store",
+        "href": "https://hybridx.club/store"
+      }
+    ],
+    "footer": {
+      "training": [
+        {
+          "label": "Free 12-Week Hyrox Plan",
+          "href": "https://hybridx.club/free-hyrox-plan"
+        },
+        {
+          "label": "How to Train for Hyrox",
+          "href": "https://hybridx.club/how-to-train-for-hyrox"
+        },
+        {
+          "label": "12-Week Plan Structure",
+          "href": "https://hybridx.club/hyrox-training-plan"
+        },
+        {
+          "label": "Hybrid Training Program",
+          "href": "https://hybridx.club/hybrid-training-program"
+        },
+        {
+          "label": "Free VO2max Guide",
+          "href": "https://hybridx.club/build-a-bigger-engine"
+        }
+      ],
+      "tools": [
+        {
+          "label": "All Calculators",
+          "href": "https://hybridx.club/calculators"
+        },
+        {
+          "label": "VDOT Calculator",
+          "href": "https://hybridx.club/vdot"
+        },
+        {
+          "label": "Treadmill FIT/TCX Generator",
+          "href": "https://hybridx.club/calculators/garmin-tcx-generator"
+        },
+        {
+          "label": "Race Time Predictor",
+          "href": "https://hybridx.club/calculators/race-time-predictor"
+        },
+        {
+          "label": "12-Week Running Plan",
+          "href": "https://hybridx.club/12-week-running-hyrox"
+        }
+      ],
+      "hybridx": [
+        {
+          "label": "The App, £5/mo",
+          "href": "https://hybridx.club/app"
+        },
+        {
+          "label": "Books",
+          "href": "https://hybridx.club/books"
+        },
+        {
+          "label": "Store",
+          "href": "https://hybridx.club/store"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "https://hybridx.club/privacy-policy"
+        }
+      ]
+    }
+  },
+  "productMapNotes": "ATHX 2027 and ULTRA STRENGTH links were supplied by the owner on 29 September 2026 (catalogVersion 2026-09-29.2). They are Amazon links, not amzn.to affiliate short links, so destinationType is 'amazon' and affiliate is false; change both if they are re-issued as affiliate links. Titles not yet published (XENOM book, HYROX Youngstars book) have no entry: route those goals to the nearest live product and record the demand (see docs/04)."
+}
