@@ -20,6 +20,7 @@ import { subscribeConsent } from '@/lib/consent';
 import type { Mode, Tracker, Variant } from '@/lib/plan-finder/tracker';
 import { createTracker, offTracker } from '@/lib/plan-finder/tracker';
 import { startPageTracking } from '@/lib/plan-finder/page-tracking';
+import { PLAN_FINDER } from '@/lib/plan-finder/config';
 import type { FinderStatus, OpenRequest, OpenSource } from './types';
 
 const loadDialog = () => import('./PlanFinderDialog');
@@ -79,11 +80,11 @@ export interface PlanFinderRootProps {
 export default function PlanFinderRoot({
   mode,
   variant = null,
-  trackEndpoint = '',
-  talkEndpoint = '',
-  captureNote = true,
-  privacyHref = '/privacy-policy',
-  siteVersion = 'web-1',
+  trackEndpoint = PLAN_FINDER.trackEndpoint,
+  talkEndpoint = PLAN_FINDER.talkEndpoint,
+  captureNote = PLAN_FINDER.captureNote,
+  privacyHref = PLAN_FINDER.privacyHref,
+  siteVersion = PLAN_FINDER.siteVersion,
 }: PlanFinderRootProps) {
   const [tracker, setTracker] = useState<Tracker>(offTracker);
   const [request, setRequest] = useState<OpenRequest | null>(null);

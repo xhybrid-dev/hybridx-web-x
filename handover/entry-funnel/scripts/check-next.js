@@ -12,7 +12,13 @@
  * the brand rules and must not be changed (docs/03). Exit code 1 if anything fails.
  */
 'use strict';
+const path = require('path');
 const { chromium } = require('playwright-core');
+// Every batch the real tracker sends must pass the collector untouched. The reference
+// collector is identical to src/lib/plan-finder/collect-core.ts (a parity test holds them
+// together); it is used here because this script runs in plain Node.
+const { validateBatch } = require('../server/collect-core.js');
+const SCHEMA = require(path.join(__dirname, '../../../src/lib/plan-finder/events.schema.json'));
 
 const base = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
 let failures = 0;
@@ -39,6 +45,10 @@ async function newPage(browser, w, h, opts = {}) {
   // Decide the consent banner up front unless a check is about the banner.
   if (opts.consent !== undefined) await ctx.addInitScript(CONSENT(opts.consent));
   const page = await ctx.newPage();
+  // Stand-ins for the two endpoints, so the checks need no Firestore or mail transport.
+  // A check that wants to see what was sent registers its own handler, which wins.
+  await page.route('**/api/collect', (r) => r.fulfill({ status: 204 }));
+  await page.route('**/api/talk', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(e.message.split('\n')[0]));
   return page;
@@ -258,7 +268,7 @@ const ROUTES = [
     const why = await page.locator('dialog').innerText();
     ok(/You have 10 weeks until your race/.test(why) && why.includes('Race in 10 weeks'), 'A6 race date becomes weeks in the reason line and a chip');
     ok(/^#plan=first\.regular\.gym\.structure\.phone\.\d{4}-\d{2}-\d{2}$/.test(await page.evaluate(() => location.hash)), 'A8 the result has a shareable #plan= link');
-    ok(!(await page.locator('dialog').innerText()).includes('Did this fit'), 'feedback question hidden while tracking is off');
+    ok(!(await page.locator('dialog').textContent()).includes('Did this fit'), 'feedback question hidden while tracking is off');
     await page.getByRole('button', { name: 'Change my answers' }).click();
     ok((await title(page)).startsWith('What are you training for'), 'A7 Change my answers returns to question 1');
     ok((await opt(page, 'goal', 'first').getAttribute('aria-pressed')) === 'true', 'A7 earlier answers stay selected');
@@ -277,8 +287,8 @@ const ROUTES = [
     await page.fill('#t-email', 'sam@example.com');
     await page.fill('#t-goal', 'First Hyrox');
     await page.getByRole('button', { name: /Send message/ }).click();
-    await page.waitForFunction(() => document.querySelector('#f-title')?.textContent.includes('Nothing was sent'));
-    ok(true, 'A9 with no endpoint the form says "This is a preview. Nothing was sent."');
+    await page.waitForFunction(() => document.querySelector('#f-title')?.textContent.includes('with us'));
+    ok(true, 'A9 a sent message is confirmed only after the endpoint accepts it');
     await page.getByRole('button', { name: 'Close' }).click();
     await page.waitForFunction(() => !document.querySelector('dialog[open]'));
     await page.waitForTimeout(300);
@@ -340,6 +350,153 @@ const ROUTES = [
     await page.context().close();
   }
 
+  console.log('\nC. Tracking');
+  // Capture what the tracker and the talk form send, without a real Firestore behind them.
+  async function captured(page, { talkStatus = 200 } = {}) {
+    const batches = [], talks = [];
+    await page.route('**/api/collect', async (r) => { batches.push(r.request().postData() || ''); await r.fulfill({ status: 204 }); });
+    await page.route('**/api/talk', async (r) => { talks.push(r.request().postData() || ''); await r.fulfill({ status: talkStatus, contentType: 'application/json', body: JSON.stringify({ ok: talkStatus === 200 }) }); });
+    return { batches, talks };
+  }
+  const events = (batches) => batches.flatMap((b) => JSON.parse(b).events);
+  const flush = (page) => page.evaluate(() => document.dispatchEvent(new Event('visibilitychange'))).then(() => page.waitForTimeout(300));
+
+  for (const [label, opts] of [
+    ['with no consent choice', {}],
+    ['after rejecting in the banner', { consent: false }],
+    ['with Global Privacy Control, even after accepting', { consent: true, gpc: true }],
+    ['with Do Not Track, even after accepting', { consent: true, dnt: true }],
+  ]) {
+    const page = await newPage(browser, 1440, 900, opts.consent === undefined ? {} : { consent: opts.consent });
+    if (opts.gpc) await page.addInitScript(() => Object.defineProperty(navigator, 'globalPrivacyControl', { get: () => true }));
+    if (opts.dnt) await page.addInitScript(() => Object.defineProperty(navigator, 'doNotTrack', { get: () => '1' }));
+    const cap = await captured(page);
+    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await toResult(page, ROUTES[0]);
+    await page.getByRole('button', { name: 'Change my answers' }).click();
+    await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(500);
+    ok(cap.batches.length === 0, 'C6 zero requests to the collector ' + label, cap.batches.length);
+    ok((await page.locator('[data-privacy-tick]').innerText()) === 'Answers stay on your device', 'E5 tick says answers stay on the device ' + label);
+    await page.context().close();
+  }
+
+  {
+    const page = await newPage(browser, 1440, 900, { consent: true });
+    const cap = await captured(page);
+    await page.goto(base + '/?utm_source=Instagram&utm_campaign=spring', { waitUntil: 'networkidle' });
+    ok((await page.locator('[data-privacy-tick]').innerText()) === 'Answers saved without your name', 'E5 tick says answers are saved once tracking is on');
+    await page.mouse.wheel(0, 300);
+    await toResult(page, { ...ROUTES[0], race: new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10), note: 'Leeds in March, email sam@example.com, call 07700 900123, see www.mysite.com' });
+    ok((await page.locator('dialog').textContent()).includes('Did this fit what you were after?'), 'feedback question shown when tracking is on');
+    await page.getByRole('button', { name: 'Partly' }).click();
+    await page.getByRole('button', { name: 'The price' }).click();
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.locator('a[data-slot="secondary"]').first().click({ modifiers: ['Control'] });
+    await page.getByRole('button', { name: 'Talk to us directly' }).click();
+    await page.fill('#t-name', 'Sam Visitor');
+    await page.fill('#t-email', 'sam@example.com');
+    await page.getByRole('button', { name: /Send message/ }).click();
+    await page.waitForFunction(() => document.querySelector('#f-title')?.textContent.includes('with us'));
+    ok(true, 'A9 with an endpoint the form says the message is with us');
+    await page.getByRole('button', { name: /Continue to the homepage/ }).click();
+    await page.waitForTimeout(300);
+    for (let y = 0; y < 30; y++) { await page.mouse.wheel(0, 900); await page.waitForTimeout(40); }
+    await page.locator('#faq button[aria-expanded]').nth(1).click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(600);
+
+    const all = events(cap.batches);
+    const results = cap.batches.map((b) => validateBatch(b, { schema: SCHEMA }));
+    ok(cap.batches.length > 0 && results.every((r) => r.ok && r.dropped.events === 0 && r.dropped.props === 0), 'C1 every batch passes the collector with nothing dropped', results.filter((r) => !r.ok || r.dropped.events || r.dropped.props).slice(0, 2));
+    const qs = all.map((e) => e.q);
+    ok(JSON.stringify(qs) === JSON.stringify(qs.map((_, i) => i)), 'C2 sequence numbers run 0..n with no gaps');
+    const names = all.map((e) => e.n);
+    const order = ['page_view', 'entry_shown', 'finder_open', 'q_answer', 'q_view', 'result_view', 'result_feedback', 'result_click', 'talk_open', 'talk_submit', 'cta_click'];
+    ok(order.every((n) => names.includes(n)), 'C2 the journey is recorded', order.filter((n) => !names.includes(n)));
+    ok(names.indexOf('page_view') === 0 && names.indexOf('finder_open') < names.indexOf('result_view') && names.indexOf('result_view') < names.indexOf('talk_open'), 'C2 events arrive in journey order');
+    ok(names.filter((n) => n === 'result_view').length === 1, 'C2 one result_view for one set of answers');
+    const text = cap.batches.join('\n');
+    ok(!/Sam Visitor|sam@example\.com/i.test(text), 'C3 no name or email in any tracking request');
+    ok(!/[0-9a-f]{32}/.test(cap.talks[0]) && !/"sid"/.test(cap.talks[0]), 'C3 the talk payload carries no visit id');
+    const note = all.find((e) => e.n === 'q_answer' && e.key === 'note');
+    ok(note && !/07700|mysite\.com|@/.test(note.value) && /\[email\]/.test(note.value) && /\[number\]/.test(note.value) && /\[link\]/.test(note.value), 'C4 the note is scrubbed before it leaves the browser', note && note.value);
+    const rv = all.find((e) => e.n === 'result_view');
+    // The context carries the catalog version, itself a date label, so look at the events.
+    ok(rv && rv.answers.race === '12-23' && !/\d{4}-\d{2}-\d{2}/.test(JSON.stringify(all)), 'C5 the race date is sent as a bucket, never a date', rv && rv.answers);
+    const ctx = JSON.parse(cap.batches[0]).ctx;
+    ok(ctx.mode === 'entry' && ctx.path === '/' && ctx.utm && ctx.utm.utm_source === 'instagram' && ctx.vw === 'desktop', 'context: mode, path, cleaned utm and width bucket', ctx);
+    const marks = all.filter((e) => e.n === 'scroll_depth').map((e) => e.pct);
+    ok(JSON.stringify(marks) === '[25,50,75,100]', 'C8 scroll depth marks fire once each, in order', marks);
+    const sections = all.filter((e) => e.n === 'section_view').map((e) => e.id);
+    ok(sections.includes('hero') && sections.includes('faq') && new Set(sections).size === sections.length, 'C8 homepage sections recorded once each, hero named by position', sections);
+    ok(all.some((e) => e.n === 'faq_open' && e.i === 1), 'C8 FAQ opens recorded by index');
+    const ctas = all.filter((e) => e.n === 'cta_click');
+    ok(ctas.every((e) => Object.keys(e).every((k) => ['n', 't', 'q', 'id', 'kind', 'host'].includes(k))), 'C8 link clicks carry only id, kind and host');
+    ok(ctas.some((e) => e.id === 'continue-to-homepage') && !names.includes('entry_skip'), 'B7 continue is a click, not a skip');
+    const storage = await page.evaluate(() => ({ session: Object.keys(sessionStorage), local: Object.keys(localStorage), cookie: document.cookie }));
+    ok(JSON.stringify(storage.session) === '["hx_entry"]' && storage.local.every((k) => ['hybridx-consent', 'hybridx-ui-theme'].includes(k)) && !storage.cookie.includes(JSON.parse(cap.batches[0]).sid), 'C11 the visit id is not stored on the device', storage);
+    await page.context().close();
+  }
+  {
+    // Accepting in the banner mid-visit starts the record from that moment.
+    const page = await newPage(browser, 1440, 900);
+    const cap = await captured(page);
+    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
+    await page.locator('#hx-entry [data-goal="xenom"]').click();
+    await page.waitForSelector('dialog[open]');
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(500);
+    const names = events(cap.batches).map((e) => e.n);
+    ok(names[0] === 'page_view' && names.includes('entry_shown') && names.includes('finder_open'), 'consent given mid-visit starts tracking with a page_view', names.slice(0, 4));
+    await page.context().close();
+  }
+  {
+    const page = await newPage(browser, 1440, 900, { consent: true });
+    const cap = await captured(page);
+    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await page.locator('a[data-skip="bar"]').click();
+    await page.waitForTimeout(200);
+    ok((await page.locator('#hx-skipwhy-slot button').count()) > 0, 'B4 the "why" strip appears after a skip when tracking is on');
+    await page.getByRole('button', { name: 'I know what I want' }).click();
+    ok((await page.locator('#hx-skipwhy-slot').innerText()).includes('Thank you'), 'the strip thanks the visitor');
+    await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(500);
+    const all = events(cap.batches);
+    ok(all.some((e) => e.n === 'entry_skip' && e.from === 'bar' && e.step === 0) && all.some((e) => e.n === 'skip_reason' && e.reason === 'know'), 'entry_skip and skip_reason recorded', all.map((e) => e.n));
+    await page.context().close();
+  }
+  {
+    const page = await newPage(browser, 1440, 900, { consent: true });
+    await captured(page, { talkStatus: 500 });
+    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await toResult(page, ROUTES[1]);
+    await page.getByRole('button', { name: 'Talk to us directly' }).click();
+    await page.fill('#t-name', 'Sam');
+    await page.fill('#t-email', 'sam@example.com');
+    await page.getByRole('button', { name: /Send message/ }).click();
+    await page.waitForTimeout(500);
+    ok((await page.locator('dialog').innerText()).includes('did not send') && (await page.inputValue('#t-name')) === 'Sam', 'C13 a failed send shows the error and keeps what the visitor typed');
+    await page.context().close();
+  }
+  {
+    const page = await newPage(browser, 1440, 900, { consent: true });
+    const cap = await captured(page);
+    await page.goto(base + '/start?goal=faster&utm_source=guide&utm_campaign=how-to-train', { waitUntil: 'networkidle' });
+    await page.waitForSelector('dialog[open]');
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(500);
+    const first = JSON.parse(cap.batches[0]);
+    const all = events(cap.batches);
+    ok(first.ctx.mode === 'page' && first.ctx.utm.utm_campaign === 'how-to-train', 'B11 /start reports mode "page" and its utm tags', first.ctx);
+    ok(all.some((e) => e.n === 'finder_open' && e.source === 'link' && e.step === 2), 'B11 ?goal= is recorded as finder_open from a link');
+    await page.context().close();
+  }
+
   console.log('\nF. Brand and layout');
   for (const [w, h] of [[1440, 900], [820, 1180], [390, 844]]) {
     const page = await newPage(browser, w, h, { consent: false });
@@ -368,7 +525,7 @@ const ROUTES = [
     await page.fill('#t-name', 'Sam');
     await page.fill('#t-email', 'sam@example.com');
     await page.getByRole('button', { name: /Send message/ }).click();
-    await page.waitForFunction(() => document.querySelector('#f-title')?.textContent.includes('Nothing was sent'));
+    await page.waitForFunction(() => document.querySelector('#f-title')?.textContent.includes('with us'));
     await audit(page, `${w} sent`);
     await page.context().close();
     const fresh = await newPage(browser, w, h);
