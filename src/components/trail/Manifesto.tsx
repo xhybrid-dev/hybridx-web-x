@@ -6,8 +6,9 @@ import styles from './Manifesto.module.css';
 /*
  * What Trail isn't, then what it is. The three "no" lines are struck through
  * one after another as the block comes into view, then "Just the line." gets
- * an orchid line drawn under it. The words are the brief's own (§1, "Never, on
- * this hardware") and the film's opening.
+ * an orchid line drawn under it. The words follow the brief (§1, "Never, on
+ * this hardware") and the film's opening, less "turn-by-turn": the app does
+ * cue each turn, a buzz before it, but from the line's shape, with no names.
  */
 
 export default function Manifesto() {
@@ -40,7 +41,7 @@ export default function Manifesto() {
         <span>No map tiles.</span>
       </p>
       <p className={styles.no}>
-        <span>No turn-by-turn.</span>
+        <span>No street names.</span>
       </p>
       <p className={styles.no}>
         <span>No rerouting.</span>
@@ -53,8 +54,8 @@ export default function Manifesto() {
       </p>
       <p className={styles.sub}>
         Breadcrumb navigation, the way the classic running watches did it. The route as a line, you
-        as an arrow on it, and a buzz if you leave it. Everything a runner needs to stay on course,
-        and nothing that needs a phone signal.
+        as an arrow on it, a buzz before each turn and another if you leave it. Everything a runner
+        needs to stay on course, all of it on the watch, so nothing needs a phone signal.
       </p>
     </div>
   );

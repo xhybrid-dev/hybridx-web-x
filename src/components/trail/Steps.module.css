@@ -108,7 +108,7 @@
   color: #50555c;
 }
 
-/* ── A concept watch screen, drawn in HTML ────────────────────────────── */
+/* ── A real watch screen, in a bezel ───────────────────────────────── */
 
 .watchFace {
   position: relative;
@@ -118,118 +118,11 @@
   border-radius: 50%;
   background: #000;
   box-shadow: 0 0 0 10px #1a1c20, 0 0 0 11px rgba(255, 255, 255, 0.14), 0 30px 60px -20px rgba(0, 0, 0, 0.9);
-  font-family: var(--font-trail-poppins), 'Poppins', sans-serif;
-  color: #fff;
-  text-align: center;
   overflow: hidden;
-  container-type: inline-size;
 }
 
-.faceTitle {
-  margin: 8.5cqw 0 0;
-  font-size: 7.5cqw;
-  font-style: italic;
-}
-
-.faceRule {
-  display: block;
-  width: 58%;
-  height: 2px;
-  margin: 2cqw auto 0;
-  background: #555;
-}
-
-.menuItem {
-  margin: 5cqw 0;
-  font-size: 7cqw;
-  font-weight: 500;
-  color: #fff;
-}
-
-.menuSel {
-  display: grid;
-  gap: 0.5cqw;
-  padding: 3.5cqw 0;
-  background: #005555;
-}
-
-.menuSel strong {
-  font-size: 10cqw;
-  font-weight: 600;
-}
-
-.menuSel span {
-  font-size: 6cqw;
-  font-style: italic;
-}
-
-.bigNum {
-  margin: 5cqw 0 0;
-  font-size: 17cqw;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.unit {
-  margin: 0;
-  font-size: 5.5cqw;
-  color: #aaa;
-}
-
-.pair {
-  display: flex;
-  justify-content: center;
-  gap: 8cqw;
-  margin-top: 3cqw;
-}
-
-.pair p {
-  margin: 0;
-  display: grid;
-}
-
-.pair strong {
-  font-size: 9.5cqw;
-  font-weight: 500;
-}
-
-.pair span {
-  font-size: 5.5cqw;
-  color: #aaa;
-}
-
-.hr {
-  margin: 3cqw 0 0;
-  font-size: 7cqw;
-  font-weight: 500;
-}
-
-.lap {
-  margin: 1.5cqw 0 0;
-  font-size: 5.5cqw;
-  color: #ff55ff;
-}
-
-.hintR1,
-.hintR2 {
-  position: absolute;
-  width: 3cqw;
-  height: 12cqw;
-  border-radius: 2cqw;
-}
-
-.hintR1 {
-  right: 5cqw;
-  top: 18cqw;
-  background: #fff;
-  transform: rotate(-30deg);
-}
-
-.hintR2 {
-  right: 5cqw;
-  bottom: 18cqw;
-  background: #ffaa00;
-  transform: rotate(30deg);
+.shot {
+  object-fit: cover;
 }
 
 @media (prefers-reduced-motion: reduce) {

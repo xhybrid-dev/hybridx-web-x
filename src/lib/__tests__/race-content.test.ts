@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSegments, STATIONS } from '../race-content';
+import { buildSegments, formatName, runWork, STATIONS } from '../race-content';
 
 // The same counts the watch app's RaceTemplateTest pins. If these drift, the
 // page is describing a race the watch does not record.
@@ -35,5 +35,28 @@ describe('buildSegments', () => {
   it('runs the stations in race order', () => {
     const stations = buildSegments('full', false).filter((s) => s.kind === 'station');
     expect(stations.map((s) => s.label)).toEqual(STATIONS.map((s) => s.label));
+  });
+});
+
+describe('run distance', () => {
+  it('writes runs as the watch does', () => {
+    expect(runWork(1000)).toBe('1 km');
+    expect(runWork(500)).toBe('500 m');
+    expect(runWork(100)).toBe('100 m');
+    expect(runWork(40)).toBe('100 m');
+    expect(runWork(2000)).toBe('1 km');
+  });
+
+  it('shortens every run and nothing else', () => {
+    const segs = buildSegments('full', false, 500);
+    expect(segs).toHaveLength(16);
+    expect(segs.filter((s) => s.kind === 'run').every((s) => s.work === '500 m')).toBe(true);
+    expect(segs.find((s) => s.kind === 'station')?.work).toBe('1000 m');
+  });
+
+  it('calls a shortened full race a sim', () => {
+    expect(formatName('full')).toBe('Full race');
+    expect(formatName('full', 500)).toBe('Full sim');
+    expect(formatName('firstHalf', 500)).toBe('Rounds 1–4');
   });
 });

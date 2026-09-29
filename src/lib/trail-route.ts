@@ -19,10 +19,16 @@
  *     point in the file, with a 5 m dead band on elevation. If a file holds
  *     both a track and a route, the kind that arrives first wins.
  *
- * Along-the-line progress and the off-course rule are the brief's v1
- * features (HYBRIDX_TRAIL_BRIEF.md F6, F7). The watch builds them in phase
- * T1, so their exact tuning (hysteresis, confirmation time) isn't decided
- * yet; OFF_COURSE_* below are the page's illustration of the 50 m default.
+ * And the watch's navigation, as built (hybridx-trail/Software/Libs/Core):
+ *   - OffCourse: OffCourse.hpp/.cpp, the same state machine and defaults —
+ *     off after 5 s more than 50 m from the line, back after 3 s within 30 m,
+ *     a reminder every minute, bad fixes (worse than 25 m) ignored, nothing
+ *     before you first reach the route and nothing after the finish.
+ *   - MAP_RADII_M, scaleFor(): MapZoom.hpp and RouteMap.cpp's scale bar.
+ *   - findTurns(), turnName(): TurnFinder.hpp — 45 degrees or more over 30 m
+ *     chords, sampled every 10 m along the route.
+ *   - locate(): a simpler stand-in for RouteTracker's search, windowed round
+ *     the last match (150 m back, 600 m ahead) as the watch's is.
  *
  * src/lib/__tests__/trail-route.test.ts checks these against the same shapes
  * the watch's host tests use.
@@ -36,19 +42,30 @@ export const ROUTE_CAPACITY = 2000;
 /** RouteBuilder::kEleBandCm, in metres. */
 export const ELE_BAND_M = 5;
 
-/** The brief's default off-course threshold (F6). */
+/** OffCourse::Config, the watch's defaults. */
 export const OFF_COURSE_M = 50;
-/** Back on course once this close again: the "some hysteresis" of F6. */
-export const BACK_ON_COURSE_M = 35;
+export const BACK_ON_COURSE_M = 30;
+export const CONFIRM_OFF_S = 5;
+export const CONFIRM_BACK_S = 3;
+export const REMIND_S = 60;
+export const MAX_PRECISION_M = 25;
 
-/** The brief's fixed zoom scales (F4), plus the whole route. */
-export const ZOOMS = [
-  { id: '200m', label: '200 m', metres: 200 },
-  { id: '500m', label: '500 m', metres: 500 },
-  { id: '1km', label: '1 km', metres: 1000 },
-  { id: '2km', label: '2 km', metres: 2000 },
-  { id: 'all', label: 'Whole route', metres: 0 },
-] as const;
+/**
+ * MapZoom::kRadiiM: metres from you to the edge of the round screen, stepped
+ * with the watch's UP and DOWN buttons, then the whole route. Starts at 150 m.
+ */
+export const MAP_RADII_M = [60, 100, 150, 250, 400, 700, 1200, 2000, 3500] as const;
+export const MAP_DEFAULT_LEVEL = 2;
+/** The level after the fixed radii: the whole route. */
+export const MAP_WHOLE_LEVEL = MAP_RADII_M.length;
+
+/** RouteMap.cpp's metric scale bar: the largest that fits 96 px. */
+const SCALE_STEPS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
+export function scaleFor(metresPerPx: number, maxPx = 96) {
+  let pick = SCALE_STEPS[0];
+  for (const m of SCALE_STEPS) if (m / metresPerPx <= maxPx) pick = m;
+  return { metres: pick, label: pick >= 1000 ? `${pick / 1000} km` : `${pick} m` };
+}
 
 export type PointKind = 'track' | 'route';
 
@@ -334,16 +351,16 @@ export function slice(route: LocalRoute, s0: number, s1: number): [number, numbe
 
 /**
  * Where a position is along the route: the nearest point on the line, looked
- * for near where you were last (within `window` metres either side), so a
+ * for near where you were last (150 m back, 600 m ahead), so a
  * loop that crosses itself or an out-and-back never jumps to the wrong leg.
  * With no previous position, the whole route is searched.
  */
-export function locate(route: LocalRoute, x: number, y: number, lastAlong?: number, window = 400) {
+export function locate(route: LocalRoute, x: number, y: number, lastAlong?: number, back = 150, ahead = 600) {
   const { pts, along } = route;
   let best = Infinity;
   let bestAlong = 0;
   for (let i = 1; i < pts.length; i++) {
-    if (lastAlong !== undefined && (along[i] < lastAlong - window || along[i - 1] > lastAlong + window)) continue;
+    if (lastAlong !== undefined && (along[i] < lastAlong - back || along[i - 1] > lastAlong + ahead)) continue;
     const [ax, ay] = pts[i - 1];
     const [bx, by] = pts[i];
     const vx = bx - ax;
@@ -359,11 +376,116 @@ export function locate(route: LocalRoute, x: number, y: number, lastAlong?: numb
   return { along: bestAlong, off: best };
 }
 
-/** The off-course alert: on past OFF_COURSE_M, off again only back inside BACK_ON_COURSE_M. */
-export function offCourseStep(wasOff: boolean, offM: number) {
-  if (!wasOff && offM > OFF_COURSE_M) return { off: true, changed: true };
-  if (wasOff && offM < BACK_ON_COURSE_M) return { off: false, changed: true };
-  return { off: wasOff, changed: false };
+export type OffCourseState = 'notStarted' | 'onCourse' | 'off' | 'finished';
+export type OffCourseEvent = 'none' | 'wentOff' | 'stillOff' | 'backOn' | 'finished';
+
+/** OffCourse.cpp, line for line. Time is in seconds. */
+export class OffCourse {
+  state: OffCourseState = 'notStarted';
+  private pending = false;
+  private pendingAt = 0;
+  private lastAlertAt = 0;
+
+  update(now: number, offRouteM: number, opts: { everLocked?: boolean; finished?: boolean; precisionM?: number } = {}): OffCourseEvent {
+    const { everLocked = true, finished = false, precisionM = 5 } = opts;
+    if (this.state === 'finished') return 'none';
+    if (finished) {
+      this.state = 'finished';
+      this.pending = false;
+      return 'finished';
+    }
+    if (this.state === 'notStarted') {
+      if (everLocked) this.state = 'onCourse';
+      return 'none';
+    }
+    if (precisionM > MAX_PRECISION_M) {
+      this.pending = false; // a bad fix breaks any run of good ones
+      return 'none';
+    }
+    if (this.state === 'onCourse') {
+      if (offRouteM <= OFF_COURSE_M) {
+        this.pending = false;
+        return 'none';
+      }
+      if (!this.pending) {
+        this.pending = true;
+        this.pendingAt = now;
+      }
+      if (now - this.pendingAt >= CONFIRM_OFF_S) {
+        this.state = 'off';
+        this.pending = false;
+        this.lastAlertAt = now;
+        return 'wentOff';
+      }
+      return 'none';
+    }
+    // Off course.
+    if (offRouteM <= BACK_ON_COURSE_M) {
+      if (!this.pending) {
+        this.pending = true;
+        this.pendingAt = now;
+      }
+      if (now - this.pendingAt >= CONFIRM_BACK_S) {
+        this.state = 'onCourse';
+        this.pending = false;
+        return 'backOn';
+      }
+      return 'none';
+    }
+    this.pending = false;
+    if (now - this.lastAlertAt >= REMIND_S) {
+      this.lastAlertAt = now;
+      return 'stillOff';
+    }
+    return 'none';
+  }
+}
+
+// ── Turns, as TurnFinder ──────────────────────────────────────────────────
+
+const TURN_CHORD_M = 30;
+const TURN_GRID_M = 10;
+const TURN_MIN_DEG = 45;
+const TURN_END_CLEAR_M = 30;
+
+export interface Turn {
+  along: number;
+  /** Positive right, negative left. */
+  angleDeg: number;
+}
+
+/** Every turn on the route: 45 degrees or more over 30 m chords, on a 10 m grid. */
+export function findTurns(route: LocalRoute): Turn[] {
+  const at = (s: number) => {
+    const p = pointAt(route, s);
+    return [p.x, p.y] as const;
+  };
+  const bearing = (a: readonly [number, number], b: readonly [number, number]) => Math.atan2(b[0] - a[0], b[1] - a[1]);
+  const turns: Turn[] = [];
+  let run: Turn | null = null;
+  for (let s = TURN_END_CLEAR_M; s <= route.length - TURN_END_CLEAR_M; s += TURN_GRID_M) {
+    const inB = bearing(at(s - TURN_CHORD_M), at(s));
+    const outB = bearing(at(s), at(s + TURN_CHORD_M));
+    let d = ((outB - inB) * 180) / Math.PI;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    if (Math.abs(d) >= TURN_MIN_DEG) {
+      if (!run || Math.abs(d) > Math.abs(run.angleDeg)) run = { along: s, angleDeg: Math.round(d) };
+    } else if (run) {
+      turns.push(run);
+      run = null;
+    }
+  }
+  if (run) turns.push(run);
+  return turns;
+}
+
+/** TurnFinder::name. */
+export function turnName(angleDeg: number) {
+  const a = Math.abs(angleDeg);
+  if (a >= 145) return 'U-turn';
+  const side = angleDeg > 0 ? 'right' : 'left';
+  return a >= 110 ? `Sharp ${side}` : side[0].toUpperCase() + side.slice(1);
 }
 
 /** "10.1 km", or "850 m" under a kilometre. */

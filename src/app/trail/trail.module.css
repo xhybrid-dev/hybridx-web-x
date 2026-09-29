@@ -208,6 +208,65 @@
   color: var(--orchid);
 }
 
+/* ── On the way round: features, each with the real screen ────────────── */
+
+.faces {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 36px);
+}
+
+.faces li {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.faces p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.faceShot {
+  margin-bottom: 14px;
+}
+
+/* ── The real screens, as a strip ─────────────────────────────────────── */
+
+.gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 36px clamp(16px, 3vw, 32px);
+}
+
+.gallery li {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.gallery strong {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.gallery span {
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 24ch;
+}
+
 /* ── Split layouts ────────────────────────────────────────────────────── */
 
 .split {
@@ -275,7 +334,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
   position: relative;
 }
@@ -334,6 +393,15 @@
   border-color: var(--orchid) !important;
   background: var(--orchid) !important;
   box-shadow: 0 0 0 5px rgba(255, 85, 255, 0.2), 0 0 16px var(--orchid);
+}
+
+.phaseDone::before {
+  border-color: #aa00aa !important;
+  background: #aa00aa !important;
+}
+
+.phaseDone .phaseTag {
+  color: #d77fd7;
 }
 
 .phaseNow .phaseTag {
@@ -428,6 +496,11 @@
     min-height: 0;
   }
 
+  .faces,
+  .gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .phases {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -448,6 +521,16 @@
 
   .phases li::before {
     top: 2px;
+  }
+}
+
+@media (max-width: 560px) {
+  .faces {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery {
+    gap: 28px 14px;
   }
 }
 

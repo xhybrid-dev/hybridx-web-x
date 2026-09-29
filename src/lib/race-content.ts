@@ -46,6 +46,25 @@ export const STATIONS: readonly Station[] = [
   { id: 8, label: 'WALL BALLS', name: 'Wall Balls', work: '100 reps' },
 ];
 
+// Run distance: the race's 1 km, or shortened for a sim. Matches the watch's
+// kRunDistanceMinM / MaxM / StepM / DefaultM in RaceData.hpp.
+export const RUN_MIN_M = 100;
+export const RUN_MAX_M = 1000;
+export const RUN_STEP_M = 100;
+export const RUN_DEFAULT_M = 1000;
+
+/** As the watch writes it: "500 m", or "1 km" for the race distance (runWork). */
+export function runWork(metres: number) {
+  const m = Math.min(RUN_MAX_M, Math.max(RUN_MIN_M, Math.round(metres / RUN_STEP_M) * RUN_STEP_M));
+  return m === 1000 ? '1 km' : `${m} m`;
+}
+
+/** The start screen's name for a format: a full race with shorter runs is a "Full sim". */
+export function formatName(format: RaceFormat, runM = RUN_DEFAULT_M) {
+  if (format === 'full') return runM === RUN_DEFAULT_M ? 'Full race' : 'Full sim';
+  return FORMATS.find((f) => f.id === format)?.label ?? '';
+}
+
 export const FORMATS: readonly { id: RaceFormat; label: string; rounds: [number, number] }[] = [
   { id: 'full', label: 'Full race', rounds: [1, 8] },
   { id: 'firstHalf', label: 'Rounds 1–4', rounds: [1, 4] },
@@ -57,9 +76,10 @@ export const FORMATS: readonly { id: RaceFormat; label: string; rounds: [number,
  *
  * Roxzone off: RUN, STATION for each round. Roxzone on: RUN, ROXZONE IN,
  * STATION, ROXZONE OUT — except that no ROXZONE OUT follows the final station,
- * because the race ends when the last station does.
+ * because the race ends when the last station does. Runs are 1 km unless the
+ * run distance is shortened for a sim (100 m to 1 km, in 100 m steps).
  */
-export function buildSegments(format: RaceFormat, roxzone: boolean): Segment[] {
+export function buildSegments(format: RaceFormat, roxzone: boolean, runM = RUN_DEFAULT_M): Segment[] {
   const found = FORMATS.find((f) => f.id === format);
   if (!found) return [];
   const [first, last] = found.rounds;
@@ -67,7 +87,7 @@ export function buildSegments(format: RaceFormat, roxzone: boolean): Segment[] {
 
   for (let round = first; round <= last; round++) {
     const station = STATIONS[round - 1];
-    segments.push({ kind: 'run', round, label: `RUN ${round}/8`, work: '1 km' });
+    segments.push({ kind: 'run', round, label: `RUN ${round}/8`, work: runWork(runM) });
     if (roxzone) segments.push({ kind: 'roxIn', round, label: 'ROXZONE IN', work: 'Transition' });
     segments.push({ kind: 'station', round, label: station.label, work: station.work });
     if (roxzone && round !== last) {

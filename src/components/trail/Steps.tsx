@@ -1,14 +1,11 @@
+import Image from 'next/image';
 import { height, RIDGE_LOOP } from '@/lib/trail-terrain';
-import { formatDistance } from '@/lib/trail-route';
 import styles from './Steps.module.css';
 
 /*
  * The visuals for "how it works" and "it's a run, too". Static, drawn in HTML
- * and CSS (the GPX stream scrolls with a CSS animation).
- *
- * The watch screens here are concept designs from the promo film
- * (promo/lib/ui-trail.mjs: routeList, dataFace). The app's real screens are
- * phase T3 of the brief; the page labels these as concepts.
+ * and CSS (the GPX stream scrolls with a CSS animation), and the app's real
+ * screens, from hybridx-trail's simulator captures (docs/screens/).
  */
 
 const LAT0 = 54.45;
@@ -65,52 +62,15 @@ export function UsbTree() {
   );
 }
 
-const LIST = [
-  { name: 'Coast path', tip: '21.1 km · 310 m' },
-  { name: 'Ridge loop', tip: `${formatDistance(RIDGE_LOOP.length)} · ${RIDGE_LOOP.ascentM} m` },
-  { name: 'Sunday long', tip: '18.0 km · 240 m' },
-];
 
-/** The route list, as the concept design draws it: the SDK's wheel menu. */
-export function RouteListScreen() {
+/**
+ * A real screen from the app, captured in the UNA simulator at the watch's
+ * 240 x 240 resolution doubled, in a round bezel.
+ */
+export function RealScreen({ name, alt, size = 250 }: { name: string; alt: string; size?: number }) {
   return (
-    <div className={styles.watchFace} role="img" aria-label="Concept design: the watch's route list, with Ridge loop selected, 14.2 km.">
-      <p className={styles.faceTitle}>Routes</p>
-      <span className={styles.faceRule} />
-      <p className={styles.menuItem}>{LIST[0].name}</p>
-      <div className={styles.menuSel}>
-        <strong>{LIST[1].name}</strong>
-        <span>{LIST[1].tip}</span>
-      </div>
-      <p className={styles.menuItem}>{LIST[2].name}</p>
-      <span className={styles.hintR1} />
-      <span className={styles.hintR2} />
-    </div>
-  );
-}
-
-/** A run data face, as RunLVGL's: the numbers are illustrative. */
-export function DataScreen() {
-  return (
-    <div className={styles.watchFace} role="img" aria-label="Concept design: the run screen, with distance, pace, time, heart rate and lap.">
-      <p className={styles.faceTitle}>Run</p>
-      <span className={styles.faceRule} />
-      <p className={styles.bigNum}>12.84</p>
-      <p className={styles.unit}>km</p>
-      <div className={styles.pair}>
-        <p>
-          <strong>5:36</strong>
-          <span>/km</span>
-        </p>
-        <p>
-          <strong>1:12:08</strong>
-          <span>time</span>
-        </p>
-      </div>
-      <p className={styles.hr}>150 bpm</p>
-      <p className={styles.lap}>Lap 13</p>
-      <span className={styles.hintR1} />
-      <span className={styles.hintR2} />
+    <div className={styles.watchFace} style={{ width: `min(${size}px, 100%)` }}>
+      <Image src={`/trail/screens/${name}.png`} alt={alt} fill sizes={`${size}px`} className={styles.shot} />
     </div>
   );
 }

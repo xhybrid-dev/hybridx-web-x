@@ -12,7 +12,7 @@ import styles from './StreakWatch.module.css';
  * demo.webm is the same recording re-encoded as VP9, for browsers without
  * H.264.
  *
- * The recording is the real GUI in the simulator: first week, a session found,
+ * The recording is the real GUI in the simulator: first week, a session added,
  * week complete, a summit with confetti, a shield, a fresh start. It is 520 px
  * square with the round display centred at radius 240; the CSS places that
  * circle on the render's transparent screen and clips the square corners away.
@@ -51,7 +51,7 @@ export default function StreakWatch() {
         loop
         playsInline
         preload="metadata"
-        aria-label="HybridX Streak on a UNA Watch: a session is found, the week is completed, the climber steps up the mountain, a summit is reached, a shield saves the streak."
+        aria-label="HybridX Streak on a UNA Watch: a session is added, the week is completed, the climber steps up the mountain, a summit is reached, a shield saves the streak."
       >
         {/* VP9 first for browsers without H.264, then the original H.264. */}
         <source src="/streak/demo.webm" type="video/webm" />

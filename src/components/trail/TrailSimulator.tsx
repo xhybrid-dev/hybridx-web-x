@@ -4,8 +4,12 @@ import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import {
   buildRoute,
   formatDistance,
+  findTurns,
   locate,
-  offCourseStep,
+  MAP_DEFAULT_LEVEL,
+  MAP_RADII_M,
+  MAP_WHOLE_LEVEL,
+  OffCourse,
   OFF_COURSE_M,
   parseGpx,
   pointAt,
@@ -13,7 +17,7 @@ import {
   slice,
   START_SPACING_M,
   toLocal,
-  ZOOMS,
+  turnName,
   type BuiltRoute,
   type LocalRoute,
 } from '@/lib/trail-route';
@@ -28,8 +32,13 @@ import styles from './TrailSimulator.module.css';
  * A runner follows a route, fast-forwarded. On the left, the whole route with
  * a 50 m corridor either side and the breadcrumb of where the runner has
  * really been; on the right, the watch's map screen for the same moment.
- * Visitors can change the zoom (the brief's fixed scales), flip heading-up and
- * north-up, and press "Wander off" to leave the line and set off the alert.
+ * Visitors can zoom in and out through the app's own levels (60 m to 3.5 km to
+ * the edge of the screen, then the whole route), flip heading-up and north-up,
+ * and press "Wander off" to leave the line and set off the alert.
+ *
+ * The alert is the app's own (OffCourse), fed simulated seconds: the runner is
+ * fast-forwarded about ten times, so the clock is too. Turn cues come from the
+ * app's TurnFinder rules: named from 400 m out, a band 50 m before.
  *
  * Their own GPX works too: it's read in the browser with lib/trail-route.ts,
  * which mirrors the watch's GpxReader and RouteBuilder, and is never uploaded.
@@ -39,6 +48,8 @@ import styles from './TrailSimulator.module.css';
  */
 
 const SPEED = 32; // metres of route per second: a brisk fast-forward
+const TIME_SCALE = 10; // simulated seconds per real second: a 3.2 m/s runner
+const BAND_S = 2; // real seconds a "Back on course" or turn band stays up
 const WANDER_S = 12; // seconds out and back
 const WANDER_M = 95; // how far off the line the wander goes
 const CRUMBS = 140;
@@ -49,7 +60,7 @@ export default function TrailSimulator() {
   const [route, setRoute] = useState<LocalRoute>(RIDGE_LOOP);
   const [source, setSource] = useState<Source>({ kind: 'demo' });
   const [stats, setStats] = useState<BuiltRoute | undefined>(undefined);
-  const [zoom, setZoom] = useState<(typeof ZOOMS)[number]['id']>('500m');
+  const [zoom, setZoom] = useState<number>(MAP_DEFAULT_LEVEL);
   const [headingUp, setHeadingUp] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +75,19 @@ export default function TrailSimulator() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Animation state lives in refs: the frame loop reads the latest settings.
-  const sim = useRef({ s: 0, wander: -1, off: false, lastAlong: 0, banner: null as null | 'off' | 'back', bannerAt: 0, crumbs: [] as [number, number][] });
+  const fresh = () => ({
+    s: 0,
+    t: 0,
+    wander: -1,
+    alert: new OffCourse(),
+    lastAlong: 0,
+    banner: null as null | 'off' | 'back' | 'turn',
+    bannerAt: 0,
+    cuedTurn: -1,
+    nextTurn: 0,
+    crumbs: [] as [number, number][],
+  });
+  const sim = useRef(fresh());
   const settings = useRef({ zoom, headingUp, playing });
   settings.current = { zoom, headingUp, playing };
 
@@ -76,7 +99,7 @@ export default function TrailSimulator() {
   // A new route: start again from its beginning.
   useEffect(() => {
     // Tracking starts from the start, so a loop's shared start and finish can't read as finished.
-    sim.current = { s: 0, wander: -1, off: false, lastAlong: 0, banner: null, bannerAt: 0, crumbs: [] };
+    sim.current = fresh();
     setStatus('on');
   }, [route]);
 
@@ -90,6 +113,7 @@ export default function TrailSimulator() {
     // Contours only for the demo loop: we don't know the land under a visitor's file.
     const b = bounds(route, 0);
     const topo: Contours | null = source.kind === 'demo' ? contours(b.x0 - 600, b.y0 - 600, b.x1 + 600, b.y1 + 600, 50, 25) : null;
+    const turns = findTurns(route);
 
     let raf = 0;
     let last = performance.now();
@@ -103,10 +127,10 @@ export default function TrailSimulator() {
       const set = settings.current;
       if (set.playing && !reduce) {
         st.s += SPEED * dt;
+        st.t += TIME_SCALE * dt;
         if (st.s >= route.length) {
-          st.s = 0;
-          st.lastAlong = 0;
-          st.crumbs = [];
+          Object.assign(st, fresh(), { wander: st.wander });
+          setStatus('on');
         }
         if (st.wander >= 0) {
           st.wander += dt / WANDER_S;
@@ -128,15 +152,29 @@ export default function TrailSimulator() {
       // Where that puts them on the line, and how far off it.
       const loc = locate(route, x, y, st.lastAlong);
       st.lastAlong = loc.along;
-      const step = offCourseStep(st.off, loc.off);
-      if (step.changed) {
-        st.off = step.off;
-        st.banner = step.off ? 'off' : 'back';
+      const ev = set.playing ? st.alert.update(st.t, loc.off) : 'none';
+      if (ev === 'wentOff' || ev === 'stillOff' || ev === 'backOn') {
+        st.banner = ev === 'backOn' ? 'back' : 'off';
         st.bannerAt = now;
         watchRef.current?.buzz();
-        setStatus(step.off ? 'off' : 'on');
+        setStatus(ev === 'backOn' ? 'on' : 'off');
       }
-      if (st.banner === 'back' && now - st.bannerAt > 2600) st.banner = null;
+      const off = st.alert.state === 'off';
+
+      // Turn cues: named from 400 m out, a band and a buzz 50 m before.
+      while (st.nextTurn < turns.length && turns[st.nextTurn].along < loc.along) st.nextTurn++;
+      const turn = turns[st.nextTurn];
+      const turnIn = turn ? turn.along - loc.along : Infinity;
+      if (turn && !off && turnIn <= 50 && st.cuedTurn !== st.nextTurn) {
+        st.cuedTurn = st.nextTurn;
+        if (st.banner !== 'back') {
+          st.banner = 'turn';
+          st.bannerAt = now;
+          watchRef.current?.buzz();
+        }
+      }
+      if ((st.banner === 'back' || st.banner === 'turn') && now - st.bannerAt > BAND_S * 1000) st.banner = null;
+      if (st.banner === 'off' && !off) st.banner = null;
       if (set.playing && (st.crumbs.length === 0 || Math.hypot(x - st.crumbs[st.crumbs.length - 1][0], y - st.crumbs[st.crumbs.length - 1][1]) > 25)) {
         st.crumbs.push([x, y]);
         if (st.crumbs.length > CRUMBS) st.crumbs.shift();
@@ -178,7 +216,7 @@ export default function TrailSimulator() {
         ctx.save();
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        ctx.strokeStyle = st.off ? 'rgba(255,170,0,0.13)' : 'rgba(255,85,255,0.08)';
+        ctx.strokeStyle = off ? 'rgba(255,255,0,0.12)' : 'rgba(255,85,255,0.08)';
         ctx.lineWidth = Math.max(2 * OFF_COURSE_M * k, 3 * dpr);
         ctx.beginPath();
         route.pts.forEach(([px, py], i) => {
@@ -212,8 +250,8 @@ export default function TrailSimulator() {
         const [rx, ry] = toPx(x, y);
         ctx.beginPath();
         ctx.arc(rx, ry, 6 * dpr, 0, Math.PI * 2);
-        ctx.fillStyle = st.off ? COLOUR.amber : '#fff';
-        ctx.shadowColor = st.off ? COLOUR.amber : '#fff';
+        ctx.fillStyle = off ? COLOUR.off : '#fff';
+        ctx.shadowColor = off ? COLOUR.off : '#fff';
         ctx.shadowBlur = 14 * dpr;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -225,20 +263,22 @@ export default function TrailSimulator() {
 
       if (now - lastWatch > 33) {
         lastWatch = now;
-        const z = ZOOMS.find((zz) => zz.id === set.zoom) ?? ZOOMS[1];
         const bannerP = st.banner ? Math.min(1, (now - st.bannerAt) / 180) : 0;
+        const near = pointAt(route, loc.along);
+        const name = turn ? turnName(turn.angleDeg) : '';
         watchRef.current?.draw(route, {
           along: loc.along,
           you: [x, y],
           heading: here.heading,
           headingUp: set.headingUp,
-          radiusM: z.metres * 2,
-          scaleLabel: z.label,
-          scaleM: z.metres,
+          radiusM: set.zoom >= MAP_WHOLE_LEVEL ? 0 : MAP_RADII_M[set.zoom],
           toGoM: Math.max(0, route.length - loc.along),
+          turnAhead: turn && turnIn <= 400 ? { name, inM: turnIn } : null,
           banner: st.banner,
           bannerP,
           offByM: loc.off,
+          backTo: [near.x, near.y],
+          turnText: name === 'U-turn' ? 'U-turn' : `Turn ${name.toLowerCase()}`,
         });
       }
 
@@ -342,21 +382,30 @@ export default function TrailSimulator() {
         </div>
 
         <div className={styles.controls}>
-          <div className={styles.group} role="radiogroup" aria-label="Zoom">
-            <span className={styles.groupLabel}>Zoom</span>
+          <div className={styles.group} role="group" aria-label="Zoom">
+            <span className={styles.groupLabel}>Zoom · the watch’s up and down buttons</span>
             <div className={styles.chips}>
-              {ZOOMS.map((z) => (
-                <button
-                  key={z.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={zoom === z.id}
-                  className={`${styles.chip} ${zoom === z.id ? styles.chipOn : ''}`}
-                  onClick={() => setZoom(z.id)}
-                >
-                  {z.label}
-                </button>
-              ))}
+              <button
+                type="button"
+                className={styles.chip}
+                onClick={() => setZoom((z) => Math.max(0, z - 1))}
+                disabled={zoom === 0}
+                aria-label="Zoom in"
+              >
+                In
+              </button>
+              <span className={styles.zoomLevel} aria-live="polite">
+                {zoom >= MAP_WHOLE_LEVEL ? 'Whole route' : `${formatDistance(MAP_RADII_M[zoom])} to the edge`}
+              </span>
+              <button
+                type="button"
+                className={styles.chip}
+                onClick={() => setZoom((z) => Math.min(MAP_WHOLE_LEVEL, z + 1))}
+                disabled={zoom === MAP_WHOLE_LEVEL}
+                aria-label="Zoom out"
+              >
+                Out
+              </button>
             </div>
           </div>
 
