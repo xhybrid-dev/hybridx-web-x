@@ -18,6 +18,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
     "@garmin/fitsdk": "^21.208.0",
     "@genkit-ai/google-genai": "^1.39.0",
     "@hookform/resolvers": "^3.9.0",

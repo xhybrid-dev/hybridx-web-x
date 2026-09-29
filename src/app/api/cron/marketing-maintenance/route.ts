@@ -15,7 +15,9 @@
 //   3. **Plan finder upkeep.** Rolls up each settled day of tracked visits
 //      into one hx_rollups document for the admin, and removes step-5 note
 //      text once it is 90 days old (src/lib/plan-finder/store.ts). Both catch
-//      up on missed days by themselves.
+//      up on missed days by themselves. Early each month it also writes the
+//      monthly review, once ANTHROPIC_API_KEY is configured
+//      (src/lib/plan-finder/monthly-review.ts).
 //
 // Both are safe to run repeatedly and safe to miss: the outbox is keyed on
 // per-lead state and the mirror is a full replacement. A skipped run delays
@@ -35,6 +37,7 @@ import { drainOutbox } from '@/lib/lead-outbox';
 import { refreshComplaintMirror } from '@/lib/suppression-mirror';
 import { pruneRateLimits } from '@/lib/rate-limit';
 import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
+import { runMonthlyReview } from '@/lib/plan-finder/monthly-review';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -58,12 +61,13 @@ export async function GET(request: Request) {
   // leads and the mirror protects the sending domain; neither is worth
   // sacrificing to the other's bad day, and neither is worth sacrificing to a
   // housekeeping sweep.
-  const [outbox, mirror, limits, rollups, notes] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
     runDailyRollups(),
     blankOldNotes(),
+    runMonthlyReview(),
   ]);
 
   const result = {
@@ -87,9 +91,13 @@ export async function GET(request: Request) {
       notes.status === 'fulfilled'
         ? notes.value
         : { error: String((notes.reason as Error)?.message ?? notes.reason) },
+    planFinderReview:
+      review.status === 'fulfilled'
+        ? review.value
+        : { error: String((review.reason as Error)?.message ?? review.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

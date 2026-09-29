@@ -474,6 +474,13 @@ function reviewItem(x: unknown): string {
 
 function MonthlyReview({ id, data }: { id: string; data: Record<string, unknown> }) {
   const list = (k: string) => (Array.isArray(data[k]) ? (data[k] as unknown[]) : []);
+  if (data.status === 'failed') {
+    return (
+      <p className="text-sm">
+        The review for {id} did not complete ({String(data.lastError ?? 'unknown error')}); attempt {String(data.attempts ?? 1)} of 3. It is retried automatically.
+      </p>
+    );
+  }
   return (
     <div className="space-y-4 text-sm">
       <p className="text-muted-foreground">Review for {id}.</p>
