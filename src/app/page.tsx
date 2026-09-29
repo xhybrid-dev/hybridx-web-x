@@ -13,6 +13,8 @@ import TrainingPlanShowcase from '@/components/TrainingPlanShowcase';
 import FreeToolsSection from '@/components/FreeToolsSection';
 import Script from 'next/script';
 import { createCourseSchema, createSpeakableSchema } from '@/lib/seo';
+import EntrySection from '@/components/plan-finder/EntrySection';
+import PlanFinderRoot from '@/components/plan-finder/PlanFinderRoot';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -99,6 +101,11 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
       />
       <Header />
+      {/* The plan finder sits in front of the homepage and can be skipped
+          (handover/entry-funnel/docs/03). Everything inside #hx-home is the
+          existing homepage, unchanged. */}
+      <EntrySection mode="entry" />
+      <div id="hx-home" tabIndex={-1} className="flex flex-grow flex-col">
       <main className="flex-grow space-y-20 md:space-y-28">
         <HeroSection />
         <SocialProofSection />
@@ -110,7 +117,9 @@ export default function Home() {
         <FaqSection />
         <InstagramSection />
       </main>
+      </div>
       <Footer />
+      <PlanFinderRoot mode="entry" />
     </div>
   );
 }

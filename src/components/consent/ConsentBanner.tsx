@@ -51,19 +51,18 @@ export default function ConsentBanner() {
       className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#333333] bg-black text-white"
       data-consent-banner
     >
-      <div className="container mx-auto flex max-w-screen-2xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:gap-8">
+      <div className="container mx-auto flex max-w-screen-2xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:gap-8 md:py-4">
         <div className="flex-1 font-body">
           <h2 id="consent-title" className="font-headline text-base font-bold">
             Can we measure how the site is used?
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-[#B3B3B3]">
-            We would like to use Google Analytics and our own anonymous plan finder statistics to see how people use
-            this site, so we can improve it. Neither runs unless you accept. You can change your choice at any time on
-            our{' '}
-            <Link href="/privacy-policy" className="text-white underline underline-offset-2">
+            We would like to use Google Analytics and anonymous plan finder statistics to improve the site. Neither
+            runs unless you accept. You can change your choice at any time in our{' '}
+            <Link href="/privacy-policy#cookies" className="text-white underline underline-offset-2">
               privacy policy
-            </Link>{' '}
-            page.
+            </Link>
+            .
             {reopened && consent !== 'unset' && (
               <span className="mt-1 block text-white">
                 Your current choice: {consent === 'granted' ? 'accepted' : 'rejected'}.

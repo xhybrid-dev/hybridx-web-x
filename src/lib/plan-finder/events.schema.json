@@ -153,8 +153,10 @@
             "band",
             "section",
             "hash",
-            "entry"
-          ]
+            "entry",
+            "link"
+          ],
+          "note": "link: /start opened with ?goal= from a guide or a post"
         },
         "step": {
           "type": "int",
@@ -244,9 +246,11 @@
             "button",
             "esc",
             "backdrop",
-            "pagehide"
+            "pagehide",
+            "back"
           ],
-          "required": true
+          "required": true,
+          "note": "back: the browser Back button closed the dialog"
         },
         "result": {
           "type": "bool",

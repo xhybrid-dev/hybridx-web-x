@@ -22,6 +22,18 @@ export default {
         archivo: ['var(--font-archivo)', 'sans-serif'],
       },
       colors: {
+        // Plan finder (entry section, dialog, admin): the brand palette from the
+        // owner's design review. The entry is black in both themes, so it uses
+        // these fixed values rather than the theme tokens, which flip.
+        hx: {
+          yellow: '#FADB5C',
+          card: '#1A1A1A',   // card on black
+          line: '#333333',   // border on black
+          mute: '#B3B3B3',   // muted text on black
+          ctl: '#808080',    // control border on black
+          lineL: '#D9D9D9',  // border on white
+          muteL: '#4D4D4D',  // muted text on white
+        },
         // "Build a Bigger Engine" VO2max funnel palette (scoped, matches the guide + carousel)
         engine: {
           ox: '#5C0F1A',       // deep oxblood — dark section backgrounds
