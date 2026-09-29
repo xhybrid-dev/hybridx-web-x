@@ -62,10 +62,8 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: '/Icon Logo.png',
-    apple: '/Icon Logo.png',
-  },
+  // Icons come from the files in this folder (favicon.ico, icon.png, apple-icon.png):
+  // Next.js links them itself, and a second declaration here would compete with them.
   openGraph: {
     type: 'website',
     locale: 'en_US',
