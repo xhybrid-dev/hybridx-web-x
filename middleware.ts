@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { CONTROL_PATH, planFinderMode } from '@/lib/plan-finder/launch';
+import { SHOP_EVENTS } from '@/lib/shop/config';
 
 /*
  * The app subdomains — race., streak. and trail.hybridx.club — are this same
@@ -68,6 +69,10 @@ function routeExperiment(request: NextRequest): NextResponse | null {
   return response;
 }
 
+function isShopSecretPath(pathname: string): boolean {
+  return pathname.startsWith('/d/') || SHOP_EVENTS.some((e) => pathname === `${e.path}/thanks`);
+}
+
 export function middleware(request: NextRequest) {
   // Clone the response to add headers
   const response = routeAppSubdomain(request) ?? routeExperiment(request) ?? NextResponse.next();
@@ -95,6 +100,15 @@ export function middleware(request: NextRequest) {
   headers.forEach(({ key, value }) => {
     response.headers.set(key, value);
   });
+
+  // Shop pages whose URL is a bearer secret: the download page (/d/<token>)
+  // and the thanks page (?session_id=...). Never sent on as a referrer, never
+  // cached, never indexed.
+  if (isShopSecretPath(request.nextUrl.pathname)) {
+    response.headers.set('Referrer-Policy', 'no-referrer');
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
   
   // Content-Security-Policy
   const cspDirectives = [

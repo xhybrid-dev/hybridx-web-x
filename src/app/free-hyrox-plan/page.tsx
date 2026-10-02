@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Trophy, Calendar, TrendingUp, Dumbbell, CheckCircle, Smartphone } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ShopEventLink from '@/components/shop/ShopEventLink';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -237,6 +238,7 @@ export default async function FreeHyroxPlanPage() {
         <WhatsIncludedSection />
         <AppUpsellSection />
         <FaqSection />
+        <ShopEventLink />
       </main>
       <Footer />
     </div>

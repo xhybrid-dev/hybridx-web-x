@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             <CardHeader className="text-center pb-8">
               <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
-                Last Updated: September 29, 2026
+                Last Updated: October 2, 2026
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -110,15 +110,29 @@ export default function PrivacyPolicyPage() {
                 </p>
               </section>
 
+              {/* DRAFT for Jon's review (docs/shop-setup.md): the shop's orders. */}
+              <section id="purchases">
+                <h2 className="text-2xl font-headline text-primary mb-3">7. Purchases</h2>
+                <p className="text-muted-foreground">
+                  When you buy a download from us, payment is taken by Stripe on its own checkout page. Stripe collects your card details, name, email address and billing address. We never see or store your card number. Stripe passes us your email address, your billing country, the country your card was issued in, what you bought and what you paid.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  We store that information as an order record in Google Firebase, together with a record of your consent to immediate download, the time of each download, the version downloaded and a one-way scrambled form of your IP address, which lets us limit downloads without keeping the address itself. We use it to give you your download page, to send you your download link by email (delivered by Brevo), to answer your questions, to handle refunds and disputes, and to meet our tax and accounting obligations. Your files are kept in Google Firebase Storage.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  The legal basis is the contract with you, and for tax records our legal obligation. We keep order records for six years after the end of the tax year of the purchase, as UK tax law requires. Buying does not add you to any mailing list. You can ask us what we hold about you at training@hybridx.club.
+                </p>
+              </section>
+
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">7. Security of Your Information</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">8. Security of Your Information</h2>
                 <p className="text-muted-foreground">
                   We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">8. Contact Us</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">9. Contact Us</h2>
                 <p className="text-muted-foreground">
                   If you have questions or comments about this Privacy Policy, please contact us at: training@hybridx.club
                 </p>

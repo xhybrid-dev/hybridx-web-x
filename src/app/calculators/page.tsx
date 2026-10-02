@@ -1,6 +1,7 @@
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ShopEventLink from '@/components/shop/ShopEventLink';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Route, Dumbbell, ClipboardList, ArrowRight } from 'lucide-react';
@@ -125,6 +126,7 @@ export default function CalculatorsHubPage() {
             </div>
           </div>
         </section>
+        <ShopEventLink />
       </main>
       <Footer />
     </div>

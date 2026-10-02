@@ -138,3 +138,77 @@ env:
     secret: GEMINI_API_KEY
     availability:
       - RUNTIME
+
+  # ── Shop (HYROX Glasgow 2027 PDFs) ────────────────────────────────────────
+  # docs/shop-setup.md is the full procedure. The plain values below are safe
+  # as they are: with SHOP_SALES_OPEN false the landing page shows "Sales have
+  # not opened yet", checkout returns 503, and nothing links to the page.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://hybridx.club
+    availability:
+      - BUILD
+      - RUNTIME
+  # Read at build time too: the sitemap and the links to the shop page from
+  # /calculators, /free-hyrox-plan and /hyrox-rule-changes-2026 are built
+  # statically, so opening the shop is a rollout. Do not set this to "true"
+  # until the EU VAT decision is made (docs/shop-setup.md, "Decisions").
+  - variable: SHOP_SALES_OPEN
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+  # true only after registering for the EU non-Union OSS and enabling Stripe
+  # Tax. Every order records its location evidence either way.
+  - variable: SHOP_TAX_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+  - variable: SHOP_SALES_CLOSE_AT
+    value: "2027-03-14T23:59:00Z"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: SHOP_DOWNLOAD_LIMIT_PER_PRODUCT_DAY
+    value: "10"
+    availability:
+      - RUNTIME
+  - variable: SHOP_DOWNLOAD_LIMIT_TOTAL
+    value: "50"
+    availability:
+      - RUNTIME
+  # Uncomment once the sender is decided (TBC). Unset, order email goes from
+  # EMAIL_FROM above.
+  # - variable: SHOP_EMAIL_FROM
+  #   value: '"HybridX" <hello@hybridx.club>'
+  #   availability:
+  #     - RUNTIME
+  #
+  # Stripe. Deliberately commented out: a `secret:` binding whose secret does
+  # not exist yet fails the WHOLE build (see CLAUDE.md, "Deploy gotchas"), not
+  # just the shop. Create and grant both secrets first:
+  #
+  #   echo -n "sk_test_..." | firebase apphosting:secrets:set STRIPE_SECRET_KEY --project hybridx-hub
+  #   echo -n "whsec_..."   | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
+  #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET --project hybridx-hub --backend studio
+  #
+  # then uncomment these, fill in the three Price IDs, and deploy.
+  # - variable: STRIPE_SECRET_KEY
+  #   secret: STRIPE_SECRET_KEY
+  #   availability:
+  #     - RUNTIME
+  # - variable: STRIPE_WEBHOOK_SECRET
+  #   secret: STRIPE_WEBHOOK_SECRET
+  #   availability:
+  #     - RUNTIME
+  # - variable: STRIPE_PRICE_GUIDE
+  #   value: price_...
+  #   availability:
+  #     - RUNTIME
+  # - variable: STRIPE_PRICE_PACK
+  #   value: price_...
+  #   availability:
+  #     - RUNTIME
+  # - variable: STRIPE_PRICE_BUNDLE
+  #   value: price_...
+  #   availability:
+  #     - RUNTIME

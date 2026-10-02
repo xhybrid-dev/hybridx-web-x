@@ -43,3 +43,5 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+# Shop source PDFs: uploaded to private Storage by scripts/shop-upload.ts, never deployed
+/private/shop-source/
