@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// No client reads or writes anything in Storage. The shop's PDFs
+// (shop/{fileKey}/v{n}.pdf) are reached only through five-minute signed URLs
+// minted by /api/shop/download with the Admin SDK, which these rules do not
+// apply to. A public read here would let anyone skip the payment.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

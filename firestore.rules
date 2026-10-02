@@ -6,7 +6,9 @@ rules_version = '2';
 // entirely as a defense-in-depth default. That includes the plan finder's
 // collections (hx_batches, hx_rollups, hx_leads, hx_insights, hx_meta), which
 // only /api/collect, /api/talk, the maintenance job and /admin/plan-finder
-// touch, all through the Admin SDK.
+// touch, all through the Admin SDK. The shop's collections (shop_orders,
+// shop_products, shop_downloads) are the same: server routes only, because a
+// download token in a client-readable document would be a free download.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {

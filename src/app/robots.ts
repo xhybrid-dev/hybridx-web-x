@@ -4,7 +4,8 @@ import { MetadataRoute } from 'next';
 // group that matches it — a named group REPLACES the '*' group entirely for
 // that bot. So every named group must carry the same disallow list, or the
 // named bots are formally allowed into /admin and /api.
-const DISALLOW = ['/api/', '/admin/'];
+// /d/ is the shop's per-order download page: its URL is the buyer's key.
+const DISALLOW = ['/api/', '/admin/', '/d/'];
 
 // Bots we explicitly welcome (traditional search + AI answer engines).
 // Being explicit is a positive signal to AI crawlers that they're wanted.

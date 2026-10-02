@@ -35,8 +35,22 @@ export default function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
+          // Shop URLs carry bearer secrets: the download token in /d/<token>
+          // and the Checkout session id on the thanks page. Neither is ever
+          // sent to Google; the page is recorded as /d/[token].
+          function hxRedact(u) {
+            try {
+              var url = new URL(u);
+              if (url.pathname.indexOf('/d/') === 0) url.pathname = '/d/[token]';
+              url.searchParams.delete('session_id');
+              url.searchParams.delete('token');
+              return url.toString();
+            } catch (e) { return ''; }
+          }
           gtag('config', '${GA_ID}', {
-            linker: { domains: ['hybridx.club', 'app.hybridx.club'] }
+            linker: { domains: ['hybridx.club', 'app.hybridx.club'] },
+            page_location: hxRedact(window.location.href),
+            page_referrer: document.referrer ? hxRedact(document.referrer) : undefined
           });
         `}
       </Script>

@@ -222,3 +222,11 @@ html.hx-lock {
     transition: none !important;
   }
 }
+
+/* Shop preview dialog: no zoom or slide for visitors who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .shop-dialog {
+    animation: none !important;
+    transition: none !important;
+  }
+}

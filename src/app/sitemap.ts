@@ -1,5 +1,7 @@
 
 import { MetadataRoute } from 'next';
+import { SHOP_EVENTS } from '@/lib/shop/config';
+import { salesState } from '@/lib/shop/env';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://hybridx.club'; // Update this to your actual domain
@@ -184,6 +186,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
   ];
+
+  // Shop pages, while their sales are open. Thanks and download pages are
+  // per-order and never listed.
+  for (const event of SHOP_EVENTS) {
+    if (salesState(event) !== 'open') continue;
+    routes.push({
+      url: `${baseUrl}${event.path}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    });
+  }
 
   return routes;
 }

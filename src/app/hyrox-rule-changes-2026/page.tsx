@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ShopEventLink from '@/components/shop/ShopEventLink';
 import TrackedLink from '@/components/TrackedLink';
 import { Button } from '@/components/ui/button';
 import {
@@ -660,6 +661,7 @@ export default function HyroxRuleChanges2026() {
             </div>
           </div>
         </section>
+        <ShopEventLink />
       </main>
 
       <Footer />

@@ -33,7 +33,7 @@ function initializeAdminApp(): App {
   return initializeApp({ projectId });
 }
 
-const adminApp = initializeAdminApp();
+export const adminApp = initializeAdminApp();
 
 export const adminFirestore = getFirestore(adminApp);
 export const adminAuth = getAuth(adminApp);

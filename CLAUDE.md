@@ -91,6 +91,16 @@ the funnel in the prompt narrows the journey to that route.
 `scripts/seed-journeys.ts` exists for the drips that predate the console; a new
 campaign does not need it.
 
+## The shop (paid PDFs)
+
+`/hyrox-glasgow-2027` sells PDFs through Stripe Checkout; everything is in
+`src/lib/shop/` and `docs/shop-setup.md`. It ships with `SHOP_SALES_OPEN` false
+and its Stripe secrets commented out in `apphosting.yaml`, for the reason in
+"Deploy gotchas" above. Prices live in `src/lib/shop/config.ts` and must equal
+the Stripe Prices: checkout refuses on a mismatch. The PDFs are never in the
+repo; `private/shop-source/` is gitignored and `scripts/shop-upload.ts` puts
+them in private Storage.
+
 ## Running a magnet funnel locally
 
 `npm run dev` is fine: with no mail credentials `getEmailProvider()` returns
