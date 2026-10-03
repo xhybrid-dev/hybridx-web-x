@@ -180,7 +180,31 @@ disallows `/d/`, and Google Analytics records them as `/d/[token]` with
 `priceEnv` names), its previews under `public/shop/<slug>/`, a landing page and a
 three-line thanks page that renders `ShopThanks`.
 
+## Free sample, split calculator and FAQ
+
+The landing page also carries three things that work whether or not sales are open:
+
+- **Free run split calculator** (`src/components/shop/SplitPreview.tsx`). It uses the
+  Pacing Pack's own division profiles (`src/lib/shop/glasgow-2027-pacing.ts`), so
+  its numbers match the pack. It shows the eight runs, the halfway clock and the
+  totals. The station-by-station targets stay in the pack.
+  `glasgow-pacing.test.ts` checks it against the printed tables. If the pack's
+  tables change, re-measure the shares as that file describes.
+- **Free sample pages** (Guide p5 and p9, Pack p8) through the existing magnet
+  machinery: slug `hyrox_glasgow_2027_sample`, confirmed opt-in, file
+  `private/hyrox-glasgow-2027-sample.pdf`, confirm page `/hyrox-glasgow-2027/sample`.
+  Confirming adds the address to the mailing list, and the form says so. This
+  follows the site's other magnets rather than the brief's optional checkbox.
+  **Set up the follow-up in the console** at `/admin/marketing/studio` on
+  app.hybridx.club, naming the funnel `hyrox_glasgow_2027_sample`. Before race
+  week, a short drip is where the sample turns into sales: the benchmark tests in
+  Week 1, the half simulation in Week 9, and race week logistics. If the PDFs
+  change, rebuild the sample from the same three pages.
+- **FAQ** with `FAQPage` structured data, and a "where to start in the plan" line
+  that states the current plan week. The download page shows the same line to
+  Guide buyers, and mentions the other PDF to anyone who bought only one.
+
 ## Not built yet (phase 2)
 
-Free sample and list opt-in, server-side `shop_purchase` event, per-buyer PDF
+Server-side `shop_purchase` event, per-buyer PDF
 stamp, `scripts/notify-buyers.ts`, promo codes.

@@ -7,6 +7,7 @@ import DownloadButton from '@/components/shop/DownloadButton';
 import { getShopEvent, getShopFile, SHOP_SUPPORT_EMAIL } from '@/lib/shop/config';
 import { findOrderByToken, toDate } from '@/lib/shop/orders';
 import { getProductDocs } from '@/lib/shop/products';
+import { planPosition } from '@/lib/shop/glasgow-2027-pacing';
 
 /*
  * A buyer's download page. The token in the URL is the only credential, so
@@ -26,6 +27,13 @@ export const metadata: Metadata = {
 };
 
 const DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London' });
+
+function planNote(now: Date): string {
+  const p = planPosition(now);
+  if (p.kind === 'before') return 'Week 1 of the plan starts on Monday 12 October 2026, with the first benchmark tests.';
+  if (p.kind === 'after') return 'The plan finished with race week in March 2027.';
+  return `This week is Week ${p.week} of the plan (${p.phase}). Section 03 of the guide has the sessions for it.`;
+}
 
 export default async function DownloadPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -110,6 +118,22 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
                 );
               })}
             </ul>
+            {event?.slug === 'hyrox-glasgow-2027' && order.files.includes('glasgow-2027-guide') ? (
+              <p className="mt-8">{planNote(new Date())}</p>
+            ) : null}
+            {event && event.files.some((f) => !order.files.includes(f.key)) ? (
+              <p className="mt-4 text-muted-foreground">
+                {event.files
+                  .filter((f) => !order.files.includes(f.key))
+                  .map((f) => f.name)
+                  .join(' and ')}{' '}
+                is sold separately on the{' '}
+                <Link href={`${event.path}#buy`} className="font-medium text-foreground underline underline-offset-4">
+                  {event.name} page
+                </Link>
+                .
+              </p>
+            ) : null}
             <p className="mt-8 text-sm text-muted-foreground">
               Each download link lasts five minutes, so press the button again if one expires. If a file does not
               open or something looks wrong, email{' '}

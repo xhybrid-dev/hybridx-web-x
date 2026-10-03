@@ -12,6 +12,12 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/api/race-card/download': ['./private/**'],
   },
+  // The shop's full PDFs are kept locally in private/shop-source/ for upload
+  // to Storage. Tracing would otherwise bundle them alongside the free magnet
+  // files in private/ whenever a build runs on a machine that has them.
+  outputFileTracingExcludes: {
+    '*': ['./private/shop-source/**'],
+  },
   async headers() {
     return [
       {

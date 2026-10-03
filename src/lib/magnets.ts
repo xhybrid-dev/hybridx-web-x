@@ -189,6 +189,38 @@ export const MAGNETS: readonly MagnetDefinition[] = [
     },
   },
   {
+    // Three pages from the paid Glasgow PDFs: the Guide's timeline (p5) and
+    // station technique (p9), and the Pacing Pack's race cards (p8). Rebuilt
+    // from private/shop-source/ if either PDF changes; see docs/shop-setup.md.
+    slug: 'hyrox_glasgow_2027_sample',
+    name: 'HYROX Glasgow 2027 free sample pages',
+    tag: 'hyrox-glasgow-2027-sample',
+    pagePath: '/hyrox-glasgow-2027',
+    confirmPath: '/hyrox-glasgow-2027/sample',
+    rateLimitBucket: 'glasgow-sample',
+    delivery: 'confirmed',
+    asset: {
+      kind: 'gated',
+      file: 'hyrox-glasgow-2027-sample.pdf',
+      downloadFilename: 'HybridX-HYROX-Glasgow-2027-Sample.pdf',
+      disposition: 'inline',
+    },
+    email: {
+      subject: 'Confirm your email to get the HYROX Glasgow sample pages',
+      heading: 'One click and the sample is yours',
+      intro:
+        'You asked for three sample pages from the HYROX Glasgow 2027 Preparation Guide and Pacing Pack: the 22-week timeline, technique and pacing for the first four stations, and the race cards. Confirm your address and they open straight away.',
+      buttonLabel: 'Confirm and open the sample',
+      insight:
+        'One thing to take from the sample before race day: most time is lost in the second half, at the lunges and wall balls, by people who went too hard on the first three stations. Aim for even effort across the whole race rather than fast early splits.',
+      footerLinkLabel: 'HYROX Glasgow 2027 guide and pacing pack',
+      reason: 'you asked for the HYROX Glasgow 2027 sample pages at',
+      accent: '#fadb5c',
+      accentText: '#111111',
+      disclaimer: 'HybridX is independent and not affiliated with, sponsored or endorsed by HYROX.',
+    },
+  },
+  {
     slug: 'build_a_bigger_engine',
     name: 'Build a Bigger Engine VO2max guide',
     tag: 'vo2max-guide',

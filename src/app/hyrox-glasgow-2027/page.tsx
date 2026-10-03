@@ -5,9 +5,12 @@ import Footer from '@/components/Footer';
 import BuyPanel from '@/components/shop/BuyPanel';
 import PreviewGallery from '@/components/shop/PreviewGallery';
 import ShopViewEvent from '@/components/shop/ShopViewEvent';
+import SplitPreview from '@/components/shop/SplitPreview';
+import SampleForm from '@/components/shop/SampleForm';
+import { planPosition } from '@/lib/shop/glasgow-2027-pacing';
 import { formatPence, getShopEvent, SHOP_CONSENT, SHOP_SUPPORT_EMAIL, type ShopEvent } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
-import { createBreadcrumbSchema } from '@/lib/seo';
+import { createBreadcrumbSchema, createFAQSchema } from '@/lib/seo';
 
 /*
  * HYROX Glasgow 2027: the shop's first event.
@@ -105,6 +108,50 @@ const PRODUCTS: ProductCopy[] = [
   },
 ];
 
+const FAQS: { question: string; answer: string }[] = [
+  {
+    question: 'Do I need to be racing in Glasgow?',
+    answer:
+      'The training plan is dated to end in Glasgow race week, which starts on Monday 8 March 2027, and the race week section covers the SEC. The split targets are not venue-specific, so the Pacing Pack works for any HYROX race in the 2026/27 season.',
+  },
+  {
+    question: 'Does it cover Pro and Doubles?',
+    answer:
+      'The Preparation Guide is written for Open and Doubles. Pro athletes can follow the same structure with heavier station work, and the guide lists the Pro weights. The Pacing Pack has split tables for Men, Women, Men Pro, Women Pro, Doubles Men, Doubles Women and Doubles Mixed, with notes for splitting the work in Doubles and for Relay.',
+  },
+  {
+    question: 'What if I start the plan late?',
+    answer:
+      'Keep Weeks 13 to 22 as written, because they carry the race-specific work, and shorten the earlier phases to fit the time you have. With fewer than 10 weeks to go, start at Week 13 and drop the volume in its first two weeks by about a quarter.',
+  },
+  {
+    question: 'How many sessions a week is the plan?',
+    answer:
+      'Five: one strength session, one quality run, one easy run, one hybrid session and one long session. If you can only train four times, drop the easy run.',
+  },
+  {
+    question: 'Can I print the files?',
+    answer:
+      'Yes. Both are A4 PDFs. The checklists, logs and the race cards are laid out to be printed, and the race cards are designed to be cut out and kept in your kit bag.',
+  },
+  {
+    question: 'How do I get the files after paying?',
+    answer:
+      'Your download page opens as soon as the payment goes through, and the link is emailed to you. The page keeps working, so you can download again on another device. No account is needed.',
+  },
+];
+
+/** The plan's calendar, stated for today. Regenerated with the page. */
+function startText(now: Date): string {
+  const p = planPosition(now);
+  if (p.kind === 'before') return 'The plan starts on Monday 12 October 2026 and runs for 22 weeks to race week.';
+  if (p.kind === 'after') return 'The 22-week plan finished with Glasgow race week in March 2027.';
+  if (p.week >= 14) {
+    return `This week is Week ${p.week} of the plan, with fewer than 10 weeks to race week. The guide advises starting at Week 13 with about a quarter less volume for the first two weeks, then following Weeks 13 to 22 as written.`;
+  }
+  return `This week is Week ${p.week} of the plan, in the ${p.phase.toLowerCase()} phase. Joining now, start at Week ${p.week} and keep Weeks 13 to 22 as written, because they carry the race-specific work.`;
+}
+
 function productSchema(name: string, description: string, pricePence: number, image: string) {
   return {
     '@context': 'https://schema.org',
@@ -146,6 +193,7 @@ export default function HyroxGlasgow2027Page() {
       BUNDLE.pricePence,
       'https://hybridx.club/shop/hyrox-glasgow-2027/guide-1.webp',
     ),
+    createFAQSchema(FAQS),
     createBreadcrumbSchema([
       { name: 'Home', url: '/' },
       { name: 'HYROX Glasgow 2027', url: PATH },
@@ -181,6 +229,13 @@ export default function HyroxGlasgow2027Page() {
                 className="font-semibold text-accent underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 Go to buying options
+              </a>{' '}
+              ·{' '}
+              <a
+                href="#split-preview"
+                className="font-semibold text-accent underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                Try the free split calculator
               </a>
             </p>
           </div>
@@ -214,6 +269,19 @@ export default function HyroxGlasgow2027Page() {
           </div>
         </section>
 
+        <section id="split-preview" aria-labelledby="split-heading" className="scroll-mt-20 border-t border-border py-12 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6">
+            <h2 id="split-heading" className="mb-3 font-headline text-2xl font-bold md:text-3xl">
+              Free run split calculator
+            </h2>
+            <p className="mb-6 text-muted-foreground">
+              Choose your division and target finish to see the target for each 1 km run, using the same profiles as
+              the Pacing Pack. Free, with no email needed.
+            </p>
+            <SplitPreview />
+          </div>
+        </section>
+
         <section id="buy" aria-labelledby="buy-heading" className="scroll-mt-20 bg-secondary/60 py-12 md:py-16">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <h2 id="buy-heading" className="mb-6 font-headline text-2xl font-bold md:text-3xl">
@@ -231,6 +299,34 @@ export default function HyroxGlasgow2027Page() {
           </div>
         </section>
 
+        <section aria-labelledby="start-heading" className="py-12 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6">
+            <h2 id="start-heading" className="mb-3 font-headline text-2xl font-bold md:text-3xl">
+              Where to start in the plan
+            </h2>
+            <p className="text-muted-foreground">{startText(new Date())}</p>
+            <ol className="mt-4 grid gap-2 text-sm sm:grid-cols-4">
+              <li className="rounded-md border border-border p-3"><span className="font-semibold">Base</span><br />Weeks 1 to 6, from 12 Oct</li>
+              <li className="rounded-md border border-border p-3"><span className="font-semibold">Build</span><br />Weeks 7 to 12, from 23 Nov</li>
+              <li className="rounded-md border border-border p-3"><span className="font-semibold">Race specific</span><br />Weeks 13 to 19, from 4 Jan</li>
+              <li className="rounded-md border border-border p-3"><span className="font-semibold">Peak and taper</span><br />Weeks 20 to 22, from 22 Feb</li>
+            </ol>
+          </div>
+        </section>
+
+        <section id="sample" aria-labelledby="sample-heading" className="scroll-mt-20 bg-secondary/60 py-12 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6">
+            <h2 id="sample-heading" className="mb-3 font-headline text-2xl font-bold md:text-3xl">
+              Free sample pages
+            </h2>
+            <p className="mb-6 text-muted-foreground">
+              Three pages to read before you buy: the 22-week timeline and technique for the first four stations from
+              the Preparation Guide, and the race cards from the Pacing Pack.
+            </p>
+            <SampleForm />
+          </div>
+        </section>
+
         <section aria-labelledby="method" className="py-12 md:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <h2 id="method" className="mb-4 font-headline text-2xl font-bold md:text-3xl">
@@ -242,6 +338,22 @@ export default function HyroxGlasgow2027Page() {
               your result. The worksheet takes your 5 km time and fresh benchmark tests and gives a finish time with
               a range of 3 to 5 minutes either way.
             </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="faq-heading" className="border-t border-border py-12 md:py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6">
+            <h2 id="faq-heading" className="mb-6 font-headline text-2xl font-bold md:text-3xl">
+              Questions
+            </h2>
+            <div className="space-y-6">
+              {FAQS.map((f) => (
+                <div key={f.question}>
+                  <h3 className="mb-1 font-headline text-lg font-bold">{f.question}</h3>
+                  <p className="text-muted-foreground">{f.answer}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -273,7 +385,7 @@ export default function HyroxGlasgow2027Page() {
                 </p>
               </div>
               <div>
-                <h3 className="mb-1 font-headline text-lg font-bold text-foreground">Questions</h3>
+                <h3 className="mb-1 font-headline text-lg font-bold text-foreground">Contact</h3>
                 <p>
                   Email{' '}
                   <a href={`mailto:${SHOP_SUPPORT_EMAIL}`} className="font-medium text-foreground underline underline-offset-4">
