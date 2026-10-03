@@ -3,9 +3,12 @@
 ## Infrastructure
 
 - **Firebase project ID:** `hybridx-hub`
-- **Firebase App Hosting backend name:** `studio`
+- **Firebase App Hosting backend name:** `hybridx-web-x` (region `europe-west4`)
   - Public URL: `https://hybridx.club`
-  - Used as `--backend studio` for `firebase apphosting:secrets:grantaccess`.
+  - Used as `--backend hybridx-web-x` for `firebase apphosting:secrets:grantaccess`.
+  - An older backend, `studio` (`us-central1`, repository `gymtrackpage-HybridX-web`), still
+    exists with automatic rollouts disabled. It is not the live site: granting a secret to
+    it does nothing for the build that matters.
   - Confirm with `firebase apphosting:backends:list --project hybridx-hub` if a deploy
     ever shows more than one backend.
 - The **app** lives in a *separate* Firebase project, `hyroxedgeai`
@@ -28,7 +31,7 @@
   # 1. create the secret value in THIS project
   echo -n "<value>" | firebase apphosting:secrets:set SECRET_NAME --project hybridx-hub
   # 2. grant the App Hosting backend read access
-  firebase apphosting:secrets:grantaccess SECRET_NAME --project hybridx-hub --backend studio
+  firebase apphosting:secrets:grantaccess SECRET_NAME --project hybridx-hub --backend hybridx-web-x
   ```
 
   `grantaccess` takes a comma-separated list, so several can be granted in one call.

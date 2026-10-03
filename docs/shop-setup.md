@@ -53,7 +53,7 @@ Copy the signing secret (`whsec_...`).
 
 ## 3. Secrets and environment (App Hosting, not Vercel)
 
-The site runs on Firebase App Hosting (`hybridx-hub`, backend `studio`), not
+The site runs on Firebase App Hosting (`hybridx-hub`, backend `hybridx-web-x`, region `europe-west4`), not
 Vercel. **Read "Deploy gotchas" in `CLAUDE.md` first.** A `secret:` binding
 whose secret is missing fails the whole build, so create and grant before
 uncommenting:
@@ -62,7 +62,7 @@ uncommenting:
 echo -n "sk_test_..." | firebase apphosting:secrets:set STRIPE_SECRET_KEY --project hybridx-hub
 echo -n "whsec_..."   | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
 firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET \
-  --project hybridx-hub --backend studio
+  --project hybridx-hub --backend hybridx-web-x
 ```
 
 Then, in `apphosting.yaml`, uncomment the Stripe block and fill in the three
@@ -107,7 +107,7 @@ firebase deploy --only firestore:rules,firestore:indexes,storage --project hybri
   *Service Account Token Creator* on itself:
 
   ```bash
-  SA=$(gcloud run services describe studio --region us-central1 --project hybridx-hub \
+  SA=$(gcloud run services describe hybridx-web-x --region europe-west4 --project hybridx-hub \
         --format='value(spec.template.spec.serviceAccountName)')
   gcloud iam service-accounts add-iam-policy-binding "$SA" \
     --member="serviceAccount:$SA" --role=roles/iam.serviceAccountTokenCreator --project hybridx-hub
