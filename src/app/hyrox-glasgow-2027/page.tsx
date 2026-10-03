@@ -6,6 +6,7 @@ import BuyPanel from '@/components/shop/BuyPanel';
 import PreviewGallery from '@/components/shop/PreviewGallery';
 import ShopViewEvent from '@/components/shop/ShopViewEvent';
 import SplitPreview from '@/components/shop/SplitPreview';
+import GlasgowHero from '@/components/shop/GlasgowHero';
 import SampleForm from '@/components/shop/SampleForm';
 import { planPosition } from '@/lib/shop/glasgow-2027-pacing';
 import { formatPence, getShopEvent, SHOP_CONSENT, SHOP_SUPPORT_EMAIL, type ShopEvent } from '@/lib/shop/config';
@@ -209,37 +210,23 @@ export default function HyroxGlasgow2027Page() {
       <Header />
 
       <main className="flex-grow">
-        <section className="bg-black py-12 text-white md:py-16">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <p className="mb-3 font-headline text-sm font-semibold uppercase tracking-widest text-accent">
-              SEC, Glasgow · 10 to 14 March 2027
-            </p>
-            <h1 className="mb-5 font-headline text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl">
-              HYROX Glasgow 2027 Preparation Guide and Pacing Pack
-            </h1>
-            <p className="max-w-3xl text-lg text-white/85">
-              A 22-week training plan and split targets for HYROX Glasgow at the SEC, 10 to 14 March 2027. Two
-              PDFs, sold separately or together. Download straight after payment. No account needed.
-            </p>
-            <p className="mt-6 text-white/85">
-              Guide {formatPence(GUIDE.pricePence)} · Pacing Pack {formatPence(PACK.pricePence)} · Both{' '}
-              {formatPence(BUNDLE.pricePence)}.{' '}
-              <a
-                href="#buy"
-                className="font-semibold text-accent underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
-                Go to buying options
-              </a>{' '}
-              ·{' '}
-              <a
-                href="#split-preview"
-                className="font-semibold text-accent underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
-                Try the free split calculator
-              </a>
-            </p>
-          </div>
-        </section>
+        <GlasgowHero
+          guide={{
+            name: 'Preparation Guide',
+            price: GUIDE.pricePence,
+            detail: '22-week plan. 16 pages.',
+            cover: EVENT.previews[GUIDE.key][0].src,
+            alt: EVENT.previews[GUIDE.key][0].alt,
+          }}
+          pack={{
+            name: 'Pacing Pack',
+            price: PACK.pricePence,
+            detail: 'Split targets. 10 pages.',
+            cover: EVENT.previews[PACK.key][0].src,
+            alt: EVENT.previews[PACK.key][0].alt,
+          }}
+          bundlePrice={BUNDLE.pricePence}
+        />
 
         <section aria-labelledby="products" className="py-12 md:py-16">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">

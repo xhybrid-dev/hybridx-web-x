@@ -230,3 +230,25 @@ html.hx-lock {
     transition: none !important;
   }
 }
+
+/* Shop hero: one short rise on load. Transform only: content is never
+   invisible, so the largest paint is not held back by the animation. */
+.shop-rise {
+  animation: shop-rise 0.6s ease-out both;
+}
+.shop-rise-delay {
+  animation-delay: 0.12s;
+}
+@keyframes shop-rise {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-rise {
+    animation: none;
+  }
+}
