@@ -210,14 +210,14 @@ env:
       - RUNTIME
   # TEST price IDs. Replace with the live ones at go-live.
   - variable: STRIPE_PRICE_GUIDE
-    value: price_1UMZaNGKLIEfAkDG2phfSXHR
+    value: price_1UMa9aGKLIEfAkDGQ2HzENZj
     availability:
       - RUNTIME
   - variable: STRIPE_PRICE_PACK
-    value: price_1UMZadGKLIEfAkDG9aC6D4hy
+    value: price_1UMa9qGKLIEfAkDGMOgnXtaN
     availability:
       - RUNTIME
   - variable: STRIPE_PRICE_BUNDLE
-    value: price_1UMZasGKLIEfAkDGKj8Z8ncl
+    value: price_1UMaA6GKLIEfAkDG6CNrfWJm
     availability:
       - RUNTIME
