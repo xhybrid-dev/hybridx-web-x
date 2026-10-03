@@ -152,9 +152,9 @@ env:
   # /calculators, /free-hyrox-plan and /hyrox-rule-changes-2026 are built
   # statically, so opening the shop is a rollout.
   #
-  # "true" opens the shop. While the Stripe values below are TEST values only
-  # test cards can pay, so do not leave it open on test values: go live in the
-  # same sitting (docs/shop-setup.md, "Go live").
+  # "true" opens the shop, taking real payments while the Stripe values below
+  # are LIVE values. If the Stripe values are ever switched back to TEST ones,
+  # only test cards can pay, so set this to "false" first.
   #
   # EU VAT: sales are recorded by country (/admin/shop) and no tax is charged
   # while SHOP_TAX_ENABLED is "false". See "Decisions" in docs/shop-setup.md.
@@ -197,9 +197,9 @@ env:
   #   echo -n "whsec_..." | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
   #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET --project hybridx-hub --backend hybridx-web-x
   #
-  # While testing, the secrets hold Stripe TEST values and the three prices
-  # below are the TEST prices. Going live replaces all of them with live
-  # values (docs/shop-setup.md, "Go live").
+  # LIVE: the secrets hold Stripe LIVE values and the three prices below are
+  # the LIVE prices. Keys and prices must come from the same Stripe mode, or
+  # every checkout fails with a 500.
   - variable: STRIPE_SECRET_KEY
     secret: STRIPE_SECRET_KEY
     availability:
@@ -208,16 +208,16 @@ env:
     secret: STRIPE_WEBHOOK_SECRET
     availability:
       - RUNTIME
-  # TEST price IDs. Replace with the live ones at go-live.
+  # LIVE price IDs.
   - variable: STRIPE_PRICE_GUIDE
-    value: price_1UMa9aGKLIEfAkDGQ2HzENZj
+    value: price_1UMZaNGKLIEfAkDG2phfSXHR
     availability:
       - RUNTIME
   - variable: STRIPE_PRICE_PACK
-    value: price_1UMa9qGKLIEfAkDGMOgnXtaN
+    value: price_1UMZadGKLIEfAkDG9aC6D4hy
     availability:
       - RUNTIME
   - variable: STRIPE_PRICE_BUNDLE
-    value: price_1UMaA6GKLIEfAkDG6CNrfWJm
+    value: price_1UMZasGKLIEfAkDGKj8Z8ncl
     availability:
       - RUNTIME
