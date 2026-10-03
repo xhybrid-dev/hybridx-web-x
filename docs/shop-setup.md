@@ -204,6 +204,28 @@ The landing page also carries three things that work whether or not sales are op
   that states the current plan week. The download page shows the same line to
   Guide buyers, and mentions the other PDF to anyone who bought only one.
 
+## Sales by country (VAT report)
+
+Signed in as an admin (the `ADMIN_EMAILS` list), open `/admin/shop`, or press
+"Shop sales" on `/admin/leads`. It shows net sales split into UK, EU and rest of
+world, a table by country and by month, the date and reference of the first EU
+sale, shop sales over the last 12 months beside the UK registration threshold,
+and any orders whose billing, card and IP countries contradict each other. A date
+range filter narrows it, and "Export orders CSV" gives one row per order for an
+accountant, with location evidence and no emails, names or IP addresses.
+
+- It does not calculate VAT. Rates differ by country; Stripe Tax or an accountant
+  owns that number. It answers how much of the shop is UK and how much EU.
+- Fully refunded orders are left out of every figure and listed as a count.
+  Partial refunds count for what was kept. Disputed orders count and are flagged.
+- **Stripe test-mode orders are left out by default.** Testing locally (section 6)
+  writes to the same Firestore project as the live site, so they are in the
+  collection. Tick "Include Stripe test orders" to see them.
+- A sale is attributed to the country two pieces of evidence agree on, otherwise
+  to the billing country. App Hosting records no IP country, so billing and card
+  country are normally the pair.
+- The logic is in `src/lib/shop/vat-report.ts`, tested by `shop-vat-report.test.ts`.
+
 ## Not built yet (phase 2)
 
 Server-side `shop_purchase` event, per-buyer PDF

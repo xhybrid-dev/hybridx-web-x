@@ -79,6 +79,9 @@ export default async function AdminLeadsPage({
               <Link href="/admin/plan-finder">Plan finder</Link>
             </Button>
             <Button variant="outline" asChild>
+              <Link href="/admin/shop">Shop sales</Link>
+            </Button>
+            <Button variant="outline" asChild>
               <a href={`/api/admin/leads/export${source ? `?source=${source}` : ''}`}>
                 <Download className="mr-2 h-4 w-4" /> Export CSV
               </a>
