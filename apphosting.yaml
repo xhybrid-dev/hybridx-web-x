@@ -183,32 +183,35 @@ env:
   #   availability:
   #     - RUNTIME
   #
-  # Stripe. Deliberately commented out: a `secret:` binding whose secret does
-  # not exist yet fails the WHOLE build (see CLAUDE.md, "Deploy gotchas"), not
-  # just the shop. Create and grant both secrets first:
+  # Stripe. These bind two secrets, and a `secret:` binding whose secret does
+  # not exist fails the WHOLE build (see CLAUDE.md, "Deploy gotchas"), not just
+  # the shop. Both must exist and be granted before this is deployed:
   #
-  #   echo -n "sk_test_..." | firebase apphosting:secrets:set STRIPE_SECRET_KEY --project hybridx-hub
-  #   echo -n "whsec_..."   | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
+  #   echo -n "sk_..."    | firebase apphosting:secrets:set STRIPE_SECRET_KEY --project hybridx-hub
+  #   echo -n "whsec_..." | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
   #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET --project hybridx-hub --backend hybridx-web-x
   #
-  # then uncomment these, fill in the three Price IDs, and deploy.
-  # - variable: STRIPE_SECRET_KEY
-  #   secret: STRIPE_SECRET_KEY
-  #   availability:
-  #     - RUNTIME
-  # - variable: STRIPE_WEBHOOK_SECRET
-  #   secret: STRIPE_WEBHOOK_SECRET
-  #   availability:
-  #     - RUNTIME
-  # - variable: STRIPE_PRICE_GUIDE
-  #   value: price_...
-  #   availability:
-  #     - RUNTIME
-  # - variable: STRIPE_PRICE_PACK
-  #   value: price_...
-  #   availability:
-  #     - RUNTIME
-  # - variable: STRIPE_PRICE_BUNDLE
-  #   value: price_...
-  #   availability:
-  #     - RUNTIME
+  # While testing, the secrets hold Stripe TEST values and the three prices
+  # below are the TEST prices. Going live replaces all of them with live
+  # values (docs/shop-setup.md, "Go live").
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+    availability:
+      - RUNTIME
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+    availability:
+      - RUNTIME
+  # TEST price IDs. Replace with the live ones at go-live.
+  - variable: STRIPE_PRICE_GUIDE
+    value: price_1UMZaNGKLIEfAkDG2phfSXHR
+    availability:
+      - RUNTIME
+  - variable: STRIPE_PRICE_PACK
+    value: price_1UMZadGKLIEfAkDG9aC6D4hy
+    availability:
+      - RUNTIME
+  - variable: STRIPE_PRICE_BUNDLE
+    value: price_1UMZasGKLIEfAkDGKj8Z8ncl
+    availability:
+      - RUNTIME
