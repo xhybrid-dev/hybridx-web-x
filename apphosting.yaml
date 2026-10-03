@@ -189,7 +189,7 @@ env:
   #
   #   echo -n "sk_test_..." | firebase apphosting:secrets:set STRIPE_SECRET_KEY --project hybridx-hub
   #   echo -n "whsec_..."   | firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project hybridx-hub
-  #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET --project hybridx-hub --backend studio
+  #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET --project hybridx-hub --backend hybridx-web-x
   #
   # then uncomment these, fill in the three Price IDs, and deploy.
   # - variable: STRIPE_SECRET_KEY
