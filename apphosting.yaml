@@ -150,10 +150,16 @@ env:
       - RUNTIME
   # Read at build time too: the sitemap and the links to the shop page from
   # /calculators, /free-hyrox-plan and /hyrox-rule-changes-2026 are built
-  # statically, so opening the shop is a rollout. Do not set this to "true"
-  # until the EU VAT decision is made (docs/shop-setup.md, "Decisions").
+  # statically, so opening the shop is a rollout.
+  #
+  # "true" opens the shop. While the Stripe values below are TEST values only
+  # test cards can pay, so do not leave it open on test values: go live in the
+  # same sitting (docs/shop-setup.md, "Go live").
+  #
+  # EU VAT: sales are recorded by country (/admin/shop) and no tax is charged
+  # while SHOP_TAX_ENABLED is "false". See "Decisions" in docs/shop-setup.md.
   - variable: SHOP_SALES_OPEN
-    value: "false"
+    value: "true"
     availability:
       - BUILD
       - RUNTIME
