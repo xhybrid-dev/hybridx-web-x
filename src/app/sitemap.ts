@@ -1,10 +1,55 @@
 
 import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
 import { SHOP_EVENTS } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://hybridx.club'; // Update this to your actual domain
+/*
+ * The sitemap Google Search Console reads at https://hybridx.club/sitemap.xml
+ * (robots.ts points at it).
+ *
+ * What belongs here: every page meant to appear in search, once, on the host it
+ * canonicalises to. What does not: noindex pages (/start, the confirm pages, the
+ * shop's thanks, sample and resend pages, /d/<token>, /admin), per-order pages,
+ * and /home-control, which redirects to "/".
+ *
+ * /race, /streak and /trail are also absent, on purpose. Each declares its own
+ * subdomain as its canonical (race., streak. and trail.hybridx.club), so listing
+ * the hybridx.club copy would tell Google two things at once. The subdomains are
+ * separate sites to Google, so they get their own sitemap below: the same
+ * /sitemap.xml route, answered with that subdomain's address when it is the one
+ * asked. src/lib/__tests__/sitemap.test.ts fails if a new page is neither listed
+ * nor deliberately left out.
+ */
+
+/** Subdomain label to the address its page declares as canonical. */
+const APP_SUBDOMAINS: Record<string, string> = {
+  race: 'https://race.hybridx.club',
+  streak: 'https://streak.hybridx.club',
+  trail: 'https://trail.hybridx.club',
+};
+
+async function requestedHost(): Promise<string> {
+  try {
+    const h = await headers();
+    // App Hosting sits behind a proxy, so the host the visitor used is forwarded.
+    const raw = h.get('x-forwarded-host') ?? h.get('host') ?? '';
+    return raw.split(',')[0].trim().toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const host = await requestedHost();
+  const label = host.split('.')[0];
+  if (host.includes('.') && Object.hasOwn(APP_SUBDOMAINS, label)) {
+    return [
+      { url: APP_SUBDOMAINS[label], lastModified: new Date(), changeFrequency: 'monthly', priority: 1.0 },
+    ];
+  }
+
+  const baseUrl = 'https://hybridx.club';
 
   // Define all static routes
   const routes = [
@@ -184,6 +229,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/shop-terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
     },
   ];
 
