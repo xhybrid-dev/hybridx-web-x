@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { DIVISION_PROFILES, formatDuration, planPosition, previewSplits } from '../shop/glasgow-2027-pacing';
+import {
+  DIVISION_PROFILES, formatDuration, planPosition, previewSplits, raceCountdown, raceCountdownLabel,
+} from '../shop/glasgow-2027-pacing';
 
 /**
  * The free preview on /hyrox-glasgow-2027 must agree with the Pacing Pack a
@@ -69,5 +71,34 @@ describe('planPosition', () => {
   });
   it('after race week', () => {
     expect(planPosition(new Date('2027-03-15T12:00:00Z'))).toEqual({ kind: 'after' });
+  });
+});
+
+describe('raceCountdown', () => {
+  // Race week starts Monday 8 March 2027.
+  const label = (iso: string) => raceCountdownLabel(raceCountdown(new Date(iso)));
+
+  it('counts whole weeks while two or more weeks away', () => {
+    expect(label('2026-10-04T12:00:00Z')).toBe('22 weeks to race week'); // 155 days
+    expect(label('2026-10-12T12:00:00Z')).toBe('21 weeks to race week'); // 147 days, the day Week 1 starts
+    expect(label('2027-02-22T12:00:00Z')).toBe('2 weeks to race week'); // 14 days
+  });
+
+  it('switches to days inside two weeks', () => {
+    expect(label('2027-02-23T12:00:00Z')).toBe('13 days to race week');
+    expect(label('2027-03-07T12:00:00Z')).toBe('1 day to race week');
+  });
+
+  it('says race week is here from the Monday to the Sunday, then stops', () => {
+    expect(label('2027-03-08T09:00:00Z')).toBe('Race week is here');
+    expect(label('2027-03-14T22:00:00Z')).toBe('Race week is here');
+    expect(label('2027-03-15T09:00:00Z')).toBeNull();
+  });
+
+  it('uses UK dates across the clock change', () => {
+    // 23:30 GMT on 7 March is still 7 March in the UK: one day to go.
+    expect(label('2027-03-07T23:30:00Z')).toBe('1 day to race week');
+    // 23:30 UTC on 27 March is 00:30 BST on 28 March, after race week either way.
+    expect(label('2027-03-27T23:30:00Z')).toBeNull();
   });
 });

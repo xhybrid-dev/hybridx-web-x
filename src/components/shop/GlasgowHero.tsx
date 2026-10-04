@@ -7,12 +7,15 @@ import { formatPence } from '@/lib/shop/config';
  * Built to answer three things at a glance, in this order: where you are (the
  * Glasgow race, its dates and venue), what is on offer (two PDFs, shown as
  * their real covers, with prices), and what to do next (buy, or try the free
- * calculator first). The headline names the thing; it does not tease it.
+ * calculator first). The headline leads with the nudge; the tag above it, the
+ * paragraph under it and the two covers say exactly what is being sold.
+ *
+ * The urgency is factual: real dates and the weeks genuinely left before race
+ * week. There is no fake scarcity, because the files are unlimited downloads.
  *
  * Visual language comes from the PDFs themselves: black ground, the brand
  * yellow, and the strip of eight numbered station boxes from the guide's
- * cover. Shop copy rules apply here as everywhere on the page: plain, no
- * urgency, no exclamation marks, no em dashes.
+ * cover. Copy rules otherwise: plain, no exclamation marks, no em dashes.
  */
 
 interface HeroOffer {
@@ -34,10 +37,13 @@ export default function GlasgowHero({
   guide,
   pack,
   bundlePrice,
+  countdown,
 }: {
   guide: HeroOffer;
   pack: HeroOffer;
   bundlePrice: number;
+  /** "22 weeks to race week", or null once the race has passed. */
+  countdown: string | null;
 }) {
   return (
     <section aria-labelledby="hero-heading" className="relative isolate overflow-hidden bg-black text-white">
@@ -70,15 +76,16 @@ export default function GlasgowHero({
 
             <h1
               id="hero-heading"
-              className="mt-6 font-headline text-[2.6rem] font-bold leading-[0.95] tracking-tight sm:text-6xl lg:text-[4rem] xl:text-[4.25rem]"
+              className="mt-6 text-balance font-headline text-[2.6rem] font-bold leading-[0.95] tracking-tight sm:text-6xl lg:text-[3.6rem] xl:text-[4rem]"
             >
-              <span className="lg:whitespace-nowrap">HYROX Glasgow 2027</span>
-              <span className="mt-2 block text-accent">Training plan and split targets</span>
+              <span className="block">Now is the time to prepare for</span>
+              <span className="mt-2 block text-accent">HYROX Glasgow.</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
-              Two PDFs for HYROX Glasgow at the SEC. A 22-week plan from 12 October 2026 to race week, and split
-              targets for every run and station. Download straight after payment. No account needed.
+              <strong className="font-headline font-bold text-white">Don&apos;t leave it too late.</strong> Everything
+              you need to sharpen your preparation, in two PDFs: a 22-week plan from 12 October 2026 to race week, and
+              split targets for every run and station. Download straight after payment. No account needed.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -95,6 +102,16 @@ export default function GlasgowHero({
                 Try the free split calculator
               </a>
             </div>
+
+            {countdown ? (
+              <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="inline-flex items-center gap-2 font-headline font-bold text-white">
+                  <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-accent" />
+                  {countdown}
+                </span>
+                <span className="text-white/65">Starting later? The guide shows how to join at the right week.</span>
+              </p>
+            ) : null}
           </div>
 
           {/* ── The two products, as their covers ────────────────────── */}
