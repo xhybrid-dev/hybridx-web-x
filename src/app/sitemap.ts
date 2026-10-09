@@ -11,7 +11,7 @@ import { salesState } from '@/lib/shop/env';
  * What belongs here: every page meant to appear in search, once, on the host it
  * canonicalises to. What does not: noindex pages (/start, the confirm pages, the
  * shop's thanks, sample and resend pages, /d/<token>, /admin), per-order pages,
- * and /home-control, which redirects to "/".
+ * /12-week-hyrox (a gated embed, noindex), and /home-control, which redirects to "/".
  *
  * /race, /streak and /trail are also absent, on purpose. Each declares its own
  * subdomain as its canonical (race., streak. and trail.hybridx.club), so listing
@@ -157,12 +157,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/app`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/12-week-hyrox`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
