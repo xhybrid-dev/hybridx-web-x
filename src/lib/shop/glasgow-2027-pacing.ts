@@ -106,3 +106,44 @@ export function planPosition(now: Date): PlanPosition {
   const phase = PHASES.find(([last]) => week <= last)![1];
   return { kind: 'week', week, phase };
 }
+
+// ---------------------------------------------------------------------------
+// Time left to race week
+// ---------------------------------------------------------------------------
+
+/** Monday of Glasgow race week, and its last day (the Sunday). */
+export const RACE_WEEK_START = '2027-03-08';
+export const RACE_WEEK_END = '2027-03-14';
+
+export type RaceCountdown =
+  | { kind: 'weeks'; n: number }
+  | { kind: 'days'; n: number }
+  | { kind: 'raceWeek' }
+  | { kind: 'over' };
+
+const dayNumber = (ymd: string) => Math.round(Date.parse(`${ymd}T00:00:00Z`) / 86_400_000);
+
+/**
+ * How long until race week, in UK dates: whole weeks while it is two or more
+ * weeks away, days inside that.
+ */
+export function raceCountdown(now: Date): RaceCountdown {
+  const today = dayNumber(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(now));
+  const days = dayNumber(RACE_WEEK_START) - today;
+  if (days > 0) return days >= 14 ? { kind: 'weeks', n: Math.floor(days / 7) } : { kind: 'days', n: days };
+  return today <= dayNumber(RACE_WEEK_END) ? { kind: 'raceWeek' } : { kind: 'over' };
+}
+
+/** "22 weeks to race week", or null once the race has passed. */
+export function raceCountdownLabel(c: RaceCountdown): string | null {
+  switch (c.kind) {
+    case 'weeks':
+      return `${c.n} weeks to race week`;
+    case 'days':
+      return `${c.n} ${c.n === 1 ? 'day' : 'days'} to race week`;
+    case 'raceWeek':
+      return 'Race week is here';
+    case 'over':
+      return null;
+  }
+}

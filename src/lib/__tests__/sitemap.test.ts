@@ -34,6 +34,7 @@ function pageRoutes(dir = APP_DIR, prefix = ''): Array<{ route: string; file: st
 /** Pages that carry noindex, and so must stay out of the sitemap. */
 const NOINDEX = [
   '/start',
+  '/12-week-hyrox',
   '/confirm',
   '/resend',
   '/athx-2027/confirm',
@@ -51,6 +52,16 @@ const SUBDOMAIN_CANONICAL: Record<string, string> = {
 
 /** Reached only by a rewrite and redirected to "/" on a direct visit. */
 const REDIRECTED = ['/home-control'];
+
+/**
+ * Pages that are noindex only some of the time. The shop page is noindex while
+ * sales are not open and is listed only while they are; 'lists the shop page
+ * while sales are open, and not before or after' below holds that to account.
+ */
+const CONDITIONALLY_NOINDEX = ['/hyrox-glasgow-2027'];
+
+/** Any of the ways a page in this codebase says "do not index me". */
+const NOINDEX_MARKER = /index:\s*false|noIndex:\s*true|['"]noindex/;
 
 const isExcludedByRule = (route: string) => route.startsWith('/admin') || route.includes('[');
 
@@ -71,6 +82,15 @@ describe('the main sitemap', () => {
     expect(missing, 'pages on disk that are neither in the sitemap nor deliberately left out').toEqual([]);
   });
 
+  it('never lists a page that marks itself noindex, whether or not it is in the lists above', async () => {
+    const listed = new Set((await sitemap()).map((e) => e.url.replace(BASE, '') || '/'));
+    const offenders = pageRoutes()
+      .filter((p) => NOINDEX_MARKER.test(readFileSync(p.file, 'utf8')))
+      .map((p) => p.route)
+      .filter((r) => !CONDITIONALLY_NOINDEX.includes(r) && listed.has(r));
+    expect(offenders, 'listed in the sitemap but marked noindex: Search Console reports these as errors').toEqual([]);
+  });
+
   it('does not list a page that is left out or does not exist', async () => {
     const urls = (await sitemap()).map((e) => e.url.replace(BASE, '') || '/');
     const routes = new Set(pageRoutes().map((p) => p.route));
@@ -85,7 +105,7 @@ describe('the main sitemap', () => {
     const byRoute = new Map(pageRoutes().map((p) => [p.route, p.file]));
     for (const r of NOINDEX) {
       const src = readFileSync(byRoute.get(r)!, 'utf8');
-      expect(/index:\s*false|noIndex:\s*true/.test(src), `${r} is listed as noindex but is not`).toBe(true);
+      expect(NOINDEX_MARKER.test(src), `${r} is listed as noindex but is not`).toBe(true);
     }
     for (const [r, canonical] of Object.entries(SUBDOMAIN_CANONICAL)) {
       expect(readFileSync(byRoute.get(r)!, 'utf8'), `${r} canonical`).toContain(`'${canonical}'`);

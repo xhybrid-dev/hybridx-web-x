@@ -8,7 +8,7 @@ import ShopViewEvent from '@/components/shop/ShopViewEvent';
 import SplitPreview from '@/components/shop/SplitPreview';
 import GlasgowHero from '@/components/shop/GlasgowHero';
 import SampleForm from '@/components/shop/SampleForm';
-import { planPosition } from '@/lib/shop/glasgow-2027-pacing';
+import { planPosition, raceCountdown, raceCountdownLabel } from '@/lib/shop/glasgow-2027-pacing';
 import { formatPence, getShopEvent, SHOP_CONSENT, SHOP_SUPPORT_EMAIL, type ShopEvent } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
 import { createBreadcrumbSchema, createFAQSchema } from '@/lib/seo';
@@ -19,8 +19,10 @@ import { createBreadcrumbSchema, createFAQSchema } from '@/lib/seo';
  * Machinery (prices, Stripe, delivery) lives in src/lib/shop and is shared by
  * every event; this file is the event's content. Copy rules for shop pages:
  * UK English, plain and factual, no rhetorical questions, no exclamation
- * marks, no urgency devices, no testimonials, no em dashes. Every claim about
- * the PDFs here was checked against the PDFs themselves.
+ * marks, no testimonials, no em dashes. Urgency is allowed where it is true:
+ * real dates and the weeks left before race week. No fake scarcity or stock
+ * counters, because these are unlimited downloads. Every claim about the PDFs
+ * here was checked against the PDFs themselves.
  *
  * Regenerated every five minutes so the page notices the sales close time.
  * The checkout route enforces that time exactly; this only decides what the
@@ -226,6 +228,7 @@ export default function HyroxGlasgow2027Page() {
             alt: EVENT.previews[PACK.key][0].alt,
           }}
           bundlePrice={BUNDLE.pricePence}
+          countdown={raceCountdownLabel(raceCountdown(new Date()))}
         />
 
         <section aria-labelledby="products" className="py-12 md:py-16">
