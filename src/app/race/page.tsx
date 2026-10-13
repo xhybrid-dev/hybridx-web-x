@@ -39,10 +39,12 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  * Honesty constraints, all deliberate:
  *   - The app is not in the UNA store yet, so nothing here says "download".
  *     The status line is "coming to UNA Watch".
- *   - The watch screens are pre-release captures and say so.
- *   - Strava is the UNA app's export (the manifest's stravaExport). Garmin
- *     Connect is claimed only for an uploaded file, which is what was tested:
- *     named laps with distance and pace. There is no Garmin sync.
+ *   - The watch screens are the 0.1.0 store previews, from UNA's simulator,
+ *     and say so.
+ *   - Strava is the UNA app's sync, tested in a real race on 1 October. No
+ *     claim that lap names show in Strava or Garmin Connect: the names are in
+ *     the file, but neither has been seen to display them (watch repo NOTES
+ *     5.12). The store text makes the same choice. There is no Garmin sync.
  *   - The sims (run distance 100 m to 1 km) are built; the roadmap keeps only
  *     what isn't: custom stations and rounds, relay, target pacing, GPS.
  *   - Claims about UNA are limited to what UNA says publicly about itself:
@@ -120,7 +122,7 @@ const FEATURES = [
   {
     kicker: 'Undo',
     title: 'Take it back, exactly',
-    body: 'Pressed on the way into the Roxzone instead of out? Undo it. The times either side are put back exactly as they were, as if you never pressed.',
+    body: 'Pressed on the way into the Roxzone instead of out? Undo it — the last split, or even the finish. The times either side are put back exactly as they were, as if you never pressed.',
     accent: 'orchid',
   },
   {
@@ -262,13 +264,9 @@ export default function RacePage() {
                   <h3 className={styles.h3}>Lands as a race, not a blob</h3>
                   <p>
                     Most watches save a race as one long workout. HybridX Race saves it as sixteen
-                    laps, each run and each station in order with its own time, distance, pace and
-                    heart rate, and the UNA app sends it to Strava — so you can see exactly where
+                    laps, each run and each station in order with its own time, distance and heart
+                    rate, and it syncs to Strava through the UNA app — so you can see exactly where
                     the time went.
-                  </p>
-                  <p>
-                    It’s a standard activity file, too: upload it to Garmin Connect and every lap
-                    is there by name — RUN 1/8, SKIERG, SLED PUSH.
                   </p>
                 </div>
                 <div className={styles.lapChart} aria-hidden="true">
@@ -319,7 +317,7 @@ export default function RacePage() {
             ))}
           </ol>
           <div className={styles.container}>
-            <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
+            <p className={styles.footnote}>The app’s own screens, from version 0.1.0, captured in UNA’s simulator.</p>
           </div>
         </section>
 
