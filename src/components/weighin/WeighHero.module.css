@@ -1,0 +1,144 @@
+/*
+ * The hero: graph paper, the copy and the watch, and the strip chart along
+ * the foot. The paper is lime at a whisper, heavier every fifth line, and
+ * fades out towards the edges.
+ */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(40px, 6vw, 80px) 0 0;
+}
+
+.paper {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(170, 255, 0, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170, 255, 0, 0.055) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(80% 70% at 60% 55%, #000 25%, transparent 80%);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+  width: 100%;
+  max-width: calc(1180px + var(--gutter) * 2);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+}
+
+.watchCol {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+
+.halo {
+  position: absolute;
+  top: 54%;
+  left: 50%;
+  width: 92%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(170, 255, 0, 0.2), rgba(170, 255, 0, 0.06) 55%, transparent);
+  filter: blur(20px);
+}
+
+.watch {
+  width: min(380px, 74vw);
+}
+
+/* ── The strip chart ─────────────────────────────────────────────────── */
+
+.strip {
+  position: relative;
+  margin-top: clamp(8px, 2vw, 24px);
+  height: clamp(190px, 21vw, 260px);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(170, 255, 0, 0.025), transparent 70%);
+}
+
+.canvas {
+  position: absolute;
+  inset: 34px 0 0;
+  width: 100%;
+  height: calc(100% - 34px);
+  display: block;
+  font-family: var(--mono);
+}
+
+.readout {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  display: inline-flex;
+  gap: 14px;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(170, 255, 0, 0.25);
+  background: rgba(4, 6, 3, 0.85);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  will-change: transform;
+}
+
+.readout b {
+  font-weight: 500;
+}
+
+.scaleNum {
+  color: #e9ece6;
+}
+
+.trendNum {
+  color: var(--lime);
+}
+
+.note {
+  max-width: calc(1180px + var(--gutter) * 2);
+  margin: 0 auto;
+  padding: 10px var(--gutter) 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+
+@media (max-width: 960px) {
+  .inner {
+    grid-template-columns: 1fr;
+  }
+
+  .watchCol {
+    order: -1;
+  }
+
+  .watch {
+    width: min(300px, 70vw);
+  }
+}
+
+@media (max-width: 560px) {
+  .readout {
+    gap: 10px;
+    font-size: 10px;
+  }
+}

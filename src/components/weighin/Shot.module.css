@@ -1,0 +1,17 @@
+.bezel {
+  position: relative;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #000;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 9px #141612,
+    0 0 0 10px rgba(255, 255, 255, 0.12),
+    0 0 0 11px rgba(170, 255, 0, 0.06),
+    0 30px 60px -22px rgba(0, 0, 0, 0.9);
+}
+
+.shot {
+  object-fit: cover;
+}
