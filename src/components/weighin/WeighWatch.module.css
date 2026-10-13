@@ -1,0 +1,28 @@
+/*
+ * The black UNA watch with a drawn screen. Geometry as Trail's watch: the
+ * render's display is a circle of radius 367 at (571.5, 800.5) in the
+ * 1144 x 1576 crop; the screen is drawn at radius 372.
+ */
+
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1144 / 1576;
+}
+
+.screen {
+  position: absolute;
+  left: 17.439%;
+  top: 27.189%;
+  width: 65.035%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
+}
+
+.render {
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.7));
+}

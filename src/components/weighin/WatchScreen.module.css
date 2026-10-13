@@ -1,0 +1,10 @@
+/* A drawn X Weigh-in screen: the watch's face is Poppins. */
+
+.screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-weighin-watch), 'Poppins', system-ui, sans-serif;
+  /* The display is 240 px; LVGL draws its fonts without hinting tricks. */
+  text-rendering: geometricPrecision;
+}

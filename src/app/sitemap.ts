@@ -231,6 +231,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      // X Weigh-in for UNA Watch. Unlike /race, /streak and /trail it has no
+      // subdomain yet, so its canonical is this address.
+      url: `${baseUrl}/weigh-in`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/shop-terms`,
       lastModified: new Date(),
       changeFrequency: 'yearly' as const,
