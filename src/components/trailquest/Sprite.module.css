@@ -1,0 +1,37 @@
+.sprite {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.sprite img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.flip {
+  transform: scaleX(-1);
+}
+
+/* The idle: frame 1 shows for half of every second, as on the watch. */
+.f1 {
+  animation: idle 1s steps(1, end) infinite;
+}
+
+@keyframes idle {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f1 {
+    display: none;
+  }
+}

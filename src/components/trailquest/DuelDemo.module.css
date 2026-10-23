@@ -1,0 +1,223 @@
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(260px, 440px) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: center;
+}
+
+/* The black UNA watch; its display is a circle of radius 367 at (571.5, 800.5) in the 1144 x 1576 render. */
+.watch {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1144 / 1576;
+}
+
+.face {
+  position: absolute;
+  left: 17.439%;
+  top: 27.189%;
+  width: 65.035%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  z-index: 0;
+}
+
+.render {
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.7));
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--pixel);
+}
+
+.num {
+  font-size: 13px;
+  fill: #fff;
+  text-anchor: middle;
+}
+
+.band {
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.small {
+  font-size: 8px;
+  text-anchor: middle;
+}
+
+.px {
+  image-rendering: pixelated;
+}
+
+.blink {
+  animation: blink 200ms steps(1, end) 3;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.controls {
+  display: grid;
+  gap: 18px;
+}
+
+.moves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.move {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 0;
+  background: #0d0d22;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px #24244a, inset 6px 0 0 var(--c);
+  transition: transform 80ms steps(2), background-color 80ms steps(2);
+}
+
+.move strong {
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--c);
+}
+
+.move span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.move:hover:not(:disabled) {
+  background: #16163a;
+  transform: translate(-2px, -2px);
+  box-shadow: inset 0 0 0 2px #24244a, inset 6px 0 0 var(--c), 4px 4px 0 #000040;
+}
+
+.move:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.move:focus-visible,
+.strike:focus-visible,
+.again:focus-visible {
+  outline: 3px solid var(--tq-gold);
+  outline-offset: 3px;
+}
+
+.strike {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  min-height: 132px;
+  border: 0;
+  background: #00c000;
+  color: #000040;
+  font-family: var(--pixel);
+  font-size: clamp(16px, 2.4vw, 22px);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 4px #000040, 6px 6px 0 #000040;
+  animation: pulse 400ms steps(2, end) infinite;
+}
+
+.strike span {
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.strike:active {
+  transform: translate(4px, 4px);
+  box-shadow: inset 0 0 0 4px #000040, 2px 2px 0 #000040;
+}
+
+@keyframes pulse {
+  50% {
+    background: #40e040;
+  }
+}
+
+.end {
+  padding: 20px;
+  background: #0d0d22;
+  box-shadow: inset 0 0 0 2px #24244a;
+}
+
+.end p {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.end .endTitle {
+  font-family: var(--pixel);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--tq-gold);
+}
+
+.again {
+  padding: 14px 18px;
+  border: 0;
+  background: var(--tq-gold);
+  color: #000040;
+  font-family: var(--pixel);
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000040, inset 0 0 0 3px #000040;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggles input {
+  accent-color: var(--tq-gold);
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 860px) {
+  .wrap {
+    grid-template-columns: 1fr;
+  }
+  .watch {
+    width: min(360px, 88%);
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strike,
+  .blink {
+    animation: none;
+  }
+}

@@ -233,6 +233,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // Trail Quest for UNA Watch. As /weigh-in, no subdomain yet, so its
+      // canonical is this address.
+      url: `${baseUrl}/trail-quest`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/shop-terms`,
       lastModified: new Date(),
       changeFrequency: 'yearly' as const,

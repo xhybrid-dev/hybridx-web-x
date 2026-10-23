@@ -26,6 +26,7 @@ export const UNA_APPS = [
   { name: 'HybridX Streak', href: `${HYBRIDX_URL}/streak` },
   { name: 'HybridX Trail', href: `${HYBRIDX_URL}/trail` },
   { name: 'X Weigh-in', href: `${HYBRIDX_URL}/weigh-in` },
+  { name: 'Trail Quest', href: `${HYBRIDX_URL}/trail-quest` },
 ] as const;
 
 export function Arrow() {

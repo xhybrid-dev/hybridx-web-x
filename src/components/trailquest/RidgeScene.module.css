@@ -1,0 +1,156 @@
+.scene {
+  position: relative;
+  height: clamp(220px, 30vw, 320px);
+  overflow: hidden;
+  background: var(--sky);
+  transition: background-color 900ms steps(4);
+  border-top: 4px solid #000040;
+  border-bottom: 4px solid #000040;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  bottom: 30%;
+  width: 200%;
+  height: 70%;
+  display: flex;
+  animation: scroll 40s linear infinite;
+}
+
+.layer svg {
+  width: 50%;
+  height: 100%;
+  display: block;
+}
+
+.far polygon {
+  fill: var(--hill);
+  opacity: 0.55;
+  transition: fill 900ms steps(4);
+}
+
+.near {
+  animation-duration: 22s;
+  bottom: 28%;
+  height: 55%;
+}
+
+.near polygon {
+  fill: var(--hill);
+  transition: fill 900ms steps(4);
+}
+
+.ground {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 30%;
+  background: var(--ground);
+  transition: background-color 900ms steps(4);
+  border-top: 4px solid #000040;
+}
+
+/* The path: dashes of the path colour running past under the runner's feet. */
+.path {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 28%;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, var(--path) 0 40px, transparent 40px 64px);
+  background-size: 64px 12px;
+  animation: dash 0.9s linear infinite;
+}
+
+.runner {
+  position: absolute;
+  left: 14%;
+  bottom: calc(30% - 22px);
+  z-index: 2;
+  animation: bob 0.5s steps(1, end) infinite;
+}
+
+.parade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.walker {
+  position: absolute;
+  right: -160px;
+  bottom: calc(30% - 18px);
+  animation: walk 6.4s linear both;
+}
+
+.label {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 12px;
+  background: #000040;
+  color: #fff;
+  font-family: var(--pixel);
+  font-size: clamp(9px, 1.4vw, 12px);
+  line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: 0 0 0 3px #c0c0c0, 0 0 0 6px #000040;
+  animation: pop 400ms steps(3, end) both;
+}
+
+.label span {
+  color: var(--tq-gold);
+  margin-right: 8px;
+}
+
+@keyframes scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes dash {
+  to {
+    background-position: -64px 0;
+  }
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes walk {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100vw - 200px));
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer,
+  .path,
+  .runner,
+  .label {
+    animation: none;
+  }
+  .walker {
+    animation: none;
+    right: 18%;
+  }
+  .walker + .walker {
+    display: none;
+  }
+}

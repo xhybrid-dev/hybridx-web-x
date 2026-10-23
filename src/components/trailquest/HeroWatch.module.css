@@ -1,0 +1,48 @@
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1144 / 1576;
+}
+
+.screen {
+  position: absolute;
+  left: 17.439%;
+  top: 27.189%;
+  width: 65.035%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
+}
+
+.shot {
+  object-fit: cover;
+  image-rendering: pixelated;
+  opacity: 0;
+  animation: turn 12s steps(1, end) infinite;
+}
+
+.shot:first-child {
+  opacity: 1;
+}
+
+@keyframes turn {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+}
+
+.render {
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 40px 50px rgba(0, 0, 0, 0.75));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shot {
+    animation: none;
+  }
+}
