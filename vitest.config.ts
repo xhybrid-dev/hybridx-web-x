@@ -7,7 +7,9 @@ export default defineConfig({
     globals: true,
     // handover/ is the entry-funnel reference package, kept for comparison. Its
     // tests use node:test and run with `node --test` from inside that folder.
-    exclude: [...configDefaults.exclude, 'handover/**'],
+    // hybridx-video/ is the Remotion video project, with its own package.json
+    // and checks (`npm run check` from inside that folder).
+    exclude: [...configDefaults.exclude, 'handover/**', 'hybridx-video/**'],
   },
   resolve: {
     alias: {

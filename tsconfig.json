@@ -38,6 +38,7 @@
   "exclude": [
     "node_modules",
     "public/12-week-running-hyrox",
-    "handover"
+    "handover",
+    "hybridx-video"
   ]
 }

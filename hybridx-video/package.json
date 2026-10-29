@@ -1,0 +1,31 @@
+{
+  "name": "hybridx-video",
+  "private": true,
+  "description": "HybridX Club video productions, built with Remotion. See VIDEO-PRODUCTION-SCOPE.md.",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit && tsx scripts/check.ts",
+    "render:test": "remotion render src/index.ts RenderTest out/tests/render-test.mp4",
+    "still:test": "remotion still src/index.ts RenderTest out/stills/render-test.png --frame=24"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.539",
+    "@remotion/fonts": "4.0.539",
+    "@remotion/media-utils": "4.0.539",
+    "@remotion/transitions": "4.0.539",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.539"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "@types/react": "19.2.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  }
+}
