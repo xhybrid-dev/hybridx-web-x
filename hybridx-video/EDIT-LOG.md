@@ -20,7 +20,53 @@ npm run render:test            # the Gate 0 one-second render
 | Gate | State |
 |---|---|
 | 0. Setup | **Delivered 2026-10-29, awaiting review** |
-| 1. Assets | Blocked on the PDFs (Q3) and logo files (Q2) |
+| 1. Assets | Blocked on the colour PDFs (Q8) and logo files (Q2) |
+
+---
+
+## Gate 0 addendum: the print PDFs (2026-10-29)
+
+Received `ATHX-2027-Mens-print.pdf` and `ATHX-2027-Womens-print.pdf`. Both were
+built by ReportLab on 2026-10-28 at 513 x 738 pt (a 7 x 10 in trim with bleed).
+They are newer than the copies in Drive (2026-08-29, 416 KB and 421 KB). Both
+are stored in `assets/pdf/` under their own names, gitignored, not renamed,
+because they are not the colour interiors.
+
+| Check | Men's | Women's |
+|---|---|---|
+| Pages | 158, as expected | 162 = 161 content + 1 blank padding page (p162 is pure white) |
+| Colour | **Greyscale throughout** | **Greyscale throughout** |
+
+- **Colour.** All 158 + 162 pages render with zero chroma. The content streams
+  set colour through RGB operators, but all 14 distinct values are neutral greys
+  (#000000 to #FFFFFF); no images, no CMYK. Where the colour editions would carry
+  the men's orange or women's purple, these use black. They are clean,
+  legible black-on-white pages, but not what brief 2.4 asks for.
+- **Women's offset (correction 2) confirmed exactly.** A page-by-page text
+  alignment matches p1 to p42 one-for-one. Women's p43 to p45 are the added
+  Chapter 13, "Aligning the Block". Men's p43 to p158 equal women's p46 to p161
+  (+3). From the Taper onwards the women's chapter numbers are one higher (men's
+  Ch 14 "The Compressed Warm-Up" is women's Ch 15), which matters only if a cut-out
+  shows a chapter number.
+- **Page index verified against the men's book.** Every page in brief 5.2 holds
+  what the brief says. Correction 1 confirmed: p14 holds "Earn the load", the split
+  jerk focus by week table and "The drills" table; p15 holds "If your split jerk is
+  not ready in time" and the competition rules.
+- **`check_pdfs.sh` reworked.** It now checks every PDF in the folder whatever its
+  name, scans every page at 20 dpi rather than a sample, and lists the distinct RGB
+  values. It counts trailing blank pages so print padding does not fail the page
+  count, and it fails a book interior that is not in colour.
+
+**Q8. Colour interiors.** These PDFs cannot be used for cut-outs as the brief
+specifies. Two ways forward:
+- (a) **Recommended.** Export the colour interiors from the same build (2026-10-28),
+  so the page numbers verified above still hold. If the colour export drops the
+  bleed, crop coordinates differ from the print files, but Gate 1 measures every
+  crop from the PDF's own text boxes (correction 9), so that costs nothing.
+- (b) Proceed with the greyscale print files as the cut-out source. They read
+  cleanly as white paper on the near-black plate, but the edition colours are lost.
+  The men's and women's p6 tables in Scene 7 would then be told apart only by their
+  footers or by a label we add.
 
 ---
 
@@ -167,9 +213,9 @@ npm run render:test            # the Gate 0 one-second render
   files that carry the yellow.
 - **Q2. Logo files.** The official logo in a reversed (white) version for the black
   end card, SVG preferred, plus PNG.
-- **Q3. PDFs.** Attach to the chat: `ATHX-2027-Mens.pdf`, `ATHX-2027-Womens.pdf`
-  (say which of the three Drive copies is current if they differ), both
-  `*-FRONT.pdf` covers, and optionally `ATHX-2027-Mens-Volume-Progression.pdf`.
+- **Q3. PDFs.** Print interiors received (see the addendum above and Q8). Still
+  needed: both `*-FRONT.pdf` covers, and optionally
+  `ATHX-2027-Mens-Volume-Progression.pdf`.
 - **Q4. Where the project lives.** Gate 0 is committed and pushed to branch
   `claude/hyrox-athx-video-gate0` of the website repo; no pull request opened. Keep
   it there, or move it to its own repo?

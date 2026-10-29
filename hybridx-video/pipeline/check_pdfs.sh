@@ -5,49 +5,63 @@
 # Usage: pipeline/check_pdfs.sh            (checks assets/pdf)
 #        pipeline/check_pdfs.sh DIR        (checks another folder)
 #
-# Colour is sampled on pages that carry edition colour in the books: the cover
-# page and the p6 MetCon X table. Exit status is 1 if a required book is missing
-# or its page count is wrong.
+# Every PDF in the folder is checked, including ones under other names (such as
+# the -print editions). Page counts exclude trailing blank pages, which print
+# files carry as padding. Exit status is 1 if a required file is missing, a book
+# has the wrong number of content pages, or a book interior is not in colour.
 
-set -euo pipefail
+set -uo pipefail
 cd "$(dirname "$0")/.."
 DIR="${1:-assets/pdf}"
 
-declare -A EXPECT_PAGES=([ATHX-2027-Mens.pdf]=158 [ATHX-2027-Womens.pdf]=161)
 REQUIRED=(ATHX-2027-Mens.pdf ATHX-2027-Womens.pdf ATHX-2027-Mens-FRONT.pdf ATHX-2027-Womens-FRONT.pdf)
 OPTIONAL=(ATHX-2027-Mens-Volume-Progression.pdf)
 status=0
 
-check() {
-	local name="$1" required="$2" f="$DIR/$1"
-	if [[ ! -f "$f" ]]; then
-		if [[ "$required" == yes ]]; then echo "MISSING   $name"; status=1; else echo "absent    $name (optional)"; fi
-		return
-	fi
-	local pages size
-	pages=$(pdfinfo "$f" | awk '/^Pages:/{print $2}')
-	size=$(pdfinfo "$f" | awk -F': +' '/^Page size:/{print $2}')
-	local expect="${EXPECT_PAGES[$name]:-}"
-	local count_note=""
-	if [[ -n "$expect" ]]; then
-		if [[ "$pages" == "$expect" ]]; then count_note="(expected $expect: ok)"; else count_note="(expected $expect: WRONG)"; status=1; fi
-	fi
-	echo "found     $name: $pages pages $count_note, $size, $(du -h "$f" | cut -f1)"
-	local sample=(1)
-	[[ "$pages" -ge 6 ]] && sample+=(6)
-	python3 -I pipeline/pdf_colour.py "$f" "${sample[@]}"
+# Expected content pages for a book interior, from its file name; empty for covers.
+expected_pages() {
+	case "$1" in
+	*FRONT* | *Volume-Progression*) echo "" ;;
+	*Womens*) echo 161 ;;
+	*Mens*) echo 158 ;;
+	*) echo "" ;;
+	esac
 }
 
 echo "PDF check in $DIR"
-for n in "${REQUIRED[@]}"; do check "$n" yes; done
-for n in "${OPTIONAL[@]}"; do check "$n" no; done
+for n in "${REQUIRED[@]}"; do
+	[[ -f "$DIR/$n" ]] || { echo "MISSING   $n"; status=1; }
+done
+for n in "${OPTIONAL[@]}"; do
+	[[ -f "$DIR/$n" ]] || echo "absent    $n (optional)"
+done
 
-# Anything else in the folder, e.g. the -print editions the plan mentions.
 shopt -s nullglob
 for f in "$DIR"/*.pdf; do
 	name=$(basename "$f")
-	[[ " ${REQUIRED[*]} ${OPTIONAL[*]} " == *" $name "* ]] && continue
-	echo "extra     $name: $(pdfinfo "$f" | awk '/^Pages:/{print $2}') pages (not used; rename if it is a colour interior)"
+	role="extra"
+	[[ " ${REQUIRED[*]} ${OPTIONAL[*]} " == *" $name "* ]] && role="found"
+	echo "$role     $name: $(pdfinfo "$f" | awk -F': +' '/^Page size:/{print $2}'), $(du -h "$f" | cut -f1)"
+	report=$(python3 -I pipeline/pdf_colour.py "$f")
+	grep -v '^RESULT' <<<"$report"
+	result=$(grep '^RESULT' <<<"$report")
+	content=$(sed -E 's/.*content=([0-9]+).*/\1/' <<<"$result")
+	verdict=$(sed -E 's/.*verdict=([a-z-]+).*/\1/' <<<"$result")
+
+	expect=$(expected_pages "$name")
+	if [[ -n "$expect" ]]; then
+		if [[ "$content" == "$expect" ]]; then
+			echo "  pages: $content content pages, as the page index expects"
+		else
+			echo "  pages: $content content pages, page index expects $expect: WRONG"
+			[[ $role == found ]] && status=1
+		fi
+		if [[ "$verdict" != "rgb-colour" ]]; then
+			echo "  NOT USABLE for cut-outs: the brief needs the colour interior ($verdict)"
+			[[ $role == found ]] && status=1
+		fi
+	fi
+	[[ $role == extra ]] && echo "  (not under a name the pipeline uses; rename to ATHX-2027-Mens.pdf or -Womens.pdf once it is the colour interior)"
 done
 
 exit $status

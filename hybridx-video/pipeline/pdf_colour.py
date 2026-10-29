@@ -1,18 +1,22 @@
 """Report whether a PDF is RGB colour, CMYK or greyscale.
 
-Usage: python3 -I pipeline/pdf_colour.py BOOK.pdf [PAGE ...]
+Usage: python3 -I pipeline/pdf_colour.py BOOK.pdf
 
 Three independent signals, because no single one is conclusive:
 
 1. Content-stream colour operators. Inflates every Flate stream and counts the
    device colour operators: rg/RG set DeviceRGB, k/K set DeviceCMYK, g/G set
    DeviceGray. Vector text, rules and table fills are coloured this way.
+   It also lists the distinct RGB values: a greyscale book written through RGB
+   operators uses only values with r == g == b.
 2. Embedded images, from `pdfimages -list`: colour space and component count
    (3 = RGB, 4 = CMYK, 1 = grey).
-3. A low-resolution render of the sample pages: how much of the page carries
-   visible chroma, so a "colour" PDF that renders grey is caught.
+3. A 20 dpi render of every page: which pages carry visible chroma, so an "RGB"
+   PDF that renders grey is caught. Also counts trailing blank pages, which print
+   files carry as padding.
 
-Stdlib plus Pillow only. Prints one human-readable block per PDF.
+Stdlib plus Pillow only. Prints a human-readable block, then one RESULT line
+for check_pdfs.sh.
 """
 
 import re
@@ -71,44 +75,72 @@ def image_signals(pdf: Path) -> Counter:
     return kinds
 
 
-def render_chroma(pdf: Path, page: int) -> tuple[float, int]:
-    """Share of pixels with visible chroma, and the strongest chroma, at 50 dpi."""
+RG_VALUES = re.compile(rb"(?:^|\s)" + (rb"([-+]?(?:\d+(?:\.\d*)?|\.\d+))\s+") * 3 + rb"(?:rg|RG)" + _END)
+
+
+def rgb_values(pdf: Path) -> Counter:
+    """Distinct DeviceRGB colours set in the content streams. A greyscale book
+    written through RGB operators shows only values with r == g == b."""
+    values: Counter = Counter()
+    for m in STREAM.finditer(pdf.read_bytes()):
+        try:
+            body = zlib.decompress(m.group(1))
+        except zlib.error:
+            continue
+        for t in RG_VALUES.finditer(body):
+            values[tuple(round(float(x) * 255) for x in t.groups())] += 1
+    return values
+
+
+def scan_pages(pdf: Path) -> list[tuple[int, bool]]:
+    """Every page at 20 dpi in one pass: (peak chroma, blank) per page."""
     with tempfile.TemporaryDirectory() as tmp:
-        stem = Path(tmp) / "p"
-        subprocess.run(
-            ["pdftoppm", "-r", "50", "-f", str(page), "-l", str(page), "-png", "-singlefile", str(pdf), str(stem)],
-            check=True,
-            capture_output=True,
-        )
-        im = Image.open(f"{stem}.png").convert("RGB")
-        px = list(im.get_flattened_data() if hasattr(im, "get_flattened_data") else im.getdata())
-    chroma = [max(p) - min(p) for p in px]
-    return sum(c > 40 for c in chroma) / len(chroma), max(chroma)
+        subprocess.run(["pdftoppm", "-r", "20", "-png", str(pdf), f"{tmp}/p"], check=True, capture_output=True)
+        out = []
+        for f in sorted(Path(tmp).glob("p-*.png"), key=lambda p: int(p.stem.split("-")[1])):
+            px = Image.open(f).convert("RGB").get_flattened_data()
+            out.append((max(max(p) - min(p) for p in px), all(min(p) == 255 for p in px)))
+    return out
 
 
 def main() -> None:
     pdf = Path(sys.argv[1])
-    info = subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True, check=True).stdout
-    count = int(re.search(r"^Pages:\s+(\d+)", info, re.M).group(1))
-    pages = [p for p in (int(a) for a in sys.argv[2:]) if 1 <= p <= count] or [1]
     ops, names = stream_signals(pdf)
     images = image_signals(pdf)
-    print(f"  colour operators: rgb {ops['rgb']}, cmyk {ops['cmyk']}, gray {ops['gray']}")
+    values = rgb_values(pdf)
+    chromatic = [v for v in values if max(v) - min(v) > 6]
+    print(
+        f"  colour operators: rgb {ops['rgb']} ({len(values)} distinct values, {len(chromatic)} chromatic),"
+        f" cmyk {ops['cmyk']}, gray {ops['gray']}"
+    )
     print(f"  colour space names: " + ", ".join(f"{k} {v}" for k, v in names.items()))
     print(f"  embedded images: {dict(images) or 'none'}")
-    any_colour = False
-    for page in pages:
-        share, peak = render_chroma(pdf, page)
-        any_colour |= peak > 40
-        print(f"  render p{page}: {share:.1%} of pixels in colour, peak chroma {peak}")
+
+    pages = scan_pages(pdf)
+    coloured = [i + 1 for i, (peak, _) in enumerate(pages) if peak > 40]
+    trailing_blank = 0
+    for _, blank in reversed(pages):
+        if not blank:
+            break
+        trailing_blank += 1
+    shown = ", ".join(f"p{p}" for p in coloured[:12]) + (" ..." if len(coloured) > 12 else "")
+    print(f"  render: {len(pages)} pages scanned; {len(coloured)} carry colour{f' ({shown})' if coloured else ''}")
+    if trailing_blank:
+        print(f"  trailing blank pages: {trailing_blank} (print padding; content is {len(pages) - trailing_blank} pages)")
+
     cmyk = ops["cmyk"] > 0 or names["DeviceCMYK"] > 0 or any(k.endswith("4comp") for k in images)
     if cmyk:
-        verdict = "CMYK content present: renders will shift colour; ask for an RGB export"
-    elif any_colour:
-        verdict = "RGB colour"
+        verdict = "cmyk"
+        note = "CMYK content present: renders will shift colour; ask for an RGB export"
+    elif coloured:
+        verdict = "rgb-colour"
+        note = "RGB colour"
     else:
-        verdict = "no colour on the sampled pages: greyscale, or sample other pages"
-    print(f"  verdict: {verdict}")
+        verdict = "greyscale"
+        note = "greyscale throughout: no page renders with colour"
+    print(f"  verdict: {note}")
+    # Machine-readable summary for check_pdfs.sh.
+    print(f"RESULT pages={len(pages)} content={len(pages) - trailing_blank} colour_pages={len(coloured)} verdict={verdict}")
 
 
 if __name__ == "__main__":
