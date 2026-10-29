@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "check": "tsc --noEmit && tsx scripts/check.ts",
     "render:test": "remotion render src/index.ts RenderTest out/tests/render-test.mp4",
-    "still:test": "remotion still src/index.ts RenderTest out/stills/render-test.png --frame=24"
+    "still:test": "remotion still src/index.ts RenderTest out/stills/render-test.png --frame=24",
+    "still:test:portrait": "remotion still src/index.ts RenderTestPortrait out/stills/render-test-portrait.png --frame=24"
   },
   "dependencies": {
     "@remotion/cli": "4.0.539",

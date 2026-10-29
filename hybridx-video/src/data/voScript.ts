@@ -1,11 +1,14 @@
-// The voiceover script for HYROX or ATHX?, one entry per paragraph.
+// The voiceover script for HYROX or ATHX?, one entry per paragraph, for both the
+// 16:9 main video and the 9:16 cut-down.
 //
-// Verbatim from the recording script in PRODUCTION-PLAN.md, which is the brief's
-// script with Gate 0 correction 4 applied to 3b ("in about two and a half hours",
-// not "in one afternoon"). This is the single source for three things: which
-// paragraph each shot carries (sceneTimings.ts), where VO-keyed builds land before
-// the recording exists, and the SRT captions at Gate 4, which must match the read
-// word for word. If Jon's read departs from it, change it here.
+// Main video: verbatim from the recording script in PRODUCTION-PLAN.md, which is
+// the brief's script with Gate 0 correction 4 applied to 3b ("in about two and a
+// half hours", not "in one afternoon"). Cut-down: brief Part 4, see below.
+//
+// This is the single source for three things: which paragraph each shot carries
+// (sceneTimings.ts), where VO-keyed builds land before the recording exists, and
+// the captions (SRT for the main video, burned in for the cut-down), which must
+// match the read word for word. If Jon's read departs from it, change it here.
 
 export type VoId =
 	| '1'
@@ -16,7 +19,9 @@ export type VoId =
 	| '7a' | '7b'
 	| '8a' | '8b'
 	| '9'
-	| '10a' | '10b' | '10c';
+	| '10a' | '10b' | '10c'
+	// 9:16 cut-down (brief Part 4): its own lines, recorded as one extra WAV.
+	| 'r1' | 'r2' | 'r3' | 'r4' | 'r5' | 'r6' | 'r7';
 
 export type VoParagraph = {
 	id: VoId;
@@ -26,6 +31,7 @@ export type VoParagraph = {
 };
 
 const scene = (n: number) => `vo-s${String(n).padStart(2, '0')}.wav`;
+const REEL_FILE = 'vo-reel.wav';
 
 export const voScript: readonly VoParagraph[] = [
 	{
@@ -125,6 +131,25 @@ export const voScript: readonly VoParagraph[] = [
 		file: scene(10),
 		text: "It's in the ATHX 2027 books, in a men's and a women's edition, and in the HybridX app.",
 	},
+
+	// 9:16 cut-down, verbatim from brief Part 4, with correction 4 carried over to
+	// r2 ("in about two and a half hours", not "in an afternoon"): the same claim,
+	// the same reason. These lines are not in PRODUCTION-PLAN.md's recording script.
+	{id: 'r1', file: REEL_FILE, text: "HYROX athletes: here's how ATHX compares."},
+	{
+		id: 'r2',
+		file: REEL_FILE,
+		text: 'Instead of one continuous race, ATHX is three separate tests in about two and a half hours.',
+	},
+	{id: 'r3', file: REEL_FILE, text: 'Each zone is ranked, and your placings are added together.'},
+	{id: 'r4', file: REEL_FILE, text: 'Your ski, row, burpees and sandbag work all carry over.'},
+	{
+		id: 'r5',
+		file: REEL_FILE,
+		text: "What's new is a strength zone: a heavy overhead lift, squat and deadlift.",
+	},
+	{id: 'r6', file: REEL_FILE, text: 'Plus dumbbell bench and sandbag squats straight into a carry.'},
+	{id: 'r7', file: REEL_FILE, text: 'The full twelve-week plan is in the ATHX 2027 books. Link in bio.'},
 ];
 
 export const voById = Object.fromEntries(voScript.map((p) => [p.id, p])) as Record<VoId, VoParagraph>;

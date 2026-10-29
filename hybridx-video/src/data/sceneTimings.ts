@@ -1,9 +1,11 @@
-// Scene and shot timings for HYROX or ATHX? (16:9 main video).
+// Scene and shot timings for HYROX or ATHX?: the 16:9 main video and the 9:16
+// cut-down.
 //
-// `scenes` is the storyboard as planned: the brief's times with the Gate 0 retimes
-// (6a-6d, 8a-8b, 10a-10c, end card 5:32-5:42), written in m:ss so they can be
-// checked against the brief by eye. Compositions never read it directly. They read
-// `timeline`, which is the plan conformed to the recorded voiceover:
+// Each plan is the storyboard as planned, written in m:ss so it can be checked
+// against the brief by eye: the main video is brief Part 3 with the Gate 0 retimes
+// (6a-6d, 8a-8b, 10a-10c, end card 5:32-5:42); the cut-down is brief Part 4.
+// Compositions never read a plan directly. They read its timeline, which is the
+// plan conformed to the recorded voiceover:
 //
 //   - Until voTimings.json holds a paragraph, its shots keep their planned length.
 //   - Once it does (written at Gate 3 from the cleaned WAVs), the shots carrying
@@ -16,13 +18,11 @@
 // scene dissolve on the boundary, so dissolves never change the running time.
 
 import {motion} from '../easing';
+import type {Aspect} from '../tokens';
 import measuredJson from './voTimings.json';
 import {PLANNING_WPM, voById, words, type VoId} from './voScript';
 
 export const FPS = 25;
-
-/** Brief 2.7: main video length. */
-export const LENGTH_RANGE_SECONDS = {min: 5 * 60 + 15, max: 5 * 60 + 45} as const;
 
 /** How VO sits in its shot once recorded. Tuned by ear at Gate 3. */
 export const voPadding = {
@@ -37,7 +37,7 @@ const CUE_SETTLE_SECONDS = 1.0;
 const HOLD_SECONDS = motion.minHoldFrames / FPS;
 
 // ---------------------------------------------------------------------------
-// Plan
+// Plans
 // ---------------------------------------------------------------------------
 
 /** A build that lands on a spoken word, e.g. a carry-over line on "SkiErg". */
@@ -71,199 +71,310 @@ export type ScenePlan = {
 	shots: ShotPlan[];
 };
 
-export const scenes: readonly ScenePlan[] = [
-	{
-		id: 's01',
-		n: 1,
-		title: 'Opening',
-		chapter: 'Introduction',
-		shots: [
-			{id: '1a', what: 'HYROX race map draws, km counter', start: '0:00', end: '0:08', vo: '1', minSeconds: 7},
-			{id: '1b', what: 'ATHX day timeline, blocks rise in', start: '0:08', end: '0:16', vo: '1', minSeconds: 6},
-			{id: '1c', what: 'Both hold, yellow rule draws between', start: '0:16', end: '0:20', vo: '1', minSeconds: 3},
-		],
-	},
-	{
-		id: 's02',
-		n: 2,
-		title: 'Title',
-		shots: [{id: '2', what: 'HYROX OR ATHX? title card', start: '0:20', end: '0:26', minSeconds: 6}],
-	},
-	{
-		id: 's03',
-		n: 3,
-		title: 'Two different formats',
-		chapter: 'Two different formats',
-		shots: [
-			{id: '3a', what: 'Race map, station labels in order', start: '0:26', end: '0:45', vo: '3a', minSeconds: 12},
-			{
-				id: '3b',
-				what: 'ATHX timeline opens into zone cards',
-				start: '0:45',
-				end: '1:05',
-				vo: '3b',
-				minSeconds: 12,
-				cues: [
-					{id: 'strength', word: 'strength'},
-					{id: 'endurance', word: 'endurance'},
-					{id: 'metconX', word: 'MetCon'},
-				],
-			},
-			{id: '3c', what: 'Split: HYROX card / ATHX card', start: '1:05', end: '1:15', vo: '3c', minSeconds: 6},
-		],
-	},
-	{
-		id: 's04',
-		n: 4,
-		title: 'How each is scored',
-		chapter: 'How each event is scored',
-		shots: [
-			{id: '4a', what: 'TOTAL TIME figure', start: '1:15', end: '1:25', vo: '4a', minSeconds: 5},
-			{id: '4b', what: 'Placing boxes count up and sum', start: '1:25', end: '1:35', vo: '4b', minSeconds: 6},
-			{id: '4c', what: 'p9 specialist / all-rounder table builds', start: '1:35', end: '1:50', vo: '4c', minSeconds: 10},
-		],
-	},
-	{
-		id: 's05',
-		n: 5,
-		title: 'What carries over',
-		chapter: 'What carries over from HYROX',
-		shots: [
-			{
-				id: '5a',
-				what: 'Carry-over map, lines draw one at a time',
-				start: '1:50',
-				end: '2:35',
-				vo: '5a',
-				minSeconds: 20,
-				cues: [
-					{id: 'line1', word: 'SkiErg'},
-					{id: 'line2', word: 'rower'},
-					{id: 'line3', word: 'Burpees'},
-					{id: 'line4', word: 'sandbag'},
-					{id: 'line5', word: 'dumbbell'},
-					{id: 'line6', word: 'heavy'},
-					{id: 'line7', word: 'running'},
-				],
-			},
-			// Brief: the finished map stays on screen for 3 seconds.
-			{id: '5b', what: 'Caption under the finished map', start: '2:35', end: '2:45', vo: '5b', minSeconds: 5, tailSeconds: 3},
-		],
-	},
-	{
-		id: 's06',
-		n: 6,
-		title: "What's new: the Strength Zone",
-		chapter: "What's new: the Strength Zone",
-		shots: [
-			{
-				id: '6a',
-				what: 'SkillCard 1: 15-minute window timeline',
-				start: '2:45',
-				end: '3:01',
-				vo: '6a',
-				minSeconds: 8,
-				cues: [
-					{id: 'overhead', word: 'overhead'},
-					{id: 'squat', word: 'squat'},
-					{id: 'deadlift', word: 'deadlift'},
-				],
-			},
-			{id: '6b', what: 'p12 worked example, band on averages', start: '3:01', end: '3:13', vo: '6b', minSeconds: 6},
-			{id: '6c', what: 'p14 focus + drills tables, parallax', start: '3:13', end: '3:28', vo: '6c', minSeconds: 8},
-			{id: '6d', what: 'p144 Inside each window, overhead rows', start: '3:28', end: '3:35', vo: '6d', minSeconds: 6},
-		],
-	},
-	{
-		id: 's07',
-		n: 7,
-		title: "What's new: MetCon X",
-		chapter: "What's new: MetCon X",
-		shots: [
-			{id: '7a', what: "p6 MetCon X, men's + women's; then p20", start: '3:35', end: '3:50', vo: '7a', minSeconds: 10},
-			{
-				id: '7b',
-				what: 'SkillCards 2 and 3: DB bench, sandbag',
-				start: '3:50',
-				end: '4:10',
-				vo: '7b',
-				minSeconds: 8,
-				cues: [
-					{id: 'dbBench', word: 'Thirty'},
-					{id: 'sandbag', word: 'sandbag'},
-				],
-			},
-		],
-	},
-	{
-		id: 's08',
-		n: 8,
-		title: "What's new: the Endurance Zone",
-		chapter: "What's new: the Endurance Zone",
-		shots: [
-			{id: '8a', what: '24-minute split bar, ski metres count', start: '4:10', end: '4:21', vo: '8a', minSeconds: 8},
-			{id: '8b', what: 'p16 run pace table, three rows', start: '4:21', end: '4:35', vo: '8b', minSeconds: 6},
-		],
-	},
-	{
-		id: 's09',
-		n: 9,
-		title: 'Why give it a go',
-		chapter: 'Why give it a go',
-		shots: [
-			{
-				id: '9',
-				what: 'Four cards, rule lands yellow then white; p53 at 25%',
-				start: '4:35',
-				end: '5:05',
-				vo: '9',
-				minSeconds: 12,
-				cues: [
-					{id: 'card1', word: 'fitness'},
-					{id: 'card2', word: 'strength'},
-					{id: 'card3', word: 'three'},
-					{id: 'card4', word: 'less'},
-				],
-			},
-		],
-	},
-	{
-		id: 's10',
-		n: 10,
-		title: 'How to prepare',
-		chapter: 'How to prepare',
-		shots: [
-			{id: '10a', what: '12-week phase bar builds', start: '5:05', end: '5:11', vo: '10a', minSeconds: 5},
-			{
-				id: '10b',
-				what: 'Day pages p79, p54, p90, about 3 s each',
-				start: '5:11',
-				end: '5:25',
-				vo: '10b',
-				minSeconds: 9,
-				cues: [
-					{id: 'heavy', word: 'heavy'},
-					{id: 'triangle', word: 'MetCon'},
-					{id: 'runSki', word: 'engine'},
-				],
-			},
-			{id: '10c', what: 'Both covers, slow push-in', start: '5:25', end: '5:32', vo: '10c', minSeconds: 6},
-		],
-	},
-	{
-		id: 's11',
-		n: 11,
-		title: 'End card',
-		shots: [{id: '11', what: 'Logo, hybridx.club, disclaimer', start: '5:32', end: '5:42', minSeconds: 10}],
-	},
-];
+export type VideoPlan = {
+	id: 'main' | 'reel';
+	title: string;
+	aspect: Aspect;
+	/** Brief 2.7, in seconds. */
+	lengthRange: {min: number; max: number};
+	scenes: readonly ScenePlan[];
+};
+
+export const main: VideoPlan = {
+	id: 'main',
+	title: 'HYROX or ATHX? (16:9)',
+	aspect: 'landscape',
+	lengthRange: {min: 5 * 60 + 15, max: 5 * 60 + 45},
+	scenes: [
+		{
+			id: 's01',
+			n: 1,
+			title: 'Opening',
+			chapter: 'Introduction',
+			shots: [
+				{id: '1a', what: 'HYROX race map draws, km counter', start: '0:00', end: '0:08', vo: '1', minSeconds: 7},
+				{id: '1b', what: 'ATHX day timeline, blocks rise in', start: '0:08', end: '0:16', vo: '1', minSeconds: 6},
+				{id: '1c', what: 'Both hold, yellow rule draws between', start: '0:16', end: '0:20', vo: '1', minSeconds: 3},
+			],
+		},
+		{
+			id: 's02',
+			n: 2,
+			title: 'Title',
+			shots: [{id: '2', what: 'HYROX OR ATHX? title card', start: '0:20', end: '0:26', minSeconds: 6}],
+		},
+		{
+			id: 's03',
+			n: 3,
+			title: 'Two different formats',
+			chapter: 'Two different formats',
+			shots: [
+				{id: '3a', what: 'Race map, station labels in order', start: '0:26', end: '0:45', vo: '3a', minSeconds: 12},
+				{
+					id: '3b',
+					what: 'ATHX timeline opens into zone cards',
+					start: '0:45',
+					end: '1:05',
+					vo: '3b',
+					minSeconds: 12,
+					cues: [
+						{id: 'strength', word: 'strength'},
+						{id: 'endurance', word: 'endurance'},
+						{id: 'metconX', word: 'MetCon'},
+					],
+				},
+				{id: '3c', what: 'Split: HYROX card / ATHX card', start: '1:05', end: '1:15', vo: '3c', minSeconds: 6},
+			],
+		},
+		{
+			id: 's04',
+			n: 4,
+			title: 'How each is scored',
+			chapter: 'How each event is scored',
+			shots: [
+				{id: '4a', what: 'TOTAL TIME figure', start: '1:15', end: '1:25', vo: '4a', minSeconds: 5},
+				{id: '4b', what: 'Placing boxes count up and sum', start: '1:25', end: '1:35', vo: '4b', minSeconds: 6},
+				{id: '4c', what: 'p9 specialist / all-rounder table builds', start: '1:35', end: '1:50', vo: '4c', minSeconds: 10},
+			],
+		},
+		{
+			id: 's05',
+			n: 5,
+			title: 'What carries over',
+			chapter: 'What carries over from HYROX',
+			shots: [
+				{
+					id: '5a',
+					what: 'Carry-over map, lines draw one at a time',
+					start: '1:50',
+					end: '2:35',
+					vo: '5a',
+					minSeconds: 20,
+					cues: [
+						{id: 'line1', word: 'SkiErg'},
+						{id: 'line2', word: 'rower'},
+						{id: 'line3', word: 'Burpees'},
+						{id: 'line4', word: 'sandbag'},
+						{id: 'line5', word: 'dumbbell'},
+						{id: 'line6', word: 'heavy'},
+						{id: 'line7', word: 'running'},
+					],
+				},
+				// Brief: the finished map stays on screen for 3 seconds.
+				{id: '5b', what: 'Caption under the finished map', start: '2:35', end: '2:45', vo: '5b', minSeconds: 5, tailSeconds: 3},
+			],
+		},
+		{
+			id: 's06',
+			n: 6,
+			title: "What's new: the Strength Zone",
+			chapter: "What's new: the Strength Zone",
+			shots: [
+				{
+					id: '6a',
+					what: 'SkillCard 1: 15-minute window timeline',
+					start: '2:45',
+					end: '3:01',
+					vo: '6a',
+					minSeconds: 8,
+					cues: [
+						{id: 'overhead', word: 'overhead'},
+						{id: 'squat', word: 'squat'},
+						{id: 'deadlift', word: 'deadlift'},
+					],
+				},
+				{id: '6b', what: 'p12 worked example, band on averages', start: '3:01', end: '3:13', vo: '6b', minSeconds: 6},
+				{id: '6c', what: 'p14 focus + drills tables, parallax', start: '3:13', end: '3:28', vo: '6c', minSeconds: 8},
+				{id: '6d', what: 'p144 Inside each window, overhead rows', start: '3:28', end: '3:35', vo: '6d', minSeconds: 6},
+			],
+		},
+		{
+			id: 's07',
+			n: 7,
+			title: "What's new: MetCon X",
+			chapter: "What's new: MetCon X",
+			shots: [
+				{id: '7a', what: "p6 MetCon X, men's + women's; then p20", start: '3:35', end: '3:50', vo: '7a', minSeconds: 10},
+				{
+					id: '7b',
+					what: 'SkillCards 2 and 3: DB bench, sandbag',
+					start: '3:50',
+					end: '4:10',
+					vo: '7b',
+					minSeconds: 8,
+					cues: [
+						{id: 'dbBench', word: 'Thirty'},
+						{id: 'sandbag', word: 'sandbag'},
+					],
+				},
+			],
+		},
+		{
+			id: 's08',
+			n: 8,
+			title: "What's new: the Endurance Zone",
+			chapter: "What's new: the Endurance Zone",
+			shots: [
+				{id: '8a', what: '24-minute split bar, ski metres count', start: '4:10', end: '4:21', vo: '8a', minSeconds: 8},
+				{id: '8b', what: 'p16 run pace table, three rows', start: '4:21', end: '4:35', vo: '8b', minSeconds: 6},
+			],
+		},
+		{
+			id: 's09',
+			n: 9,
+			title: 'Why give it a go',
+			chapter: 'Why give it a go',
+			shots: [
+				{
+					id: '9',
+					what: 'Four cards, rule lands yellow then white; p53 at 25%',
+					start: '4:35',
+					end: '5:05',
+					vo: '9',
+					minSeconds: 12,
+					cues: [
+						{id: 'card1', word: 'fitness'},
+						{id: 'card2', word: 'strength'},
+						{id: 'card3', word: 'three'},
+						{id: 'card4', word: 'less'},
+					],
+				},
+			],
+		},
+		{
+			id: 's10',
+			n: 10,
+			title: 'How to prepare',
+			chapter: 'How to prepare',
+			shots: [
+				{id: '10a', what: '12-week phase bar builds', start: '5:05', end: '5:11', vo: '10a', minSeconds: 5},
+				{
+					id: '10b',
+					what: 'Day pages p79, p54, p90, about 3 s each',
+					start: '5:11',
+					end: '5:25',
+					vo: '10b',
+					minSeconds: 9,
+					cues: [
+						{id: 'heavy', word: 'heavy'},
+						{id: 'triangle', word: 'MetCon'},
+						{id: 'runSki', word: 'engine'},
+					],
+				},
+				{id: '10c', what: 'Both covers, slow push-in', start: '5:25', end: '5:32', vo: '10c', minSeconds: 6},
+			],
+		},
+		{
+			id: 's11',
+			n: 11,
+			title: 'End card',
+			shots: [{id: '11', what: 'Logo, hybridx.club, disclaimer', start: '5:32', end: '5:42', minSeconds: 10}],
+		},
+	],
+};
+
+/** Brief Part 4. Each beat is its own scene; burned-in captions run throughout. */
+export const reel: VideoPlan = {
+	id: 'reel',
+	title: 'HYROX or ATHX? (9:16 cut-down)',
+	aspect: 'portrait',
+	lengthRange: {min: 55, max: 65},
+	scenes: [
+		{
+			id: 'r1',
+			n: 1,
+			title: 'HYROX vs ATHX',
+			shots: [{id: 'r1', what: 'Race map (top) and ATHX timeline (bottom) draw together', start: '0:00', end: '0:04', vo: 'r1', minSeconds: 4}],
+		},
+		{
+			id: 'r2',
+			n: 2,
+			title: '3 zones, not 1 race',
+			shots: [{id: 'r2', what: 'Top half collapses; ATHX timeline, three blocks labelled', start: '0:04', end: '0:12', vo: 'r2', minSeconds: 6}],
+		},
+		{
+			id: 'r3',
+			n: 3,
+			title: 'Placings added together',
+			shots: [{id: 'r3', what: 'Placing boxes sum to a total', start: '0:12', end: '0:20', vo: 'r3', minSeconds: 6}],
+		},
+		{
+			id: 'r4',
+			n: 4,
+			title: 'Your engine carries over',
+			shots: [
+				{
+					id: 'r4',
+					what: 'Short carry-over map: SkiErg, rower, burpees, sandbag',
+					start: '0:20',
+					end: '0:32',
+					vo: 'r4',
+					minSeconds: 8,
+					cues: [
+						{id: 'line1', word: 'ski'},
+						{id: 'line2', word: 'row'},
+						{id: 'line3', word: 'burpees'},
+						{id: 'line4', word: 'sandbag'},
+					],
+				},
+			],
+		},
+		{
+			id: 'r5',
+			n: 5,
+			title: 'New: max strength',
+			shots: [
+				{
+					id: 'r5',
+					what: 'Strength timeline, then the split jerk table cut-out',
+					start: '0:32',
+					end: '0:46',
+					vo: 'r5',
+					minSeconds: 10,
+					cues: [
+						{id: 'overhead', word: 'overhead'},
+						{id: 'squat', word: 'squat'},
+						{id: 'deadlift', word: 'deadlift'},
+					],
+				},
+			],
+		},
+		{
+			id: 'r6',
+			n: 6,
+			title: 'New: DB bench, squats into a carry',
+			shots: [
+				{
+					id: 'r6',
+					what: 'DB bench and sandbag squat cards',
+					start: '0:46',
+					end: '0:54',
+					vo: 'r6',
+					minSeconds: 6,
+					cues: [
+						{id: 'dbBench', word: 'dumbbell'},
+						{id: 'sandbag', word: 'sandbag'},
+					],
+				},
+			],
+		},
+		{
+			id: 'r7',
+			n: 7,
+			title: '12-week plan. Link in bio.',
+			shots: [{id: 'r7', what: 'Both covers, then the end card', start: '0:54', end: '1:02', vo: 'r7', minSeconds: 7}],
+		},
+	],
+};
+
+export const videos = {main, reel} as const;
 
 // ---------------------------------------------------------------------------
 // Measured voiceover (written by the Gate 3 VO pipeline)
 // ---------------------------------------------------------------------------
 
 export type MeasuredVo = {
-	/** Cleaned scene WAV, as a staticFile path: 'audio/vo-clean/vo-s03.wav'. */
+	/** Cleaned WAV, as a staticFile path: 'audio/vo-clean/vo-s03.wav'. */
 	file: string;
 	/** Where the paragraph starts in that file, seconds. */
 	inSeconds: number;
@@ -332,6 +443,7 @@ export type TimedScene = {
 };
 
 export type Timeline = {
+	video: VideoPlan['id'];
 	fps: number;
 	durationInFrames: number;
 	scenes: TimedScene[];
@@ -364,17 +476,17 @@ const wordTime = (vo: VoId, cue: Cue, m: MeasuredVo | undefined): number => {
 };
 
 /**
- * Build the timeline. With `estimate`, every paragraph without a recording is
- * conformed to a 150 wpm read instead: a projection of the cut, used by
+ * Build a video's timeline. With `estimate`, every paragraph without a recording
+ * is conformed to a 150 wpm read instead: a projection of the cut, used by
  * `npm run check`, never rendered.
  */
-export const buildTimeline = (vo: VoTimings = measured, {estimate = false} = {}): Timeline => {
+export const buildTimeline = (video: VideoPlan, vo: VoTimings = measured, {estimate = false} = {}): Timeline => {
 	const toFrames = (s: number) => Math.round(s * FPS);
 	const outScenes: TimedScene[] = [];
 	const conformed: string[] = [];
 	let cursor = 0; // seconds; frames are rounded from running boundaries so nothing drifts
 
-	for (const scene of scenes) {
+	for (const scene of video.scenes) {
 		const sceneStart = cursor;
 		const shots: TimedShot[] = [];
 		const placements: VoPlacement[] = [];
@@ -441,11 +553,15 @@ export const buildTimeline = (vo: VoTimings = measured, {estimate = false} = {})
 		});
 	}
 
-	return {fps: FPS, durationInFrames: toFrames(cursor), scenes: outScenes, conformed};
+	return {video: video.id, fps: FPS, durationInFrames: toFrames(cursor), scenes: outScenes, conformed};
 };
 
-export const timeline = buildTimeline();
+/** What the compositions render. */
+export const timelines = {
+	main: buildTimeline(main),
+	reel: buildTimeline(reel),
+} as const;
 
 /** YouTube chapters for the description, from the conformed timeline. */
-export const chapters = (t: Timeline = timeline) =>
+export const chapters = (t: Timeline = timelines.main) =>
 	t.scenes.filter((s) => s.chapter).map((s) => `${formatTc(s.from / t.fps)} ${s.chapter}`);

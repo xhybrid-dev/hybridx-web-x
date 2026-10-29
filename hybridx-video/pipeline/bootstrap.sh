@@ -161,7 +161,7 @@ fi
 
 echo "8. Production assets (not in git)"
 for f in assets/pdf/ATHX-2027-Mens.pdf assets/pdf/ATHX-2027-Womens.pdf \
-	assets/pdf/ATHX-2027-Mens-FRONT.pdf assets/pdf/ATHX-2027-Womens-FRONT.pdf; do
+	assets/pdf/ATHX-2027-Mens-COVER-white.pdf assets/pdf/ATHX-2027-Womens-COVER-white.pdf; do
 	[[ -f "$f" ]] && ok "$f" || warn "absent: $f"
 done
 vo=$(ls assets/audio/vo/*.wav 2>/dev/null | wc -l)

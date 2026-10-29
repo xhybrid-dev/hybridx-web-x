@@ -8,14 +8,15 @@ import * as facts from '../src/data/facts';
 import {voScript, words, PLANNING_WPM, type VoId} from '../src/data/voScript';
 import {
 	FPS,
-	LENGTH_RANGE_SECONDS,
 	buildTimeline,
 	chapters,
 	formatTc,
+	main,
 	parseTc,
-	scenes,
-	timeline,
+	reel,
+	timelines,
 	voPadding,
+	type VideoPlan,
 } from '../src/data/sceneTimings';
 import {motion} from '../src/easing';
 
@@ -94,23 +95,92 @@ for (const s of onScreenText) {
 }
 
 // ---------------------------------------------------------------------------
-// Timings
+// Timings, per video, with a VO fit report against the planned cuts
 // ---------------------------------------------------------------------------
 
-const plannedShots = scenes.flatMap((s) => s.shots.map((shot) => ({...shot, scene: s})));
-expect(plannedShots[0]?.start === '0:00', 'Timings: starts at 0:00');
-plannedShots.forEach((shot, i) => {
-	const next = plannedShots[i + 1];
-	if (next) expect(shot.end === next.start, `Timings: gap or overlap between ${shot.id} and ${next.id}`);
-	const len = parseTc(shot.end) - parseTc(shot.start);
-	expect(len >= shot.minSeconds, `Timings: ${shot.id} planned ${len}s is under its ${shot.minSeconds}s minimum`);
-});
+const pad = (s: string | number, n: number) => String(s).padEnd(n);
+const padL = (s: string | number, n: number) => String(s).padStart(n);
+const carriers = new Map<VoId, string[]>();
+const range = (v: VideoPlan) => `${formatTc(v.lengthRange.min)}-${formatTc(v.lengthRange.max)}`;
 
-const plannedEnd = parseTc(plannedShots.at(-1)!.end);
-expect(plannedEnd === 5 * 60 + 42, `Timings: planned end is 5:42 (got ${formatTc(plannedEnd)})`);
-expect(timeline.durationInFrames === plannedEnd * FPS || timeline.conformed.length > 0, 'Timings: frame total');
+const checkVideo = (video: VideoPlan, expectedEnd: string) => {
+	const plannedShots = video.scenes.flatMap((s) => s.shots);
+	const label = video.title;
+	expect(plannedShots[0]?.start === '0:00', `${label}: starts at 0:00`);
+	plannedShots.forEach((shot, i) => {
+		const next = plannedShots[i + 1];
+		if (next) expect(shot.end === next.start, `${label}: gap or overlap between ${shot.id} and ${next.id}`);
+		const len = parseTc(shot.end) - parseTc(shot.start);
+		expect(len >= shot.minSeconds, `${label}: ${shot.id} planned ${len}s is under its ${shot.minSeconds}s minimum`);
+		if (shot.vo) carriers.set(shot.vo, [...(carriers.get(shot.vo) ?? []), `${video.id}/${shot.id}`]);
+	});
+	const plannedEnd = parseTc(plannedShots.at(-1)!.end);
+	expect(plannedEnd === parseTc(expectedEnd), `${label}: planned end is ${expectedEnd} (got ${formatTc(plannedEnd)})`);
+	expect(
+		plannedEnd >= video.lengthRange.min && plannedEnd <= video.lengthRange.max,
+		`${label}: planned ${formatTc(plannedEnd)} is outside ${range(video)}`,
+	);
+	const rendered = timelines[video.id];
+	expect(rendered.durationInFrames === plannedEnd * FPS || rendered.conformed.length > 0, `${label}: frame total`);
 
-// Gate 0 correction 5, exactly.
+	const planned = buildTimeline(video, {});
+	const projected = buildTimeline(video, {}, {estimate: true});
+	const projectedShot = new Map(projected.scenes.flatMap((s) => s.shots.map((x) => [x.id, x])));
+	const plannedShot = new Map(planned.scenes.flatMap((s) => s.shots.map((x) => [x.id, x])));
+
+	console.log(`\n${label}: VO fit at ${PLANNING_WPM} wpm (lead ${voPadding.leadSeconds}s, tail ${voPadding.tailSeconds}s unless the shot sets one)\n`);
+	console.log(`${pad('shot', 10)}${pad('planned', 14)}${padL('len', 5)}  ${pad('vo', 4)}${padL('words', 6)}${padL('read', 7)}${padL('+pad', 7)}${padL('slack', 7)}   ${pad('projected', 14)}`);
+	let words_ = 0;
+	for (const scene of video.scenes) {
+		const groups = new Map<string, typeof scene.shots>();
+		for (const s of scene.shots) groups.set(s.vo ?? s.id, [...(groups.get(s.vo ?? s.id) ?? []), s]);
+		for (const [, group] of groups) {
+			const first = group[0]!;
+			const last = group.at(-1)!;
+			const len = sum(group.map((s) => parseTc(s.end) - parseTc(s.start)));
+			const p0 = projectedShot.get(first.id)!;
+			const p1 = projectedShot.get(last.id)!;
+			const proj = `${formatTc(p0.from / FPS)}-${formatTc((p1.from + p1.durationInFrames) / FPS)}`;
+			const ids = group.map((s) => s.id).join('+');
+			if (!first.vo) {
+				console.log(`${pad(ids, 10)}${pad(`${first.start}-${last.end}`, 14)}${padL(`${len}s`, 5)}  ${pad('-', 4)}${padL('', 33)}   ${proj}`);
+				continue;
+			}
+			const n = words(voScript.find((p) => p.id === first.vo)!.text).length;
+			words_ += n;
+			const read = (n * 60) / PLANNING_WPM;
+			const needed = voPadding.leadSeconds + read + (last.tailSeconds ?? voPadding.tailSeconds);
+			const slack = len - needed;
+			console.log(
+				`${pad(ids, 10)}${pad(`${first.start}-${last.end}`, 14)}${padL(`${len}s`, 5)}  ${pad(first.vo, 4)}${padL(n, 6)}${padL(`${read.toFixed(1)}s`, 7)}${padL(`${needed.toFixed(1)}s`, 7)}${padL(`${slack >= 0 ? '+' : ''}${slack.toFixed(1)}s`, 7)}   ${proj}`,
+			);
+			warn(slack >= 0, `${video.id}: VO ${first.vo} at ${PLANNING_WPM} wpm needs ${needed.toFixed(1)}s with padding; shot ${ids} is ${len}s`);
+		}
+	}
+
+	// Cue positions in the planned cut: each build must land, settle and hold inside its shot.
+	for (const shot of plannedShots) {
+		const timed = plannedShot.get(shot.id)!;
+		for (const [id, f] of Object.entries(timed.cues)) {
+			const latest = timed.durationInFrames - motion.minHoldFrames - FPS;
+			warn(f >= 0 && f <= latest, `${video.id}: cue ${shot.id}/${id} at ${(f / FPS).toFixed(1)}s leaves under 2.5s to build and hold in a ${timed.durationInFrames / FPS}s shot`);
+		}
+	}
+
+	const projectedSeconds = projected.durationInFrames / FPS;
+	console.log(`\nScript:        ${words_} words, ${formatTc((words_ * 60) / PLANNING_WPM)} of speech at ${PLANNING_WPM} wpm`);
+	console.log(`Planned cut:   ${formatTc(planned.durationInFrames / FPS)} (${planned.durationInFrames} frames), target ${range(video)}`);
+	console.log(`Projected cut: ${formatTc(projectedSeconds)} (${projected.durationInFrames} frames) if read at ${PLANNING_WPM} wpm`);
+	console.log(`Rendered now:  ${formatTc(rendered.durationInFrames / FPS)}, ${rendered.conformed.length} shots conformed to recorded VO`);
+	warn(
+		projectedSeconds >= video.lengthRange.min && projectedSeconds <= video.lengthRange.max,
+		`${video.id}: projected cut ${formatTc(projectedSeconds)} is outside ${range(video)}`,
+	);
+	return {plannedShots, planned};
+};
+
+// Main video, plus the two things only it has: the Gate 0 retimes and the chapters.
+const mainChecked = checkVideo(main, '5:42');
 const retimes: Record<string, [string, string]> = {
 	'6a': ['2:45', '3:01'], '6b': ['3:01', '3:13'], '6c': ['3:13', '3:28'], '6d': ['3:28', '3:35'],
 	'8a': ['4:10', '4:21'], '8b': ['4:21', '4:35'],
@@ -118,84 +188,27 @@ const retimes: Record<string, [string, string]> = {
 	'11': ['5:32', '5:42'],
 };
 for (const [id, [start, end]] of Object.entries(retimes)) {
-	const s = plannedShots.find((x) => x.id === id);
+	const s = mainChecked.plannedShots.find((x) => x.id === id);
 	expect(s?.start === start && s?.end === end, `Correction 5: ${id} should be ${start}-${end} (got ${s?.start}-${s?.end})`);
 }
-
-// The brief's YouTube chapters, from the planned timeline.
 const briefChapters = [
 	'0:00 Introduction', '0:26 Two different formats', '1:15 How each event is scored',
 	'1:50 What carries over from HYROX', "2:45 What's new: the Strength Zone", "3:35 What's new: MetCon X",
 	"4:10 What's new: the Endurance Zone", '4:35 Why give it a go', '5:05 How to prepare',
 ];
-const planned = buildTimeline({});
-expect(JSON.stringify(chapters(planned)) === JSON.stringify(briefChapters), 'Timings: chapters differ from the brief');
+expect(JSON.stringify(chapters(mainChecked.planned)) === JSON.stringify(briefChapters), 'Main video: chapters differ from the brief');
 
-// Every paragraph is carried by exactly one run of shots.
-const carriers = new Map<VoId, string[]>();
-for (const shot of plannedShots) if (shot.vo) carriers.set(shot.vo, [...(carriers.get(shot.vo) ?? []), shot.id]);
-for (const p of voScript) expect(carriers.has(p.id), `VO ${p.id} is not carried by any shot`);
+checkVideo(reel, '1:02');
 
-// ---------------------------------------------------------------------------
-// Report: VO fit at 150 wpm against the planned cuts, and the projected cut
-// ---------------------------------------------------------------------------
-
-const projected = buildTimeline({}, {estimate: true});
-const projectedShot = new Map(projected.scenes.flatMap((s) => s.shots.map((x) => [x.id, x])));
-const plannedShot = new Map(planned.scenes.flatMap((s) => s.shots.map((x) => [x.id, x])));
-const pad = (s: string | number, n: number) => String(s).padEnd(n);
-const padL = (s: string | number, n: number) => String(s).padStart(n);
-
-console.log(`\nVO fit at ${PLANNING_WPM} wpm (lead ${voPadding.leadSeconds}s, tail ${voPadding.tailSeconds}s unless the shot sets one)\n`);
-console.log(`${pad('shot', 10)}${pad('planned', 14)}${padL('len', 5)}  ${pad('vo', 4)}${padL('words', 6)}${padL('read', 7)}${padL('+pad', 7)}${padL('slack', 7)}   ${pad('projected', 14)}`);
-for (const scene of scenes) {
-	const groups = new Map<string, typeof scene.shots>();
-	for (const s of scene.shots) groups.set(s.vo ?? s.id, [...(groups.get(s.vo ?? s.id) ?? []), s]);
-	for (const [, group] of groups) {
-		const first = group[0]!;
-		const last = group.at(-1)!;
-		const len = sum(group.map((s) => parseTc(s.end) - parseTc(s.start)));
-		const p0 = projectedShot.get(first.id)!;
-		const p1 = projectedShot.get(last.id)!;
-		const proj = `${formatTc(p0.from / FPS)}-${formatTc((p1.from + p1.durationInFrames) / FPS)}`;
-		const label = group.map((s) => s.id).join('+');
-		if (!first.vo) {
-			console.log(`${pad(label, 10)}${pad(`${first.start}-${last.end}`, 14)}${padL(`${len}s`, 5)}  ${pad('-', 4)}${padL('', 33)}   ${proj}`);
-			continue;
-		}
-		const n = words(voScript.find((p) => p.id === first.vo)!.text).length;
-		const read = (n * 60) / PLANNING_WPM;
-		const needed = voPadding.leadSeconds + read + (last.tailSeconds ?? voPadding.tailSeconds);
-		const slack = len - needed;
-		console.log(
-			`${pad(label, 10)}${pad(`${first.start}-${last.end}`, 14)}${padL(`${len}s`, 5)}  ${pad(first.vo, 4)}${padL(n, 6)}${padL(`${read.toFixed(1)}s`, 7)}${padL(`${needed.toFixed(1)}s`, 7)}${padL(`${slack >= 0 ? '+' : ''}${slack.toFixed(1)}s`, 7)}   ${proj}`,
-		);
-		warn(slack >= 0, `VO ${first.vo} at ${PLANNING_WPM} wpm needs ${needed.toFixed(1)}s with padding; shot ${label} is ${len}s`);
-	}
+// Every paragraph is carried by exactly one run of shots, in exactly one video.
+for (const p of voScript) {
+	const where = carriers.get(p.id) ?? [];
+	expect(where.length > 0, `VO ${p.id} is not carried by any shot`);
+	expect(new Set(where.map((w) => w.split('/')[0])).size <= 1, `VO ${p.id} is used in both videos: ${where.join(', ')}`);
 }
 
-// Cue positions in the planned cut: each build must land, settle and hold inside its shot.
-const holdFrames = motion.minHoldFrames;
-for (const shot of plannedShots) {
-	const timed = plannedShot.get(shot.id)!;
-	for (const [id, f] of Object.entries(timed.cues)) {
-		const latest = timed.durationInFrames - holdFrames - FPS;
-		warn(f >= 0 && f <= latest, `Cue ${shot.id}/${id} at ${(f / FPS).toFixed(1)}s leaves under 2.5s to build and hold in a ${timed.durationInFrames / FPS}s shot`);
-	}
-}
-
-const totalWords = sum(voScript.map((p) => words(p.text).length));
-const projectedSeconds = projected.durationInFrames / FPS;
-console.log(`\nScript: ${totalWords} words, ${formatTc((totalWords * 60) / PLANNING_WPM)} of speech at ${PLANNING_WPM} wpm`);
-console.log(`Planned cut:   ${formatTc(planned.durationInFrames / FPS)} (${planned.durationInFrames} frames)`);
-console.log(`Projected cut: ${formatTc(projectedSeconds)} (${projected.durationInFrames} frames) if read at ${PLANNING_WPM} wpm`);
-console.log(`Rendered now:  ${formatTc(timeline.durationInFrames / FPS)}, ${timeline.conformed.length} shots conformed to recorded VO`);
-console.log(`ATHX on the clock: ${athx.clock.onTheClockMinutes} min (zone slots); individual working time ${individualWork} min`);
-warn(
-	projectedSeconds >= LENGTH_RANGE_SECONDS.min && projectedSeconds <= LENGTH_RANGE_SECONDS.max,
-	`Projected cut ${formatTc(projectedSeconds)} is outside 5:15-5:45`,
-);
-console.log('\nYouTube chapters (rendered timeline):');
+console.log(`\nATHX on the clock: ${athx.clock.onTheClockMinutes} min (zone slots); individual working time ${individualWork} min`);
+console.log('\nYouTube chapters (rendered main timeline):');
 for (const c of chapters()) console.log(`  ${c}`);
 
 if (warnings.length) {

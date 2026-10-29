@@ -14,14 +14,15 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 DIR="${1:-assets/pdf}"
 
-REQUIRED=(ATHX-2027-Mens.pdf ATHX-2027-Womens.pdf ATHX-2027-Mens-FRONT.pdf ATHX-2027-Womens-FRONT.pdf)
+# Covers are full print wraps (back, spine, front); Gate 1 crops the front panel.
+REQUIRED=(ATHX-2027-Mens.pdf ATHX-2027-Womens.pdf ATHX-2027-Mens-COVER-white.pdf ATHX-2027-Womens-COVER-white.pdf)
 OPTIONAL=(ATHX-2027-Mens-Volume-Progression.pdf)
 status=0
 
 # Expected content pages for a book interior, from its file name; empty for covers.
 expected_pages() {
 	case "$1" in
-	*FRONT* | *Volume-Progression*) echo "" ;;
+	*COVER* | *FRONT* | *Volume-Progression*) echo "" ;;
 	*Womens*) echo 161 ;;
 	*Mens*) echo 158 ;;
 	*) echo "" ;;

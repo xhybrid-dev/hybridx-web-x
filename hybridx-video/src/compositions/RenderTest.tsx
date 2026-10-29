@@ -1,29 +1,28 @@
-// Gate 0 render test: one second at 1920 x 1080. Exercises the fonts, the type
-// scale, the plate and the easing tokens, and shows the two candidate yellows
-// side by side for the brand decision. Not part of any video.
+// Gate 0 render test: one second, in both aspect ratios. Exercises the fonts,
+// the type scale, the plate, the easing tokens and an image from assets/, and
+// shows the colour tokens as swatches. Not part of any video.
 
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {easeEnter, easeLinear, motion} from '../easing';
 import {athx, hyrox} from '../data/facts';
-import {colour, css, layout, space, stroke, type} from '../tokens';
+import {type Aspect, colour, css, layout, space, stroke, type} from '../tokens';
 
-const t = type.landscape;
-const {margin} = layout.landscape;
-
-const Swatch = ({hex, name, note}: {hex: string; name: string; note: string}) => (
+const Swatch = ({hex, name, note, aspect}: {hex: string; name: string; note: string; aspect: Aspect}) => (
 	<div style={{display: 'flex', alignItems: 'center', gap: space(2)}}>
 		<div style={{width: space(8), height: space(8), background: hex}} />
 		<div>
-			<div style={{...css(t.label), color: colour.text}}>{name}</div>
-			<div style={{...css(t.small), color: colour.textMuted}}>
+			<div style={{...css(type[aspect].label), color: colour.text}}>{name}</div>
+			<div style={{...css(type[aspect].small), color: colour.textMuted}}>
 				{hex.toUpperCase()} {note}
 			</div>
 		</div>
 	</div>
 );
 
-export const RenderTest = () => {
+export const RenderTest = ({aspect}: {aspect: Aspect}) => {
 	const frame = useCurrentFrame();
+	const t = type[aspect];
+	const {margin, width, height} = layout[aspect];
 	const textIn = interpolate(frame, [0, motion.textIn.frames], [0, 1], {
 		easing: easeEnter,
 		extrapolateRight: 'clamp',
@@ -34,9 +33,16 @@ export const RenderTest = () => {
 		extrapolateRight: 'clamp',
 	});
 	const firstStation = hyrox.stations[0];
+	const portrait = aspect === 'portrait';
+	// Portrait text stays inside the Reels safe zone.
+	const top = portrait ? layout.portrait.safeZone.y0 : margin;
 
 	return (
-		<AbsoluteFill style={{background: colour.bg, padding: margin, justifyContent: 'center'}}>
+		<AbsoluteFill style={{background: colour.bg, padding: `${top}px ${margin}px`, justifyContent: 'center'}}>
+			<Img
+				src={staticFile('brand/hybridx-logo-full-white.png')}
+				style={{position: 'absolute', top, right: margin, width: portrait ? 240 : 200}}
+			/>
 			<div style={{opacity: textIn, transform: `translateY(${(1 - textIn) * motion.textIn.rise}px)`}}>
 				<div style={{...css(t.display), color: colour.text}}>HYROX or ATHX?</div>
 				<div style={{...css(t.label), color: colour.textMuted, marginTop: space(3)}}>
@@ -46,7 +52,7 @@ export const RenderTest = () => {
 			<div
 				style={{
 					height: stroke.titleRule,
-					width: 640 * rule,
+					width: (portrait ? 480 : 640) * rule,
 					background: colour.accent,
 					marginTop: space(4),
 				}}
@@ -55,15 +61,30 @@ export const RenderTest = () => {
 				Inter 400 tabular: 0123456789 · {firstStation?.shortName} {firstStation?.amount.toLocaleString('en-GB')} m ·{' '}
 				{athx.format.zoneCount} zones, {athx.clock.onTheClockMinutes} min on the clock
 			</div>
-			<div style={{display: 'flex', gap: space(6), marginTop: space(8)}}>
-				<Swatch hex={colour.accent} name="accent (set)" note="hybridx.club CSS" />
-				<Swatch hex="#C8FF00" name="brief expected" note="not in site or logos" />
-				<Swatch hex={colour.hyroxNeutral} name="hyroxNeutral" note="HYROX content" />
-				<Swatch hex={colour.mens} name="mens" note="cut-outs only" />
-				<Swatch hex={colour.womens} name="womens" note="cut-outs only" />
+			<div
+				style={{
+					display: 'flex',
+					flexWrap: 'wrap',
+					flexDirection: portrait ? 'column' : 'row',
+					gap: space(portrait ? 4 : 6),
+					marginTop: space(8),
+				}}
+			>
+				<Swatch aspect={aspect} hex={colour.accent} name="accent" note="HybridX yellow" />
+				<Swatch aspect={aspect} hex={colour.hyroxNeutral} name="hyroxNeutral" note="HYROX content" />
+				<Swatch aspect={aspect} hex={colour.mens} name="mens" note="cut-outs only" />
+				<Swatch aspect={aspect} hex={colour.womens} name="womens" note="cut-outs only" />
 			</div>
-			<div style={{...css(t.small), color: colour.textMuted, position: 'absolute', left: margin, bottom: space(6)}}>
-				Gate 0 render test · Space Grotesk 500/700 · Inter 400/600 · 1920 x 1080 · 25 fps · frame {frame}
+			<div
+				style={{
+					...css(t.small),
+					color: colour.textMuted,
+					position: 'absolute',
+					left: margin,
+					bottom: portrait ? height - layout.portrait.safeZone.y1 : space(6),
+				}}
+			>
+				Gate 0 render test · {width} x {height} · 25 fps · frame {frame}
 			</div>
 		</AbsoluteFill>
 	);

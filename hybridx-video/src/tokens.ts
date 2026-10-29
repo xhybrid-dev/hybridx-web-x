@@ -21,14 +21,11 @@ export const colour = {
 	/** Table header fill, card fill. */
 	panel: 'rgba(255,255,255,0.06)',
 	/**
-	 * HybridX yellow. One highlight per shot at most.
-	 *
-	 * PENDING CONFIRMATION (Gate 0). The logo files hold no yellow: every logo in
-	 * the website repo is #131313 on transparent. #FADB5C is the yellow hybridx.club
-	 * uses throughout its CSS (globals.css, tailwind.config.ts, 39 uses); the
-	 * brief's expected #C8FF00 appears nowhere. See EDIT-LOG.md.
+	 * HybridX yellow, confirmed at Gate 0. One highlight per shot at most.
+	 * The logo files are monochrome, so this comes from HybridX directly; the
+	 * website's CSS uses the near-identical #FADB5C.
 	 */
-	accent: '#FADB5C',
+	accent: '#FBD85B',
 	/** HYROX content in the comparison video only. Never yellow. */
 	hyroxNeutral: '#A3A3A3',
 	/** Only as printed on Men's Edition cut-outs and covers. */
