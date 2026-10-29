@@ -20,8 +20,58 @@ npm run still:test:portrait    # the same card at 1080 x 1920
 
 | Gate | State |
 |---|---|
-| 0. Setup | **Delivered 2026-10-29, awaiting review** (open: Q4, Q5, Q6, Q8, Q9) |
-| 1. Assets | Blocked on the book interiors (Q8); logo and covers received |
+| 0. Setup | **Complete 2026-10-29**: every input received and checked; awaiting the go-ahead for Gate 1 |
+| 1. Assets | Ready to start: colour interiors, covers and logo all in hand |
+
+---
+
+## Gate 0 addendum 3: colour interiors, answers, own repo (2026-10-29)
+
+**Colour interiors received and passing.** `ATHX-2027-Mens.pdf` (158 pages) and
+`ATHX-2027-Womens.pdf` (161 + the blank padding page) are RGB colour.
+`pipeline/check_pdfs.sh` exits clean.
+- Built 2 s before the print files and **text-identical to them on every page**, so
+  the page index check and the women's +3 offset in addendum 1 hold unchanged.
+- Accents match the tokens: men's `#EA580C`, women's `#7C3AED`. The men's edition
+  also uses a near-black brown, `#290D03`, in small elements on pp 4, 26, 43 and
+  140 with no women's counterpart. None of those pages is cut, so it is noted, not
+  acted on.
+- Only pp 25, 31 and 40 carry no colour.
+- The greyscale `-print` copies are removed from `assets/pdf/`; the uploads remain.
+
+**What the colour pages showed.**
+- **p6 confirms decision 13.** The ATHX column reads DB 20 kg, sandbag 50 kg, row
+  45 cal (men's) and 12.5 kg, 30 kg, 35 cal (women's).
+- **Scene 7 crops include the heading.** The p6 tables are neutral grey in both
+  editions; the edition colour is only on the "MetCon X" heading rule and the
+  bullets. Each crop takes the heading and its rule, so the two tables side by
+  side read as men's and women's.
+- **The run note.** The book (p5) says the run is "2.4 km for Lite, 3 km for ATHX
+  and Pro", where the fact sheet says "Lite 2.4 km for pairs". Not on screen;
+  noted in `facts.ts`.
+
+**Answers.**
+- **Q5, 69 minutes: (a).** HybridX confirms 69 for 2027 as 20 + 24 + 25. The book
+  agrees on 69 as total working time (pp 33, 87, 138), and p5 says individuals
+  lift for fifteen minutes and pairs twenty.
+  - The ATHX day timeline draws and labels its blocks from
+    `facts.athx.clock.zoneSlotMinutes` (20, 24, 25), so they add to the 69 on the
+    3c card.
+  - The Strength windows stay 3 x 5 minutes (6a, the 3b card).
+  - The exact strength label is Gate 2 copy, shown on the stills for approval.
+- **Q6, copy trims: approved.** 3c HYROX card: "1 RACE, ABOUT 60 TO 100 MIN",
+  small print "Most age-group athletes, start to finish". Scene 8 caption:
+  "3 KM RUN. ONLY SKI METRES SCORE".
+- **Q9, reel r2: approved.** "...in about two and a half hours" stands. The seven
+  reel lines go into Jon's recording session as one extra WAV, `vo-reel.wav`.
+- **Q4, own repo: yes.** The session's GitHub integration cannot create a repository
+  (403), so HybridX creates an empty private `xhybrid-dev/hybridx-video`. Then:
+  - Claude pushes this folder's full history to it (`git subtree split`, tested: 3
+    commits, the project at the repo root).
+  - Work continues there; this folder in the website repo is retired, and the
+    website branch `claude/hyrox-athx-video-gate0` can be deleted.
+- `CLAUDE.md` added, so a session opened on the new repo starts with the working
+  rules and the bootstrap.
 
 ---
 
@@ -255,44 +305,18 @@ specifies. Two ways forward:
 
 ### Questions
 
-Answered:
+Answered (see the addenda): Q1 yellow `#FBD85B`; Q2 white logo; Q3 PDFs; Q5 69
+minutes, option (a); Q6 copy trims approved; Q7 cut-down in scope; Q8 colour
+interiors supplied; Q9 reel r2 approved.
 
-- **Q1. Brand yellow.** `#FBD85B`. See addendum 2.
-- **Q2. Logo files.** White full lock-up received. See addendum 2.
-- **Q3. PDFs.** Print interiors and cover wraps received. The Volume-Progression
-  PDF is still optional and absent. The colour interiors are Q8.
-- **Q7. 9:16 cut-down.** In scope. See addendum 2.
+Open:
 
-Open (need your input):
-
-- **Q4. Where the project lives.** Committed and pushed to branch
-  `claude/hyrox-athx-video-gate0` of the website repo; no pull request opened. Keep
-  it there, or move it to its own repo?
-- **Q5. The 64 against 69 question.** Scenes 1 and 3 label the ATHX blocks
-  STRENGTH 15 min, ENDURANCE 24 min, METCON X 25 min cap. Those add to 64, while
-  the 3c card says 69 MIN ON THE CLOCK. A viewer who adds up the blocks gets a
-  different number. Options:
-  - (a) Label the strength block with its 20-minute slot and say "15 min lifting"
-    inside the 3b card.
-  - (b) Use the plan's other wording, "UP TO 64 MIN OF WORK".
-  - (c) Keep both as briefed.
-- **Q6. Lines over eight words.** Two storyboard lines break the 8-word rule:
-  - The 3c HYROX card: 12 words. Proposed: "1 RACE, ABOUT 60 TO 100 MIN", with small
-    print "Most age-group athletes, start to finish". The headline mirrors the ATHX
-    card; the small print keeps the brief's caveat.
-  - The Scene 8 caption: 9 words. Proposed: "3 KM RUN. ONLY SKI METRES SCORE".
-  - Scene 9 card 4 is 8 or 9 words depending on whether "3" and "8" count; fine as
-    is unless you count them.
-  - The reel's captions are all 6 words or fewer.
-- **Q8. Colour interiors.** See the print PDFs addendum: (a) export them from the
-  2026-10-28 build (recommended), or (b) cut from the greyscale print files.
-- **Q9. Reel VO.** Brief Part 4's r2 says "three separate tests in an afternoon".
-  `voScript.ts` carries correction 4 over to it ("in about two and a half hours")
-  for the same reason as 3b: say if you want the original. Jon also needs the seven
-  reel lines added to his recording script; they are in `voScript.ts` (r1 to r7).
+- **Q4. Own repo.** Waiting on HybridX to create the empty private repository
+  `xhybrid-dev/hybridx-video` and give the Claude GitHub app access to it.
 
 Not needed until Gate 3: the voiceover WAVs (`vo-s01` to `vo-s10`, plus
-`vo-reel.wav`) and the licensed music track with its licence.
+`vo-reel.wav`) and the licensed music track with its licence. The
+Volume-Progression PDF stays optional.
 
 ## Components
 

@@ -161,7 +161,10 @@ export const athx = {
 		name: 'Endurance',
 		capMinutes: 24,
 		runKm: 3,
-		/** Verbatim from the fact sheet. Not used on screen. */
+		/**
+		 * Verbatim from the fact sheet. Not used on screen. The book (men's p5) puts
+		 * it as "2.4 km for Lite, 3 km for ATHX and Pro".
+		 */
 		runNote: 'Lite 2.4 km for pairs',
 		then: 'Max SkiErg distance',
 		score: 'Ski metres only',
@@ -184,9 +187,9 @@ export const athx = {
 		/** The row calories are for individual ATHX division. */
 		rowCaloriesApplyTo: 'individual ATHX',
 		/**
-		 * ATHX division loads. The fact sheet gives each pair as "a / b"; read as
-		 * men / women, the order it states explicitly for the row. Not on screen
-		 * in the storyboard; confirm before any shot shows them.
+		 * ATHX division loads. The fact sheet gives each pair as "a / b"; men /
+		 * women, confirmed by the ATHX column of the p6 MetCon X table in each
+		 * edition. Not on screen in the storyboard except inside that cut-out.
 		 */
 		loadsKg: {
 			dumbbell: {men: 20, women: 12.5},
@@ -215,12 +218,17 @@ export const athx = {
 	clock: {
 		/**
 		 * Scene 3c summary card reads "3 ZONES, 69 MIN ON THE CLOCK" (Gate 0
-		 * correction 3). The fact sheet's "about 69 minutes of work" overstated an
-		 * individual's work: 69 is the sum of the zone slots below, and individuals
-		 * lift for 15 of the Strength Zone's 20.
+		 * correction 3). Confirmed by HybridX for 2027 as 20 + 24 + 25, the zone
+		 * slots below; the book gives the same figure as total working time (men's
+		 * p33, p87, p138). Individuals lift in three 5-minute windows, 15 minutes,
+		 * inside the 20-minute Strength slot (book p5).
 		 */
 		onTheClockMinutes: 69,
-		/** Source: PRODUCTION-PLAN.md, which cites BLK BOX's 2027 summary. */
+		/**
+		 * What the ATHX day timeline (ZoneTimeline) draws and labels, so its blocks
+		 * add up to the 69 on the 3c card. Source: HybridX, Gate 0; also
+		 * PRODUCTION-PLAN.md, citing BLK BOX's 2027 summary.
+		 */
 		zoneSlotMinutes: {strength: 20, endurance: 24, metconX: 25},
 		zoneSlotSource: sources.blkBox2027,
 	},
