@@ -1,0 +1,131 @@
+.figure {
+  margin: 0;
+  background: #fff;
+  border: 2px solid #0a0a0a;
+  padding: 18px 18px 14px;
+}
+
+.legend {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend i {
+  width: 18px;
+  height: 4px;
+}
+
+.legend span {
+  font-weight: 400;
+  color: #555;
+}
+
+.plot {
+  position: relative;
+}
+
+.plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+}
+
+.grid {
+  stroke: #0a0a0a;
+  stroke-opacity: 0.12;
+  stroke-width: 1;
+}
+
+.zero {
+  stroke: #0a0a0a;
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+
+.cross {
+  stroke: #0a0a0a;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.tick {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 10.5px;
+  fill: #555;
+}
+
+.end {
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  fill: #0a0a0a;
+}
+
+.tip {
+  position: absolute;
+  top: 6px;
+  transform: translateX(12px);
+  padding: 8px 10px;
+  background: #0a0a0a;
+  color: #fff;
+  display: grid;
+  gap: 2px;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tip[data-side='left'] {
+  transform: translateX(calc(-100% - 12px));
+}
+
+.figure figcaption {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #333;
+}
+
+.table {
+  margin-top: 10px;
+  font-size: 13.5px;
+}
+
+.table summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.table table {
+  margin-top: 8px;
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12.5px;
+}
+
+.table th,
+.table td {
+  padding: 5px 8px;
+  text-align: right;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.table th:last-child,
+.table td:last-child {
+  text-align: left;
+}

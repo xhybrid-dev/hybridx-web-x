@@ -241,6 +241,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // The X family: the linked HybridX apps for UNA Watch, and the method
+      // behind their numbers.
+      url: `${baseUrl}/una`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/una/nerdy-bits`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/shop-terms`,
       lastModified: new Date(),
       changeFrequency: 'yearly' as const,
