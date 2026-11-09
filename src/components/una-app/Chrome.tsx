@@ -20,8 +20,12 @@ export const UNA_URL = 'https://unawatch.com';
 export const HYBRIDX_URL = 'https://hybridx.club';
 export const HYBRIDX_APP_URL = 'https://hybridx.club/app';
 
-/** The HybridX apps for UNA Watch, for cross-links between their pages. */
+/**
+ * The HybridX apps for UNA Watch, for cross-links between their pages. The
+ * first entry is not an app but the page that shows how they join up (/una).
+ */
 export const UNA_APPS = [
+  { name: 'The X family', href: `${HYBRIDX_URL}/una` },
   { name: 'HybridX Race', href: `${HYBRIDX_URL}/race` },
   { name: 'HybridX Streak', href: `${HYBRIDX_URL}/streak` },
   { name: 'HybridX Trail', href: `${HYBRIDX_URL}/trail` },

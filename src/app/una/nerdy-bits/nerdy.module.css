@@ -1,0 +1,488 @@
+/*
+ * /una/nerdy-bits. A lab notebook: graph paper, ink, one red pen. Same type
+ * and the same hard edges as /una, so it reads as the back of the same book.
+ */
+
+.page {
+  --ink: #0a0a0a;
+  --red: #c1121f;
+  --ox: #5c0f1a;
+  --pad: clamp(16px, 4vw, 56px);
+  color: var(--ink);
+  font-family: var(--font-una-text), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  background-color: #fbf5ef;
+  background-image:
+    linear-gradient(rgba(92, 15, 26, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(92, 15, 26, 0.11) 1px, transparent 1px);
+  background-size: 24px 24px;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page a {
+  color: inherit;
+}
+
+.page :focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px var(--pad);
+  background: var(--ink);
+  color: #fff;
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: var(--font-una-display), sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.back img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.barUna {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.head {
+  padding: clamp(40px, 6vw, 88px) var(--pad) clamp(28px, 4vw, 56px);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.over {
+  margin: 0 0 12px;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ox);
+}
+
+.h1 {
+  margin: 0;
+  font-family: var(--font-una-display), sans-serif;
+  font-weight: 400;
+  font-size: clamp(3.6rem, 14vw, 13rem);
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.h1 em {
+  font-style: normal;
+  color: var(--red);
+}
+
+.lead {
+  margin: 24px 0 0;
+  max-width: 32em;
+  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.body {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--pad) clamp(64px, 8vw, 120px);
+  display: grid;
+  grid-template-columns: 220px minmax(0, 760px);
+  gap: clamp(24px, 5vw, 80px);
+  align-items: start;
+}
+
+/* Contents: a ruler down the margin. */
+.toc {
+  position: sticky;
+  top: 24px;
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 3px solid var(--ink);
+}
+
+.toc a {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0 7px 14px;
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 500;
+  position: relative;
+}
+
+.toc a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 3px;
+  margin-top: -1.5px;
+  background: var(--ink);
+}
+
+.toc a:hover {
+  color: var(--red);
+}
+
+.toc b {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  color: var(--red);
+}
+
+.main section {
+  padding-top: 8px;
+  scroll-margin-top: 16px;
+}
+
+.main section + section {
+  margin-top: clamp(48px, 6vw, 84px);
+  border-top: 3px solid var(--ink);
+  padding-top: 26px;
+}
+
+.main h2 {
+  margin: 0 0 18px;
+  font-family: var(--font-una-display), sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5.4vw, 4rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.main h2 b {
+  font-weight: 400;
+  color: var(--red);
+}
+
+.main h3 {
+  margin: 34px 0 10px;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ox);
+}
+
+.main p {
+  margin: 0 0 14px;
+}
+
+.main p a,
+.limits a {
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.cite a {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red);
+  text-decoration: none;
+  padding: 0 1px;
+}
+
+.cite a:hover {
+  text-decoration: underline;
+}
+
+.formula {
+  margin: 18px 0 20px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ox);
+  padding: 14px 18px 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.formula span {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ox);
+}
+
+.formula code {
+  font-family: var(--font-una-mono), monospace;
+  font-size: clamp(0.92rem, 1.6vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.worked {
+  margin: 20px 0;
+  padding: 16px 18px;
+  background: var(--ink);
+  color: #fff;
+}
+
+.workedHead {
+  margin: 0 0 10px !important;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fadb5c;
+}
+
+.worked code {
+  display: block;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 13.5px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.worked code b {
+  color: #fadb5c;
+}
+
+.worked p:last-child {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+}
+
+.rules,
+.notes,
+.limits {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.rules li,
+.notes li,
+.limits li {
+  position: relative;
+  padding: 10px 0 10px 28px;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+}
+
+.rules li::before,
+.notes li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+}
+
+/* Limits are marked in red pen. */
+.limits li::before {
+  content: '!';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.fields {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 2px solid var(--ink);
+  font-size: 15px;
+}
+
+.fields th,
+.fields td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+  vertical-align: top;
+}
+
+.fields th {
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.fields td:last-child {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 13px;
+}
+
+.minuteRules {
+  margin: 16px 0;
+  background: #fff;
+  border: 2px solid var(--ink);
+}
+
+.minuteRules div {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 4px 18px;
+  padding: 11px 14px;
+}
+
+.minuteRules div + div {
+  border-top: 1px solid rgba(10, 10, 10, 0.25);
+}
+
+.minuteRules dt {
+  font-weight: 700;
+}
+
+.minuteRules dd {
+  margin: 0;
+  font-size: 15.5px;
+}
+
+.refs {
+  margin: 0 0 20px;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: ref;
+}
+
+.refs li {
+  counter-increment: ref;
+  position: relative;
+  padding: 10px 0 10px 40px;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+  font-size: 15px;
+  scroll-margin-top: 16px;
+}
+
+.refs li::before {
+  content: counter(ref);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 26px;
+  font-family: var(--font-una-mono), monospace;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.refs li:target {
+  background: #fadb5c;
+}
+
+.refs a {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.small {
+  font-size: 14px;
+  color: #333;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 13px 18px;
+  background: var(--ink);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.footer {
+  background: var(--ink);
+  color: rgba(255, 255, 255, 0.78);
+  padding: 28px var(--pad) 40px;
+  font-size: 13.5px;
+}
+
+.footer p {
+  margin: 0 auto;
+  max-width: 1320px;
+}
+
+@media (max-width: 900px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .toc {
+    position: static;
+  }
+
+  .toc ol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .minuteRules div {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    font-size: 16px;
+  }
+
+  .formula,
+  .formula code {
+    box-shadow: none;
+  }
+
+  .formula {
+    box-shadow: 5px 5px 0 var(--ox);
+  }
+}

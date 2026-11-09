@@ -60,6 +60,23 @@ The platform is trusted by over 2,000 athletes currently using HybridX training 
   pacing, and plan-adjustment questions. No app store required — bookmark and train.
 - Positioning: The most affordable structured Hyrox training app available.
 
+### The X Family — Apps for UNA Watch
+- URL: https://hybridx.club/una
+- Method and references: https://hybridx.club/una/nerdy-bits
+- Description: Six linked HybridX apps for UNA Watch, the modular GPS sports watch:
+  HybridX Race (HYROX-format race timer), X Run (running with an on-watch VO2max
+  estimate), X Trail (GPX route following), X Ride (outdoor and turbo rides),
+  X Workout (strength, EMOM, AMRAP, Tabata, intervals, circuits) and X Streak (a weekly
+  training streak with fitness, fatigue and form).
+- How they link: each app leaves one line of eight numbers in a shared folder on the
+  watch when a session is saved; X Streak reads it. No account or server is involved.
+- Methods: VO2max from the ACSM running equation and heart-rate reserve (Swain and
+  Leutholtz 1997), maximum heart rate by Tanaka et al. 2001 when not entered; training
+  load by Edwards' heart-rate-zone method; fitness, fatigue and form from 42-day and
+  7-day averages of daily load (Banister's model). The VO2max is an estimate for
+  tracking a trend, not a lab test.
+- Independent apps: not made, endorsed or sponsored by UNA Watch Ltd or by HYROX.
+
 ### Training Books
 - URL: https://hybridx.club/books
 - Format: Paperback, sold on Amazon

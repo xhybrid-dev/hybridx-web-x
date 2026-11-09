@@ -156,3 +156,23 @@ the wire format between this site and `hyroxedgeai`, it belongs in
   hourly run. Documents also carry `expiresAt`, so a Firestore TTL policy on the
   `rateLimits` collection would do the same job with no code; the cron sweep exists
   so the collection stays bounded whether or not that policy was ever configured.
+
+## The X family pages (`/una`, `/una/nerdy-bits`)
+
+`/una` shows the six linked UNA Watch apps as one system; `/una/nerdy-bits` is
+the method and its references. The apps live in `xhybrid-dev/una-hyrox`.
+
+- **Facts come from that repo's checked store text**
+  (`hybridx-link/docs/STORE_RELEASE.md`) and live in `src/lib/una-family.ts`.
+  What that document lists under "Not claimed" stays unclaimed here.
+- **Store status is one constant**, `STORE_STATUS` in `src/lib/una-family.ts`.
+  Edit it as listings go live; nothing else on the page says "download".
+- **The demos run the real sums.** `src/lib/una-maths.ts` restates the watch's
+  load, fitness/fatigue and VO2max arithmetic, and `una-maths.test.ts` pins it
+  to the watch's own hand-worked figures (a load of 39, a VO2max of 54.4). If
+  a method changes on the watch, change it there and let the tests say what moved.
+- **A reference goes on the nerdy page only once it has been checked to exist**
+  with those details. Books are cited without a link rather than a guessed one.
+- Watch screens in `public/una/screens/` are the apps' store previews
+  (`<app>/Resources/previews/` in the watch repo); icons are the 1024 px brand
+  masters, resized.
