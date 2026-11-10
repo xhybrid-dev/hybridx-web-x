@@ -150,7 +150,9 @@ export interface DoublesDivision {
  * Doubles carry the loads of the equivalent singles division (Jon Lee, from
  * the 2026/27 rulebook): sled pull 78 kg for Women Doubles; 103 kg for Women
  * Pro Doubles, Men Doubles and Mixed Doubles; 153 kg for Men Pro Doubles.
- * Mixed shares the Men Open loads, which is what puts its sled pull at 103 kg.
+ * Mixed shares the Men Open loads (2 × 24 kg farmers carry, 20 kg sandbag,
+ * 6 kg wall ball), each partner throwing to the target for their own sex:
+ * confirmed by Jon, 10 November 2026.
  */
 export const DOUBLES: readonly DoublesDivision[] = [
   { id: 'women-doubles', label: 'Women Doubles', loadsAs: 'women-open' },
