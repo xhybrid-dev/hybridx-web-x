@@ -1,55 +1,60 @@
 import { MetadataRoute } from 'next';
 
-// Robots.txt semantics: a crawler obeys ONLY the most specific user-agent
-// group that matches it — a named group REPLACES the '*' group entirely for
-// that bot. So every named group must carry the same disallow list, or the
-// named bots are formally allowed into /admin and /api.
-// /d/ is the shop's per-order download page: its URL is the buyer's key.
-const DISALLOW = ['/api/', '/admin/', '/d/'];
+// Built once, with the site, and served as a static file from the CDN: nothing
+// in it changes between deploys, so no request ever wakes the server for it.
+export const dynamic = 'force-static';
 
-// Bots we explicitly welcome (traditional search + AI answer engines).
-// Being explicit is a positive signal to AI crawlers that they're wanted.
+// Robots.txt semantics: a crawler obeys ONLY the most specific user-agent
+// group that matches it, and a named group REPLACES the '*' group for that
+// bot. So '*' and every named bot share ONE group here (stacked User-agent
+// lines), and therefore one disallow list: a named bot can never be formally
+// allowed into /admin or /api by a group that forgot them.
+//
+// /d/ (the shop's per-order download page, whose URL is the buyer's key) is
+// deliberately NOT disallowed. Disallow stops a crawler reading the page, so a
+// leaked /d/<token> link could still be listed in results as a bare URL, token
+// and all. Left crawlable, a bot that finds one reads its noindex (the page's
+// metadata, and X-Robots-Tag from middleware.ts) and drops it.
+const DISALLOW = ['/api/', '/admin/'];
+
+// Bots we explicitly welcome: traditional search and AI answer engines.
+// Matching is case-insensitive (RFC 9309), so each appears once.
 const WELCOMED_BOTS = [
   // Traditional search engines
   'Googlebot',
   'Bingbot',
   'Slurp', // Yahoo
   'DuckDuckBot',
-  // OpenAI / ChatGPT: GPTBot trains models, OAI-SearchBot powers ChatGPT
-  // search, ChatGPT-User is live browsing sessions
+  'Applebot',
+  // OpenAI: GPTBot trains models, OAI-SearchBot powers ChatGPT search,
+  // ChatGPT-User is live browsing
   'GPTBot',
   'OAI-SearchBot',
   'ChatGPT-User',
-  // Google AI (Gemini / AI Overviews)
+  // Google AI (Gemini, AI Overviews) and Apple Intelligence: control tokens
   'Google-Extended',
-  // Anthropic / Claude
+  'Applebot-Extended',
+  // Anthropic
   'ClaudeBot',
   'Claude-Web',
-  // Perplexity
+  'anthropic-ai',
+  // Perplexity: the index, and live user-triggered citations
   'PerplexityBot',
+  'Perplexity-User',
   // Meta AI
   'FacebookBot',
-  // Microsoft Copilot / Bing AI
-  'bingbot',
+  'meta-externalagent',
+  // Microsoft
   'MicrosoftBot',
-  // You.com
+  // You.com and Cohere
   'YouBot',
-  // Cohere
   'cohere-ai',
 ];
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = 'https://hybridx.club';
-
   return {
-    rules: [
-      { userAgent: '*', allow: '/', disallow: DISALLOW },
-      ...WELCOMED_BOTS.map((userAgent) => ({
-        userAgent,
-        allow: '/',
-        disallow: DISALLOW,
-      })),
-    ],
+    rules: [{ userAgent: ['*', ...WELCOMED_BOTS], allow: '/', disallow: DISALLOW }],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
   };
