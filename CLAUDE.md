@@ -169,8 +169,9 @@ is the method and its references. The apps live in `xhybrid-dev/una-hyrox`.
 - **Facts come from that repo's checked store text**
   (`hybridx-link/docs/STORE_RELEASE.md`) and live in `src/lib/una-family.ts`.
   What that document lists under "Not claimed" stays unclaimed here.
-- **Store status is one constant**, `STORE_STATUS` in `src/lib/una-family.ts`.
-  Edit it as listings go live; nothing else on the page says "download".
+- **No version numbers or release status on the page** (Jon, 10 November 2026):
+  all six apps are on the UNA app store, and a version goes stale. The athlete
+  chooses which apps they want.
 - **The nerdy page's calculators run the real sums.** `src/lib/una-maths.ts` restates the watch's
   load, fitness/fatigue and VO2max arithmetic, and `una-maths.test.ts` pins it
   to the watch's own hand-worked figures (a load of 39, a VO2max of 54.4). If

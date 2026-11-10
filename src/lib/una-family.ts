@@ -14,9 +14,6 @@
  * The colours are the family's brand colourways (hybridx-link/Tools/Brand).
  */
 
-/** Change this one line when the store status changes. */
-export const STORE_STATUS = 'Race is on the UNA app store now. The rest are arriving as version 1.0.';
-
 export type AppSlug = 'race' | 'run' | 'trail' | 'ride' | 'workout' | 'streak';
 
 export type FamilyApp = {
