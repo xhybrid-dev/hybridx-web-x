@@ -118,10 +118,12 @@ describe('the server actions', () => {
       () => actions.approveGuide(form({ slug: sample.slug, when: 'now' })),
       () => actions.rejectGuide(form({ slug: sample.slug, reason: 'No.' })),
       () => actions.commentOnGuide(form({ slug: sample.slug, text: 'Hi' })),
-      () => actions.saveGuideEdit(sample.slug, { ...sample }),
     ]) {
       await expect(run()).rejects.toThrow('Not authorized');
     }
+    // The editor shows this one, so it is returned rather than thrown.
+    const saved = await actions.saveGuideEdit(sample.slug, { ...sample, title: 'Changed' });
+    expect(saved).toEqual({ ok: false, errors: [expect.stringContaining('sign-in has expired')] });
     expect((await store.getGuide(sample.slug))?.status).toBe('awaiting_review');
   });
 

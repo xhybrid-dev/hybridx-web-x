@@ -12,7 +12,8 @@ import { planPosition } from '@/lib/shop/glasgow-2027-pacing';
 /*
  * A buyer's download page. The token in the URL is the only credential, so
  * the page is never cached, indexed or sent on as a referrer (middleware.ts),
- * is disallowed in robots.txt, and is recorded in analytics as /d/[token].
+ * is noindex but deliberately not disallowed in robots.txt (see robots.ts),
+ * and is recorded in analytics as /d/[token].
  *
  * Reads the current version of each file at request time, so an updated PDF
  * appears here for every past buyer as soon as it is uploaded.

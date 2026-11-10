@@ -17,7 +17,7 @@ vi.mock('next/headers', () => ({ headers: async () => new Headers(requestHeaders
 let publishedGuides: () => Promise<Array<{ slug: string; updatedAt: string }>> = async () => [];
 vi.mock('@/lib/guides/store', () => ({ listPublishedGuides: () => publishedGuides() }));
 
-const { default: sitemap } = await import('../../app/sitemap');
+const { default: sitemap } = await import('../sitemap');
 
 const APP_DIR = path.resolve(__dirname, '../../app');
 const BASE = 'https://hybridx.club';
@@ -148,11 +148,14 @@ describe('the main sitemap', () => {
     expect(entry?.lastModified).toBe('2026-11-08T07:00:00Z');
   });
 
-  it('dates nothing it cannot date', async () => {
+  it('never dates anything "now"', async () => {
     // A lastmod of "now" on every fetch teaches Google to ignore lastmod for
-    // the whole sitemap, articles included.
-    const dated = (await sitemap()).filter((e) => e.lastModified !== undefined);
-    expect(dated).toEqual([]);
+    // the whole sitemap, articles included. Two fetches must give the same dates.
+    const first = (await sitemap()).map((e) => e.lastModified);
+    await new Promise((r) => setTimeout(r, 5));
+    expect((await sitemap()).map((e) => e.lastModified)).toEqual(first);
+    const today = new Date().toISOString().slice(0, 10);
+    expect(first.filter((d) => String(d ?? '').startsWith(today) && !/^\d{4}-\d{2}-\d{2}$/.test(String(d)))).toEqual([]);
   });
 
   it('still answers, without articles, when Firestore cannot be read', async () => {
@@ -192,5 +195,43 @@ describe('the subdomain sitemaps', () => {
       requestHeaders = host ? { 'x-forwarded-host': host } : {};
       expect((await sitemap()).length, host || '(no host)').toBeGreaterThan(20);
     }
+  });
+});
+
+describe('the /sitemap.xml route', () => {
+  it('serves XML the CDN may keep for an hour', async () => {
+    const { GET } = await import('../../app/sitemap.xml/route');
+    const res = await GET();
+    expect(res.headers.get('content-type')).toContain('application/xml');
+    expect(res.headers.get('cache-control')).toContain('s-maxage=3600');
+    const xml = await res.text();
+    expect(xml).toMatch(/^<\?xml version="1.0"/);
+    expect(xml).toContain('<loc>https://hybridx.club</loc>');
+  });
+});
+
+describe('lastmod on hand-built pages', () => {
+  it('gives every main-site page a fixed date', async () => {
+    const missing = (await sitemap()).filter((e) => e.url.startsWith(BASE) && !e.lastModified).map((e) => e.url);
+    expect(missing).toEqual([]);
+  });
+
+  it('never dates a page earlier than its last commit: edit a page, bump its date in page-dates.ts', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const { PAGE_UPDATED } = await import('../page-dates');
+    let git = true;
+    try {
+      execFileSync('git', ['rev-parse', '--is-inside-work-tree'], { stdio: 'ignore' });
+    } catch {
+      git = false;
+    }
+    if (!git) return; // a checkout without history: nothing to compare against
+    const stale: string[] = [];
+    for (const [route, date] of Object.entries(PAGE_UPDATED)) {
+      const file = path.join('src/app', route, 'page.tsx');
+      const last = execFileSync('git', ['log', '-1', '--format=%cs', '--', file], { encoding: 'utf8' }).trim();
+      if (last && last > date) stale.push(`${route}: page changed ${last}, dated ${date}`);
+    }
+    expect(stale).toEqual([]);
   });
 });

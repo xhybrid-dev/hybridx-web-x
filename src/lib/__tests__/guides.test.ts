@@ -13,7 +13,7 @@ const { guideJsonLd, jsonLdString } = await import('../guides/schema');
 const { SITE_PAGES, PILLARS, TOOLS } = await import('../guides/topics');
 const { CTAS } = await import('../guides/ctas');
 const store = await import('../guides/store');
-const { default: sitemap } = await import('../../app/sitemap');
+const { default: sitemap } = await import('../sitemap');
 
 /*
  * Articles are data, not code: these tests hold the line that keeps them so.
