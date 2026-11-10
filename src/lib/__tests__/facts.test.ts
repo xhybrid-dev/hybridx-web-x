@@ -3,8 +3,10 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import {
   APP,
+  ARTICLE_REVIEWER,
   ATHLETES,
   DIVISIONS,
+  DOUBLES,
   LOADS_CHECK,
   RUNS,
   STATION_STANDARDS,
@@ -12,6 +14,7 @@ import {
   UNCOVERED_FORMATS,
   appPriceLabel,
   division,
+  doublesLoads,
   type DivisionLoads,
 } from '@/lib/facts';
 import { STATIONS as WATCH_STATIONS } from '@/lib/race-content';
@@ -123,13 +126,28 @@ describe('division loads', () => {
     }
   });
 
-  it('says why doubles and relay are not stated', () => {
-    expect(UNCOVERED_FORMATS.map((f) => f.format)).toEqual(['doubles', 'relay']);
+  it('gives each doubles division the loads of its singles equivalent', () => {
+    // Jon Lee, from the 2026/27 rulebook: sled pull 78 kg for Women Doubles;
+    // 103 kg for Women Pro Doubles, Men Doubles and Mixed Doubles; 153 kg for
+    // Men Pro Doubles.
+    const sledPull = Object.fromEntries(DOUBLES.map((d) => [d.id, doublesLoads(d.id).sledPullKg]));
+    expect(sledPull).toEqual({
+      'women-doubles': 78,
+      'women-pro-doubles': 103,
+      'men-doubles': 103,
+      'men-pro-doubles': 153,
+      'mixed-doubles': 103,
+    });
+  });
+
+  it('says why relay is not stated', () => {
+    expect(UNCOVERED_FORMATS.map((f) => f.format)).toEqual(['relay']);
     for (const f of UNCOVERED_FORMATS) expect(f.reason.length).toBeGreaterThan(20);
   });
 
-  it('records confirmation as a date or not at all', () => {
+  it('records who confirmed the loads, and when', () => {
     expect(LOADS_CHECK.confirmedOn === null || /^\d{4}-\d{2}-\d{2}$/.test(LOADS_CHECK.confirmedOn)).toBe(true);
+    expect(LOADS_CHECK.confirmedBy).toContain(ARTICLE_REVIEWER.name);
     expect(LOADS_CHECK.agreedBy.length).toBeGreaterThanOrEqual(2);
   });
 });
@@ -174,5 +192,13 @@ describe('the site copy agrees with the product facts', () => {
       .filter(({ match }) => Number(match[1].replace(/,/g, '')) === ATHLETES.count)
       .map(({ where, match }) => `${where}: "${match[0]}"`);
     expect(asUsers, 'the 2,000 are athletes who trained with HybridX plans, mostly book buyers').toEqual([]);
+  });
+
+  it('calls the price very affordable, never the most affordable or the cheapest', () => {
+    const wrong = [
+      ...findInCopy(/\bmost affordable\b/gi),
+      ...findInCopy(/\bcheapest\b[^.]{0,60}\b(?:app|plan|coaching|training)\b/gi),
+    ].map(({ where, match }) => `${where}: "${match[0]}"`);
+    expect(wrong, `say "${APP.affordability}" (src/lib/facts/product.ts)`).toEqual([]);
   });
 });

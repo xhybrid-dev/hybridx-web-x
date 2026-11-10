@@ -23,6 +23,12 @@ export const APP = {
    * (owner, 10 November 2026).
    */
   trialDays: 14,
+  /**
+   * How copy describes the price. "Very affordable", never "the most
+   * affordable" or "the cheapest" (owner, 10 November 2026): a comparison
+   * needs evidence on file, and the price makes the point on its own.
+   */
+  affordability: 'very affordable',
   includes: [
     'daily workouts',
     'a programme library',
@@ -56,11 +62,22 @@ export const ATHLETES = {
   wording: 'Over 2,000 athletes have trained with HybridX plans',
 } as const;
 
-/** Who an article is by. The brand, kept simple (owner, 10 November 2026). */
+/**
+ * Who an article is by, and who stands behind it. The brand is the author;
+ * Jon Lee, HybridX's trainer, reviews and approves every article before it is
+ * published (owner, 10 November 2026). Articles are AI-drafted, so "reviewed
+ * by" is the accurate credit, and "How our guides are written" says so.
+ */
 export const ARTICLE_AUTHOR = {
   name: 'HybridX',
   type: 'Organization',
   url: 'https://hybridx.club',
+} as const;
+
+export const ARTICLE_REVIEWER = {
+  name: 'Jon Lee',
+  role: 'HybridX trainer',
+  type: 'Person',
 } as const;
 
 /**
@@ -90,7 +107,7 @@ export const NOT_CLAIMED: readonly { claim: string; why: string }[] = [
   },
   {
     claim: 'The cheapest or most affordable app, or any comparison with a named competitor',
-    why: 'UK advertising rules require evidence on file for superlatives and comparisons.',
+    why: 'Owner decision, 10 November 2026: say "very affordable" and let the price speak. UK advertising rules also require evidence on file for superlatives and comparisons.',
   },
   {
     claim: 'Guaranteed results, times or weight loss',

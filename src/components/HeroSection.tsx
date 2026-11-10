@@ -27,7 +27,7 @@ const trainingOptions = [
     icon: Smartphone,
     title: "The Pro App",
     price: "£5/mo",
-    description: "The most affordable training app on the market. Daily workouts, tracking, and more. 14-day free trial.",
+    description: "Very affordable at £5 a month. Daily workouts, tracking, and more. 14-day free trial.",
     cta: "Explore The App",
     href: "/app",
     variant: "default" as const,

@@ -5,17 +5,18 @@
 //
 // Two rules keep this file worth trusting:
 //
-//   1. A division appears here only when its loads are agreed. The four
-//      singles divisions are. Doubles and relay are absent on purpose:
-//      secondary sources disagree on mixed doubles (which ball, which sled
-//      load), and a wrong load in an article is worse than no article. The
-//      content engine reads UNCOVERED_FORMATS and will not state a load for
-//      them until they are added here from the rulebook.
-//   2. LOADS_CHECK records whether the loads have been confirmed against the
-//      official rulebook. Until `confirmedOn` is set, they stand on secondary
-//      sources that agree with each other, and the engine treats them as
-//      unconfirmed. hyrox.com could not be reached from the session that wrote
-//      this file, so the owner confirms them.
+//   1. A division appears here only when its loads are confirmed. The four
+//      singles divisions and the five doubles divisions are. Relay is absent
+//      on purpose: a wrong load in an article is worse than no article, and
+//      the content engine reads UNCOVERED_FORMATS and will not state a load
+//      for a format listed there.
+//   2. LOADS_CHECK records who confirmed the loads, against what, and when.
+//      Jon Lee (HybridX's trainer) checked every singles figure against the
+//      official 2026/27 rulebook on 10 November 2026, and gave the doubles
+//      rule: each doubles division carries the loads of its equivalent singles
+//      division. hyrox.com could not be reached from the session that wrote
+//      this file, which is why the confirmation is recorded rather than
+//      assumed.
 //
 // Station order and work are not new facts: they restate what
 // src/lib/hyrox-rules-2026.ts (the 2026/27 rulebooks) and src/lib/race-content.ts
@@ -130,38 +131,69 @@ export const DIVISIONS: readonly DivisionLoads[] = [
   },
 ];
 
+export type DoublesDivisionId =
+  | 'women-doubles'
+  | 'women-pro-doubles'
+  | 'men-doubles'
+  | 'men-pro-doubles'
+  | 'mixed-doubles';
+
+export interface DoublesDivision {
+  id: DoublesDivisionId;
+  label: string;
+  /** The singles division whose loads it carries. */
+  loadsAs: DivisionId;
+  note?: string;
+}
+
 /**
- * Formats whose loads are deliberately not stated anywhere yet, and why.
- * Add a format to DIVISIONS from the rulebook, then remove it here.
+ * Doubles carry the loads of the equivalent singles division (Jon Lee, from
+ * the 2026/27 rulebook): sled pull 78 kg for Women Doubles; 103 kg for Women
+ * Pro Doubles, Men Doubles and Mixed Doubles; 153 kg for Men Pro Doubles.
+ * Mixed shares the Men Open loads, which is what puts its sled pull at 103 kg.
  */
-export const UNCOVERED_FORMATS: readonly { format: 'doubles' | 'relay'; reason: string }[] = [
+export const DOUBLES: readonly DoublesDivision[] = [
+  { id: 'women-doubles', label: 'Women Doubles', loadsAs: 'women-open' },
+  { id: 'women-pro-doubles', label: 'Women Pro Doubles', loadsAs: 'women-pro' },
+  { id: 'men-doubles', label: 'Men Doubles', loadsAs: 'men-open' },
+  { id: 'men-pro-doubles', label: 'Men Pro Doubles', loadsAs: 'men-pro' },
   {
-    format: 'doubles',
-    reason:
-      'Secondary sources disagree on mixed doubles loads (the wall ball and sled weights). Not stated until taken from the 2026/27 Doubles rulebook.',
-  },
-  {
-    format: 'relay',
-    reason: 'Not yet taken from the 2026/27 Team Relay rulebook.',
+    id: 'mixed-doubles',
+    label: 'Mixed Doubles',
+    loadsAs: 'men-open',
+    note: 'Each partner throws the wall ball to the target for their own sex: 2.70 m for women, 3.00 m for men.',
   },
 ];
 
 /**
- * Whether DIVISIONS has been checked against the official rulebook.
- *
- * `confirmedOn` stays null until the owner has compared every number above
- * with the 2026/27 Singles rulebook. The content engine states unconfirmed
+ * Formats whose loads are deliberately not stated anywhere yet, and why.
+ * Add a format above from the rulebook, then remove it here.
+ */
+export const UNCOVERED_FORMATS: readonly { format: 'relay'; reason: string }[] = [
+  {
+    format: 'relay',
+    reason: 'Not yet confirmed from the 2026/27 Team Relay rulebook.',
+  },
+];
+
+/**
+ * Who confirmed DIVISIONS and DOUBLES, against what, and when. Set
+ * `confirmedOn` back to null if a new season's rulebook changes anything,
+ * until the new figures are checked: the content engine states unconfirmed
  * loads only with a "check the current rulebook" line, and never in a table.
  */
 export const LOADS_CHECK: {
   confirmedOn: string | null;
+  confirmedBy: string;
   against: string;
   agreedBy: readonly string[];
 } = {
-  confirmedOn: null,
-  against: 'HYROX 2026/27 Singles rulebook (hyrox.com)',
-  // Secondary sources consulted on 10 November 2026. They agree with each
-  // other on every singles figure above; none of them is the rulebook.
+  confirmedOn: '2026-11-10',
+  confirmedBy: 'Jon Lee, HybridX trainer',
+  against: 'HYROX 2026/27 official rulebook',
+  // Secondary sources consulted on 10 November 2026, before the rulebook
+  // check. They agree with each other, and with the rulebook, on every
+  // singles figure above.
   agreedBy: [
     'https://www.redbull.com/gb-en/hyrox-weights-overview',
     'https://rundida.com/tools/hyrox-weights/',
@@ -174,6 +206,13 @@ export function division(id: DivisionId): DivisionLoads {
   const found = DIVISIONS.find((d) => d.id === id);
   if (!found) throw new Error(`Unknown HYROX division: ${id}`);
   return found;
+}
+
+/** A doubles division's loads: those of its equivalent singles division. */
+export function doublesLoads(id: DoublesDivisionId): DivisionLoads {
+  const found = DOUBLES.find((d) => d.id === id);
+  if (!found) throw new Error(`Unknown HYROX doubles division: ${id}`);
+  return division(found.loadsAs);
 }
 
 export function loadsConfirmed(): boolean {
