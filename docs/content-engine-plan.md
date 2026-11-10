@@ -38,6 +38,13 @@
   analytics cover it.
 - **Google data is fetched by the server, not by gum** (section 10.3). Nothing
   depends on a computer at home being switched on.
+- **The facts the engine starts from** (owner, 10 November 2026):
+  - **The trial is 14 days.** It was a free first month until it was cut to
+    improve retention.
+  - **"Over 2,000 athletes" is true and usable,** worded as athletes who *have
+    trained with HybridX plans*. Most are buyers of the paperback plans, so it
+    is never an app or subscriber count.
+  - **Articles are by "HybridX".**
 
 ---
 
@@ -48,9 +55,9 @@ italics.
 
 | # | Decision | Needed before |
 |---|---|---|
-| D1 | Byline: the name and credentials shown on every article. *Yours, with the experience you're happy to state* | Step 2 |
-| D2 | Trial length: `/app` says 14 days, `llms.txt` says the first month. *Pick one* | Step 1 |
-| D3 | "Over 2,000 athletes" (in `llms.txt`). *Keep it only if you can stand behind the number* | Step 1 |
+| D1 | ~~Byline~~ **Decided:** "HybridX" | Step 2 |
+| D2 | ~~Trial length~~ **Decided:** 14 days | Step 1 |
+| D3 | ~~"Over 2,000 athletes"~~ **Decided:** true, worded as athletes who have trained with HybridX plans | Step 1 |
 | D4 | Publishing slots and email hours. *Monday, Wednesday and Friday at 07:00; emails 07:00–20:00* | Step 3 |
 | D5 | Review address. *Your admin address* | Step 4 |
 | D6 | The reviewer model. *Claude, so a different model family checks Gemini's work.* This needs `ANTHROPIC_API_KEY` bound on the site, which also switches on the dormant monthly analytics review (Anthropic is already named in the privacy policy for that) | Step 4 |
@@ -78,24 +85,38 @@ italics.
 Steps 1–4 get articles flowing. The rest add tools, automation and measurement,
 and their order can change.
 
-### Step 1: facts registry and claims fix (S)
+### Step 1: facts registry and claims fix (S). Built
 
 - **Builds:**
-  - `src/lib/facts/hyrox-standards.ts`: loads, distances and reps by season and
-    division, each with a source and a `checkedAt` date;
-  - `src/lib/facts/product.ts`: price, trial length, what the app does, and a
-    "Not claimed" list in the style of `una-family.ts`;
+  - `src/lib/facts/hyrox-standards.ts`:
+    - station work, and loads for the four singles divisions;
+    - `LOADS_CHECK`: confirmation status and sources;
+    - `UNCOVERED_FORMATS`: doubles and relay, left out because secondary
+      sources disagree on mixed doubles, so the engine won't state their loads;
+  - `src/lib/facts/product.ts`:
+    - price, a 14-day trial, what the app does, and store availability (not yet
+      published);
+    - the athlete count with its wording, and the article author;
+    - a `NOT_CLAIMED` list;
   - `src/lib/facts/index.ts`: re-exports the 2026/27 rules and the ATHX zones
     from their existing files;
-  - fixes to `/app` and `public/llms.txt` so both match the product facts.
-- **Tests:** `facts.test.ts`, which checks the loads for every division and
-  fails if `llms.txt` or `/app` states a trial length or price that differs from
-  `product.ts`.
-- **You, before merge:**
-  - D2 and D3;
-  - check the HYROX loads I compile against the official 2026/27 rulebook. I can
-    only reach secondary sources from here.
-- **Check on the live site:** `/app` and `/llms.txt` agree.
+  - fixes: "first month free" in `public/llms.txt` (three places), and the
+    athlete line in `llms.txt` and the homepage hero ("currently using" became
+    "have trained with HybridX plans").
+- **Tests:** `facts.test.ts`:
+  - station order and work match both `hyrox-rules-2026.ts` and the watch's
+    `race-content.ts`;
+  - the load ladder holds: Women Pro equals Men Open, and Pro is heavier than
+    Open;
+  - a scan of all site copy for any trial length, monthly price or athlete
+    count that disagrees with `product.ts`. It caught the three stale lines
+    before the fix.
+- **You, before merge:** compare the four rows in `DIVISIONS` with the official
+  2026/27 Singles rulebook (hyrox.com is blocked from my session). If they match,
+  I set `LOADS_CHECK.confirmedOn`; if not, I correct them. Until then the engine
+  treats them as unconfirmed.
+- **Check on the live site:** `/llms.txt` says 14 days, and the homepage badge
+  reads "Over 2,000 athletes have trained with HybridX plans".
 
 ### Step 2: articles on the site (M)
 
@@ -105,8 +126,15 @@ and their order can change.
   - `src/lib/guides/topics.ts`: every indexable page with its pillar and the
     queries it owns;
   - `src/lib/guides/related.ts`;
-  - `src/components/guides/`: the block components, `RelatedGuides` and
-    `AuthorBox`;
+  - `src/components/guides/`: the block components, `RelatedGuides`, and a
+    byline reading "By HybridX · Updated <date>" (JSON-LD author is the
+    `Organization`, from `ARTICLE_AUTHOR`);
+  - a short "How our guides are written" page linked from the byline:
+    - who writes and checks the articles, and how;
+    - the facts registry and the review before publishing.
+
+    With a brand rather than a person as the author, this is what tells readers
+    and search engines who stands behind the advice;
   - `src/app/guides/page.tsx` (the hub), `src/app/guides/[slug]/page.tsx`, and
     its `opengraph-image.tsx`;
   - `sitemap.ts`: published articles with their real `lastModified`, and
@@ -122,9 +150,8 @@ and their order can change.
   - `sitemap.test.ts` knows the dynamic route;
   - unpublished articles return 404.
 - **You, before merge:**
-  - D1;
-  - `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub`
-    (this repo deploys rules by hand).
+  `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub`
+  (this repo deploys rules by hand).
 - **Check on the live site:** a test article seeded by a script shows at
   `/guides/<slug>` and in `/sitemap.xml`. Then we retire it.
 
@@ -431,7 +458,9 @@ Rules common to all tools:
   - kit (full gym, basic gym, home, no sled);
   - long-run day.
 - **Rules:**
-  - minimum gaps between heavy lower-body work and hard running (your numbers);
+  - minimum gaps between heavy lower-body work and hard running. The site
+    already states HybridX's rule as at least 6–8 hours (`llms.txt`); that is
+    the default unless you set numbers per pairing;
   - strength first when sharing a day;
   - no stacked hard days in a 3-day week;
   - kit substitutions.
@@ -576,7 +605,8 @@ reminder; after 14 days it is archived, and you can revive it.
 - **Structured data:** JSON-LD `Article` (author as a `Person`, dates) and
   `BreadcrumbList`. FAQ JSON-LD is optional: FAQ rich results have been limited
   to government and health sites since 2023.
-- **Trust signals:** the author box and "Reviewed by … on …".
+- **Trust signals:** "By HybridX · Updated <date>", linked to "How our guides
+  are written".
 - **OG image:** per article, kept out of `public/` (commit `b982d11`).
 - **Retiring an article:** a permanent redirect to `redirectTo`, otherwise 410.
 
@@ -638,7 +668,8 @@ store badges.
    - **No invented first-person experience.** That comes only from your coach's
      notes.
 2. **Training rules.**
-   - Interference gaps, in your numbers for each pairing.
+   - Interference gaps: at least 6–8 hours, as the site already says,
+     refined per pairing if you want.
    - Strength first when combined with running.
    - Every workout scaled two ways, with RPE and rest.
    - Progression limits.
@@ -812,8 +843,8 @@ weekly summary email cover the questions the proposal wanted it for.
 
 | Step | Who | What |
 |---|---|---|
-| 1 | You | D2 and D3; check the HYROX loads against the official rulebook |
-| 2 | You | D1; `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub` |
+| 1 | You | Check the four singles rows in `DIVISIONS` against the official 2026/27 Singles rulebook |
+| 2 | You | `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub` |
 | 3 | You | D4; grant `roles/iam.serviceAccountTokenCreator` to the backend service account on itself |
 | 4 | You | D5 and D6; create and grant `ANTHROPIC_API_KEY`; set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `on` when ready |
 | 6 | You | Enable the Search Console API in `hybridx-hub`; add the service account to `sc-domain:hybridx.club` as Restricted; confirm the sitemap was submitted once |

@@ -54,7 +54,7 @@ export default function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
           </span>
           <ShieldCheck className="h-4 w-4 text-accent" />
-          Trusted by over 2,000 Athletes currently using HybridX training
+          Over 2,000 athletes have trained with HybridX plans
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-primary mb-4 leading-tight">
