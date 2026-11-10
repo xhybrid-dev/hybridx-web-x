@@ -137,9 +137,9 @@ env:
   # queue and email each draft for review. Nothing it drafts is published
   # without approval in /admin/guides, and Pause in guide settings stops it
   # without a deploy. Uses GEMINI_API_KEY below to write, and ANTHROPIC_API_KEY
-  # (when bound) for the second review.
+  # (when bound) for the second review. Switched on by Jon, 10 November 2026.
   - variable: CONTENT_ENGINE_MODE
-    value: "off"
+    value: "on"
     availability:
       - RUNTIME
   # Gemini API key powering the "Describe it, let AI build it" feature on the

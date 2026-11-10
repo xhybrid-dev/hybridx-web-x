@@ -22,6 +22,12 @@
 //
 // The model calls and the email sender are passed in (EngineDeps), so this file
 // can be tested with stand-ins and never imports a model SDK itself.
+//
+// The request running a tick may be cut off by the platform at any point, so
+// every model call is counted before it starts (a cut-off call counts as a
+// failed try), no new call starts late in a tick, and the next tick recovers
+// anything left half-done: a topic stuck "drafting" goes back in the queue, a
+// draft saved without its run gets one.
 
 import { adminFirestore } from '@/lib/firebase-admin';
 import { checkDraft, type CheckResult, type Issue } from '../checks';
@@ -54,6 +60,10 @@ export const MODEL_CALLS_PER_TICK = 2;
 export const MAX_REVISION_ROUNDS = 3;
 const MAX_ATTEMPTS = 3;
 const REMINDER_AFTER_MS = 3 * 86_400_000;
+/** No model call starts later than this into a tick. */
+export const CALL_WINDOW_MS = 25_000;
+/** A topic still "drafting" after this was cut off, and goes back in the queue. */
+const STALLED_AFTER_MS = 30 * 60_000;
 
 export interface Run {
   slug: string;
@@ -80,6 +90,8 @@ export interface EngineDeps {
   models: EngineModels;
   send(email: ReviewEmail): Promise<void>;
   now(): Date;
+  /** Overrides CALL_WINDOW_MS, for tests. */
+  callWindowMs?: number;
 }
 
 export function engineOn(): boolean {
@@ -169,11 +181,18 @@ interface Tick {
   deps: EngineDeps;
   now: Date;
   calls: number;
+  /** Wall-clock start, for the call window: real time, not the injected clock. */
+  startedMs: number;
   published: Guide[];
   log: string[];
 }
 
-const spend = (t: Tick) => (t.calls > 0 ? (t.calls--, true) : false);
+/** Takes one model call from the tick's budget, if there is budget and time left. */
+const spend = (t: Tick) => {
+  if (t.calls <= 0 || Date.now() - t.startedMs >= (t.deps.callWindowMs ?? CALL_WINDOW_MS)) return false;
+  t.calls--;
+  return true;
+};
 
 /**
  * Takes a run as far as the tick's model budget allows: checks (and one fix),
@@ -188,6 +207,7 @@ async function advance(run: Run, guide: Guide, t: Tick): Promise<void> {
       const checks = checkDraft(guide, t.published, { fromModel: true });
       if (checks.errors.length && run.checkFixes < 1 && spend(t)) {
         run.checkFixes++;
+        await saveRun(run, t.now); // counted first: a cut-off fix is not retried every hour
         try {
           const fixed = toContent(await t.deps.models.write(fixPrompt(brief, contentOf(guide), checks.errors)));
           if (!schemaIssues({ ...guide, ...fixed }, t.now).length) {
@@ -206,26 +226,36 @@ async function advance(run: Run, guide: Guide, t: Tick): Promise<void> {
     }
 
     if (run.stage === 'review') {
-      // The review gets a tick to itself, so that it and the fix it may ask
-      // for always fit in one tick's model budget.
-      if (t.calls < MODEL_CALLS_PER_TICK || !spend(t)) break;
-      let review: ReviewOutcome;
-      try {
-        review = await t.deps.models.review(reviewPrompt(topic.question, guide.pillar, contentOf(guide)));
-      } catch (e) {
-        run.attempts++;
-        run.error = `review failed: ${message(e)}`;
-        if (run.attempts < MAX_ATTEMPTS) {
-          await saveRun(run, t.now);
-          break;
+      if (!run.review) {
+        if (t.deps.models.canReview && !t.deps.models.canReview()) {
+          run.review = { skipped: 'the reviewer key (ANTHROPIC_API_KEY) is not set yet' };
+        } else if (run.attempts >= MAX_ATTEMPTS) {
+          run.review = { skipped: `the review did not finish after ${MAX_ATTEMPTS} tries` };
+        } else {
+          // The review gets a tick to itself, so that it and the fix it may ask
+          // for always fit in one tick's model budget.
+          if (t.calls < MODEL_CALLS_PER_TICK || !spend(t)) break;
+          run.attempts++;
+          await saveRun(run, t.now); // counted first: a cut-off review counts as a try
+          try {
+            run.review = await t.deps.models.review(reviewPrompt(topic.question, guide.pillar, contentOf(guide)));
+            run.attempts = 0;
+          } catch (e) {
+            run.error = `review failed: ${message(e)}`;
+            if (run.attempts < MAX_ATTEMPTS) {
+              await saveRun(run, t.now);
+              break;
+            }
+            run.review = { skipped: `the review failed ${MAX_ATTEMPTS} times (${message(e)})` };
+          }
         }
-        review = { skipped: `the review failed ${MAX_ATTEMPTS} times (${message(e)})` };
+        await saveRun(run, t.now);
       }
-      run.review = review;
-      run.attempts = 0;
+      const review = run.review;
       const serious = 'skipped' in review ? [] : review.notes.filter((n) => n.severity === 'serious');
       if (serious.length && run.reviewFixes < 1 && spend(t)) {
         run.reviewFixes++;
+        await saveRun(run, t.now);
         try {
           const problems = serious.map((n) => ({ block: n.block || undefined, message: `"${n.quote}": ${n.problem}` }));
           const fixed = toContent(await t.deps.models.write(fixPrompt(brief, contentOf(guide), problems)));
@@ -266,20 +296,25 @@ async function revise(guide: Guide, t: Tick): Promise<void> {
     t.log.push(`${guide.slug}: ${MAX_REVISION_ROUNDS} rounds without approval; handed back to Jon`);
     return;
   }
+  if (base.attempts >= MAX_ATTEMPTS) {
+    await updateGuideState(guide.slug, { status: 'awaiting_review' });
+    await saveRun({ ...base, kind: 'revision', stage: 'notify', gaveUp: true, error: base.error ?? `the revision did not finish after ${MAX_ATTEMPTS} tries` }, t.now);
+    return;
+  }
   if (!spend(t)) return;
+  const attempts = base.attempts + 1;
+  await saveRun({ ...base, attempts }, t.now); // counted first: a cut-off revision counts as a try
   const topic = await briefTopicFor(base, guide);
   let revised: DraftContent;
   try {
     revised = toContent(await t.deps.models.write(revisePrompt(draftPrompt(topic, t.published), contentOf(guide), comments)));
   } catch (e) {
-    const attempts = base.attempts + 1;
-    await saveRun({ ...base, attempts, error: `revision failed: ${message(e)}`, ...(attempts >= MAX_ATTEMPTS ? { stage: 'notify', gaveUp: true } : {}) }, t.now);
-    if (attempts >= MAX_ATTEMPTS) await updateGuideState(guide.slug, { status: 'awaiting_review' });
+    await saveRun({ ...base, attempts, error: `revision failed: ${message(e)}` }, t.now);
     return;
   }
   const issues = schemaIssues({ ...guide, ...revised }, t.now);
   if (issues.length) {
-    await saveRun({ ...base, attempts: base.attempts + 1, error: `the revision did not fit the article format: ${issues[0].message}` }, t.now);
+    await saveRun({ ...base, attempts, error: `the revision did not fit the article format: ${issues[0].message}` }, t.now);
     return;
   }
   const saved = await saveContent(guide, revised, t.now);
@@ -343,9 +378,28 @@ async function draft(t: Tick): Promise<void> {
   if (issues.length) return failTopic(topic, `the draft did not fit the article format: ${issues[0].message}`, t);
 
   const guide = await saveGuide({ ...content, slug, status: 'drafting', pillar: topic.pillar }, t.now);
+  // The run is saved with the article, so a cut-off from here on resumes.
+  const run: Run = { slug, topicId: topic.id, kind: 'draft', stage: 'check', round: 0, checkFixes: 0, reviewFixes: 0, attempts: 0, updatedAt: t.now.toISOString() };
+  await saveRun(run, t.now);
   await setTopic(topic.id, { status: 'drafted', guideSlug: slug }, t.now);
   t.log.push(`${slug}: drafted from "${topic.question}"`);
-  await advance({ slug, topicId: topic.id, kind: 'draft', stage: 'check', round: 0, checkFixes: 0, reviewFixes: 0, attempts: 0, updatedAt: t.now.toISOString() }, guide, t);
+  await advance(run, guide, t);
+}
+
+/** Puts back what a cut-off tick left half-done. */
+async function recoverStalled(t: Tick): Promise<void> {
+  for (const topic of await listTopics()) {
+    if (topic.status === 'drafting' && t.now.getTime() - Date.parse(topic.updatedAt) > STALLED_AFTER_MS) {
+      await failTopic(topic, 'the drafting request was cut off before it finished', t);
+    }
+  }
+  for (const guide of await listAllGuides()) {
+    if (guide.status === 'drafting' && !(await getRun(guide.slug))) {
+      const topicId = (await listTopics()).find((x) => x.guideSlug === guide.slug)?.id;
+      await saveRun({ slug: guide.slug, topicId, kind: 'draft', stage: 'check', round: 0, checkFixes: 0, reviewFixes: 0, attempts: 0, updatedAt: '' }, t.now);
+      t.log.push(`${guide.slug}: recovered a draft saved without its run`);
+    }
+  }
 }
 
 /** Whether the pipeline has room for another draft. */
@@ -393,7 +447,8 @@ export async function runEngineStep(deps: EngineDeps): Promise<{ skipped?: strin
   try {
     const settings = await getEngineSettings();
     if (settings.paused) return { skipped: 'paused in settings' };
-    const t: Tick = { deps, now, calls: MODEL_CALLS_PER_TICK, published: await listPublishedGuides(now.getTime()), log: [] };
+    const t: Tick = { deps, now, calls: MODEL_CALLS_PER_TICK, startedMs: Date.now(), published: await listPublishedGuides(now.getTime()), log: [] };
+    await recoverStalled(t);
 
     const inFlight = [...(await runsAt('check')), ...(await runsAt('review'))];
     if (inFlight.length) {

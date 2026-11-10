@@ -39,6 +39,7 @@ function harness(over: Partial<EngineModels> = {}, at = '2026-11-10T10:00:00Z') 
   const models: EngineModels = {
     write: over.write ?? (async (p) => (calls.write++, sampleFor(p))),
     review: over.review ?? (async () => (calls.review++, publishable)),
+    canReview: over.canReview,
   };
   const deps = { models, send: async (e: ReviewEmail) => void sent.push(e), now: () => new Date(clock.at) };
   const clock = { at };
@@ -329,5 +330,77 @@ describe('the review email', () => {
     // 06:30 UTC is 07:30 in British Summer Time.
     expect(inEmailHours(new Date('2026-06-15T06:30:00Z'), hours)).toBe(true);
     expect(inEmailHours(new Date('2026-11-10T20:00:00Z'), hours)).toBe(false);
+  });
+});
+
+describe('a tick cut off by the platform', () => {
+  /** A model call that never returns: the request was killed mid-call. */
+  const never = <T,>() => new Promise<T>(() => {});
+  /** Starts a tick that will hang, and lets it get as far as the hanging call. */
+  const startCutOff = async (h: ReturnType<typeof harness>) => {
+    void h.tick();
+    await new Promise((r) => setTimeout(r, 30));
+  };
+
+  it('puts a topic cut off mid-draft back in the queue, and drafts it next time', async () => {
+    await startCutOff(harness({ write: () => never() }));
+    expect((await queue.listTopics())[0].status).toBe('drafting');
+
+    const h = harness({}, '2026-11-10T10:45:00Z');
+    await h.tick();
+    const first = (await queue.listTopics())[0];
+    expect([first.status, first.failures]).toEqual(['drafted', 1]);
+    expect(await store.listAllGuides()).toHaveLength(1);
+  });
+
+  it('does not retry a cut-off fix every hour: the draft goes on to review, flagged', async () => {
+    let writes = 0;
+    const h = harness({
+      write: (p) => (++writes === 1 ? Promise.resolve(sampleFor(p, (d) => (d.blocks![0].text = 'The Men Open sled push is 150 kg including the sled.'))) : never()),
+    });
+    await startCutOff(h);
+    h.clock.at = '2026-11-10T11:00:00Z';
+    await h.tick();
+    expect(writes).toBe(2);
+    expect(h.sent.map((e) => e.kind)).toEqual(['ready']);
+    expect(h.sent[0].checks?.errors.map((i) => i.code)).toContain('wrong-load');
+  });
+
+  it('gives up on a review that never finishes after three tries, and still sends the draft', async () => {
+    const h = harness({ review: () => never() });
+    await h.tick();
+    for (const at of ['2026-11-10T11:00:00Z', '2026-11-10T12:00:00Z', '2026-11-10T13:00:00Z']) {
+      h.clock.at = at;
+      await startCutOff(h);
+    }
+    expect(h.sent).toEqual([]);
+    h.clock.at = '2026-11-10T14:00:00Z';
+    await h.tick();
+    expect(h.sent.map((e) => e.kind)).toEqual(['ready']);
+    expect(buildReviewEmail(h.sent[0]).text).toContain('Second-model review skipped: the review did not finish after 3 tries.');
+  });
+
+  it('recovers a draft saved without its run', async () => {
+    await store.saveGuide({ ...sample, slug: 'orphan', status: 'drafting', publishedAt: undefined });
+    const h = harness({}, '2026-11-10T11:00:00Z');
+    await h.tick();
+    expect((await getRun('orphan'))?.stage).not.toBeUndefined();
+    expect(h.sent.map((e) => e.guide.slug)).toContain('orphan');
+  });
+
+  it('starts no model call late in a tick', async () => {
+    const h = harness();
+    const late = { ...h.deps, callWindowMs: 0 };
+    await runEngineStep(late);
+    expect(h.calls.write).toBe(0);
+    expect((await queue.listTopics())[0].status).toBe('queued');
+  });
+
+  it('sends the draft in the same tick when no review is possible', async () => {
+    const h = harness({ canReview: () => false });
+    await h.tick();
+    expect(h.calls.review).toBe(0);
+    expect(h.sent.map((e) => e.kind)).toEqual(['ready']);
+    expect(buildReviewEmail(h.sent[0]).text).toContain('Second-model review skipped: the reviewer key (ANTHROPIC_API_KEY) is not set yet.');
   });
 });
