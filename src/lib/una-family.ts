@@ -1,51 +1,43 @@
-import type { ZoneMinutes } from '@/lib/una-maths';
-
 /*
- * The X family: the HybridX apps for UNA Watch that are linked on the wrist.
- * One source for /una and /una/nerdy-bits.
+ * The X family: the HybridX apps for UNA Watch that work together on the
+ * wrist. One source for /una (the sales page) and /una/nerdy-bits (the method).
  *
- * Every fact below is taken from the watch repository's checked store text
+ * The copy is written for an athlete choosing an app, not for a developer:
+ * what you get, in a few words. How it works belongs on the nerdy page.
+ *
+ * Every claim is taken from the watch repository's checked store text
  * (xhybrid-dev/una-hyrox, hybridx-link/docs/STORE_RELEASE.md, "Facts checked
- * against the code") and nothing is claimed that it lists under "Not
- * claimed": no rep counting, no bike sensors, no routes sent from the phone,
- * no VO2max accuracy against a lab or another watch, and no counting of
- * UNA's own built-in apps.
+ * against the code"), and nothing it lists under "Not claimed" is claimed
+ * here: no rep counting, no bike sensors, no routes sent from the phone, no
+ * VO2max accuracy against a lab, no counting of UNA's built-in apps.
  *
- * The colourways are the family's brand system (hybridx-link/Tools/Brand):
- * each app has its own, which is what lets the page keep them apart.
+ * The colours are the family's brand colourways (hybridx-link/Tools/Brand).
  */
 
 /** Change this one line when the store status changes. */
-export const STORE_STATUS =
-  'HybridX Race is on the UNA app store. The rest of the family is arriving there as version 1.0.';
+export const STORE_STATUS = 'Race is on the UNA app store now. The rest are arriving as version 1.0.';
 
 export type AppSlug = 'race' | 'run' | 'trail' | 'ride' | 'workout' | 'streak';
 
 export type FamilyApp = {
   slug: AppSlug;
   name: string;
-  /** The brand's name for the colourway. */
-  colourway: string;
-  /** One word for what it is for, shown on the hero band. */
-  does: string;
-  line: string;
-  blurb: string;
-  /** Dark ground, light ink, and the accent: for display type, discs and lines, never small text. */
+  /** The tab label. */
+  tab: string;
+  tagline: string;
+  summary: string;
+  /** The panel's ground, the ink on it, and the app's signal colour. */
   ground: string;
   ink: string;
   accent: string;
-  /** The ink that is legible on the accent, for filled buttons and tags. */
-  onAccent: string;
-  facts: string[];
+  /** Which UNA Watch render the brand pairs it with. */
+  watch: 'black' | 'white' | 'teal';
+  features: { title: string; body: string }[];
+  /** How it joins the rest, in a few words each. */
+  together: string[];
   screens: { src: string; label: string }[];
-  /** What goes down the line to X Streak when a session is saved. */
-  hands: string;
-  /** Anything else it shares, beyond the session itself. */
-  also?: string;
   /** Its own page, where it has one. */
-  page?: { href: string; label: string };
-  /** Said plainly, so nobody finds out on the wrist. */
-  notYet?: string;
+  page?: string;
 };
 
 const s = (app: AppSlug, file: string) => `/una/screens/${app}/${file}.png`;
@@ -54,197 +46,158 @@ export const RECORDERS: FamilyApp[] = [
   {
     slug: 'race',
     name: 'HybridX Race',
-    colourway: 'Classic',
-    does: 'Hyrox',
-    line: 'One button per split.',
-    blurb:
-      'The HYROX-format race timer. Press once at every transition and each run and each station is timed as its own lap, with its own heart rate.',
+    tab: 'Race',
+    tagline: 'Every split. One button.',
+    summary: 'The HYROX-format race timer. Press once at each transition and every run and station is timed on its own.',
     ground: '#0a0a0a',
     ink: '#ffffff',
     accent: '#FADB5C',
-    onAccent: '#0a0a0a',
-    facts: [
-      'A full race or either half, with an optional Roxzone split around every station.',
-      'Runs from 100 m to 1 km, so a sim in the gym is still timed as a race.',
-      'A split lock for sweaty double presses, and an undo that puts the times back exactly.',
-      'A pace plan against your last race or a target finish, ahead or behind at a glance.',
+    watch: 'black',
+    features: [
+      { title: 'Race or sim', body: 'The full race, either half, or shorter runs for training.' },
+      { title: 'Pace plan', body: 'See if you are ahead of your last race or your target.' },
+      { title: 'Mistake-proof', body: 'A split lock for double presses, and an undo.' },
+      { title: 'Sixteen splits', body: 'Each with its own time and heart rate, on Strava.' },
     ],
+    together: ['Counts in X Streak'],
     screens: [
-      { src: s('race', 'race-run'), label: 'Run 1 of 8' },
-      { src: s('race', 'race-station'), label: 'SkiErg' },
-      { src: s('race', 'summary'), label: 'Where the time went' },
+      { src: s('race', 'race-run'), label: 'Run' },
+      { src: s('race', 'race-station'), label: 'Station' },
+      { src: s('race', 'summary'), label: 'Summary' },
     ],
-    hands: 'A Hybrid session, with its training load.',
-    page: { href: '/race', label: 'The full Race page' },
+    page: '/race',
   },
   {
     slug: 'run',
     name: 'X Run',
-    colourway: 'Engine',
-    does: 'Run',
-    line: 'Your engine, measured on the wrist.',
-    blurb:
-      'A running app with a VO2max estimate of its own, worked out on the watch from your steady running: pace and gradient against your heart-rate reserve.',
+    tab: 'Run',
+    tagline: 'Know your engine.',
+    summary: 'A running app that estimates your VO2max on your wrist, and shows how it is trending.',
     ground: '#5C0F1A',
     ink: '#FBF5EF',
     accent: '#E63946',
-    onAccent: '#1a0306',
-    facts: [
-      'Distance, pace, heart rate, laps and climb with GPS.',
-      'VO2max after every run that earns one, its trend, and the runs behind it.',
-      'Cadence and step length, time in each zone, best 1 km, mile and 5 km, and how evenly you paced it.',
-      'Treadmill mode: speed and distance from your cadence, corrected to the console afterwards.',
+    watch: 'black',
+    features: [
+      { title: 'VO2max', body: 'An estimate from your steady running, updated as you train.' },
+      { title: 'Every detail', body: 'Pace, heart rate, cadence, laps and climb.' },
+      { title: 'Best splits', body: 'Your fastest 1 km, mile and 5 km in every run.' },
+      { title: 'Treadmill mode', body: 'Distance indoors, without GPS.' },
     ],
+    together: ['Counts in X Streak', 'VO2max from X Trail runs too'],
     screens: [
-      { src: s('run', 'running'), label: 'Mid-run' },
       { src: s('run', 'vo2max'), label: 'VO2max' },
+      { src: s('run', 'running'), label: 'Running' },
       { src: s('run', 'best-splits'), label: 'Best splits' },
     ],
-    hands: 'A Run, with its training load.',
-    also: 'Takes in steady minutes from X Trail, so its VO2max is built from every run on the watch.',
   },
   {
     slug: 'trail',
     name: 'X Trail',
-    colourway: 'Moss',
-    does: 'Trail',
-    line: 'Follow the line, not your phone.',
-    blurb:
-      'Load a GPX route and run it from your wrist: you on the line, a buzz when you leave it, and an arrow back.',
+    tab: 'Trail',
+    tagline: 'Follow the route, not your phone.',
+    summary: 'Load a route and run it from your wrist, with a buzz the moment you leave it.',
     ground: '#1F3A2B',
     ink: '#EFE9DC',
     accent: '#E040A0',
-    onAccent: '#1a0612',
-    facts: [
-      'A map of the route, heading-up or north-up, zoomed from 300 m to 3 km with one button.',
-      'Off by 25 m or more? A buzz and the way back. “Back on course” when you are.',
-      'Turn cues before each turn, distance to go, and an elevation profile.',
-      'It records the run as well: distance, pace, heart rate and laps.',
+    watch: 'white',
+    features: [
+      { title: 'A map on your wrist', body: 'Your route, and you on it. Zoom with one button.' },
+      { title: 'Off-course alert', body: 'A buzz, and an arrow back to the line.' },
+      { title: 'Turns and climbs', body: 'Cues before each turn, and what is left to climb.' },
+      { title: 'A full run record', body: 'Distance, pace and heart rate, on Strava.' },
     ],
+    together: ['Counts in X Streak', 'Feeds your VO2max in X Run'],
     screens: [
-      { src: s('trail', 'map'), label: 'You, on the line' },
+      { src: s('trail', 'map'), label: 'Map' },
       { src: s('trail', 'off-course'), label: 'Off course' },
-      { src: s('trail', 'elevation'), label: 'What is left to climb' },
+      { src: s('trail', 'elevation'), label: 'Climbs' },
     ],
-    hands: 'A Run, with its training load.',
-    also: 'Hands its steady minutes to X Run, where they count towards your VO2max.',
-    page: { href: '/trail', label: 'The full Trail page' },
-    notYet: 'Routes go on by USB for now.',
+    page: '/trail',
   },
   {
     slug: 'ride',
     name: 'X Ride',
-    colourway: 'Velodrome',
-    does: 'Ride',
-    line: 'Stops when you stop.',
-    blurb:
-      'Outdoors with GPS and the barometer, or indoors on the turbo with intervals counted down for you.',
+    tab: 'Ride',
+    tagline: 'Stops when you stop.',
+    summary: 'For the road and the turbo. It pauses at the lights and picks up as you ride off.',
     ground: '#0E1A4F',
     ink: '#F2F4FB',
     accent: '#FF6A1A',
-    onAccent: '#1a0a00',
-    facts: [
-      'Speed, distance and climb outdoors, with heart rate from the wrist or a strap.',
-      'Auto-pause stops the clock at the lights and starts it as you ride off.',
-      'Auto laps by time, or by distance from 1 to 25 km.',
-      'Indoors: free, Intervals with your own work, rest and rounds, or Tabata.',
+    watch: 'black',
+    features: [
+      { title: 'Auto-pause', body: 'The clock stops when you do.' },
+      { title: 'Outdoors', body: 'Speed, distance and climb with GPS.' },
+      { title: 'On the turbo', body: 'Intervals and Tabata, counted down for you.' },
+      { title: 'Auto laps', body: 'By time, or every 1 to 25 km.' },
     ],
+    together: ['Counts in X Streak'],
     screens: [
       { src: s('ride', 'riding'), label: 'Riding' },
-      { src: s('ride', 'auto-paused'), label: 'Auto-paused' },
-      { src: s('ride', 'intervals'), label: 'Turbo intervals' },
+      { src: s('ride', 'auto-paused'), label: 'Paused' },
+      { src: s('ride', 'intervals'), label: 'Intervals' },
     ],
-    hands: 'A Ride, with its training load.',
-    notYet: 'The watch does not connect power, cadence or speed sensors yet. Ride will use them when it does.',
   },
   {
     slug: 'workout',
     name: 'X Workout',
-    colourway: 'Iron',
-    does: 'Gym',
-    line: 'Everything that is not a run or a ride.',
-    blurb:
-      'Seven kinds of session in one app, each step timed for you: a countdown, three ticks before it ends, and a different buzz for work, rest and done.',
+    tab: 'Workout',
+    tagline: 'For everything else.',
+    summary: 'Gym, HIIT and Hyrox-style sessions, with every interval timed for you.',
     ground: '#161618',
     ink: '#EDEDED',
     accent: '#FF2E88',
-    onAccent: '#1a0010',
-    facts: [
-      'Free, Strength, EMOM, AMRAP, Tabata, Intervals and Hyrox-style Circuits.',
-      'Strength sets with a rest timer, saved as sets.',
-      'Circuits of runs and stations, each step saved as its own lap.',
-      'Heart-rate zones and calories throughout.',
+    watch: 'black',
+    features: [
+      { title: 'Seven ways to train', body: 'Strength, EMOM, AMRAP, Tabata, intervals, circuits, or free.' },
+      { title: '3, 2, 1, go', body: 'Countdowns, and a different buzz for work and rest.' },
+      { title: 'Sets and rest', body: 'A rest timer between every set.' },
+      { title: 'Hyrox-style circuits', body: 'Runs and stations, each timed on its own.' },
     ],
+    together: ['Counts in X Streak'],
     screens: [
-      { src: s('workout', 'strength-set'), label: 'Set 1 of 3' },
+      { src: s('workout', 'strength-set'), label: 'Sets' },
       { src: s('workout', 'tabata'), label: 'Tabata' },
-      { src: s('workout', 'circuit-station'), label: 'Circuit station' },
+      { src: s('workout', 'circuit-station'), label: 'Circuit' },
     ],
-    hands: 'Strength, Hybrid or Workout, by what you did, with its training load.',
   },
 ];
 
 export const STREAK: FamilyApp = {
   slug: 'streak',
   name: 'X Streak',
-  colourway: 'Glacier',
-  does: 'Everything',
-  line: 'Where every session lands.',
-  blurb:
-    'Set a weekly target and keep the streak going. Sessions saved by the other five count by themselves: open Streak and they are there.',
+  tab: 'Streak',
+  tagline: 'Where it all adds up.',
+  summary: 'Set a weekly target and keep it going. Sessions from the other five apps count by themselves.',
   ground: '#0B1F33',
   ink: '#F4FAFB',
   accent: '#2EC4C4',
-  onAccent: '#04161a',
-  facts: [
-    'Every week you hit your target is a step up the mountain: Arthur’s Seat at 4 weeks, Snowdon at 12, Ben Nevis at 26, Mont Blanc at a year, Everest at two.',
-    'Shields, earned every four good weeks, save the streak when life happens.',
-    'Anything else you did can be logged by hand, today or yesterday.',
-    'You choose the target, the day your week starts, what counts and the shortest session.',
+  watch: 'teal',
+  features: [
+    { title: 'Your weekly streak', body: 'Hit your target each week and climb, from Arthur’s Seat to Everest.' },
+    { title: 'Nothing to log', body: 'Save a session in any X app and it is counted.' },
+    { title: 'Fitness, fatigue, form', body: 'See what you have built, and when to ease off.' },
+    { title: 'Shields', body: 'Earned by good weeks. They save your streak when life happens.' },
   ],
+  together: ['Counts all five apps'],
   screens: [
-    { src: s('streak', 'home'), label: 'The climb' },
-    { src: s('streak', 'session-found'), label: 'A run, found' },
-    { src: s('streak', 'training-load'), label: 'Training load' },
+    { src: s('streak', 'home'), label: 'Streak' },
+    { src: s('streak', 'session-found'), label: 'Counted' },
+    { src: s('streak', 'training-load'), label: 'Form' },
   ],
-  hands: 'Hands back your week and your streak, for every Saved screen.',
-  page: { href: '/streak', label: 'The full Streak page' },
+  page: '/streak',
 };
 
 export const FAMILY: FamilyApp[] = [...RECORDERS, STREAK];
 
 export const icon = (slug: string) => `/una/icons/${slug}.png`;
 
-/*
- * The week machine's sessions. The durations and zone minutes are examples;
- * the load each one scores is worked out from them by the real formula
- * (edwardsLoad), not typed in.
- */
-export type DemoSession = {
-  slug: Exclude<AppSlug, 'streak'>;
-  /** What X Streak calls it. */
-  kind: string;
-  /** Sport code in the shared line. */
-  sport: number;
-  title: string;
-  minutes: number;
-  metres: number;
-  avgHr: number;
-  maxHr: number;
-  zones: ZoneMinutes;
-  /** Steady minutes that could count towards X Run's VO2max. */
-  steady?: number;
-};
+export const WATCH_RENDER = {
+  black: '/weigh-in/una-watch-black.png',
+  white: '/trail/una-watch-white.png',
+  teal: '/race/una-watch-teal.png',
+} as const;
 
-export const DEMO_SESSIONS: DemoSession[] = [
-  { slug: 'run', kind: 'Run', sport: 1, title: 'Steady run', minutes: 45, metres: 8600, avgHr: 148, maxHr: 166, zones: [5, 25, 12, 3, 0], steady: 34 },
-  { slug: 'trail', kind: 'Run', sport: 1, title: 'Hill loop', minutes: 70, metres: 11200, avgHr: 151, maxHr: 174, zones: [10, 30, 20, 10, 0], steady: 21 },
-  { slug: 'ride', kind: 'Ride', sport: 2, title: 'Road ride', minutes: 60, metres: 27400, avgHr: 128, maxHr: 152, zones: [20, 30, 10, 0, 0] },
-  { slug: 'workout', kind: 'Strength', sport: 4, title: 'Strength', minutes: 40, metres: 0, avgHr: 112, maxHr: 141, zones: [25, 10, 5, 0, 0] },
-  { slug: 'race', kind: 'Hybrid', sport: 6, title: 'Race sim', minutes: 75, metres: 8750, avgHr: 168, maxHr: 184, zones: [0, 0, 20, 40, 15] },
-];
-
-/** The eight numbers of one line in the shared folder, in order. */
+/** The eight numbers of one line in the shared folder, in order (nerdy page). */
 export const LINE_FIELDS = [
   { key: 'start', label: 'When it started', note: 'seconds, UTC' },
   { key: 'zone', label: 'Your time zone', note: 'minutes, plus 1440' },
