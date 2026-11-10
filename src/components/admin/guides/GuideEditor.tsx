@@ -80,7 +80,13 @@ export default function GuideEditor({
 
   const onSave = () =>
     start(async () => {
-      const result = await save(slug, doc);
+      let result: Awaited<ReturnType<typeof save>>;
+      try {
+        result = await save(slug, doc);
+      } catch (e) {
+        // A failure on the server (or the network) must still say something.
+        result = { ok: false, errors: [`The save did not go through: ${e instanceof Error ? e.message : 'unknown error'}. Your edits are still here; try again.`] };
+      }
       if (result.ok) {
         router.push(`/admin/guides/${slug}?done=saved`);
         router.refresh();

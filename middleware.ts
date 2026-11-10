@@ -114,10 +114,12 @@ export function middleware(request: NextRequest) {
   const cspDirectives = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://app.ecwid.com https://script.google.com",
+    // GA4 sends hits to region-specific hosts (region1.analytics.google.com)
+    // and to googletagmanager.com, not only *.google-analytics.com.
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: http:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.google-analytics.com https://www.google-analytics.com https://app.ecwid.com https://script.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
+    "connect-src 'self' https://*.google-analytics.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://app.ecwid.com https://script.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
     "frame-src 'self' https://app.ecwid.com https://script.google.com",
     "object-src 'none'",
     "base-uri 'self'",

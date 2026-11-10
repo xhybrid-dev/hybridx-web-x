@@ -157,7 +157,11 @@ export interface EditPayload {
 
 /** Saves edited content as the next revision. Returns the problems instead if it does not pass. */
 export async function saveGuideEdit(slug: string, payload: EditPayload): Promise<{ ok: true } | { ok: false; errors: string[] }> {
-  await requireAdmin();
+  // Said, not thrown: a thrown error never reaches the editor, so an expired
+  // sign-in looked like a Save button that did nothing.
+  if (!(await getAdminSession())) {
+    return { ok: false, errors: ['Your sign-in has expired. Open /admin/guides in a new tab, sign in, then come back and press Save again: your edits are still here.'] };
+  }
   if (!SLUG.test(slug)) throw new Error('Bad request');
   const current = await getGuide(slug);
   if (!current) return { ok: false, errors: ['That article no longer exists.'] };
