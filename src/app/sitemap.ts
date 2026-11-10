@@ -35,7 +35,7 @@ import { listPublishedGuides } from '@/lib/guides/store';
 // runs the function once to see whether it can be prerendered, because
 
 // Force static generation at build time (or revalidate once a day)
-export const dynamic = 'force-static'
+export const dynamic = 'force-dynamic';
 export const revalidate = 86400 // Cache for 24 hours (in seconds)
 
 import { MetadataRoute } from 'next'
