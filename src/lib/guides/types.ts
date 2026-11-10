@@ -97,6 +97,8 @@ export const GUIDE_STATUSES = [
   'scheduled',
   'published',
   'retired',
+  /** Turned down in review. Never public; the reason is kept so the topic is not offered again. */
+  'rejected',
 ] as const;
 export type GuideStatus = (typeof GUIDE_STATUSES)[number];
 
@@ -125,10 +127,16 @@ export const GuideSchema = z
     publishAt: isoDate.optional(),
     /** Where a retired article sends its visitors. A path on this site. */
     redirectTo: z.string().regex(/^\/[a-z0-9\-/]*$/).optional(),
+    /** Why it was turned down, in Jon's words. */
+    rejectionReason: plain(500).optional(),
   })
   .refine((g) => g.status !== 'published' || g.publishedAt !== undefined, {
     message: 'A published article needs publishedAt',
     path: ['publishedAt'],
+  })
+  .refine((g) => g.status !== 'scheduled' || g.publishAt !== undefined, {
+    message: 'A scheduled article needs publishAt',
+    path: ['publishAt'],
   });
 
 export type Guide = z.infer<typeof GuideSchema>;

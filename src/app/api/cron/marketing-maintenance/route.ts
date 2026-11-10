@@ -19,7 +19,11 @@
 //      monthly review, once ANTHROPIC_API_KEY is configured
 //      (src/lib/plan-finder/monthly-review.ts).
 //
-// Both are safe to run repeatedly and safe to miss: the outbox is keyed on
+//   4. **Publish due guides.** Records scheduled articles whose slot has
+//      passed as published (src/lib/guides/store.ts). Visitors see them from
+//      the slot itself either way; this keeps Firestore saying so too.
+//
+// All are safe to run repeatedly and safe to miss: the outbox is keyed on
 // per-lead state and the mirror is a full replacement. A skipped run delays
 // work, it does not corrupt anything.
 //
@@ -38,6 +42,7 @@ import { refreshComplaintMirror } from '@/lib/suppression-mirror';
 import { pruneRateLimits } from '@/lib/rate-limit';
 import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
 import { runMonthlyReview } from '@/lib/plan-finder/monthly-review';
+import { publishDueGuides } from '@/lib/guides/store';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -61,13 +66,16 @@ export async function GET(request: Request) {
   // leads and the mirror protects the sending domain; neither is worth
   // sacrificing to the other's bad day, and neither is worth sacrificing to a
   // housekeeping sweep.
-  const [outbox, mirror, limits, rollups, notes, review] = await Promise.allSettled([
+  // Guides go live at their slot whether or not this runs (the public pages
+  // decide that when they are read); this records them as published.
+  const [outbox, mirror, limits, rollups, notes, review, guides] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
     runDailyRollups(),
     blankOldNotes(),
     runMonthlyReview(),
+    publishDueGuides(),
   ]);
 
   const result = {
@@ -95,9 +103,13 @@ export async function GET(request: Request) {
       review.status === 'fulfilled'
         ? review.value
         : { error: String((review.reason as Error)?.message ?? review.reason) },
+    guidesPublished:
+      guides.status === 'fulfilled'
+        ? guides.value
+        : { error: String((guides.reason as Error)?.message ?? guides.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

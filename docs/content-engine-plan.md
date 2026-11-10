@@ -58,7 +58,7 @@ italics.
 | D1 | ~~Byline~~ **Decided:** "HybridX" | Step 2 |
 | D2 | ~~Trial length~~ **Decided:** 14 days | Step 1 |
 | D3 | ~~"Over 2,000 athletes"~~ **Decided:** true, worded as athletes who have trained with HybridX plans | Step 1 |
-| D4 | Publishing slots and email hours. *Monday, Wednesday and Friday at 07:00; emails 07:00–20:00* | Step 3 |
+| D4 | ~~Publishing slots~~ **Decided:** Monday, Wednesday and Friday at 07:00; emails 07:00–20:00 | Step 3 |
 | D5 | Review address. *Your admin address* | Step 4 |
 | D6 | The reviewer model. *Claude, so a different model family checks Gemini's work.* This needs `ANTHROPIC_API_KEY` bound on the site, which also switches on the dormant monthly analytics review (Anthropic is already named in the privacy policy for that) | Step 4 |
 | D7 | Week planner: standalone, or the plan finder's result screen. *Standalone first* | Step 5 |
@@ -196,39 +196,81 @@ and their order can change.
   Real articles arrive from step 3, when you can write one in admin, and from
   step 4 by email.
 
-### Step 3: the review page, publishing slots and longer sign-in (M)
+### Step 3: the review page, publishing slots and longer sign-in (M). Built
 
 - **Builds:**
-  - **14-day admin sign-in:** `src/lib/admin-auth.ts` switches from the
-    55-minute ID-token cookie to Firebase session cookies;
-  - **the review page,** `src/app/admin/guides/[[...view]]/page.tsx`: the
-    queue, a rendered preview, and Approve (into the next slot, or now),
-    Comment (whole article or one paragraph), Edit and Reject (with a reason);
-  - **actions:** `src/app/api/admin/guides/…` routes, all POST, all behind admin
-    auth;
-  - **slots:** `src/lib/guides/slots.ts` holds the slot logic, and settings sit
-    in `contentSettings/engine` (slots, email hours, review address, a pause
-    switch), editable in admin;
-  - **publishing on time:** a new step in the hourly
-    `/api/cron/marketing-maintenance` job publishes articles whose slot has
-    arrived.
-- **Tests:** slot maths (time zones, a full week, a pause); authorisation on
-  every action; a GET never changes state.
-- **You, before merge:**
-  - D4;
-  - grant the backend's service account permission to sign session cookies:
+  - **`/admin/guides`, the queue:** waiting for you, scheduled (with each
+    slot), published, and turned down or retired, plus the next free slot. It is
+    linked from the leads admin.
+  - **`/admin/guides/<slug>`, the review page:**
+    - the article rendered exactly as it will appear, block by block and
+      numbered;
+    - the point and the search description;
+    - **Approve for <next slot>**, or **Publish now**;
+    - take it out of its slot;
+    - **Comment** on the whole article or one block;
+    - **Turn down** (a reason is required);
+    - **Retire** a published article, optionally sending its readers to
+      another page on the site;
+    - its revision history.
 
-    ```bash
-    gcloud iam service-accounts add-iam-policy-binding <backend-service-account> \
-      --member="serviceAccount:<backend-service-account>" \
-      --role="roles/iam.serviceAccountTokenCreator" --project=hybridx-hub
-    ```
+    `?action=approve` and `?action=comment` (the review email's buttons, step
+    4) highlight and focus that part. Neither acts by itself.
+  - **`/admin/guides/<slug>/edit`, the editor:**
+    - a small form per block; lists, workout steps and table rows are one per
+      line;
+    - move, delete and add blocks;
+    - saving runs the article schema and lists problems in plain words by block
+      number ("Block 4 (workout) racePace.rest: is empty").
+  - **`/admin/guides/new`:** a title and a topic make a draft with placeholder
+    text, which cannot be approved until it is replaced. This is how you write
+    one yourself.
+  - **`/admin/guides/settings`:** publishing days and time (UK), email hours,
+    the review address, and Pause. Pause stops new drafts and emails; articles
+    already approved still go live, which is how a week away is covered.
+  - **`src/lib/guides/slots.ts`:** Monday, Wednesday and Friday at 07:00 UK
+    time, one article per slot. Tests cover both clock changes: Monday 29 March
+    2027 publishes at 06:00 UTC.
+  - **Going live exactly at the slot:** a scheduled article is public from its
+    slot when the page is read, so it goes live at 07:00 however late the hourly
+    job runs. The hourly job (`publishDueGuides`) then records it as published.
+  - **Review rules** in `src/lib/guides/review.ts`, and server actions in
+    `src/app/admin/guides/actions.ts`. Every action is a POST and re-checks the
+    admin session; a status change never counts as a content revision.
+  - **14-day admin sign-in:**
+    - Firebase session cookies, falling back to the old one-hour sign-in until
+      the IAM grant below exists, so admin never breaks;
+    - cookies issued before the change still work;
+    - sign-in returns to the page that asked for it (`?next=`, admin pages
+      only);
+    - the Guides header says which kind of sign-in you have.
+- **Tests:** `guides-admin.test.ts` (slots, state, comments, settings),
+  `guides-review.test.ts` (review rules and actions) and `admin-auth.test.ts`
+  (sign-in and return path). The whole suite has 562 tests.
+- **Checked by hand:**
+  - the full flow in a browser, against an in-memory Firestore: comment on a
+    block, approve into Wednesday 07:00, the article not public before its
+    slot, edit to revision 2, a broken edit refused by block number, a new
+    article's placeholders blocking approval, and the settings;
+  - no page errors.
+- **You, after merge** (admin works without it; it only turns the one-hour
+  sign-in into 14 days):
 
-    I'll look up the exact account name with you when we reach this step.
+  ```bash
+  gcloud services enable iamcredentials.googleapis.com --project=hybridx-hub
+  SA=$(gcloud run services describe hybridx-web-x --region=europe-west4 --project=hybridx-hub \
+    --format='value(spec.template.spec.serviceAccountName)')
+  echo "$SA"   # usually firebase-app-hosting-compute@hybridx-hub.iam.gserviceaccount.com
+  gcloud iam service-accounts add-iam-policy-binding "$SA" \
+    --member="serviceAccount:$SA" --role="roles/iam.serviceAccountTokenCreator" --project=hybridx-hub
+  ```
+
+  Then sign out and in again. The Guides header should say "stays signed in
+  for 14 days".
 - **Check on the live site:**
-  - you write a short article in admin, approve it, and it goes live at the next
-    slot;
-  - you're still signed in the next day.
+  - `/admin/guides` shows an empty queue and the next free slot;
+  - New article, then edit it, approve it, and see it go live at the slot, or
+    Publish now and see it at `/guides/<slug>`.
 
 ### Step 4: AI drafting and the email loop (L). Articles start flowing here
 
@@ -887,7 +929,7 @@ weekly summary email cover the questions the proposal wanted it for.
 |---|---|---|
 | 1 | You | Check the four singles rows in `DIVISIONS` against the official 2026/27 Singles rulebook |
 | 2 | You | Nothing: the existing deny-all Firestore rule already covers the new collections |
-| 3 | You | D4; grant `roles/iam.serviceAccountTokenCreator` to the backend service account on itself |
+| 3 | You | After merge: enable the IAM Credentials API and grant `roles/iam.serviceAccountTokenCreator` (commands in step 3). Admin works before then, with one-hour sign-in |
 | 4 | You | D5 and D6; create and grant `ANTHROPIC_API_KEY`; set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `on` when ready |
 | 6 | You | Enable the Search Console API in `hybridx-hub`; add the service account to `sc-domain:hybridx.club` as Restricted; confirm the sitemap was submitted once |
 | 10 | You | A Google Ads account and developer token. An OAuth client with its consent screen **set to "In production"**: left in "Testing", Google expires refresh tokens after seven days. A one-time sign-in; create and grant the secrets |

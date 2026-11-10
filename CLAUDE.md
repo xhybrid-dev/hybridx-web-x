@@ -122,6 +122,18 @@ AI-drafted, reviewed and approved by Jon before publishing.
 - **Byline:** by HybridX, reviewed by Jon Lee, HybridX trainer.
   `/guides/how-we-write` describes the process, so change it whenever the
   process changes.
+- **Review happens in `/admin/guides`.** Rules are in `src/lib/guides/review.ts`
+  and slots in `slots.ts`: Monday, Wednesday and Friday at 07:00 UK time, one
+  article per slot, editable in settings.
+  - **Nothing publishes without Jon's approval, and no GET changes state.** Mail
+    scanners open every link in a review email.
+  - **A scheduled article is public from its slot,** decided when it is read;
+    the hourly job only records it as published afterwards.
+- **Admin sign-in lasts 14 days** only once the App Hosting service account
+  holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
+  Credentials API is enabled. Until then `createAdminSessionCookie` falls back
+  to the one-hour ID token and logs why; the Guides admin header says which you
+  have.
 
 ## The shop (paid PDFs)
 
