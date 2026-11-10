@@ -36,13 +36,8 @@ import { listPublishedGuides } from '@/lib/guides/store';
 
 // Force static generation at build time (or revalidate once a day)
 export const dynamic = 'force-dynamic';
-export const revalidate = 86400 // Cache for 24 hours (in seconds)
 
-import { MetadataRoute } from 'next'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  // ... your existing sitemap array
-}
 
 /** Subdomain label to the address its page declares as canonical. */
 const APP_SUBDOMAINS: Record<string, string> = {
