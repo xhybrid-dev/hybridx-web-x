@@ -33,7 +33,7 @@ export default function OpengraphImage() {
             <span>&nbsp;FAMILY</span>
           </div>
           <div style={{ display: 'flex', fontSize: 34, marginTop: 14 }}>
-            Six apps. Every session lands in the same place.
+            Six apps. One watch. Every session counts.
           </div>
         </div>
         <div style={{ display: 'flex', flex: 1, position: 'relative', borderTop: '4px solid #ffffff' }}>

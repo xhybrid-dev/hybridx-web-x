@@ -1,8 +1,7 @@
-import { Anton, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import { Anton, Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 
-// The X family's type, as its store art sets it: Anton for the one big
-// uppercase phrase, Space Grotesk for everything read, and a mono for the
-// numbers the apps pass each other.
+// The X family's type. On /una: Space Grotesk for headlines, Inter for
+// everything read. /una/nerdy-bits adds Anton and a mono for its formulas.
 
 export const anton = Anton({
   subsets: ['latin'],
@@ -15,6 +14,13 @@ export const grotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
   variable: '--font-una-text',
+  display: 'swap',
+});
+
+export const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-una-body',
   display: 'swap',
 });
 
