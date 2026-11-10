@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { HYBRIDX_APP_URL, HYBRIDX_URL, UNA_URL } from '@/components/una-app/Chrome';
 import { grotesk, inter } from '@/components/una/fonts';
 import FamilyExplorer from '@/components/una/FamilyExplorer';
-import { FAMILY, STORE_STATUS, WATCH_RENDER, icon } from '@/lib/una-family';
+import { FAMILY, WATCH_RENDER, icon } from '@/lib/una-family';
 import styles from './una.module.css';
 
 /*
@@ -22,7 +22,7 @@ import styles from './una.module.css';
  *
  * Honesty constraints, all deliberate:
  *   - Claims are the watch repo's checked store text (see lib/una-family.ts).
- *   - Store status is one constant, STORE_STATUS, to edit as listings go live.
+ *   - No version numbers or release status: all six are on the UNA app store.
  *   - VO2max is called an estimate wherever it is described.
  *   - Watch screens are the apps' own, from UNA's simulator; the watch is
  *     UNA's product render, as on the single-app pages.
@@ -170,7 +170,7 @@ export default function UnaFamilyPage() {
                 Train with HybridX <span aria-hidden="true">→</span>
               </a>
             </div>
-            <p className={styles.status}>{STORE_STATUS}</p>
+            <p className={styles.status}>All six are on the UNA app store. Pick the ones you want.</p>
           </div>
           <div className={styles.unaWatch}>
             <Image src="/una/screens/streak/home.png" alt="" width={480} height={480} className={styles.unaScreen} />
