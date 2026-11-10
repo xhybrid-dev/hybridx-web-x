@@ -31,7 +31,8 @@ describe('the click counter', () => {
   });
 
   it('sends a tool click to the tool', async () => {
-    expect((await out(`g=${sample.slug}&tool=vdot`)).headers.get('location')).toBe('https://hybridx.club/vdot');
+    expect((await out(`g=${sample.slug}&tool=vdot`)).headers.get('location')).toBe(`https://hybridx.club/vdot?src=guide-${sample.slug}`);
+    expect((await out(`g=${sample.slug}&tool=week-planner`)).headers.get('location')).toBe(`https://hybridx.club/calculators/week-planner?src=guide-${sample.slug}`);
   });
 
   it('never redirects anywhere the registry does not name', async () => {

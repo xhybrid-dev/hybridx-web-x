@@ -56,6 +56,12 @@
     --location=us-central1 --project=hybridx-hub
   ```
 
+- **The build's TypeScript check needs more than Node's default heap.** The full
+  check uses about 2 GB, Node's default ceiling there, and the build fails with
+  "JavaScript heap out of memory" during "Running TypeScript". `apphosting.yaml`
+  sets `NODE_OPTIONS=--max-old-space-size=3072` for the build only; build locally
+  with the same (`NODE_OPTIONS=--max-old-space-size=3072 npm run build`).
+
 - **`LEAD_BRIDGE_SECRET` is not interchangeable with `CRON_SECRET`.** The bridge
   credential authorises pushing leads into the mailing system; the cron credential
   only authorises running maintenance. A scheduler job should not be able to do the
@@ -175,6 +181,11 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
     questions and topics he moved up, then search demand by score, then the
     rest, then topics he moved down. Keep his moves ahead of the data.
+- **The week planner** (plan step 5, `/calculators/week-planner`): the rules
+  live in `src/lib/calculators/week-planner.ts` and `week-planner.test.ts`
+  checks all 336 input combinations in every week. Change a session there, never
+  in the page. Its magnet is the one `personal` asset: the emailed link is the
+  planner page rebuilt from the validated form fields.
 - **Article performance** (plan step 7, `/admin/guides/performance`): an
   article's tool and call-to-action links go through `/api/guides/out`, which
   counts a total per article and redirects to a destination looked up by id.

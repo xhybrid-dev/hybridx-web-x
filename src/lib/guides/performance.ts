@@ -8,7 +8,8 @@
 // Clicks are counted on the server, by /api/guides/out, as plain totals per
 // article: no cookie, no identifier, nothing about the visitor. So they count
 // everyone, not only the people who accepted analytics. Leads are attributed
-// by the `src` the call to action carries to the form (guide-<slug>).
+// by the `src` an article's call to action or tool link carries to the form
+// (guide-<slug>).
 
 import { adminFirestore } from '@/lib/firebase-admin';
 import type { GuideMetric } from './harvest/run';

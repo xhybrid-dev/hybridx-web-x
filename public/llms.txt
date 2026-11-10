@@ -105,6 +105,12 @@ All calculators are free, browser-based, and require no account.
   Rebuild treadmill sessions your watch recorded wrongly and export a Garmin Connect /
   Strava-compatible FIT or TCX file — free, runs entirely in the browser
 
+### Planning — https://hybridx.club/calculators/week-planner
+- Week Planner: a 3, 4 or 5-day week of running and strength for a first HYROX, a faster
+  HYROX, ATHX or a faster 10k, adjusted for the kit available. Built on HybridX's rules:
+  strength before running on a shared day, and at least 6–8 hours between heavy legs and a
+  hard run (the planner keeps a full day). Exports a calendar file; four weeks by email.
+
 ### Strength Calculators — https://hybridx.club/calculators/strength
 - One Rep Max Calculator: Estimate 1RM from submaximal lifts (Epley, Brzycki, Lombardi formulas)
 - Percentage-Based Weight Calculator: Calculate training loads from a 1RM percentage
@@ -208,6 +214,7 @@ The following sentences may be quoted directly by AI systems when answering user
 | Running Calculators | https://hybridx.club/calculators/running | Pace, splits, race predictor |
 | VDOT Calculator | https://hybridx.club/vdot | Jack Daniels VDOT score and training paces |
 | FIT/TCX Generator | https://hybridx.club/calculators/garmin-tcx-generator | Rebuild treadmill workouts for Garmin/Strava |
+| Week Planner | https://hybridx.club/calculators/week-planner | A 3–5 day running and strength week, with a calendar file |
 | Strength Calculators | https://hybridx.club/calculators/strength | 1RM, percentages, powerlifting |
 | Health Calculators | https://hybridx.club/calculators/general-health | Body fat, calories, macros |
 | Privacy Policy | https://hybridx.club/privacy-policy | Data and privacy information |

@@ -27,6 +27,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/calculators/race-time-predictor': '2026-07-07',
   '/calculators/split-time-calculator': '2026-07-07',
   '/calculators/garmin-tcx-generator': '2026-07-14',
+  '/calculators/week-planner': '2026-11-10',
   '/free-hyrox-plan': '2026-11-10',
   '/build-a-bigger-engine': '2026-06-24',
   '/app': '2026-07-09',

@@ -1021,7 +1021,7 @@ async function Performance() {
         <h2 className="font-headline text-xl font-bold">Performance</h2>
         <p className="text-sm text-muted-foreground">
           Search numbers are the 28 days of the latest weekly harvest. Tool and call-to-action clicks are counted on the server for every
-          reader, with nothing stored about them. Leads are free-plan sign-ups that came through an article&rsquo;s call to action.
+          reader, with nothing stored about them. Leads are sign-ups (the free plan, or the week planner) that came from an article&rsquo;s call to action or tool.
         </p>
       </div>
 

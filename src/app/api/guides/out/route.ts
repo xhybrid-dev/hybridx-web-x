@@ -14,7 +14,8 @@ import { TOOLS, type ToolId } from '@/lib/guides/topics';
  * Not an open redirect: the destination is looked up from the registry by id,
  * never read from the URL. A call to action carries src=guide-<article> so a
  * lead from it is credited to the article. Bots, and links to articles that
- * are not public, are sent on without counting.
+ * are not public, are sent on without counting. A tool link carries the src
+ * too, so a sign-up on a tool page (the week planner's) is credited as well.
  */
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
     cta && Object.hasOwn(CTAS, cta)
       ? { kind: 'cta' as const, href: `${CTAS[cta as CtaId].href}${SLUG.test(slug) ? `?src=${guideSrc(slug)}` : ''}` }
       : tool && Object.hasOwn(TOOLS, tool)
-        ? { kind: 'tool' as const, href: TOOLS[tool as ToolId].route }
+        ? { kind: 'tool' as const, href: `${TOOLS[tool as ToolId].route}${SLUG.test(slug) ? `?src=${guideSrc(slug)}` : ''}` }
         : null;
   if (!target) return NextResponse.redirect(new URL('/guides', request.url), 302);
 

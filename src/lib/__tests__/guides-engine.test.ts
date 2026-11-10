@@ -184,7 +184,7 @@ describe('pacing', () => {
   });
 
   it('passes over topics whose tool is not built yet', () => {
-    const t = { status: 'queued', needs: 'week-planner' } as never;
+    const t = { status: 'queued', needs: 'strength-test' } as never;
     expect(queue.isDraftable(t)).toBe(false);
     expect(queue.isDraftable(t, [])).toBe(true);
   });

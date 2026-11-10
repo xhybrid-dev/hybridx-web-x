@@ -37,7 +37,7 @@ import { getMagnet, magnetAssetUrl, magnetConfirmPath } from '@/lib/magnets';
  * free-form map on the lead document, and an open one would let a page — or
  * anyone posting to it — write unbounded fields into that collection.
  */
-const EXTRA_FIELDS = ['raceDate', 'edition', 'calcUsed'] as const;
+const EXTRA_FIELDS = ['raceDate', 'edition', 'calcUsed', 'plan'] as const;
 
 export type MagnetLeadState = {
   status: '' | 'success' | 'error';
@@ -113,6 +113,14 @@ export async function submitMagnetLead(
   }
 
   const { email, firstName, placement } = parsed.data;
+
+  // A personal asset is built from the form (the week planner's choices).
+  // Checked before anything is recorded, so an incomplete form saves no lead
+  // and sends no broken link.
+  const personalPath = magnet.asset.kind === 'personal' ? magnet.asset.url(formData) : null;
+  if (magnet.asset.kind === 'personal' && !personalPath) {
+    return { status: 'error', message: 'Choose your days, goal, kit and long-run day first.' };
+  }
 
   const hdrs = await headers();
   const ip =
@@ -202,7 +210,7 @@ export async function submitMagnetLead(
       ? `${SITE_CONFIG.url}${magnetConfirmPath(magnet)}?token=${encodeURIComponent(
           createLeadToken(email, magnet.slug),
         )}`
-      : `${SITE_CONFIG.url}${magnetAssetUrl(magnet, null)}`;
+      : `${SITE_CONFIG.url}${personalPath ?? magnetAssetUrl(magnet, null)}`;
 
   try {
     await sendMagnetEmail({
@@ -234,7 +242,7 @@ export async function submitMagnetLead(
     email,
     // Only for a public asset. Offering an in-page download for a gated one
     // would hand over the file without the confirmation that gates it.
-    ...(magnet.asset.kind === 'public' ? { assetUrl: magnet.asset.url } : {}),
+    ...(magnet.asset.kind === 'public' ? { assetUrl: magnet.asset.url } : personalPath ? { assetUrl: personalPath } : {}),
   };
 }
 
