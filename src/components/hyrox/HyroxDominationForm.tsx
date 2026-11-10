@@ -98,6 +98,12 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
   const [selectedEvent, setSelectedEvent] = useState<HyroxEvent | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  // Where the visitor came from (?src=, e.g. guide-<slug> from an article's
+  // call to action), so the lead is credited to it. Read once on mount.
+  const [src, setSrc] = useState('');
+  useEffect(() => {
+    setSrc(new URLSearchParams(window.location.search).get('src') ?? '');
+  }, []);
   const [completed, setCompleted] = useState(false);
   const leadFiredRef = useRef(false);
 
@@ -275,6 +281,7 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
   return (
     <Form {...form}>
       <form ref={formRef} action={formAction} className="space-y-6">
+        {src && <input type="hidden" name="src" value={src} />}
         <FormField
             control={form.control}
             name="name"

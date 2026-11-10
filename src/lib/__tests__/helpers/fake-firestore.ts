@@ -161,7 +161,8 @@ class FakeQuery {
   private matches(): Array<[string, Data]> {
     let rows = this.db.rawDocs(this.name).filter(([, d]) =>
       this.filters.every(([f, op, v]) => {
-        const x = d[f];
+        // Dotted paths reach into maps, as Firestore's do ("extra.src").
+        const x = f.split('.').reduce<unknown>((o, k) => (o && typeof o === 'object' ? (o as Data)[k] : undefined), d) as Data[string];
         switch (op) {
           case '==':
             return x === v;

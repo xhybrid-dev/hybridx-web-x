@@ -14,6 +14,7 @@ import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guid
 import { parseInline } from '@/lib/guides/inline';
 import { HARVEST_EVERY_MS, getHarvest, getHarvestState, listMetrics } from '@/lib/guides/harvest/run';
 import { asQuestion } from '@/lib/guides/harvest/analyse';
+import { FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
 import { engineOn, getRun } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
@@ -56,7 +57,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Guides', robots: { index: false, follow: false } };
 
 const BASE = '/admin/guides';
-const RESERVED = new Set(['new', 'settings', 'topics', 'search']);
+const RESERVED = new Set(['new', 'settings', 'topics', 'search', 'performance']);
 
 const STATUS_WORDS: Record<GuideStatus, string> = {
   drafting: 'Being drafted',
@@ -100,6 +101,7 @@ export default async function GuidesAdmin({
   else if (view.length === 1 && view[0] === 'settings') body = <Settings done={one(search.done)} error={one(search.error)} />;
   else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} />;
   else if (view.length === 1 && view[0] === 'search') body = <SearchView />;
+  else if (view.length === 1 && view[0] === 'performance') body = <Performance />;
   else if (view.length === 1 && !RESERVED.has(view[0])) body = await Review({ slug: view[0], search });
   else if (view.length === 2 && view[1] === 'edit') body = await Edit({ slug: view[0] });
   else notFound();
@@ -125,6 +127,9 @@ export default async function GuidesAdmin({
             </Link>
             <Link href={`${BASE}/search`} className="underline underline-offset-4">
               Search
+            </Link>
+            <Link href={`${BASE}/performance`} className="underline underline-offset-4">
+              Performance
             </Link>
             <Link href={`${BASE}/new`} className="underline underline-offset-4">
               New article
@@ -997,6 +1002,89 @@ async function SearchView() {
           <p className="text-sm text-muted-foreground">Nothing published yet.</p>
         )}
       </section>
+    </div>
+  );
+}
+
+/* ── Performance ─────────────────────────────────────────────────────────── */
+
+async function Performance() {
+  const [guides, metrics, clicks, leads] = await Promise.all([listAllGuides(), listMetrics(), listClicks(), leadsByGuide()]);
+  const rows = performanceRows(guides, metrics, clicks, leads, new Date());
+  const flagged = rows.filter((r) => r.flags.length);
+  const cell = 'px-3 py-2 text-left align-top';
+  const n = (v: number | undefined) => (v === undefined ? '–' : v);
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-1">
+        <h2 className="font-headline text-xl font-bold">Performance</h2>
+        <p className="text-sm text-muted-foreground">
+          Search numbers are the 28 days of the latest weekly harvest. Tool and call-to-action clicks are counted on the server for every
+          reader, with nothing stored about them. Leads are free-plan sign-ups that came through an article&rsquo;s call to action.
+        </p>
+      </div>
+
+      {flagged.length > 0 && (
+        <section className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
+          <h3 className="font-headline font-bold">Needs a look ({flagged.length})</h3>
+          <ul className="space-y-2">
+            {flagged.map((r) => (
+              <li key={r.slug}>
+                <Link className="font-semibold underline" href={`${BASE}/${r.slug}`}>
+                  {r.title}
+                </Link>
+                {r.flags.map((f) => (
+                  <p key={f} className="text-muted-foreground">
+                    {FLAG_WORDS[f]}
+                  </p>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {rows.length ? (
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead className="bg-secondary/50">
+              <tr>
+                <th className={cell}>Article</th>
+                <th className={cell}>Days live</th>
+                <th className={cell}>Indexed</th>
+                <th className={cell}>Clicks</th>
+                <th className={cell}>Impressions</th>
+                <th className={cell}>Position</th>
+                <th className={cell}>Tool clicks</th>
+                <th className={cell}>CTA clicks</th>
+                <th className={cell}>Leads</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rows.map((r) => (
+                <tr key={r.slug} className={r.flags.length ? 'bg-accent/10' : ''}>
+                  <td className={cell}>
+                    <Link className="underline" href={`${BASE}/${r.slug}`}>
+                      {r.title}
+                    </Link>
+                  </td>
+                  <td className={cell}>{r.days}</td>
+                  <td className={cell}>{r.indexed === 'yes' ? 'Yes' : r.indexed === 'no' ? (r.coverage ?? 'No') : 'Not checked yet'}</td>
+                  <td className={cell}>{n(r.clicks)}</td>
+                  <td className={cell}>{n(r.impressions)}</td>
+                  <td className={cell}>{n(r.position)}</td>
+                  <td className={cell}>{r.toolClicks}</td>
+                  <td className={cell}>{r.ctaClicks}</td>
+                  <td className={cell}>{r.leads}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">Nothing published yet.</p>
+      )}
     </div>
   );
 }

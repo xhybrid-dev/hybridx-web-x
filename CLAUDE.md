@@ -175,6 +175,10 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
     questions and topics he moved up, then search demand by score, then the
     rest, then topics he moved down. Keep his moves ahead of the data.
+- **Article performance** (plan step 7, `/admin/guides/performance`): an
+  article's tool and call-to-action links go through `/api/guides/out`, which
+  counts a total per article and redirects to a destination looked up by id.
+  Keep it that way: never redirect to a URL taken from the query string.
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back

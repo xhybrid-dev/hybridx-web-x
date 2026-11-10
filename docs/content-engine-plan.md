@@ -512,14 +512,24 @@ actually search for decides what gets written next.
   - within the hour, `/admin/guides/search` shows the first harvest; the
     summary email follows a couple of ticks later.
 
-### Step 7: performance page (S)
+### Step 7: performance page (S). Built
 
-- **Builds:** `/admin/guides/performance`, one row per article (indexed, clicks,
-  impressions, position, tool uses, CTA clicks, leads), with flags for "not
-  indexed after 30 days" and "too few impressions after 90 days".
-- **Tests:** the flag rules.
-- **Before it ships:** the three-month baseline export for existing pages. It
-  comes from step 6's data, or a manual export from Search Console beforehand.
+- **`/admin/guides/performance`:** one row per published article: days live,
+  indexed, clicks, impressions, position (the latest weekly harvest), tool
+  clicks, call-to-action clicks and leads.
+- **Flags:** not indexed 30 days after publishing; under 100 impressions in
+  the 28-day window 90 days after publishing. Each says what to do.
+- **Clicks** go through `/api/guides/out`, which adds one to a total per
+  article (`guideClicks`) and sends the reader on. No cookie, no identifier,
+  nothing about the visitor, so it counts every reader, not only those who
+  accepted analytics. The destination comes from the registry by id, never
+  from the URL, so it is not an open redirect. Bots are not counted.
+- **Leads:** a call to action carries `src=guide-<slug>`; the free-plan form
+  now records `src` on the lead, so sign-ups are credited to the article.
+  App trials happen on app.hybridx.club and are not counted here (step 11).
+- **Tests:** `guides-performance.test.ts`.
+- **Baseline:** the search page's CSV export from step 6 is the "before"
+  for existing pages; download one now and keep it.
 
 ### Step 8: strength and engine test (M)
 

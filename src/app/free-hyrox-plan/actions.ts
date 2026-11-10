@@ -21,6 +21,11 @@ export type SignUpFormState = {
   leadSaved?: boolean;
 };
 
+function srcOf(formData: FormData): string | null {
+  const src = String(formData.get('src') ?? '').trim();
+  return /^[a-z0-9][a-z0-9_-]{0,90}$/i.test(src) ? src.toLowerCase() : null;
+}
+
 export async function signUpForTrainingPlan(
   prevState: SignUpFormState,
   formData: FormData
@@ -51,7 +56,9 @@ export async function signUpForTrainingPlan(
       source: 'free_hyrox_plan',
       email,
       name,
-      extra: { event, eventDate },
+      // Where they came from, when the link said (guide-<slug> from an article):
+      // bounded and pattern-checked, since anyone can put anything in a URL.
+      extra: { event, eventDate, ...(srcOf(formData) ? { src: srcOf(formData) } : {}) },
       ip,
       userAgent,
     });

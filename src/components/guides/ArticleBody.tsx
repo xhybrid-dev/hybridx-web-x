@@ -144,7 +144,10 @@ function BlockView({ slug, block, articles }: { slug: string; block: Block; arti
       const tool = TOOLS[block.tool];
       return (
         <TrackedLink
-          href={tool.route}
+          // Through the click counter (step 7), which sends the reader on to the tool.
+          href={`/api/guides/out?g=${slug}&tool=${block.tool}`}
+          prefetch={false}
+          rel="nofollow"
           event="guide_tool_click"
           eventParams={{ guide: slug, tool: block.tool }}
           className="group flex items-center gap-4 rounded-xl border-2 border-accent bg-card p-5 transition-colors hover:bg-accent/10"
@@ -168,7 +171,11 @@ function BlockView({ slug, block, articles }: { slug: string; block: Block; arti
           <h2 className="font-headline text-2xl font-bold">{cta.headline}</h2>
           <p className="mt-2 max-w-xl font-body text-white/80">{cta.body}</p>
           <TrackedLink
-            href={cta.href}
+            // Through the click counter (step 7), which sends the reader on with
+            // src=guide-<slug>, so a lead from it is credited to this article.
+            href={`/api/guides/out?g=${slug}&cta=${block.variant}`}
+            prefetch={false}
+            rel="nofollow"
             event="guide_cta_click"
             eventParams={{ guide: slug, variant: block.variant }}
             className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-headline font-bold text-black transition-colors hover:bg-accent/90"
