@@ -290,10 +290,16 @@ and their order can change.
       claims; a race load, wall ball weight or target that disagrees with the
       registry (training loads are left alone); relay loads; product claims
       (price, trial, store apps, partnership, guarantees, user counts, "most
-      affordable"); a duplicate title;
-    - **warnings for you:** US spelling, em dashes, more than four sections, a
-      long title, no link to the topic page, no CTA, heavy overlap with a
-      published article.
+      affordable"); em dashes and spaced en dashes; a duplicate title;
+    - **warnings for you:** US spelling (including -ize endings, "program" and
+      "fiber"), more than four sections, a long title, no link to the topic
+      page, no CTA, heavy overlap with a published article;
+    - **how words are matched** (Jon's review, 10 November 2026): banned
+      phrases, medical words and spellings match as whole words, with curly
+      apostrophes read as straight, so "secure" is not "cure" and "it’s not
+      just about" is caught. Two deliberate gaps: "tire" is correct British
+      English for getting tired, and "meter" is only wrong after a number
+      ("400 meters"), since a power meter is a meter in Britain too.
   - **`engine/`:**
     - `prompts.ts`: each brief carries only that topic's facts (no HYROX facts
       for ATHX), the allowed links, tools and CTAs, the published titles, and
