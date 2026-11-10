@@ -181,3 +181,8 @@ is the method and its references. The apps live in `xhybrid-dev/una-hyrox`.
 - Watch screens in `public/una/screens/` are the apps' store previews
   (`<app>/Resources/previews/` in the watch repo); icons are the 1024 px brand
   masters, resized.
+  - **Two are retouched:** X Trail's `map.png` and `elevation.png`. The
+    simulator's test route is a straight double line and a sine wave, which
+    did not look like a trail (Jon, 10 November 2026). `scripts/una-trail-screens.py
+    <previews dir> public/una/screens/trail` redraws only the route and the
+    profile, in the watch's own colours; every other pixel is the app's.
