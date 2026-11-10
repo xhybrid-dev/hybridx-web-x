@@ -17,7 +17,7 @@ vi.mock('next/headers', () => ({ headers: async () => new Headers(requestHeaders
 let publishedGuides: () => Promise<Array<{ slug: string; updatedAt: string }>> = async () => [];
 vi.mock('@/lib/guides/store', () => ({ listPublishedGuides: () => publishedGuides() }));
 
-const { default: sitemap } = await import('../../app/sitemap');
+const { default: sitemap } = await import('../sitemap');
 
 const APP_DIR = path.resolve(__dirname, '../../app');
 const BASE = 'https://hybridx.club';
@@ -192,5 +192,17 @@ describe('the subdomain sitemaps', () => {
       requestHeaders = host ? { 'x-forwarded-host': host } : {};
       expect((await sitemap()).length, host || '(no host)').toBeGreaterThan(20);
     }
+  });
+});
+
+describe('the /sitemap.xml route', () => {
+  it('serves XML the CDN may keep for an hour', async () => {
+    const { GET } = await import('../../app/sitemap.xml/route');
+    const res = await GET();
+    expect(res.headers.get('content-type')).toContain('application/xml');
+    expect(res.headers.get('cache-control')).toContain('s-maxage=3600');
+    const xml = await res.text();
+    expect(xml).toMatch(/^<\?xml version="1.0"/);
+    expect(xml).toContain('<loc>https://hybridx.club</loc>');
   });
 });

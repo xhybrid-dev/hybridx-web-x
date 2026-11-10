@@ -102,7 +102,7 @@ AI-drafted, reviewed and approved by Jon before publishing.
 
 - **Articles live in Firestore** (`guides`, with every revision copied to
   `guideRevisions`), never in the repo, so publishing needs no build. They are
-  read at request time only: the guide pages and `sitemap.ts` are
+  read at request time only: the guide pages and the sitemap (`src/lib/sitemap.ts`, served with CDN caching by `src/app/sitemap.xml/route.ts`) are
   `force-dynamic`, and nothing may read Firestore during a build. The build has
   no credentials, and the sitemap once tried to while being prerendered.
 - **An article is typed blocks** (`src/lib/guides/types.ts`), never HTML or MDX.

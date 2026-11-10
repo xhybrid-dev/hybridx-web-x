@@ -30,11 +30,9 @@ import { listPublishedGuides } from '@/lib/guides/store';
  * the articles rather than not at all.
  */
 
-// Answered per request, never while the site is built: the articles come from
-// Firestore, and the build has no credentials for it. Without this, the build
-// runs the function once to see whether it can be prerendered, because
-// requestedHost() below catches the headers() error that would otherwise tell it.
-export const dynamic = 'force-dynamic';
+// Served by src/app/sitemap.xml/route.ts, per request and never while the site
+// is built: the articles come from Firestore, which the build cannot read, and
+// the answer depends on the host asked. That route sets the CDN caching.
 
 /** Subdomain label to the address its page declares as canonical. */
 const APP_SUBDOMAINS: Record<string, string> = {
