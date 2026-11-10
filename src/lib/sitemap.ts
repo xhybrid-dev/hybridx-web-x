@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { SHOP_EVENTS } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
 import { listPublishedGuides } from '@/lib/guides/store';
+import { PAGE_UPDATED } from '@/lib/page-dates';
 
 /*
  * The sitemap Google Search Console reads at https://hybridx.club/sitemap.xml
@@ -23,11 +24,11 @@ import { listPublishedGuides } from '@/lib/guides/store';
  * nor deliberately left out.
  *
  * Articles (/guides/<slug>) come from Firestore, published ones only, each with
- * the date it last changed. The hand-built pages carry no lastModified at all:
- * they used to say "now" on every fetch, and Google ignores a lastmod that is
- * never true, for the whole sitemap. Leaving it off keeps the articles' real
- * dates believable. If Firestore cannot be read, the sitemap is served without
- * the articles rather than not at all.
+ * the date it last changed. The hand-built pages carry a fixed date each, from
+ * src/lib/page-dates.ts, never "now": they once said "now" on every fetch, and
+ * Google ignores a lastmod that is never true, for the whole sitemap. A test
+ * keeps each date at or after the page file's last commit. If Firestore cannot
+ * be read, the sitemap is served without the articles rather than not at all.
  */
 
 // Served by src/app/sitemap.xml/route.ts, per request and never while the site
@@ -246,8 +247,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/guides`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/guides/how-we-write`, changeFrequency: 'yearly', priority: 0.3 },
   );
+  let newestGuide: string | undefined;
   try {
     for (const guide of await listPublishedGuides()) {
+      if (!newestGuide || guide.updatedAt > newestGuide) newestGuide = guide.updatedAt;
       routes.push({
         url: `${baseUrl}/guides/${guide.slug}`,
         lastModified: guide.updatedAt,
@@ -270,5 +273,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  return routes;
+  // Hand-built pages carry the date they last changed (src/lib/page-dates.ts);
+  // the hub changes whenever an article does.
+  return routes.map((r) => {
+    if (r.lastModified) return r;
+    const path = r.url.slice(baseUrl.length) || '/';
+    const dates = [PAGE_UPDATED[path], path === '/guides' ? newestGuide : undefined].filter((d): d is string => !!d).sort();
+    return dates.length ? { ...r, lastModified: dates[dates.length - 1] } : r;
+  });
 }

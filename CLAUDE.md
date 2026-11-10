@@ -100,6 +100,7 @@ The plan, the decisions behind it and the build order are in
 `docs/content-engine-plan.md`: three short, one-point articles a week,
 AI-drafted, reviewed and approved by Jon before publishing.
 
+- **Sitemap dates:** hand-built pages take `<lastmod>` from `src/lib/page-dates.ts`. Edit a page, bump its date in the same commit; `sitemap.test.ts` fails otherwise.
 - **Articles live in Firestore** (`guides`, with every revision copied to
   `guideRevisions`), never in the repo, so publishing needs no build. They are
   read at request time only: the guide pages and the sitemap (`src/lib/sitemap.ts`, served with CDN caching by `src/app/sitemap.xml/route.ts`) are
