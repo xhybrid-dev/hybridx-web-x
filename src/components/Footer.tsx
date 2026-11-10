@@ -7,6 +7,7 @@ const footerColumns = [
     heading: 'Training',
     links: [
       { label: 'Free 12-Week Hyrox Plan', href: '/free-hyrox-plan' },
+      { label: 'All Guides', href: '/guides' },
       { label: 'How to Train for Hyrox', href: '/how-to-train-for-hyrox' },
       { label: '12-Week Plan Structure', href: '/hyrox-training-plan' },
       { label: 'Hybrid Training Program', href: '/hybrid-training-program' },

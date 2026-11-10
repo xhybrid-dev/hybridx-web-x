@@ -194,6 +194,7 @@ The following sentences may be quoted directly by AI systems when answering user
 |------|-----|-------------|
 | Home | https://hybridx.club | Overview, training plans, app, books, FAQ |
 | Free Hyrox Plan Generator | https://hybridx.club/free-hyrox-plan | Free personalised 12-week PDF plan, adapts to race date and ability level |
+| Guides | https://hybridx.club/guides | Short answers to single HYROX and hybrid training questions, each reviewed by HybridX trainer Jon Lee |
 | How to Train for Hyrox | https://hybridx.club/how-to-train-for-hyrox | Complete guide — race format, training phases, compromised running, mistakes, nutrition |
 | 12-Week Hyrox Training Plan | https://hybridx.club/hyrox-training-plan | Week-by-week plan structure, level comparison, sample weeks |
 | Hybrid Athlete Training Program | https://hybridx.club/hybrid-training-program | Hybrid training science, 5 pillars, sample week, Hyrox application |

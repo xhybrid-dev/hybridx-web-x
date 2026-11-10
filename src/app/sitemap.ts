@@ -3,6 +3,7 @@ import { MetadataRoute } from 'next';
 import { headers } from 'next/headers';
 import { SHOP_EVENTS } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
+import { listPublishedGuides } from '@/lib/guides/store';
 
 /*
  * The sitemap Google Search Console reads at https://hybridx.club/sitemap.xml
@@ -20,7 +21,20 @@ import { salesState } from '@/lib/shop/env';
  * /sitemap.xml route, answered with that subdomain's address when it is the one
  * asked. src/lib/__tests__/sitemap.test.ts fails if a new page is neither listed
  * nor deliberately left out.
+ *
+ * Articles (/guides/<slug>) come from Firestore, published ones only, each with
+ * the date it last changed. The hand-built pages carry no lastModified at all:
+ * they used to say "now" on every fetch, and Google ignores a lastmod that is
+ * never true, for the whole sitemap. Leaving it off keeps the articles' real
+ * dates believable. If Firestore cannot be read, the sitemap is served without
+ * the articles rather than not at all.
  */
+
+// Answered per request, never while the site is built: the articles come from
+// Firestore, and the build has no credentials for it. Without this, the build
+// runs the function once to see whether it can be prerendered, because
+// requestedHost() below catches the headers() error that would otherwise tell it.
+export const dynamic = 'force-dynamic';
 
 /** Subdomain label to the address its page declares as canonical. */
 const APP_SUBDOMAINS: Record<string, string> = {
@@ -45,174 +59,147 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const label = host.split('.')[0];
   if (host.includes('.') && Object.hasOwn(APP_SUBDOMAINS, label)) {
     return [
-      { url: APP_SUBDOMAINS[label], lastModified: new Date(), changeFrequency: 'monthly', priority: 1.0 },
+      { url: APP_SUBDOMAINS[label], changeFrequency: 'monthly', priority: 1.0 },
     ];
   }
 
   const baseUrl = 'https://hybridx.club';
 
   // Define all static routes
-  const routes = [
+  const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 1.0,
     },
     {
       url: `${baseUrl}/calculators`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/calculators/running`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/calculators/strength`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/calculators/general-health`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/calculators/body-fat-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/calorie-macronutrient-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/heart-rate-zone-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/one-rep-max-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/percentage-based-weight-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/powerlifting-score-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/pace-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/race-time-predictor`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/split-time-calculator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/calculators/garmin-tcx-generator`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/free-hyrox-plan`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/build-a-bigger-engine`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/app`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/store`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/books`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/vdot`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/12-week-running-hyrox`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
     // ── AI-answerable guide pages ─────────────────────────────────────────
     {
       url: `${baseUrl}/how-to-train-for-hyrox`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.95,
     },
     {
       url: `${baseUrl}/hyrox-training-plan`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.95,
     },
     {
       url: `${baseUrl}/hybrid-training-program`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/hyrox-rule-changes-2026`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.95,
     },
@@ -220,7 +207,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // The ATHX 2027 pre-launch funnel. Its /confirm page is deliberately
       // absent: it is a per-address utility page and carries noindex.
       url: `${baseUrl}/athx-2027`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
@@ -228,7 +214,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // X Weigh-in for UNA Watch. Unlike /race, /streak and /trail it has no
       // subdomain yet, so its canonical is this address.
       url: `${baseUrl}/weigh-in`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
@@ -236,7 +221,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Trail Quest for UNA Watch. As /weigh-in, no subdomain yet, so its
       // canonical is this address.
       url: `${baseUrl}/trail-quest`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
@@ -244,23 +228,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // The X family: the linked HybridX apps for UNA Watch, and the method
       // behind their numbers.
       url: `${baseUrl}/una`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.85,
     },
     {
       url: `${baseUrl}/una/nerdy-bits`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/shop-terms`,
-      lastModified: new Date(),
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
   ];
+
+  // The guides hub, how they are written, and every published article.
+  routes.push(
+    { url: `${baseUrl}/guides`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/guides/how-we-write`, changeFrequency: 'yearly', priority: 0.3 },
+  );
+  try {
+    for (const guide of await listPublishedGuides()) {
+      routes.push({
+        url: `${baseUrl}/guides/${guide.slug}`,
+        lastModified: guide.updatedAt,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
+    }
+  } catch (error) {
+    console.error('[sitemap] articles left out, Firestore unavailable:', error instanceof Error ? error.message : error);
+  }
 
   // Shop pages, while their sales are open. Thanks and download pages are
   // per-order and never listed.
@@ -268,7 +267,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (salesState(event) !== 'open') continue;
     routes.push({
       url: `${baseUrl}${event.path}`,
-      lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     });

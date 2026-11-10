@@ -118,42 +118,83 @@ and their order can change.
 - **Check on the live site:** `/llms.txt` says 14 days, and the homepage badge
   reads "Over 2,000 athletes have trained with HybridX plans".
 
-### Step 2: articles on the site (M)
+### Step 2: articles on the site (M). Built
 
 - **Builds:**
-  - `src/lib/guides/types.ts`: the block schema (zod, section 6.4);
-  - `src/lib/guides/store.ts`: Firestore reads and writes, with revisions;
-  - `src/lib/guides/topics.ts`: every indexable page with its pillar and the
-    queries it owns;
-  - `src/lib/guides/related.ts`;
-  - `src/components/guides/`: the block components, `RelatedGuides`, and a
-    byline reading "By HybridX · Updated <date>" (JSON-LD author is the
-    `Organization`, from `ARTICLE_AUTHOR`);
-  - a short "How our guides are written" page linked from the byline:
-    - who writes and checks the articles, and how;
-    - the facts registry and the review before publishing.
+  - `src/lib/guides/types.ts`: the block schema (zod, section 6.4). It refuses a
+    workout without both options and their RPE and rest, more than three FAQs,
+    table rows that don't match the header, an unknown tool or CTA, and any link
+    outside the topic map;
+  - `src/lib/guides/inline.ts`: the only formatting text may carry (bold,
+    italic, links), parsed into tokens so article text is never HTML;
+  - `src/lib/guides/store.ts`: Firestore reads and writes. Each save is
+    numbered in a transaction and copied to `guideRevisions`. A five-minute
+    in-memory cache serves the public list, and a malformed document is skipped
+    and logged, never served;
+  - `src/lib/guides/topics.ts`: the pillars, every page an article may link to,
+    and the tools it may point to. Owned queries per page come at step 6;
+  - `src/lib/guides/related.ts`, `ctas.ts` (the two calls to action, worded
+    from the facts registry) and `schema.ts`. The JSON-LD has the Article by
+    HybridX, a breadcrumb, and a WebPage with Jon Lee as `reviewedBy`. ATHX
+    articles never mention HYROX in their structured data;
+  - `src/lib/guides/fixtures.ts`: two sample articles in the short format.
+    `GUIDES_FIXTURES=1 npm run dev` previews the pages with them (ignored in
+    production), and step 4 will show them to the model as the worked example;
+  - `src/components/guides/`: the block components, the byline ("By HybridX ·
+    Reviewed by Jon Lee, HybridX trainer · Updated <date>"), and the
+    `guide_engaged` event;
+  - **pages:**
+    - `/guides`, the hub: each pillar's hand-built guides, then its
+      articles;
+    - `/guides/[slug]` and its OG image;
+    - `/guides/how-we-write`: who reviews the articles, that they are drafted
+      with AI from the HybridX method, how facts are checked, and how to report
+      a correction;
+  - **`sitemap.ts`:** published articles with their real dates. The static pages
+    no longer carry a fake "now", and the route is now `force-dynamic` so the
+    build never reaches for Firestore;
+  - **navigation:** "All Guides" in the header's Guides menu and in the footer,
+    and the hub in `llms.txt`;
+  - **GA4 events:** `guide_engaged` (half the article read), `guide_tool_click`
+    and `guide_cta_click`.
+- **Changed from the original plan:**
+  - **Revisions** live in a top-level `guideRevisions` collection, not a
+    subcollection: same data, and testable with the existing in-memory
+    Firestore.
+  - **No Firestore rules change** was needed. The existing rule already denies
+    all client access to every collection.
+  - **A retired article** without a redirect returns 404, not 410.
+  - **The tool block** renders as a link card to the tool until step 5 makes
+    tools embeddable.
+  - **The pillar pages don't list their articles yet**; the hub does. Adding
+    "Questions answered" to `/how-to-train-for-hyrox` and the others would turn
+    those static pages dynamic. To decide at step 4, once articles exist.
+- **Tests:** `guides.test.ts` (23) and four new sitemap tests:
+  - inline parsing, HTML treated as text, and the link allowlist (including
+    `javascript:` and protocol-relative links);
+  - every schema rule above;
+  - revision numbering;
+  - drafts never served;
+  - a malformed document skipped;
+  - related-article order;
+  - the structured data;
+  - every linkable page present in the sitemap;
+  - the sitemap still answering, without articles, when Firestore fails.
+- **Checked by hand:**
+  - screenshots at phone and desktop widths, with no horizontal scroll;
+  - a three-column table that fits a phone;
+  - one title suffix per page;
+  - no hydration errors in a production build;
+  - no Google credential lookups during the build.
+- **You, before merge:** nothing.
+- **Check on the live site:**
+  - `/guides` lists the hand-built guides under five headings;
+  - `/guides/how-we-write` reads as you want it to;
+  - "All Guides" appears in the header and footer;
+  - `/sitemap.xml` still lists every page.
 
-    With a brand rather than a person as the author, this is what tells readers
-    and search engines who stands behind the advice;
-  - `src/app/guides/page.tsx` (the hub), `src/app/guides/[slug]/page.tsx`, and
-    its `opengraph-image.tsx`;
-  - `sitemap.ts`: published articles with their real `lastModified`, and
-    static pages no longer stamped `new Date()`;
-  - "Guides" in the header and footer, and the hub in `llms.txt`;
-  - `firestore.rules` and `firestore.indexes.json`, server-only for every new
-    collection;
-  - GA4 events through the existing `trackEvent`: `guide_engaged` (50%
-    scroll), `calculator_used` and `cta_click`.
-- **Tests:**
-  - the schema rejects bad blocks;
-  - the renderer never outputs raw HTML;
-  - `sitemap.test.ts` knows the dynamic route;
-  - unpublished articles return 404.
-- **You, before merge:**
-  `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub`
-  (this repo deploys rules by hand).
-- **Check on the live site:** a test article seeded by a script shows at
-  `/guides/<slug>` and in `/sitemap.xml`. Then we retire it.
+  Real articles arrive from step 3, when you can write one in admin, and from
+  step 4 by email.
 
 ### Step 3: the review page, publishing slots and longer sign-in (M)
 
@@ -353,7 +394,8 @@ All are server-only: the client has no access.
 
 | Collection | Holds |
 |---|---|
-| `guides/{slug}` | Lifecycle: `status` (`drafting`, `awaiting_review`, `revising`, `approved`, `scheduled`, `published`, `retired`), `publishAt`, `redirectTo`. Content: `point`, `blocks`, `meta` (title, description, query group, pillar, proof element, tool, CTA). Provenance: `factsUsed`, `sources`, `author`, `reviewedAt`, `publishedAt`, `revision`. Subcollections `revisions/{n}` and `comments/{id}` |
+| `guides/{slug}` | Lifecycle: `status` (`drafting`, `awaiting_review`, `revising`, `approved`, `scheduled`, `published`, `retired`), `publishAt`, `redirectTo`. Content: `point`, `blocks`, `meta` (title, description, query group, pillar, proof element, tool, CTA). Provenance: `factsUsed`, `sources`, `author`, `reviewedAt`, `publishedAt`, `revision` |
+| `guideRevisions/{slug}__{n}` | Every saved revision of every article (step 2). Comments go in `guideComments` (step 3) |
 | `guideRuns/{id}` | Stage, inputs, model, tokens, check results, error |
 | `guideTopics/{id}` | Candidate, query group, Search Console numbers, volume, kind, the page currently ranking, score, status, rejection reason |
 | `guideHarvests/{date}` | Each weekly harvest |
@@ -608,7 +650,7 @@ reminder; after 14 days it is archived, and you can revive it.
 - **Trust signals:** "By HybridX · Updated <date>", linked to "How our guides
   are written".
 - **OG image:** per article, kept out of `public/` (commit `b982d11`).
-- **Retiring an article:** a permanent redirect to `redirectTo`, otherwise 410.
+- **Retiring an article:** a permanent redirect to `redirectTo`, otherwise 404.
 
 ---
 
@@ -844,7 +886,7 @@ weekly summary email cover the questions the proposal wanted it for.
 | Step | Who | What |
 |---|---|---|
 | 1 | You | Check the four singles rows in `DIVISIONS` against the official 2026/27 Singles rulebook |
-| 2 | You | `firebase deploy --only firestore:rules,firestore:indexes --project hybridx-hub` |
+| 2 | You | Nothing: the existing deny-all Firestore rule already covers the new collections |
 | 3 | You | D4; grant `roles/iam.serviceAccountTokenCreator` to the backend service account on itself |
 | 4 | You | D5 and D6; create and grant `ANTHROPIC_API_KEY`; set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `on` when ready |
 | 6 | You | Enable the Search Console API in `hybridx-hub`; add the service account to `sc-domain:hybridx.club` as Restricted; confirm the sitemap was submitted once |

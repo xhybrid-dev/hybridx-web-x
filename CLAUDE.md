@@ -94,6 +94,35 @@ the funnel in the prompt narrows the journey to that route.
 `scripts/seed-journeys.ts` exists for the drips that predate the console; a new
 campaign does not need it.
 
+## Guides (`/guides`) and the facts registry
+
+The plan, the decisions behind it and the build order are in
+`docs/content-engine-plan.md`: three short, one-point articles a week,
+AI-drafted, reviewed and approved by Jon before publishing.
+
+- **Articles live in Firestore** (`guides`, with every revision copied to
+  `guideRevisions`), never in the repo, so publishing needs no build. They are
+  read at request time only: the guide pages and `sitemap.ts` are
+  `force-dynamic`, and nothing may read Firestore during a build. The build has
+  no credentials, and the sitemap once tried to while being prerendered.
+- **An article is typed blocks** (`src/lib/guides/types.ts`), never HTML or MDX.
+  Text carries only bold, italic and links, and links only to pages in
+  `src/lib/guides/topics.ts`. To make a new page linkable, add it there; the
+  test fails if it is not also in the sitemap.
+- **Preview without Firestore:** `GUIDES_FIXTURES=1 npm run dev` serves the two
+  sample articles in `src/lib/guides/fixtures.ts`. The dev server can report a
+  hydration error on the static `/guides/how-we-write`; a production build does
+  not.
+- **Facts come from `src/lib/facts/`:** HYROX loads (confirmed against the
+  2026/27 rulebook by Jon), price, the 14-day trial, the athlete count and its
+  wording, and the `NOT_CLAIMED` list. `facts.test.ts` scans the whole site's
+  copy and fails on a trial length, a monthly price or an athlete count that
+  disagrees, on "most affordable" (the line is "very affordable"), and on the
+  2,000 described as app users.
+- **Byline:** by HybridX, reviewed by Jon Lee, HybridX trainer.
+  `/guides/how-we-write` describes the process, so change it whenever the
+  process changes.
+
 ## The shop (paid PDFs)
 
 `/hyrox-glasgow-2027` sells PDFs through Stripe Checkout; everything is in
