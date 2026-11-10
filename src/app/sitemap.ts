@@ -33,8 +33,16 @@ import { listPublishedGuides } from '@/lib/guides/store';
 // Answered per request, never while the site is built: the articles come from
 // Firestore, and the build has no credentials for it. Without this, the build
 // runs the function once to see whether it can be prerendered, because
-// requestedHost() below catches the headers() error that would otherwise tell it.
-export const dynamic = 'force-dynamic';
+
+// Force static generation at build time (or revalidate once a day)
+export const dynamic = 'force-static'
+export const revalidate = 86400 // Cache for 24 hours (in seconds)
+
+import { MetadataRoute } from 'next'
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  // ... your existing sitemap array
+}
 
 /** Subdomain label to the address its page declares as canonical. */
 const APP_SUBDOMAINS: Record<string, string> = {
