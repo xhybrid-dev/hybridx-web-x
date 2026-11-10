@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SAMPLE_GUIDES } from '../guides/fixtures';
 import { checkDraft, similarity, textUnits } from '../guides/checks';
+import { BIBLE, findWordViolations } from '../guides/bible';
 import type { Block, Guide } from '../guides/types';
 
 /*
@@ -105,13 +106,54 @@ describe('wording', () => {
     expect(codes(checkDraft(withLine('This will cure your knee pain.')))).toContain('medical');
   });
 
-  it('flags US spelling and em dashes for Jon', () => {
-    const r = checkDraft(withLine('Run 400 meters at your favorite pace — easy.'));
-    expect(codes(r, 'warnings')).toEqual(expect.arrayContaining(['us-spelling', 'em-dash']));
+  it('matches whole words, so "secure" is not "cure", and catches "cure." at a sentence end', () => {
+    expect(codes(checkDraft(withLine('Keep a secure grip and a secured core.')))).not.toContain('medical');
+    expect(codes(checkDraft(withLine('Rest is not a cure.')))).toContain('medical');
+  });
+
+  it('catches the filler phrases, with straight or curly apostrophes', () => {
+    for (const line of ['It’s not just about the sled.', "Here's the thing about wall balls.", 'When it comes to grip, train it.', 'Elevate your engine.']) {
+      expect(codes(checkDraft(withLine(line))), line).toContain('banned-phrase');
+    }
+  });
+
+  it('refuses em dashes and spaced en dashes, but not a range', () => {
+    expect(codes(checkDraft(withLine('Run easy — then push.')))).toContain('dash');
+    expect(codes(checkDraft(withLine('Run easy – then push.')))).toContain('dash');
+    expect(codes(checkDraft(withLine('Keep them 6–8 hours apart.')))).not.toContain('dash');
+  });
+
+  it('flags US spelling for Jon, as whole words', () => {
+    const r = checkDraft(withLine('Run 400 meters at your favorite pace, then optimize the program.'));
     expect(r.warnings.filter((w) => w.code === 'us-spelling').map((w) => w.message)).toEqual([
       'UK spelling: "favourite", not "favorite".',
+      'UK spelling: "programme", not "program".',
+      'UK spelling: "optimise", not "optimize".',
       'UK spelling: "metres", not "meters".',
     ]);
+  });
+
+  it('leaves correct British words alone: parameter, entire, tire, power meter', () => {
+    const r = checkDraft(withLine('Check every parameter. The entire set will tire you, so watch your power meter and retire tired kit.'));
+    expect(codes(r, 'warnings')).not.toContain('us-spelling');
+  });
+});
+
+describe('the whole-word matcher', () => {
+  it('matches words and phrases whole, and punctuation as written', () => {
+    expect(findWordViolations('Secure the bag.', ['cure'])).toEqual([]);
+    expect(findWordViolations('No cure.', ['cure'])).toEqual(['cure']);
+    expect(findWordViolations('It’s not just about pace', ["it's not just about"])).toEqual(["it's not just about"]);
+    expect(findWordViolations('6–8 hours', [' – '])).toEqual([]);
+    expect(findWordViolations('easy – hard', [' – '])).toEqual([' – ']);
+  });
+});
+
+describe('the coaching bible', () => {
+  it('keeps ATHX apart from HYROX, and says where headings go', () => {
+    expect(BIBLE).toContain('ATHX is not HYROX');
+    expect(BIBLE).toContain('Section headings are heading blocks of their own');
+    expect(BIBLE).toContain('An unspaced en dash in a range is fine');
   });
 });
 

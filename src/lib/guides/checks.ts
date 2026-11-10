@@ -11,7 +11,7 @@
 // these are the rules about content.
 
 import { APP, ATHLETES, DIVISIONS, UNCOVERED_FORMATS } from '@/lib/facts';
-import { BANNED_PHRASES, MEDICAL_PHRASES, US_SPELLINGS } from './bible';
+import { BANNED_DASHES, BANNED_PHRASES, MEDICAL_PHRASES, UNITS_AFTER_A_NUMBER, US_SPELLINGS, findWordViolations } from './bible';
 import { parseInline, plainText } from './inline';
 import { pillar as pillarOf } from './topics';
 import type { Block, Guide } from './types';
@@ -152,14 +152,17 @@ function checkClaims(units: { block: number; text: string }[]): Issue[] {
 function checkWording(units: { block: number; text: string }[]): { errors: Issue[]; warnings: Issue[] } {
   const errors: Issue[] = [];
   const warnings: Issue[] = [];
+  const usSpellings = Object.keys(US_SPELLINGS);
   for (const { block, text } of units) {
-    const lower = text.toLowerCase();
-    for (const phrase of BANNED_PHRASES) if (lower.includes(phrase)) errors.push({ code: 'banned-phrase', block, message: `Banned phrase: "${phrase}".` });
-    for (const phrase of MEDICAL_PHRASES) if (lower.includes(phrase)) errors.push({ code: 'medical', block, message: `Medical territory: "${phrase.trim()}". Coaching only.` });
-    for (const [us, uk] of Object.entries(US_SPELLINGS)) {
-      if (new RegExp(`\\b${us}\\b`, 'i').test(text)) warnings.push({ code: 'us-spelling', block, message: `UK spelling: "${uk}", not "${us}".` });
+    // Whole words only, with curly apostrophes read as straight: "secure" is
+    // not "cure", and "it’s not just about" is "it's not just about".
+    for (const phrase of findWordViolations(text, BANNED_PHRASES)) errors.push({ code: 'banned-phrase', block, message: `Banned phrase: "${phrase}".` });
+    for (const phrase of findWordViolations(text, MEDICAL_PHRASES)) errors.push({ code: 'medical', block, message: `Medical territory: "${phrase}". Coaching only.` });
+    if (findWordViolations(text, BANNED_DASHES).length) errors.push({ code: 'dash', block, message: 'No em dashes or spaced en dashes: use a full stop, comma or colon.' });
+    for (const us of findWordViolations(text, usSpellings)) warnings.push({ code: 'us-spelling', block, message: `UK spelling: "${US_SPELLINGS[us]}", not "${us}".` });
+    for (const [us, uk] of Object.entries(UNITS_AFTER_A_NUMBER)) {
+      if (new RegExp(`\\d\\s*${us}\\b`, 'i').test(text)) warnings.push({ code: 'us-spelling', block, message: `UK spelling: "${uk}", not "${us}".` });
     }
-    if (text.includes('—')) warnings.push({ code: 'em-dash', block, message: 'No em dashes: use a full stop, comma or colon.' });
   }
   return { errors, warnings };
 }
