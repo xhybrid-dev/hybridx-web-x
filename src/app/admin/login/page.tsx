@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { safeReturnPath } from '@/lib/admin-return';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -37,7 +38,9 @@ export default function AdminLoginPage() {
         throw new Error(body.error === 'Not authorized' ? 'This account is not authorized for admin access.' : 'Sign-in failed.');
       }
 
-      router.push('/admin/leads');
+      // Back to the page that asked for sign-in (a review email's link, say),
+      // but only ever to an admin page: anything else is an open redirect.
+      router.push(safeReturnPath(new URLSearchParams(window.location.search).get('next')));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed. Please check your credentials.');

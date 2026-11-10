@@ -27,7 +27,7 @@ const trainingOptions = [
     icon: Smartphone,
     title: "The Pro App",
     price: "£5/mo",
-    description: "The most affordable training app on the market. Daily workouts, tracking, and more. 14-day free trial.",
+    description: "Very affordable at £5 a month. Daily workouts, tracking, and more. 14-day free trial.",
     cta: "Explore The App",
     href: "/app",
     variant: "default" as const,
@@ -54,7 +54,7 @@ export default function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
           </span>
           <ShieldCheck className="h-4 w-4 text-accent" />
-          Trusted by over 2,000 Athletes currently using HybridX training
+          Over 2,000 athletes have trained with HybridX plans
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-primary mb-4 leading-tight">

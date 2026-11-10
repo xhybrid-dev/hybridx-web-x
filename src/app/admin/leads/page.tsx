@@ -76,6 +76,9 @@ export default async function AdminLeadsPage({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" asChild>
+              <Link href="/admin/guides">Guides</Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link href="/admin/plan-finder">Plan finder</Link>
             </Button>
             <Button variant="outline" asChild>

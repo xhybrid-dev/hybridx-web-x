@@ -130,7 +130,7 @@ const faqItems: FaqItem[] = [
     icon: Smartphone,
     question: 'How do I access the HybridX app and what does it include?',
     answer:
-      'The HybridX app is web-based and works on any device — visit app.hybridx.club and bookmark it for quick access. At £5/month with a 14-day free trial, it is the most affordable structured Hyrox training app available. Inside you\'ll find your daily workout delivered clearly and concisely with zero noise, session logging across the full 12 weeks to track your progress, and the ability to set your race date so the plan automatically aligns to your competition calendar. Unlike the PDF or book, the app removes all planning from the equation — you simply open it and train.',
+      'The HybridX app is web-based and works on any device — visit app.hybridx.club and bookmark it for quick access. At £5/month with a 14-day free trial, it is a very affordable way to follow structured Hyrox training. Inside you\'ll find your daily workout delivered clearly and concisely with zero noise, session logging across the full 12 weeks to track your progress, and the ability to set your race date so the plan automatically aligns to your competition calendar. Unlike the PDF or book, the app removes all planning from the equation — you simply open it and train.',
   },
 ];
 

@@ -37,6 +37,7 @@ const navItems: NavItem[] = [
     label: 'Guides',
     isDropdown: true,
     items: [
+      { label: 'All Guides', href: '/guides', icon: <BookMarked className="mr-2 h-5 w-5" /> },
       { label: '2026/27 Rule Changes', href: '/hyrox-rule-changes-2026', icon: <ScrollText className="mr-2 h-5 w-5" /> },
       { label: 'How to Train for Hyrox', href: '/how-to-train-for-hyrox', icon: <BookMarked className="mr-2 h-5 w-5" /> },
       { label: '12 Week Hyrox Plan', href: '/hyrox-training-plan', icon: <ListChecks className="mr-2 h-5 w-5" /> },

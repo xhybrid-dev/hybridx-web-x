@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSessionCookie, ADMIN_SESSION_COOKIE, SESSION_EXPIRES_IN_MS } from '@/lib/admin-auth';
+import { createAdminSessionCookie, ADMIN_SESSION_COOKIE } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   const { idToken } = await request.json().catch(() => ({ idToken: null }));
@@ -20,13 +20,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
-  const response = NextResponse.json({ ok: true });
+  // `lasting` says whether this is the 14-day session or the one-hour fallback.
+  const response = NextResponse.json({ ok: true, lasting: result.lasting });
   response.cookies.set(ADMIN_SESSION_COOKIE, result.cookie, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: SESSION_EXPIRES_IN_MS / 1000,
+    maxAge: Math.floor(result.maxAgeMs / 1000),
   });
   return response;
 }

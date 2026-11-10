@@ -12,6 +12,11 @@ import path from 'node:path';
 let requestHeaders: Record<string, string> = {};
 vi.mock('next/headers', () => ({ headers: async () => new Headers(requestHeaders) }));
 
+// Articles come from Firestore. Never reach for the real one here: the list is
+// whatever a test sets, and a test can make the read fail.
+let publishedGuides: () => Promise<Array<{ slug: string; updatedAt: string }>> = async () => [];
+vi.mock('@/lib/guides/store', () => ({ listPublishedGuides: () => publishedGuides() }));
+
 const { default: sitemap } = await import('../../app/sitemap');
 
 const APP_DIR = path.resolve(__dirname, '../../app');
@@ -67,6 +72,7 @@ const isExcludedByRule = (route: string) => route.startsWith('/admin') || route.
 
 beforeEach(() => {
   requestHeaders = {};
+  publishedGuides = async () => [];
   process.env.SHOP_SALES_OPEN = 'true';
   process.env.SHOP_SALES_CLOSE_AT = '2099-01-01T00:00:00Z';
 });
@@ -94,7 +100,8 @@ describe('the main sitemap', () => {
   it('does not list a page that is left out or does not exist', async () => {
     const urls = (await sitemap()).map((e) => e.url.replace(BASE, '') || '/');
     const routes = new Set(pageRoutes().map((p) => p.route));
-    for (const u of urls) expect(routes.has(u), `${u} has no page`).toBe(true);
+    const page = (u: string) => (/^\/guides\/[a-z0-9-]+$/.test(u) && !routes.has(u) ? '/guides/[slug]' : u);
+    for (const u of urls) expect(routes.has(page(u)), `${u} has no page`).toBe(true);
     for (const r of [...NOINDEX, ...Object.keys(SUBDOMAIN_CANONICAL), ...REDIRECTED]) {
       expect(urls, r).not.toContain(r);
     }
@@ -133,6 +140,30 @@ describe('the main sitemap', () => {
 
   it('lists the terms page', async () => {
     expect((await sitemap()).map((e) => e.url)).toContain(`${BASE}/shop-terms`);
+  });
+
+  it('lists published articles with the date each last changed', async () => {
+    publishedGuides = async () => [{ slug: 'lift-or-run-first', updatedAt: '2026-11-08T07:00:00Z' }];
+    const entry = (await sitemap()).find((e) => e.url === `${BASE}/guides/lift-or-run-first`);
+    expect(entry?.lastModified).toBe('2026-11-08T07:00:00Z');
+  });
+
+  it('dates nothing it cannot date', async () => {
+    // A lastmod of "now" on every fetch teaches Google to ignore lastmod for
+    // the whole sitemap, articles included.
+    const dated = (await sitemap()).filter((e) => e.lastModified !== undefined);
+    expect(dated).toEqual([]);
+  });
+
+  it('still answers, without articles, when Firestore cannot be read', async () => {
+    publishedGuides = async () => {
+      throw new Error('unavailable');
+    };
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const urls = (await sitemap()).map((e) => e.url);
+    expect(urls).toContain(`${BASE}/guides`);
+    expect(urls.some((u) => u.startsWith(`${BASE}/guides/`) && !u.endsWith('/how-we-write'))).toBe(false);
+    spy.mockRestore();
   });
 });
 
