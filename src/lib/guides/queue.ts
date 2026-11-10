@@ -5,6 +5,15 @@
 // source of truth and Jon orders it in /admin/guides/topics. A topic he skips
 // keeps its reason, so it is never offered again; a question he types in goes
 // to the front.
+//
+// From step 6 the weekly Search Console harvest adds topics people are searching
+// for, records the search numbers on topics they match, and reorders the queue
+// in four bands (reorderQueue):
+//   1. Jon's own questions, and topics he moved up, in his order;
+//   2. topics with search demand, highest score first;
+//   3. the rest, in their order;
+//   4. topics he moved down, in his order.
+// So search data decides the order only where Jon has not.
 
 import { adminFirestore } from '@/lib/firebase-admin';
 import { CANDIDATES, UNBUILT_TOOLS, type FutureTool, type Proof } from './candidates';
@@ -26,7 +35,11 @@ export interface Topic {
   /** Lower goes first. Spaced by 10 so a move needs no renumbering. */
   rank: number;
   status: TopicStatus;
-  source: 'list' | 'jon';
+  source: 'list' | 'jon' | 'search';
+  /** Search Console numbers from the latest harvest that matched it (step 6). */
+  search?: TopicSearch;
+  /** Jon moved it: up keeps it ahead of search-ranked topics, down behind them. */
+  held?: 'up' | 'down';
   skipReason?: string;
   guideSlug?: string;
   /** Drafting attempts that produced nothing usable; skipped after two. */
@@ -34,6 +47,16 @@ export interface Topic {
   lastError?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TopicSearch {
+  /** The harvest it came from (its date). */
+  harvest: string;
+  impressions: number;
+  clicks: number;
+  position: number;
+  score: number;
+  queries: string[];
 }
 
 const clean = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
@@ -96,7 +119,46 @@ export async function moveTopic(id: string, direction: -1 | 1): Promise<void> {
   const i = queued.findIndex((t) => t.id === id);
   const j = i + direction;
   if (i < 0 || j < 0 || j >= queued.length) return;
-  await Promise.all([setTopic(queued[i].id, { rank: queued[j].rank }), setTopic(queued[j].id, { rank: queued[i].rank })]);
+  await Promise.all([
+    setTopic(queued[i].id, { rank: queued[j].rank, held: direction === -1 ? 'up' : 'down' }),
+    setTopic(queued[j].id, { rank: queued[i].rank }),
+  ]);
+}
+
+/** The queued topics in the order reorderQueue puts them. */
+export function bandOrder(queued: Topic[]): Topic[] {
+  const byRank = (a: Topic, b: Topic) => a.rank - b.rank;
+  const first = queued.filter((t) => t.source === 'jon' || t.held === 'up').sort(byRank);
+  const last = queued.filter((t) => t.held === 'down' && t.source !== 'jon').sort(byRank);
+  const middle = queued.filter((t) => !first.includes(t) && !last.includes(t));
+  const searched = middle.filter((t) => (t.search?.score ?? 0) > 0).sort((a, b) => b.search!.score - a.search!.score || byRank(a, b));
+  const rest = middle.filter((t) => !searched.includes(t)).sort(byRank);
+  return [...first, ...searched, ...rest, ...last];
+}
+
+/** Renumbers the queued topics into their bands. Returns how many moved. */
+export async function reorderQueue(now = new Date()): Promise<number> {
+  const queued = (await listTopics()).filter((t) => t.status === 'queued');
+  let moved = 0;
+  await Promise.all(
+    bandOrder(queued).map((t, i) => {
+      const rank = (i + 1) * 10;
+      if (t.rank === rank) return undefined;
+      moved++;
+      return setTopic(t.id, { rank }, now);
+    }),
+  );
+  return moved;
+}
+
+/** A topic from search, added at the back for reorderQueue to place by its score. */
+export async function addSearchTopic(input: { question: string; pillar: PillarId; note: string; search: TopicSearch }, now = new Date()): Promise<string> {
+  const last = (await listTopics()).at(-1)?.rank ?? 0;
+  const at = now.toISOString();
+  const ref = await adminFirestore.collection(TOPICS_COLLECTION).add(
+    clean({ ...input, proof: 'any', rank: last + 10, status: 'queued', source: 'search', createdAt: at, updatedAt: at }),
+  );
+  return ref.id;
 }
 
 export async function skipTopic(id: string, reason: string): Promise<void> {

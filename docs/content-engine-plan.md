@@ -443,33 +443,74 @@ linked *from* the older ones, not only link back to them.
   heavy legs and hard runs) in your own numbers.
 - **Then:** candidates 15–18 enter the queue.
 
-### Step 6: Search Console data, read by the server (M)
+### Step 6: Search Console data, read by the server (M). Built, waiting for access
 
-- **Builds:**
-  - `src/lib/google/search-console.ts`, two typed calls:
-    - `searchAnalytics(query × page, 28 days ending three days ago, paginated)`;
-    - `inspectUrl(url)`;
-  - `/api/admin/search-console-check`, a diagnostic like the existing
-    `email-check` that reports the identity in use and whether a call works;
-  - a weekly harvest step in the hourly job that stores `guideHarvests` and
-    `guideMetrics`;
-  - `src/lib/guides/harvest/`: grouping, routing (new article, refresh an
-    existing page, or FAQ on a pillar) and scoring;
-  - the queue reordered by score;
-  - a **refresh list** and a **search page** in admin: striking-distance
-    queries, queries landing on the wrong page, new articles' indexing;
-  - a CSV export;
-  - a weekly summary email: published, queued, refresh suggestions, anything
-    not indexed.
-- **Tests:** routing and scoring on recorded fixtures; the client's pagination
-  and error handling.
-- **You, before merge:**
-  - enable the Search Console API in `hybridx-hub`;
-  - add the service account (named in section 4.4) to the
-    `sc-domain:hybridx.club` property as a **Restricted** user.
+This is the loop the proposal's "circular" engine described: what people
+actually search for decides what gets written next.
+
+- **Built:**
+  - `src/lib/google/search-console.ts`: search analytics (query × page, the 28
+    days ending three days ago, paged), URL inspection and the property list,
+    over REST with a read-only token from the runtime's own identity. Google's
+    errors are translated into what to do (API disabled, no access, wrong
+    property);
+  - `/api/admin/search-console-check`: the identity in use, the properties it
+    can see, whether ours is among them, and whether a query works;
+  - `src/lib/guides/harvest/analyse.ts`: grouping (same content words, so
+    "hyrox sled push weight" and "sled push weights hyrox" are one group; brand
+    searches are left out), routing and scoring, as in section 4.5;
+  - `src/lib/guides/harvest/run.ts`: a step of the hourly job, one stage per
+    tick, that does real work once a week:
+    1. harvest: groups, routes and scores the rows; puts the numbers on the
+       topics they match; adds up to five new topics that nothing answers
+       (at least 10 impressions, and only our subject: a search with no
+       training word is never added); never re-adds a topic you skipped;
+       reorders the queue; records each article's clicks, impressions,
+       position and top searches;
+    2. checks whether articles published in the last 60 days are indexed,
+       eight per tick;
+    3. emails you the weekly summary, within the email hours: clicks and
+       impressions, what was published, what was added to the queue, the next
+       three topics, pages to improve, and anything not indexed after a week;
+  - the queue in four bands: your own questions and anything you moved up,
+    then search demand by score, then the rest, then anything you moved down.
+    So search decides the order only where you have not;
+  - `/admin/guides/search`: the last harvest, pages to improve (ranking 4–20),
+    articles that answer a search but searchers land elsewhere, searches
+    nothing answers yet with "Add to the front", what already ranks top three,
+    and each article's numbers and indexing; plus a CSV export;
+  - a failed harvest (no access yet) is recorded with its reason and retried a
+    day later, not every hour. Off when `CONTENT_ENGINE_MODE` is off; Pause
+    stops the summary email.
+- **Routing, in order:**
+  - an article already answers it: top three is **owned**; 4–20 is
+    **refresh** that article; otherwise **covered**, noting where searchers
+    land instead;
+  - a topic in the queue (or drafted, or skipped) answers it: **covered**, and
+    the topic gets its numbers;
+  - otherwise top three is **owned**; a page ranking 4–20 is **refresh** for
+    that page, unless the search is a question landing on a broad page (home,
+    hub, calculators), which wants an article; anything else is **new**.
+- **Score:** impressions × room to climb (most for positions 4–10) × our
+  subject (a training word in the search, or 0.2).
+- **Not built from the original step:** pillar FAQ routing. Deciding that an
+  answer fits in 150 words needs judgement; a search that wants it shows on
+  the search page for you to decide.
+- **Tests:** `guides-harvest.test.ts`: the client's paging and errors,
+  grouping, scoring, routing, the bands, and the weekly cycle tick by tick
+  against a fake Search Console.
+- **You (the site works without it; the harvest just records "no access"):**
+  1. `gcloud services enable searchconsole.googleapis.com --project=hybridx-hub`;
+  2. add the App Hosting service account (section 4.4; the command in step 3
+     prints it) to the Search Console property as a **Restricted** user;
+  3. if the property is a URL-prefix property rather than a Domain property,
+     say so: `SEARCH_CONSOLE_SITE` is then set to `https://hybridx.club/` in
+     `apphosting.yaml` (a plain value, not a secret).
 - **Check on the live site:**
-  - the diagnostic reports success;
-  - after the first Sunday, the queue reorders and the summary email arrives.
+  - `/api/admin/search-console-check` shows `property.found: true` and
+    `query.ok: true`;
+  - within the hour, `/admin/guides/search` shows the first harvest; the
+    summary email follows a couple of ticks later.
 
 ### Step 7: performance page (S)
 

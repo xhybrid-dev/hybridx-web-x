@@ -44,6 +44,21 @@ export interface LinksEmail {
   proposals: (Pick<LinkProposal, 'source' | 'after'> & { sourceTitle: string })[];
 }
 
+/** The weekly Search Console summary (step 6). */
+export interface SummaryEmail {
+  kind: 'summary';
+  to: string;
+  harvest: { id: string; window: { startDate: string; endDate: string }; clicks: number; impressions: number };
+  published: string[];
+  scheduled: string[];
+  /** Topics the harvest added to the queue. */
+  added: { question: string; impressions: number }[];
+  /** The next three topics in the queue. */
+  next: string[];
+  refresh: { page: string; query: string; position: number; impressions: number }[];
+  notIndexed: { slug: string; state: string }[];
+}
+
 /** Every email the engine sends. */
 export type EngineEmail = ReviewEmail | LinksEmail;
 
@@ -224,6 +239,32 @@ export function buildLinksEmail(e: LinksEmail): { subject: string; html: string;
     `Guide settings: ${SITE}/admin/guides/settings`,
   ].join('\n');
   return { subject, html, text };
+}
+
+const fmt = (n: number) => new Intl.NumberFormat('en-GB').format(n);
+
+/** The weekly summary: plain sections, one link to the search page. Nothing in it acts. */
+export function buildSummaryEmail(e: SummaryEmail): { subject: string; html: string; text: string } {
+  const page = `${SITE}/admin/guides/search`;
+  const { window, clicks, impressions } = e.harvest;
+  const lead = `Search, ${window.startDate} to ${window.endDate}: ${fmt(clicks)} clicks from ${fmt(impressions)} impressions across the site.`;
+  const sections: [string, string[]][] = [
+    ['Published this week', e.published],
+    ['Scheduled', e.scheduled],
+    ['Added to the queue from search', e.added.map((a) => `${a.question} (${fmt(a.impressions)} impressions)`)],
+    ['Next in the queue', e.next],
+    ['Pages to improve (ranking 4 to 20)', e.refresh.map((r) => `${r.page}: "${r.query}", position ${r.position}, ${fmt(r.impressions)} impressions`)],
+    ['Not indexed after a week', e.notIndexed.map((n) => `/guides/${n.slug}: ${n.state}`)],
+  ];
+  const shown = sections.filter(([, items]) => items.length);
+  const html = frame(`
+        <p style="${P}">${esc(lead)}</p>
+        ${shown
+          .map(([title, items]) => `<p style="${P}margin-bottom:6px;"><strong>${esc(title)}</strong></p><ul style="${P}padding-left:22px;">${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`)
+          .join('')}
+        <div style="margin-top:20px;">${button(page, 'Open the search page', true)}</div>`);
+  const text = [lead, '', ...shown.flatMap(([title, items]) => [title, ...items.map((i) => `- ${i}`), '']), `Search page: ${page}`].join('\n');
+  return { subject: `This week in search: ${fmt(clicks)} clicks`, html, text };
 }
 
 export function buildReviewEmail(e: ReviewEmail): { subject: string; html: string; text: string } {

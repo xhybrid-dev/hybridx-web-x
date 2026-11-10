@@ -161,6 +161,19 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **Pillar pages are ISR** (`revalidate = 3600`) and read articles through
     `listPublishedGuidesOutsideBuild`, which returns nothing during a build.
     Any other built-ahead page that lists articles must do the same.
+- **Search Console** (plan step 6) is read by `src/lib/google/search-console.ts`
+  with the runtime's own identity and a read-only scope: no key, no secret.
+  The property is `sc-domain:hybridx.club` unless `SEARCH_CONSOLE_SITE` says
+  otherwise. `/api/admin/search-console-check` says what is wrong when it
+  cannot read.
+  - **The weekly harvest** (`src/lib/guides/harvest/`) feeds the topic queue:
+    at most five new topics a week, only searches with a training word, and
+    never one Jon skipped. Query text is untrusted (anyone can type anything
+    into Google): it is compared and shown, never followed, and the CSV export
+    defuses spreadsheet formulas.
+  - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
+    questions and topics he moved up, then search demand by score, then the
+    rest, then topics he moved down. Keep his moves ahead of the data.
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back

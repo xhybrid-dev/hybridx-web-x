@@ -49,14 +49,16 @@ const SAME_PILLAR = 0.15;
 /** At or above this, two articles are related enough to link in the text. */
 export const RELATED_MIN = 0.25;
 
-/** 0 for nothing in common; about 1 for the same subject. */
-export function relatedness(a: Subject, b: Subject): number {
-  const x = subjectTerms(a);
-  const y = subjectTerms(b);
+/** How much two sets of words overlap: 0 for nothing, 1 for the same words. */
+export function overlap(x: ReadonlySet<string>, y: ReadonlySet<string>): number {
   let shared = 0;
   for (const w of x) if (y.has(w)) shared++;
-  const overlap = x.size && y.size ? shared / Math.sqrt(x.size * y.size) : 0;
-  return overlap + (a.pillar === b.pillar ? SAME_PILLAR : 0);
+  return x.size && y.size ? shared / Math.sqrt(x.size * y.size) : 0;
+}
+
+/** 0 for nothing in common; about 1 for the same subject. */
+export function relatedness(a: Subject, b: Subject): number {
+  return overlap(subjectTerms(a), subjectTerms(b)) + (a.pillar === b.pillar ? SAME_PILLAR : 0);
 }
 
 /** Published articles other than `current`, most related first, newest first among equals. */

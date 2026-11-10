@@ -51,6 +51,8 @@ import { publishDueGuides } from '@/lib/guides/store';
 import { applyAcceptedLinks } from '@/lib/guides/backlinks';
 import { runEngineStep } from '@/lib/guides/engine/run';
 import { liveDeps } from '@/lib/guides/engine/live';
+import { runSearchHarvest } from '@/lib/guides/harvest/run';
+import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -77,7 +79,7 @@ export async function GET(request: Request) {
   // Guides go live at their slot whether or not this runs (the public pages
   // decide that when they are read); this records them as published, and puts
   // in the links from older articles Jon accepted once their target is live.
-  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -87,6 +89,7 @@ export async function GET(request: Request) {
     publishDueGuides(),
     applyAcceptedLinks(),
     runEngineStep(liveDeps),
+    runSearchHarvest(liveHarvestDeps),
   ]);
 
   const result = {
@@ -126,9 +129,13 @@ export async function GET(request: Request) {
       engine.status === 'fulfilled'
         ? engine.value
         : { error: String((engine.reason as Error)?.message ?? engine.reason) },
+    searchHarvest:
+      search.status === 'fulfilled'
+        ? search.value
+        : { error: String((search.reason as Error)?.message ?? search.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 
