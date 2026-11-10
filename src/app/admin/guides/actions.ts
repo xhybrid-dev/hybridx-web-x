@@ -18,12 +18,15 @@ import {
   unschedule,
 } from '@/lib/guides/review';
 import { EngineSettingsSchema } from '@/lib/guides/slots';
+import { engineOn } from '@/lib/guides/engine/run';
+import { addTopic, ensureQueueSeeded, moveTopic, requeueTopic, skipTopic } from '@/lib/guides/queue';
 import {
   addComment,
   getGuide,
   resolveComment,
   saveEngineSettings,
   saveGuide,
+  updateGuideState,
 } from '@/lib/guides/store';
 import { PILLAR_IDS, type PillarId } from '@/lib/guides/topics';
 import { GuideSchema, type Block } from '@/lib/guides/types';
@@ -92,6 +95,12 @@ export async function commentOnGuide(form: FormData) {
     throw new Error('Bad request');
   }
   await addComment({ slug, revision: guide.revision, blockIndex, text: text.slice(0, 2000), by: session.email });
+  // With the engine on, a comment on an article waiting for review asks for a
+  // revision: the engine picks it up on its next hourly tick.
+  if (engineOn() && guide.status === 'awaiting_review') {
+    await updateGuideState(slug, { status: 'revising' });
+    redirect(`${BASE}/${slug}?done=revising#comments`);
+  }
   redirect(`${BASE}/${slug}?done=commented#comments`);
 }
 
@@ -180,4 +189,49 @@ export async function saveSettings(form: FormData) {
   }
   await saveEngineSettings(parsed.data);
   redirect(`${BASE}/settings?done=saved`);
+}
+
+/* ── The topic queue ─────────────────────────────────────────────────────── */
+
+const TOPIC_ID = /^[A-Za-z0-9]{1,40}$/;
+const topicId = (form: FormData) => {
+  const id = String(form.get('id') ?? '');
+  if (!TOPIC_ID.test(id)) throw new Error('Bad request');
+  return id;
+};
+
+export async function addTopicAction(form: FormData) {
+  await requireAdmin();
+  const question = String(form.get('question') ?? '').trim();
+  const pillar = String(form.get('pillar') ?? '') as PillarId;
+  if (question.length < 8 || !PILLAR_IDS.includes(pillar)) {
+    redirect(`${BASE}/topics?error=${encodeURIComponent('Write the question in full, and pick its topic.')}`);
+  }
+  await ensureQueueSeeded();
+  await addTopic(question, pillar);
+  redirect(`${BASE}/topics?done=added`);
+}
+
+export async function moveTopicAction(form: FormData) {
+  await requireAdmin();
+  await moveTopic(topicId(form), form.get('direction') === 'up' ? -1 : 1);
+  redirect(`${BASE}/topics`);
+}
+
+export async function skipTopicAction(form: FormData) {
+  await requireAdmin();
+  await skipTopic(topicId(form), String(form.get('reason') ?? ''));
+  redirect(`${BASE}/topics?done=skipped`);
+}
+
+export async function requeueTopicAction(form: FormData) {
+  await requireAdmin();
+  await requeueTopic(topicId(form));
+  redirect(`${BASE}/topics?done=requeued`);
+}
+
+export async function seedTopicsAction() {
+  await requireAdmin();
+  await ensureQueueSeeded();
+  redirect(`${BASE}/topics`);
 }

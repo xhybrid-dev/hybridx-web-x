@@ -29,6 +29,12 @@ import { STATIONS as WATCH_STATIONS } from '@/lib/race-content';
 
 const ROOT = path.resolve(__dirname, '../../..');
 const SKIP_DIRS = new Set(['__tests__', 'facts', 'node_modules']);
+/**
+ * Files that state the rules rather than make claims: the coaching bible tells
+ * the drafting model never to say "most affordable", and the checks catch it.
+ * Both have to name the phrase to forbid it.
+ */
+const RULE_FILES = new Set(['src/lib/guides/bible.ts', 'src/lib/guides/checks.ts']);
 
 function copyFiles(dir: string): string[] {
   const out: string[] = [];
@@ -36,7 +42,7 @@ function copyFiles(dir: string): string[] {
     const full = path.join(dir, name);
     if (statSync(full).isDirectory()) {
       if (!SKIP_DIRS.has(name)) out.push(...copyFiles(full));
-    } else if (/\.(tsx?|json)$/.test(name)) {
+    } else if (/\.(tsx?|json)$/.test(name) && !RULE_FILES.has(path.relative(ROOT, full))) {
       out.push(full);
     }
   }

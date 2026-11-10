@@ -129,6 +129,20 @@ AI-drafted, reviewed and approved by Jon before publishing.
     scanners open every link in a review email.
   - **A scheduled article is public from its slot,** decided when it is read;
     the hourly job only records it as published afterwards.
+- **The drafting engine** (`src/lib/guides/engine/`) runs as a step of the
+  hourly maintenance job and is off unless `CONTENT_ENGINE_MODE` is `"on"`.
+  - **Pace:** one stage per tick, at most two model calls, a lease lock. The
+    review gets a tick of its own.
+  - **Never publishes:** it drafts, checks, reviews, emails Jon and stops.
+  - **The rules:**
+    - the coaching bible is `bible.ts`;
+    - the deterministic checks are `checks.ts`;
+    - the starting topics are `candidates.ts`, seeded once into `guideTopics`.
+  - **Tests** use stand-in models (`guides-engine.test.ts`); `run.ts` never
+    imports a model SDK, only `live.ts` does.
+  - **The reviewer key,** `ANTHROPIC_API_KEY`, is optional: without it drafts
+    arrive marked "second review skipped". Bind it in `apphosting.yaml` only
+    after the secret exists and is granted.
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back

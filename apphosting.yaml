@@ -132,6 +132,16 @@ env:
     secret: SMTP_PASSWORD
     availability:
       - RUNTIME
+  # The guide drafting engine (docs/content-engine-plan.md, step 4). "off"
+  # drafts nothing; "on" lets the hourly maintenance job draft from the topic
+  # queue and email each draft for review. Nothing it drafts is published
+  # without approval in /admin/guides, and Pause in guide settings stops it
+  # without a deploy. Uses GEMINI_API_KEY below to write, and ANTHROPIC_API_KEY
+  # (when bound) for the second review.
+  - variable: CONTENT_ENGINE_MODE
+    value: "off"
+    availability:
+      - RUNTIME
   # Gemini API key powering the "Describe it, let AI build it" feature on the
   # Treadmill FIT/TCX Generator (src/ai/flows/parse-treadmill-workout-flow.ts).
   - variable: GEMINI_API_KEY
