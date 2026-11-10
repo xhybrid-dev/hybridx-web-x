@@ -10,10 +10,13 @@
 //   1. advance a draft already under way: code checks (one fix if they fail),
 //      then the second-model review (one fix if it finds something serious);
 //   2. otherwise revise an article Jon has commented on (at most three rounds);
-//   3. otherwise start a new draft from the topic queue, if the pipeline has
+//   3. otherwise suggest links from older articles to one Jon has approved
+//      (backlinks.ts), one article per tick;
+//   4. otherwise start a new draft from the topic queue, if the pipeline has
 //      room: fewer than two waiting for review, and fewer than three waiting or
 //      scheduled ahead, which keeps pace with three slots a week;
-//   4. send any review email that is due, within the email hours.
+//   5. send any email that is due, within the email hours: reviews, reminders
+//      and link suggestions.
 //
 // At most MODEL_CALLS_PER_TICK model calls per tick, to stay well inside the
 // job's time limit. Off unless CONTENT_ENGINE_MODE is "on"; the admin Pause
@@ -30,8 +33,19 @@
 // draft saved without its run gets one.
 
 import { adminFirestore } from '@/lib/firebase-admin';
+import {
+  linkSources,
+  listBacklinkStates,
+  listProposals,
+  proposalsFrom,
+  saveBacklinkState,
+  saveProposals,
+  targetsNeedingLinks,
+  withSourceTitles,
+  type BacklinkState,
+} from '../backlinks';
 import { checkDraft, type CheckResult, type Issue } from '../checks';
-import type { ReviewEmail, ReviewEmailKind } from '../email';
+import type { EngineEmail, ReviewEmailKind } from '../email';
 import { inEmailHours } from '../email';
 import { ensureQueueSeeded, listTopics, nextTopic, setTopic, type Topic } from '../queue';
 import { slugify } from '../review';
@@ -50,7 +64,7 @@ import {
 import { RESERVED_GUIDE_SLUGS } from '../topics';
 import { GuideSchema, type Guide } from '../types';
 import type { EngineModels, ReviewOutcome } from './models';
-import { draftPrompt, fixPrompt, revisePrompt, reviewPrompt, type BriefTopic } from './prompts';
+import { draftPrompt, fixPrompt, linkPrompt, revisePrompt, reviewPrompt, type BriefTopic } from './prompts';
 import { toContent, type DraftContent } from './shape';
 
 export const RUNS_COLLECTION = 'guideRuns';
@@ -88,7 +102,7 @@ export interface Run {
 
 export interface EngineDeps {
   models: EngineModels;
-  send(email: ReviewEmail): Promise<void>;
+  send(email: EngineEmail): Promise<void>;
   now(): Date;
   /** Overrides CALL_WINDOW_MS, for tests. */
   callWindowMs?: number;
@@ -386,6 +400,46 @@ async function draft(t: Tick): Promise<void> {
   await advance(run, guide, t);
 }
 
+/**
+ * Suggests links from older articles to the next approved article that has
+ * none yet. Returns false if there was nothing to do, so the tick can draft
+ * instead; true if it used the tick, whether or not the call succeeded.
+ */
+async function proposeLinks(guides: Guide[], t: Tick): Promise<boolean> {
+  const states = await listBacklinkStates();
+  const seen = new Set(states.filter((s) => s.status !== 'pending').map((s) => s.target));
+  for (const target of targetsNeedingLinks(guides, seen, t.now)) {
+    const state: BacklinkState = states.find((s) => s.target === target.slug) ?? { target: target.slug, status: 'pending', attempts: 0, proposed: 0, updatedAt: '' };
+    const sources = linkSources(target, t.published);
+    if (!sources.length) {
+      await saveBacklinkState({ ...state, status: 'none', note: 'no published article is related enough' }, t.now);
+      continue;
+    }
+    if (state.attempts >= MAX_ATTEMPTS) {
+      await saveBacklinkState({ ...state, status: 'failed' }, t.now);
+      t.log.push(`${target.slug}: gave up suggesting links after ${MAX_ATTEMPTS} tries`);
+      continue;
+    }
+    if (!spend(t)) return true;
+    const attempts = state.attempts + 1;
+    await saveBacklinkState({ ...state, attempts }, t.now); // counted first: a cut-off call counts as a try
+    try {
+      const { proposals, refused } = proposalsFrom(target, sources, await t.deps.models.link(linkPrompt(target, sources)), t.now);
+      await saveProposals(proposals);
+      await saveBacklinkState(
+        { ...state, attempts, status: proposals.length ? 'done' : 'none', proposed: proposals.length, note: refused.join('; ').slice(0, 500) || undefined },
+        t.now,
+      );
+      t.log.push(`${target.slug}: ${proposals.length} link suggestion(s) from older articles${refused.length ? `; refused ${refused.length}: ${refused.join('; ')}` : ''}`);
+    } catch (e) {
+      await saveBacklinkState({ ...state, attempts, note: `link suggestions failed: ${message(e)}` }, t.now);
+      t.log.push(`${target.slug}: link suggestions failed: ${message(e)}`);
+    }
+    return true;
+  }
+  return false;
+}
+
 /** Puts back what a cut-off tick left half-done. */
 async function recoverStalled(t: Tick): Promise<void> {
   for (const topic of await listTopics()) {
@@ -437,6 +491,18 @@ async function sendDue(settings: EngineSettings, t: Tick): Promise<void> {
     if ((await getGuide(run.slug))?.status !== 'awaiting_review') continue;
     await sendOne(run, 'reminder', { reminderSentAt: t.now.toISOString() });
   }
+
+  for (const state of await listBacklinkStates()) {
+    if (state.status !== 'done' || state.emailedAt) continue;
+    const guide = await getGuide(state.target);
+    const waiting = (await listProposals({ target: state.target })).filter((p) => p.status === 'proposed');
+    // Already decided in admin, or the article is gone: no email.
+    if (guide && waiting.length) {
+      await t.deps.send({ kind: 'links', to, guide, proposals: await withSourceTitles(waiting) });
+      t.log.push(`${state.target}: emailed ${waiting.length} link suggestion(s)`);
+    }
+    await saveBacklinkState({ ...state, emailedAt: t.now.toISOString() }, t.now);
+  }
 }
 
 /** One tick of the engine. Called by the hourly maintenance job. */
@@ -460,7 +526,9 @@ export async function runEngineStep(deps: EngineDeps): Promise<{ skipped?: strin
       const guides = await listAllGuides();
       const revising = guides.find((g) => g.status === 'revising');
       if (revising) await revise(revising, t);
-      else if (pipelineHasRoom(guides, now)) await draft(t);
+      else if (await proposeLinks(guides, t)) {
+        // One stage per tick: the draft waits for the next one.
+      } else if (pipelineHasRoom(guides, now)) await draft(t);
       else t.log.push('pipeline full: waiting for review or for slots to pass');
     }
 

@@ -373,6 +373,62 @@ and their order can change.
   - The pipeline rule ("two waiting, three in hand") replaces "three this
     week", so drafts keep pace with slots rather than calendar weeks.
 
+### Step 4b: links between articles (S–M). Built
+
+Added after step 4, at your request (10 November 2026): a new article should be
+linked *from* the older ones, not only link back to them.
+
+- **Relatedness** (`src/lib/guides/related.ts`): the content words two articles
+  share in their title, point and description, plus a bonus for the same
+  pillar. Words every article uses ("hyrox", "training", "race") count for
+  nothing. Deterministic; a pillar in common is not enough on its own.
+- **New → older:**
+  - the brief lists the published articles most related to the question and
+    asks for a link to one or two, in the body text, with link words that say
+    where they go;
+  - the bible says the same, and caps an article at five links, once each;
+  - the checks warn when a related article exists and none is linked, when a
+    link points to an article that is not published (it would show as plain
+    text), and on repeated or too many links.
+- **Older → new** (`src/lib/guides/backlinks.ts`):
+  - when you approve an article, the next tick picks up to three related
+    published articles that do not already link to it, and asks the drafting
+    model for one paragraph in each where the link reads naturally;
+  - a suggestion may only turn existing words into the link, or add one
+    sentence of at most 30 words at the end of the paragraph. Code refuses
+    anything else: changed words, a lost link or format, a second link,
+    "click here", or new problems for the draft checks;
+  - you get one email per new article with the suggestions, the link marked,
+    and accept or skip each on its review page (`#links`);
+  - an accepted link goes in only once the new article is live, applied by the
+    hourly job whether the engine is on or not, as a new revision of the older
+    article. That moves its date in the sitemap when the link appears. If the
+    paragraph has changed since, the suggestion is marked stale, never forced;
+  - one model call per new article, counted before it starts, three tries at
+    most; nothing to ask about means no call at all;
+  - only approved articles, and ones published in the last 14 days, are
+    offered links, so no backlog is proposed at once.
+- **Pillars → articles:** the five pillar pages list their newest eight
+  articles under "Questions answered", with a link to the rest on `/guides`.
+  The pages are built ahead of time and refreshed hourly (`revalidate`), and
+  `listPublishedGuidesOutsideBuild` returns nothing while the site is built,
+  so no Firestore read happens in a build. A fresh deploy shows the list from
+  its first refresh, within the hour.
+- **The related box** under each article ranks by relatedness, not by date.
+- **Firestore:** `guideLinkProposals/{target}__{source}`, one per suggestion,
+  and `guideBacklinks/{target}`, where the engine is with each new article.
+  Both are covered by the existing deny-all rule.
+- **Tests:** `guides-links.test.ts` (relatedness, the brief, the checks, every
+  rule a suggestion must pass) and the engine tests (asking once, refusing,
+  cut-off calls, applying only when live, stale paragraphs, the email).
+- **You:** nothing before merge. The first suggestions arrive after the first
+  article you approve, once a related one is published.
+- **Value, honestly:** links from older, already-indexed pages help Google find
+  a new page sooner, and contextual links in the text count for more than a
+  box at the foot of the page. It is ordinary good internal linking, worth
+  more as the library grows past about thirty articles; overdone, it reads as
+  spam, which is why every link is yours to approve.
+
 ### Step 5: the week planner (M)
 
 - **Builds:**
@@ -503,6 +559,8 @@ All are server-only: the client has no access.
 | `guideTopics/{id}` | Candidate, query group, Search Console numbers, volume, kind, the page currently ranking, score, status, rejection reason |
 | `guideHarvests/{date}` | Each weekly harvest |
 | `guideMetrics/{slug}__{week}` | Clicks, impressions, position, indexing, tool uses, leads |
+| `guideLinkProposals/{target}__{source}` | A suggested link from an older article to a new one: the paragraph before and after, and whether you accepted it and it went in (step 4b) |
+| `guideBacklinks/{target}` | Whether links to a new article have been suggested yet, the tries, and when you were emailed (step 4b) |
 | `contentSettings/engine` | Slots, email hours, review address, pause |
 
 **Rendering:** the Admin SDK on the server, cached by tag, revalidated on
@@ -654,8 +712,11 @@ fully answered by Google's AI summaries.
 
 ### 6.2 Clusters
 
-Each article links up to its pillar, and each pillar lists its articles
-("Questions answered") at render time. No published page is rewritten.
+Each article links up to its pillar, and across to one or two related
+articles. Each pillar page lists its articles ("Questions answered"),
+refreshed hourly. When an article is approved, the engine suggests links to it
+from up to three related older articles, and each goes in only if you accept
+it (step 4b). Nothing else in a published page is rewritten.
 
 | Pillar | Page |
 |---|---|

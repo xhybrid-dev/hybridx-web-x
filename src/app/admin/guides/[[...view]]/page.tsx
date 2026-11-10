@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { getAdminSession } from '@/lib/admin-auth';
 import { loginUrlFor } from '@/lib/admin-return';
 import { canEdit, stillHasPlaceholders } from '@/lib/guides/review';
+import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guides/backlinks';
+import { parseInline } from '@/lib/guides/inline';
 import { engineOn, getRun } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
@@ -29,6 +31,7 @@ import {
   addTopicAction,
   approveGuide,
   commentOnGuide,
+  decideLinkAction,
   createGuide,
   moveTopicAction,
   requeueTopicAction,
@@ -138,7 +141,13 @@ export default async function GuidesAdmin({
 /* ── The queue ───────────────────────────────────────────────────────────── */
 
 async function Queue() {
-  const [guides, settings, taken] = await Promise.all([listAllGuides(), getEngineSettings(), takenSlots()]);
+  const [guides, settings, taken, waitingLinks] = await Promise.all([
+    listAllGuides(),
+    getEngineSettings(),
+    takenSlots(),
+    listProposals({ status: 'proposed' }),
+  ]);
+  const linkTargets = [...new Set(waitingLinks.map((p) => p.target))];
   const next = nextFreeSlot(new Date(), taken, settings);
   const groups: { title: string; statuses: GuideStatus[]; empty: string }[] = [
     { title: 'Waiting for you', statuses: ['awaiting_review', 'revising', 'drafting'], empty: 'Nothing to review.' },
@@ -153,6 +162,21 @@ async function Queue() {
         Next free slot: <strong>{describeSlot(next)}</strong>
         {settings.paused && <> · <strong>Paused</strong>: no new drafts until you resume it in settings.</>}
       </p>
+      {linkTargets.length > 0 && (
+        <section className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
+          <h2 className="font-headline text-lg font-bold">Links to check</h2>
+          <ul className="space-y-1">
+            {linkTargets.map((target) => (
+              <li key={target}>
+                <Link href={`${BASE}/${target}#links`} className="underline underline-offset-4">
+                  {guides.find((g) => g.slug === target)?.title ?? target}
+                </Link>{' '}
+                · {waitingLinks.filter((p) => p.target === target).length} suggestion(s) from older articles
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {groups.map((group) => {
         const rows = guides
           .filter((g) => group.statuses.includes(g.status))
@@ -202,7 +226,26 @@ const DONE: Record<string, (g: Guide) => string> = {
   commented: () => 'Comment saved.',
   revising: () => 'Comment saved. The engine revises the article on its next hourly run, and emails you when it is ready.',
   saved: (g) => `Saved as revision ${g.revision}.`,
+  'link-applied': () => 'Link accepted, and it is in: the older article has a new revision.',
+  'link-accepted': () => 'Link accepted. It goes into the older article when this one goes live.',
+  'link-skipped': () => 'Link skipped.',
+  'link-stale': () => 'That paragraph has changed since the suggestion, so the link was not put in.',
 };
+
+const LINK_STATUS: Record<LinkProposal['status'], string> = {
+  proposed: 'Waiting for you',
+  accepted: 'Accepted: goes in when this article goes live',
+  skipped: 'Skipped',
+  applied: 'In',
+  stale: 'Not put in',
+};
+
+/** The words of the new link in a suggested paragraph. */
+function linkWords(p: LinkProposal): string {
+  const path = `/guides/${p.target}`;
+  for (const t of parseInline(p.after)) if (t.kind === 'link' && t.href.split('#')[0] === path) return t.text;
+  return '';
+}
 
 function blockSummary(b: Block): string {
   const text =
@@ -213,13 +256,15 @@ function blockSummary(b: Block): string {
 async function Review({ slug, search }: { slug: string; search: Search }) {
   const guide = await getGuide(slug);
   if (!guide) notFound();
-  const [comments, revisions, published, settings, taken, run] = await Promise.all([
+  const [comments, revisions, published, settings, taken, run, proposals, linkState] = await Promise.all([
     listComments(slug),
     listRevisions(slug),
     listPublishedGuides().catch(() => []),
     getEngineSettings(),
     takenSlots(),
     getRun(slug),
+    listProposals({ target: slug }),
+    listBacklinkStates().then((all) => all.find((s) => s.target === slug)),
   ]);
   const articles = new Set(published.map((g) => g.slug));
   const action = one(search.action);
@@ -350,6 +395,69 @@ async function Review({ slug, search }: { slug: string; search: Search }) {
                 </ul>
               </>
             ))}
+        </section>
+      )}
+
+      {/* ── Links from older articles to this one ── */}
+      {(proposals.length > 0 || linkState) && (
+        <section id="links" className="space-y-3 rounded-lg border p-4">
+          <h3 className="font-headline font-bold">Links from older articles</h3>
+          {proposals.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No suggestions{linkState?.note ? `: ${linkState.note}` : '.'}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Each suggestion adds one link to this article inside an older one. Accepted links go in when this article is live, as a new
+                revision of the older article.
+              </p>
+              <ul className="space-y-4">
+                {proposals.map((p) => {
+                  const source = published.find((g) => g.slug === p.source);
+                  return (
+                    <li key={p.id} className="space-y-2 rounded-md bg-secondary/40 p-3">
+                      <p className="text-sm">
+                        In{' '}
+                        <Link className="font-semibold underline underline-offset-4" href={`${BASE}/${p.source}`}>
+                          {source?.title ?? p.source}
+                        </Link>
+                        , block {p.block + 1} · <span className="text-muted-foreground">{LINK_STATUS[p.status]}{p.note ? ` (${p.note})` : ''}</span>
+                      </p>
+                      <ArticleBody slug={p.source} blocks={[{ type: 'paragraph', text: p.after }]} articles={new Set([...articles, p.target])} />
+                      <p className="text-sm">
+                        Link words: <strong>{linkWords(p)}</strong>
+                      </p>
+                      {(p.status === 'proposed' || p.status === 'accepted' || p.status === 'skipped') && (
+                        <div className="flex flex-wrap gap-2">
+                          {p.status !== 'accepted' && (
+                            <form action={decideLinkAction}>
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="source" value={p.source} />
+                              <input type="hidden" name="decision" value="accept" />
+                              <Button type="submit" size="sm">
+                                Accept
+                              </Button>
+                            </form>
+                          )}
+                          {p.status !== 'skipped' && (
+                            <form action={decideLinkAction}>
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="source" value={p.source} />
+                              <input type="hidden" name="decision" value="skip" />
+                              <Button type="submit" size="sm" variant="outline">
+                                Skip
+                              </Button>
+                            </form>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
         </section>
       )}
 

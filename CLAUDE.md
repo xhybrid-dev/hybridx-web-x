@@ -149,6 +149,18 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **The reviewer key,** `ANTHROPIC_API_KEY`, is optional: without it drafts
     arrive marked "second review skipped". Bind it in `apphosting.yaml` only
     after the secret exists and is granted.
+- **Links between articles** (plan step 4b): `related.ts` scores relatedness;
+  `backlinks.ts` turns the engine's suggestions into links from older articles
+  to a newly approved one.
+  - **A suggestion may only wrap existing words in the link, or add one short
+    sentence at the end of a paragraph.** `checkLinkEdit` enforces it; don't
+    loosen it to let the model rewrite published text.
+  - **Accepted links go in only once the new article is live,** applied by
+    `applyAcceptedLinks` in the hourly job, engine on or not. A changed
+    paragraph makes the suggestion stale, never forced.
+  - **Pillar pages are ISR** (`revalidate = 3600`) and read articles through
+    `listPublishedGuidesOutsideBuild`, which returns nothing during a build.
+    Any other built-ahead page that lists articles must do the same.
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back

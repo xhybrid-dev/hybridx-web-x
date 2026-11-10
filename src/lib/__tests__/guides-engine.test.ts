@@ -9,10 +9,11 @@ const store = await import('../guides/store');
 const queue = await import('../guides/queue');
 const { runEngineStep, pipelineHasRoom, changedBlocks, getRun } = await import('../guides/engine/run');
 const { toContent, toLoose } = await import('../guides/engine/shape');
-const { buildReviewEmail, inEmailHours } = await import('../guides/email');
+const { buildEngineEmail, buildReviewEmail, inEmailHours } = await import('../guides/email');
+const backlinks = await import('../guides/backlinks');
 const { DEFAULT_SETTINGS } = await import('../guides/slots');
 import type { EngineModels, ReviewOutcome } from '../guides/engine/models';
-import type { ReviewEmail } from '../guides/email';
+import type { EngineEmail, LinksEmail, ReviewEmail } from '../guides/email';
 import type { LooseDraft } from '../guides/engine/shape';
 
 /*
@@ -35,15 +36,18 @@ const publishable: ReviewOutcome = { verdict: 'publishable', summary: 'Sound.', 
 
 function harness(over: Partial<EngineModels> = {}, at = '2026-11-10T10:00:00Z') {
   const sent: ReviewEmail[] = [];
+  const linkEmails: LinksEmail[] = [];
   const calls = { write: 0, review: 0 };
+  const links: string[] = [];
   const models: EngineModels = {
     write: over.write ?? (async (p) => (calls.write++, sampleFor(p))),
+    link: over.link ?? (async (p) => (links.push(p), [])),
     review: over.review ?? (async () => (calls.review++, publishable)),
     canReview: over.canReview,
   };
-  const deps = { models, send: async (e: ReviewEmail) => void sent.push(e), now: () => new Date(clock.at) };
+  const deps = { models, send: async (e: EngineEmail) => void (e.kind === 'links' ? linkEmails.push(e) : sent.push(e)), now: () => new Date(clock.at) };
   const clock = { at };
-  return { deps, sent, calls, clock, tick: () => runEngineStep(deps) };
+  return { deps, sent, linkEmails, calls, links, clock, tick: () => runEngineStep(deps) };
 }
 
 beforeEach(() => {
@@ -402,5 +406,140 @@ describe('a tick cut off by the platform', () => {
     expect(h.calls.review).toBe(0);
     expect(h.sent.map((e) => e.kind)).toEqual(['ready']);
     expect(buildReviewEmail(h.sent[0]).text).toContain('Second-model review skipped: the reviewer key (ANTHROPIC_API_KEY) is not set yet.');
+  });
+});
+
+describe('links from older articles to an approved one', () => {
+  /** A published article the new one should be linked from: the sample, published a while ago. */
+  const older = { ...sample, status: 'published' as const, publishedAt: '2026-10-01T07:00:00Z' };
+  /** The new article, approved for tomorrow's slot. */
+  const newer = {
+    ...sample,
+    slug: 'sled-pull-grip',
+    title: 'How do I stop my grip failing on the sled pull?',
+    point: 'On the sled pull your grip fails when the arms do the work: drive with the legs and reset the rope in long pulls.',
+    status: 'scheduled' as const,
+    publishAt: '2026-11-11T07:00:00Z',
+    publishedAt: undefined,
+  };
+  const paragraph = older.blocks[2] as { type: 'paragraph'; text: string };
+  const suggestion = {
+    article: older.slug,
+    paragraph: 3,
+    text: `${paragraph.text} The same leg drive is [what keeps your grip on the sled pull](/guides/sled-pull-grip).`,
+  };
+
+  async function setUp() {
+    await store.saveGuide(older);
+    await store.saveGuide(newer);
+  }
+
+  it('asks once, saves what passes, and emails Jon in the same tick, before any new draft', async () => {
+    await setUp();
+    const h = harness({ link: async (p) => (h.links.push(p), [suggestion]) });
+    await h.tick();
+    expect(h.links).toHaveLength(1);
+    expect(h.links[0]).toContain('/guides/sled-pull-grip');
+    expect(h.links[0]).toContain(`OLDER ARTICLE ${older.slug}`);
+    expect(h.calls.write).toBe(0);
+    const [p] = await backlinks.listProposals({ target: 'sled-pull-grip' });
+    expect([p.source, p.block, p.status]).toEqual([older.slug, 2, 'proposed']);
+    expect(h.linkEmails.map((e) => [e.guide.slug, e.proposals.length])).toEqual([['sled-pull-grip', 1]]);
+
+    h.clock.at = '2026-11-10T11:00:00Z';
+    await h.tick();
+    expect(h.links).toHaveLength(1);
+    expect(h.linkEmails).toHaveLength(1);
+    expect(h.calls.write).toBeGreaterThan(0);
+  });
+
+  it('drops a suggestion that changes the older article’s words, and says why', async () => {
+    await setUp();
+    const rewritten = { ...suggestion, text: suggestion.text.replace('The push fails', 'The sled push fails') };
+    const h = harness({ link: async () => [rewritten] });
+    const result = await h.tick();
+    expect(await backlinks.listProposals({ target: 'sled-pull-grip' })).toEqual([]);
+    expect(result.log?.join('\n')).toContain('refused 1');
+    expect(h.linkEmails).toEqual([]);
+  });
+
+  it('makes no call when nothing published is related, and drafts instead', async () => {
+    await store.saveGuide(newer);
+    const h = harness();
+    await h.tick();
+    expect(h.links).toEqual([]);
+    expect(h.calls.write).toBe(1);
+    expect((await backlinks.listBacklinkStates())[0].status).toBe('none');
+  });
+
+  it('counts a cut-off call, retries next tick, and gives up after three', async () => {
+    await setUp();
+    let calls = 0;
+    const h = harness({ link: async () => (calls++, Promise.reject(new Error('timeout'))) });
+    for (const at of ['2026-11-10T10:00:00Z', '2026-11-10T11:00:00Z', '2026-11-10T12:00:00Z', '2026-11-10T13:00:00Z']) {
+      h.clock.at = at;
+      await h.tick();
+    }
+    expect(calls).toBe(3);
+    expect((await backlinks.listBacklinkStates())[0].status).toBe('failed');
+  });
+
+  it('puts an accepted link in only once the new article is live', async () => {
+    await setUp();
+    const h = harness({ link: async () => [suggestion] });
+    await h.tick();
+    const before = (await store.getGuide(older.slug))!.revision;
+
+    const accepted = await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'accept', new Date('2026-11-10T12:00:00Z'));
+    expect(accepted.status).toBe('accepted');
+    expect((await store.getGuide(older.slug))!.revision).toBe(before);
+
+    expect(await backlinks.applyAcceptedLinks(new Date('2026-11-10T20:00:00Z'))).toEqual({ applied: [], stale: [] });
+    expect(await backlinks.applyAcceptedLinks(new Date('2026-11-11T07:00:00Z'))).toEqual({ applied: [`sled-pull-grip__${older.slug}`], stale: [] });
+    const after = (await store.getGuide(older.slug))!;
+    expect(after.revision).toBe(before + 1);
+    expect((after.blocks[2] as { text: string }).text).toBe(suggestion.text);
+  });
+
+  it('applies at once when the new article is already live, and never twice', async () => {
+    await store.saveGuide(older);
+    await store.saveGuide({ ...newer, status: 'published', publishAt: undefined, publishedAt: '2026-11-10T07:00:00Z' });
+    const h = harness({ link: async () => [suggestion] });
+    await h.tick();
+    const p = await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'accept');
+    expect(p.status).toBe('applied');
+    await expect(backlinks.decideProposal(p.id, 'skip')).rejects.toThrow('already in');
+  });
+
+  it('marks a suggestion stale if the paragraph changed in the meantime', async () => {
+    await setUp();
+    const h = harness({ link: async () => [suggestion] });
+    await h.tick();
+    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'accept');
+    const current = (await store.getGuide(older.slug))!;
+    const { revision: _r, updatedAt: _u, ...rest } = current;
+    await store.saveGuide({ ...rest, blocks: current.blocks.map((b, i) => (i === 2 ? { type: 'paragraph' as const, text: 'Rewritten by Jon.' } : b)) });
+    expect((await backlinks.applyAcceptedLinks(new Date('2026-11-11T08:00:00Z'))).stale).toHaveLength(1);
+    expect((await store.getGuide(older.slug))!.blocks[2]).toEqual({ type: 'paragraph', text: 'Rewritten by Jon.' });
+  });
+
+  it('leaves a skipped suggestion out', async () => {
+    await setUp();
+    const h = harness({ link: async () => [suggestion] });
+    await h.tick();
+    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'skip');
+    expect(await backlinks.applyAcceptedLinks(new Date('2026-11-11T08:00:00Z'))).toEqual({ applied: [], stale: [] });
+  });
+
+  it('emails the suggestions with the new link marked, and buttons that only open the page', async () => {
+    await setUp();
+    const h = harness({ link: async () => [suggestion] });
+    await h.tick();
+    const { subject, html, text } = buildEngineEmail(h.linkEmails[0]);
+    expect(subject).toBe('Links to check: How do I stop my grip failing on the sled pull?');
+    expect(html).toContain('background:#FADB5C;font-weight:bold;">what keeps your grip on the sled pull</a>');
+    expect(text).toContain(`In "${older.title}":`);
+    const hrefs = [...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs.filter((u) => u.includes('/admin/')).every((u) => /\/admin\/guides\/(sled-pull-grip#links|settings)$/.test(u))).toBe(true);
   });
 });

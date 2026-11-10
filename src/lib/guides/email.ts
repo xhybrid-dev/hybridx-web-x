@@ -19,6 +19,7 @@ import { parseInline, plainText } from './inline';
 import { TOOLS } from './topics';
 import type { Block, Guide } from './types';
 import type { ReviewOutcome } from './engine/models';
+import type { LinkProposal } from './backlinks';
 
 export type ReviewEmailKind = 'ready' | 'revised' | 'reminder' | 'gave-up';
 
@@ -34,19 +35,32 @@ export interface ReviewEmail {
   error?: string;
 }
 
+/** Links from older articles to a newly approved one, for Jon to accept or skip. */
+export interface LinksEmail {
+  kind: 'links';
+  to: string;
+  /** The new article. */
+  guide: Guide;
+  proposals: (Pick<LinkProposal, 'source' | 'after'> & { sourceTitle: string })[];
+}
+
+/** Every email the engine sends. */
+export type EngineEmail = ReviewEmail | LinksEmail;
+
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://hybridx.club').replace(/\/$/, '');
 const YELLOW = '#FADB5C';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-function inlineHtml(text: string): string {
+function inlineHtml(text: string, highlight?: string): string {
   return parseInline(text)
     .map((t) => {
       if (t.kind === 'bold') return `<strong>${esc(t.text)}</strong>`;
       if (t.kind === 'italic') return `<em>${esc(t.text)}</em>`;
       if (t.kind === 'link') {
         const href = t.href.startsWith('/') ? SITE + t.href : t.href;
-        return `<a href="${esc(href)}" style="color:#111111;">${esc(t.text)}</a>`;
+        const mark = t.href === highlight ? `background:${YELLOW};font-weight:bold;` : '';
+        return `<a href="${esc(href)}" style="color:#111111;${mark}">${esc(t.text)}</a>`;
       }
       return esc(t.text);
     })
@@ -154,6 +168,64 @@ function findings(e: ReviewEmail): string[] {
   return out;
 }
 
+const button = (href: string, label: string, primary: boolean) =>
+  `<a href="${esc(href)}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 20px;border-radius:6px;font-weight:bold;text-decoration:none;${primary ? `background:${YELLOW};color:#000000;` : 'background:#ffffff;color:#111111;border:2px solid #111111;'}">${label}</a>`;
+
+/** The branded frame every engine email shares. */
+function frame(body: string): string {
+  return `
+  <div style="margin:0;padding:0;background-color:#0a0a0a;">
+    <div style="font-family: Helvetica, Arial, sans-serif; max-width: 640px; margin: 0 auto; background-color:#ffffff;">
+      <div style="background-color:#0a0a0a; padding: 22px 28px; border-bottom: 4px solid ${YELLOW};">
+        <span style="font-weight: 800; font-size: 20px; color:#ffffff;">HYBRID<span style="color:${YELLOW};">X</span></span>
+        <span style="color:#b3b3b3; font-size: 14px;"> · Guides</span>
+      </div>
+      <div style="padding: 28px;">${body}</div>
+      <div style="padding: 18px 28px; background:#f5f5f5; font-size:12px; color:#4d4d4d;">
+        Sent to ${esc(ARTICLE_REVIEWER.name)} as the reviewer of HybridX guides. Change the email hours, or pause drafting, in
+        <a href="${esc(SITE + '/admin/guides/settings')}" style="color:#111111;">guide settings</a>.
+      </div>
+    </div>
+  </div>`;
+}
+
+/** Any engine email. */
+export function buildEngineEmail(e: EngineEmail): { subject: string; html: string; text: string } {
+  return e.kind === 'links' ? buildLinksEmail(e) : buildReviewEmail(e);
+}
+
+/**
+ * Suggested links from older articles to a new one. Like the review email, its
+ * button only opens the page: accepting takes a tap there, after sign-in.
+ */
+export function buildLinksEmail(e: LinksEmail): { subject: string; html: string; text: string } {
+  const g = e.guide;
+  const page = `${SITE}/admin/guides/${g.slug}#links`;
+  const path = `/guides/${g.slug}`;
+  const n = e.proposals.length;
+  const lead = `${n === 1 ? 'One older article' : `${n} older articles`} could link to "${g.title}". Each change is below, with the new link highlighted. Nothing changes until you accept it, and an accepted link goes in when the new article goes live.`;
+  const subject = `Links to check: ${g.title}`;
+  const html = frame(`
+        <p style="${P}">${esc(lead)}</p>
+        <div>${button(page, 'Accept or skip', true)}</div>
+        ${e.proposals
+          .map(
+            (p) =>
+              `<div style="border-top:1px solid #dddddd;padding-top:12px;margin-top:12px;"><p style="${P}font-size:13px;color:#4d4d4d;">In <strong>${esc(p.sourceTitle)}</strong>:</p><p style="${P}">${inlineHtml(p.after, path)}</p></div>`,
+          )
+          .join('')}
+        <div style="margin-top:20px;">${button(page, 'Accept or skip', true)}</div>`);
+  const text = [
+    lead,
+    '',
+    `Accept or skip: ${page}`,
+    '',
+    ...e.proposals.flatMap((p) => [`In "${p.sourceTitle}":`, plainText(p.after), '']),
+    `Guide settings: ${SITE}/admin/guides/settings`,
+  ].join('\n');
+  return { subject, html, text };
+}
+
 export function buildReviewEmail(e: ReviewEmail): { subject: string; html: string; text: string } {
   const g = e.guide;
   const page = `${SITE}/admin/guides/${g.slug}`;
@@ -161,17 +233,8 @@ export function buildReviewEmail(e: ReviewEmail): { subject: string; html: strin
   const comment = `${page}?action=comment#comment`;
   const subject = `${SUBJECT[e.kind]}: ${g.title}`;
   const notes = findings(e);
-  const button = (href: string, label: string, primary: boolean) =>
-    `<a href="${esc(href)}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 20px;border-radius:6px;font-weight:bold;text-decoration:none;${primary ? `background:${YELLOW};color:#000000;` : 'background:#ffffff;color:#111111;border:2px solid #111111;'}">${label}</a>`;
 
-  const html = `
-  <div style="margin:0;padding:0;background-color:#0a0a0a;">
-    <div style="font-family: Helvetica, Arial, sans-serif; max-width: 640px; margin: 0 auto; background-color:#ffffff;">
-      <div style="background-color:#0a0a0a; padding: 22px 28px; border-bottom: 4px solid ${YELLOW};">
-        <span style="font-weight: 800; font-size: 20px; color:#ffffff;">HYBRID<span style="color:${YELLOW};">X</span></span>
-        <span style="color:#b3b3b3; font-size: 14px;"> · Guides</span>
-      </div>
-      <div style="padding: 28px;">
+  const html = frame(`
         <p style="${P}">${esc(lead(e))}</p>
         <h1 style="margin:0 0 8px;font-size:24px;color:#111111;">${esc(g.title)}</h1>
         <p style="${P}color:#4d4d4d;"><strong>The point:</strong> ${esc(g.point)}</p>
@@ -180,14 +243,7 @@ export function buildReviewEmail(e: ReviewEmail): { subject: string; html: strin
         ${notes.length ? `<div style="background:#f5f5f5;border-radius:8px;padding:14px 16px;margin:0 0 18px;">${notes.map((n) => `<p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:#111111;">${esc(n)}</p>`).join('')}</div>` : ''}
         <p style="${P}color:#4d4d4d;"><strong>Search description:</strong> ${esc(g.description)}</p>
         <div style="border-top:1px solid #dddddd;padding-top:8px;">${g.blocks.map((b, i) => blockHtml(b, i + 1)).join('\n')}</div>
-        <div style="margin-top:24px;">${button(approve, 'Approve', true)}${button(comment, 'Comment', false)}</div>
-      </div>
-      <div style="padding: 18px 28px; background:#f5f5f5; font-size:12px; color:#4d4d4d;">
-        Sent to ${esc(ARTICLE_REVIEWER.name)} as the reviewer of HybridX guides. Change the email hours, or pause drafting, in
-        <a href="${esc(SITE + '/admin/guides/settings')}" style="color:#111111;">guide settings</a>.
-      </div>
-    </div>
-  </div>`;
+        <div style="margin-top:24px;">${button(approve, 'Approve', true)}${button(comment, 'Comment', false)}</div>`);
 
   const text = [
     lead(e),

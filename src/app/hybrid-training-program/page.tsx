@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
+import PillarQuestions from '@/components/guides/PillarQuestions';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import { createArticleSchema, createFAQSchema } from '@/lib/seo';
@@ -161,6 +162,11 @@ const vsComparison = [
   { aspect: 'Metabolic health',  hybrid: 'Excellent', running: 'Excellent', lifting: 'Good' },
   { aspect: 'Longevity',         hybrid: 'Excellent — balanced joints', running: 'Good', lifting: 'Good' },
 ];
+
+// Built ahead of time and refreshed hourly, so the guides under this pillar
+// (PillarQuestions) appear without a deploy and without a Firestore read
+// while the site is built.
+export const revalidate = 3600;
 
 export default function HybridTrainingProgram() {
   return (
@@ -373,6 +379,8 @@ export default function HybridTrainingProgram() {
         </section>
 
         {/* ── Related Resources ────────────────────────────────────────────── */}
+        <PillarQuestions pillar="running-lifting" className="border-t border-border" />
+
         <section className="py-14 md:py-16 bg-secondary/30">
           <div className="container mx-auto px-6 max-w-4xl">
             <h2 className="text-xl font-headline font-bold text-primary mb-6">Read Next</h2>
