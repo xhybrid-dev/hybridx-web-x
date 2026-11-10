@@ -95,6 +95,7 @@ export const SITE_PAGES: readonly SitePage[] = [
   { route: '/calculators/body-fat-calculator', title: 'Body fat calculator', pillar: 'tools' },
   { route: '/calculators/calorie-macronutrient-calculator', title: 'Calorie and macronutrient calculator', pillar: 'tools' },
   { route: '/calculators/garmin-tcx-generator', title: 'Treadmill FIT/TCX generator', pillar: 'tools' },
+  { route: '/calculators/week-planner', title: 'Week planner', pillar: 'tools', hub: 'A 3, 4 or 5-day week of running and strength, built on HybridX rules, with a calendar file.' },
   { route: '/app', title: 'The HybridX app' },
   { route: '/books', title: 'HybridX training books' },
   { route: '/una', title: 'The X family for UNA Watch' },
@@ -157,6 +158,11 @@ export const TOOLS = {
     name: 'Percentage-based weight calculator',
     route: '/calculators/percentage-based-weight-calculator',
     blurb: 'The load for any percentage of your max.',
+  },
+  'week-planner': {
+    name: 'Week planner',
+    route: '/calculators/week-planner',
+    blurb: 'Pick 3, 4 or 5 days, your goal and kit, and get a week of running and strength that never stacks the hard sessions.',
   },
   'athx-endurance': {
     name: 'ATHX endurance pacing calculator',

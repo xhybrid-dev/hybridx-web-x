@@ -40,6 +40,8 @@ export interface BriefTopic {
   pillar: PillarId;
   proof: string;
   tool?: ToolId;
+  /** The tool a topic waited for. Once built, it is the topic's tool. */
+  needs?: string;
   note?: string;
 }
 
@@ -108,9 +110,10 @@ export type BriefArticle = Subject & Pick<Guide, 'slug'>;
 export function draftPrompt(topic: BriefTopic, published: BriefArticle[]): string {
   const p = pillarOf(topic.pillar);
   const related = linkCandidates({ title: topic.question, pillar: topic.pillar, point: topic.note }, published, 3);
+  const tool = topic.tool ?? (topic.needs && Object.hasOwn(TOOLS, topic.needs) ? (topic.needs as ToolId) : undefined);
   const proof =
-    topic.proof === 'tool' && topic.tool
-      ? `the tool "${topic.tool}" (${TOOLS[topic.tool].name}), as a calculator block, with a sentence on how to use it`
+    topic.proof === 'tool' && tool
+      ? `the tool "${tool}" (${TOOLS[tool].name}), as a calculator block, with a sentence on how to use it`
       : topic.proof === 'any'
         ? 'your choice of one: a workout, a table built from the facts, or a relevant tool'
         : `a ${topic.proof}`;

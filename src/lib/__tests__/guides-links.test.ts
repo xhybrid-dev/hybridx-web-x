@@ -193,3 +193,10 @@ describe('which articles are asked about', () => {
     expect(prompt).not.toContain('2: Why a sled is not the only way');
   });
 });
+
+describe('a topic that waited for a tool', () => {
+  it('gets that tool as its proof once it is built', () => {
+    const brief = draftPrompt({ question: 'How should I set up a 3-day running and lifting week?', pillar: 'running-lifting', proof: 'tool', needs: 'week-planner' }, []);
+    expect(brief).toContain('PROOF ELEMENT: the tool "week-planner" (Week planner), as a calculator block');
+  });
+});

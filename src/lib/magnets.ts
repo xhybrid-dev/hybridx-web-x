@@ -21,6 +21,8 @@
 // impossible, and that calculator is the part of that page doing the
 // persuading. Plumbing is generic; pages are bespoke.
 
+import { parsePlannerInput, plannerQuery } from '@/lib/calculators/week-planner';
+
 /**
  * How the asset reaches the person.
  *
@@ -62,7 +64,19 @@ export interface GatedAsset {
   disposition: 'inline' | 'attachment';
 }
 
-export type MagnetAsset = PublicAsset | GatedAsset;
+/**
+ * A page built for this person from what they entered in the form: the week
+ * planner's four weeks, say. Nothing secret, so it pairs with `immediate`. The
+ * builder validates the fields and returns null when they are incomplete,
+ * which the capture action reports instead of sending a broken link.
+ */
+export interface PersonalAsset {
+  kind: 'personal';
+  /** A path on this site, from the submitted form, or null. */
+  url(form: { get(name: string): FormDataEntryValue | null }): string | null;
+}
+
+export type MagnetAsset = PublicAsset | GatedAsset | PersonalAsset;
 
 /** The delivery email's copy and colour, which is all that differs between them. */
 export interface MagnetEmailCopy {
@@ -247,6 +261,39 @@ export const MAGNETS: readonly MagnetDefinition[] = [
       accentText: '#FBF5EF',
     },
   },
+  {
+    // The week planner's "email me this week and the next three". The asset is
+    // the planner page itself, opened on this person's four weeks.
+    slug: 'week_planner',
+    name: 'Week planner: four weeks by email',
+    tag: 'week-planner',
+    pagePath: '/calculators/week-planner',
+    rateLimitBucket: 'week-planner',
+    delivery: 'immediate',
+    asset: {
+      kind: 'personal',
+      url(form) {
+        const input = parsePlannerInput((key) => {
+          const v = form.get(key);
+          return typeof v === 'string' ? v : null;
+        });
+        return input ? `/calculators/week-planner?${plannerQuery(input)}&weeks=4#plan` : null;
+      },
+    },
+    email: {
+      subject: 'Your four weeks of training',
+      heading: 'Your four weeks are ready',
+      intro:
+        'Here is the week you planned, and the three after it. Weeks 1 to 3 build; week 4 is lighter on purpose. The page has a calendar file, so every session can sit in your diary.',
+      buttonLabel: 'Open my four weeks',
+      insight:
+        'The rule the whole plan is built on: when strength and a run share a day, lift first, and leave at least 6 to 8 hours between heavy legs and a hard run. Move sessions around as life needs, but keep that one.',
+      footerLinkLabel: 'Plan a different week',
+      reason: 'you asked for your four-week plan at',
+      accent: '#fadb5c',
+      accentText: '#111111',
+    },
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -293,6 +340,9 @@ export function magnetDownloadPath(slug: string, token: string): string {
  */
 export function magnetAssetUrl(magnet: MagnetDefinition, token: string | null): string {
   if (magnet.asset.kind === 'public') return magnet.asset.url;
+  if (magnet.asset.kind === 'personal') {
+    throw new Error(`Magnet "${magnet.slug}" is built per person: use its asset.url(form).`);
+  }
   if (!token) {
     throw new Error(`Magnet "${magnet.slug}" is gated and needs a token to build a link.`);
   }

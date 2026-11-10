@@ -72,12 +72,24 @@ describe('delivery and asset must agree', () => {
     }
   });
 
-  it('keeps every immediate magnet on a public asset', () => {
+  it('keeps every immediate magnet on a public or personal asset', () => {
     // The reverse: immediate delivery emails the asset URL directly, and a
-    // gated one has no URL until a token exists.
+    // gated one has no URL until a token exists. A personal asset is a page
+    // built from the form, with nothing in it to gate.
     for (const magnet of MAGNETS.filter((m) => m.delivery === 'immediate')) {
-      expect(magnet.asset.kind, magnet.slug).toBe('public');
+      expect(['public', 'personal'], magnet.slug).toContain(magnet.asset.kind);
     }
+  });
+
+  it('builds the week planner link only from a complete, valid form', () => {
+    const magnet = MAGNETS.find((m) => m.slug === 'week_planner')!;
+    if (magnet.asset.kind !== 'personal') throw new Error('expected a personal asset');
+    const form = (o: Record<string, string>) => ({ get: (k: string) => o[k] ?? null });
+    expect(magnet.asset.url(form({ days: '4', goal: 'first-hyrox', kit: 'home', long: 'sat' }))).toBe(
+      '/calculators/week-planner?days=4&goal=first-hyrox&kit=home&long=sat&weeks=4#plan',
+    );
+    expect(magnet.asset.url(form({ days: '6', goal: 'first-hyrox', kit: 'home', long: 'sat' }))).toBeNull();
+    expect(magnet.asset.url(form({ days: '4', goal: 'https://evil.example', kit: 'home', long: 'sat' }))).toBeNull();
   });
 });
 

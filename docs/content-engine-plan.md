@@ -61,7 +61,7 @@ italics.
 | D4 | ~~Publishing slots~~ **Decided:** Monday, Wednesday and Friday at 07:00; emails 07:00–20:00 | Step 3 |
 | D5 | ~~Review address~~ **Decided:** the admin address (editable in settings) | Step 4 |
 | D6 | ~~The reviewer model~~ **Decided:** Claude reviews Gemini's drafts. Needs `ANTHROPIC_API_KEY` (step 4), which also switches on the dormant monthly analytics review | Step 4 |
-| D7 | Week planner: standalone, or the plan finder's result screen. *Standalone first* | Step 5 |
+| D7 | ~~Week planner~~ **Decided:** standalone | Step 5 |
 | D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
 | D9 | The HYROX pacer versus the £5 Pacing Pack. *A free tool for run splits and budgets; the station-by-station table emailed or in the pack until 14 March 2027* | Step 9 |
 | D10 | A Google Ads account and developer token for Keyword Planner volumes. *Apply early; nothing waits on it* | Step 10 |
@@ -429,19 +429,43 @@ linked *from* the older ones, not only link back to them.
   more as the library grows past about thirty articles; overdone, it reads as
   spam, which is why every link is yours to approve.
 
-### Step 5: the week planner (M)
+### Step 5: the week planner (M). Built
 
-- **Builds:**
-  - `src/lib/calculators/week-planner.ts`, the rule engine;
-  - its page under `/calculators/`, its embed block, and `.ics` export;
-  - a magnet entry in `src/lib/magnets.ts` ("Email me this week and the next
-    three");
-  - a mapping of goal and day count to app programmes.
-- **Tests:** every input combination against every rule (section 5.1); the
-  magnet tests that already exist.
-- **You, before merge:** D7, and confirm the session rules (minimum gaps between
-  heavy legs and hard runs) in your own numbers.
-- **Then:** candidates 15–18 enter the queue.
+D7 decided: standalone. Session gap confirmed by you: at least 6 to 8 hours
+between heavy legs and a hard run (10 November 2026).
+
+- **Built:**
+  - `src/lib/calculators/week-planner.ts`: the rule engine and the session
+    library. Inputs: 3, 4 or 5 days; first HYROX, faster HYROX, ATHX, or a
+    faster 10k plus strength; full gym, no sled, basic gym or home; the
+    long-run day. Output: four weeks (1 to 3 build, 4 is lighter), with kit
+    swaps (no sled: wall drives and step-ups; no SkiErg: rower, swings or
+    burpees; home: dumbbell and kettlebell versions of every lift);
+  - `/calculators/week-planner`: the planner, a calendar file for the week
+    (or all four), the rules it is built on, and "Email me this week and the
+    next three";
+  - the `week_planner` magnet: immediate delivery of a **personal** asset, a
+    new kind: the planner page opened on that person's four weeks, built from
+    the validated form fields (`PersonalAsset` in `magnets.ts`);
+  - `week-planner` in the tool registry, so articles can embed it; the four
+    topics that waited for it are draftable, with the planner as their proof;
+  - links from the calculators hub, the sitemap and `llms.txt`.
+- **The rules, tested for all 336 combinations in every week**
+  (`week-planner.test.ts`):
+  1. exactly the chosen days, the long run on its day;
+  2. rest the day after the long run;
+  3. no two hard days touching in a 3-day week, never three in a row;
+  4. heavy legs and a hard run never on the same day;
+  5. a full day between heavy legs and the next hard run or long run;
+  6. strength before running on a shared day;
+  7. nothing that needs kit they don't have, and no distance given to a
+     swap done for reps or time;
+  8. weeks build, and week 4 is lighter than week 3.
+- **Not built:** the mapping to named app programmes. The app's programme
+  list is not in this repo; the CTA stays the free 12-week plan and the app's
+  existing wording. Revisit at step 11.
+- **You, after merge:** read a few weeks on the live page (the session
+  wording is mine, built on your rules) and tell me anything to change.
 
 ### Step 6: Search Console data, read by the server (M). Built, waiting for access
 
@@ -512,14 +536,24 @@ actually search for decides what gets written next.
   - within the hour, `/admin/guides/search` shows the first harvest; the
     summary email follows a couple of ticks later.
 
-### Step 7: performance page (S)
+### Step 7: performance page (S). Built
 
-- **Builds:** `/admin/guides/performance`, one row per article (indexed, clicks,
-  impressions, position, tool uses, CTA clicks, leads), with flags for "not
-  indexed after 30 days" and "too few impressions after 90 days".
-- **Tests:** the flag rules.
-- **Before it ships:** the three-month baseline export for existing pages. It
-  comes from step 6's data, or a manual export from Search Console beforehand.
+- **`/admin/guides/performance`:** one row per published article: days live,
+  indexed, clicks, impressions, position (the latest weekly harvest), tool
+  clicks, call-to-action clicks and leads.
+- **Flags:** not indexed 30 days after publishing; under 100 impressions in
+  the 28-day window 90 days after publishing. Each says what to do.
+- **Clicks** go through `/api/guides/out`, which adds one to a total per
+  article (`guideClicks`) and sends the reader on. No cookie, no identifier,
+  nothing about the visitor, so it counts every reader, not only those who
+  accepted analytics. The destination comes from the registry by id, never
+  from the URL, so it is not an open redirect. Bots are not counted.
+- **Leads:** a call to action carries `src=guide-<slug>`; the free-plan form
+  now records `src` on the lead, so sign-ups are credited to the article.
+  App trials happen on app.hybridx.club and are not counted here (step 11).
+- **Tests:** `guides-performance.test.ts`.
+- **Baseline:** the search page's CSV export from step 6 is the "before"
+  for existing pages; download one now and keep it.
 
 ### Step 8: strength and engine test (M)
 

@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import ShopEventLink from '@/components/shop/ShopEventLink';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Route, Dumbbell, ClipboardList, ArrowRight } from 'lucide-react';
+import { Route, Dumbbell, ClipboardList, ArrowRight, CalendarDays } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import PillarQuestions from '@/components/guides/PillarQuestions';
@@ -72,6 +72,14 @@ const calculatorCategories: CalculatorCategory[] = [
     href: '/calculators/general-health',
     ctaText: 'View Health Calculators',
   },
+  {
+    id: 'week-planner',
+    title: 'Week Planner',
+    description: 'Plan a 3, 4 or 5-day week of running and strength that never stacks the hard sessions, with a calendar file.',
+    icon: CalendarDays,
+    href: '/calculators/week-planner',
+    ctaText: 'Plan My Week',
+  },
 ];
 
 // Built ahead of time and refreshed hourly, so the guides under this pillar
@@ -93,7 +101,7 @@ export default function CalculatorsHubPage() {
               Your one-stop hub for essential tools to measure, track, and optimize every aspect of your training and health. From running pace to one-rep max, get the data you need to train smarter.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-10">
             {calculatorCategories.map((cat) => (
               <Card key={cat.id} className="shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col bg-card/80 backdrop-blur-sm border-border/60 group border-t-2 border-accent/40">
                 <CardHeader className="flex-row items-center space-x-4 pb-4 pt-6">

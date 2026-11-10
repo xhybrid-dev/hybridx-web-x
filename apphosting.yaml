@@ -18,6 +18,16 @@ runConfig:
   maxInstances: 1
 
 env:
+  # More heap for the build's TypeScript check, at build time only. The full
+  # check uses about 2 GB, which is Node's default ceiling on the build
+  # machine: at 1.92 GB it passed, at 1.98 GB (with the week planner) it ran out
+  # of memory locally. 3 GB leaves room to grow. Not a secret, so it cannot fail
+  # the build the way a missing secret does.
+  - variable: NODE_OPTIONS
+    value: --max-old-space-size=3072
+    availability:
+      - BUILD
+
   # The plan finder on the homepage (src/lib/plan-finder/launch.ts):
   #   off        the homepage alone (/start still works)
   #   on         the plan finder in front of the homepage for everyone

@@ -24,8 +24,16 @@ describe('the starting list', () => {
     expect(CANDIDATES).toHaveLength(32);
     for (const c of CANDIDATES) {
       if (c.tool) expect(Object.keys(TOOLS)).toContain(c.tool);
-      if (c.needs) expect(UNBUILT_TOOLS).toContain(c.needs);
+      // A topic waits for a tool until it is built; then that tool is its proof.
+      if (c.needs) expect([...UNBUILT_TOOLS, ...Object.keys(TOOLS)]).toContain(c.needs);
     }
+  });
+
+  it('frees the four week-planner topics now the planner is built', () => {
+    const planner = CANDIDATES.filter((c) => c.needs === 'week-planner');
+    expect(planner).toHaveLength(4);
+    expect(Object.keys(TOOLS)).toContain('week-planner');
+    expect(UNBUILT_TOOLS).not.toContain('week-planner');
   });
 
   it('seeds the queue once, and never again', async () => {
@@ -70,9 +78,9 @@ describe('ordering', () => {
 
   it('never offers a topic whose tool is not built', async () => {
     const all = await queue.listTopics();
-    const waiting = all.filter((t) => t.needs);
-    expect(waiting.length).toBe(9);
-    for (const t of all) await queue.setTopic(t.id, { status: t.needs ? 'queued' : 'drafted' }, at);
+    const unbuilt = (t: (typeof all)[number]) => !!t.needs && (UNBUILT_TOOLS as readonly string[]).includes(t.needs);
+    expect(all.filter(unbuilt).length).toBe(5);
+    for (const t of all) await queue.setTopic(t.id, { status: unbuilt(t) ? 'queued' : 'drafted' }, at);
     expect(await queue.nextTopic()).toBeNull();
   });
 });
