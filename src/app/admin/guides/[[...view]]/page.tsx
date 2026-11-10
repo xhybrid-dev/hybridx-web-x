@@ -10,6 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { getAdminSession } from '@/lib/admin-auth';
 import { loginUrlFor } from '@/lib/admin-return';
 import { canEdit, stillHasPlaceholders } from '@/lib/guides/review';
+import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guides/backlinks';
+import { parseInline } from '@/lib/guides/inline';
+import { HARVEST_EVERY_MS, getHarvest, getHarvestState, listMetrics } from '@/lib/guides/harvest/run';
+import { asQuestion } from '@/lib/guides/harvest/analyse';
 import { engineOn, getRun } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
@@ -29,6 +33,7 @@ import {
   addTopicAction,
   approveGuide,
   commentOnGuide,
+  decideLinkAction,
   createGuide,
   moveTopicAction,
   requeueTopicAction,
@@ -51,7 +56,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Guides', robots: { index: false, follow: false } };
 
 const BASE = '/admin/guides';
-const RESERVED = new Set(['new', 'settings', 'topics']);
+const RESERVED = new Set(['new', 'settings', 'topics', 'search']);
 
 const STATUS_WORDS: Record<GuideStatus, string> = {
   drafting: 'Being drafted',
@@ -94,6 +99,7 @@ export default async function GuidesAdmin({
   else if (view.length === 1 && view[0] === 'new') body = <NewArticle error={one(search.error)} />;
   else if (view.length === 1 && view[0] === 'settings') body = <Settings done={one(search.done)} error={one(search.error)} />;
   else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} />;
+  else if (view.length === 1 && view[0] === 'search') body = <SearchView />;
   else if (view.length === 1 && !RESERVED.has(view[0])) body = await Review({ slug: view[0], search });
   else if (view.length === 2 && view[1] === 'edit') body = await Edit({ slug: view[0] });
   else notFound();
@@ -117,6 +123,9 @@ export default async function GuidesAdmin({
             <Link href={`${BASE}/topics`} className="underline underline-offset-4">
               Topics
             </Link>
+            <Link href={`${BASE}/search`} className="underline underline-offset-4">
+              Search
+            </Link>
             <Link href={`${BASE}/new`} className="underline underline-offset-4">
               New article
             </Link>
@@ -138,7 +147,13 @@ export default async function GuidesAdmin({
 /* ── The queue ───────────────────────────────────────────────────────────── */
 
 async function Queue() {
-  const [guides, settings, taken] = await Promise.all([listAllGuides(), getEngineSettings(), takenSlots()]);
+  const [guides, settings, taken, waitingLinks] = await Promise.all([
+    listAllGuides(),
+    getEngineSettings(),
+    takenSlots(),
+    listProposals({ status: 'proposed' }),
+  ]);
+  const linkTargets = [...new Set(waitingLinks.map((p) => p.target))];
   const next = nextFreeSlot(new Date(), taken, settings);
   const groups: { title: string; statuses: GuideStatus[]; empty: string }[] = [
     { title: 'Waiting for you', statuses: ['awaiting_review', 'revising', 'drafting'], empty: 'Nothing to review.' },
@@ -153,6 +168,21 @@ async function Queue() {
         Next free slot: <strong>{describeSlot(next)}</strong>
         {settings.paused && <> · <strong>Paused</strong>: no new drafts until you resume it in settings.</>}
       </p>
+      {linkTargets.length > 0 && (
+        <section className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
+          <h2 className="font-headline text-lg font-bold">Links to check</h2>
+          <ul className="space-y-1">
+            {linkTargets.map((target) => (
+              <li key={target}>
+                <Link href={`${BASE}/${target}#links`} className="underline underline-offset-4">
+                  {guides.find((g) => g.slug === target)?.title ?? target}
+                </Link>{' '}
+                · {waitingLinks.filter((p) => p.target === target).length} suggestion(s) from older articles
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {groups.map((group) => {
         const rows = guides
           .filter((g) => group.statuses.includes(g.status))
@@ -202,7 +232,26 @@ const DONE: Record<string, (g: Guide) => string> = {
   commented: () => 'Comment saved.',
   revising: () => 'Comment saved. The engine revises the article on its next hourly run, and emails you when it is ready.',
   saved: (g) => `Saved as revision ${g.revision}.`,
+  'link-applied': () => 'Link accepted, and it is in: the older article has a new revision.',
+  'link-accepted': () => 'Link accepted. It goes into the older article when this one goes live.',
+  'link-skipped': () => 'Link skipped.',
+  'link-stale': () => 'That paragraph has changed since the suggestion, so the link was not put in.',
 };
+
+const LINK_STATUS: Record<LinkProposal['status'], string> = {
+  proposed: 'Waiting for you',
+  accepted: 'Accepted: goes in when this article goes live',
+  skipped: 'Skipped',
+  applied: 'In',
+  stale: 'Not put in',
+};
+
+/** The words of the new link in a suggested paragraph. */
+function linkWords(p: LinkProposal): string {
+  const path = `/guides/${p.target}`;
+  for (const t of parseInline(p.after)) if (t.kind === 'link' && t.href.split('#')[0] === path) return t.text;
+  return '';
+}
 
 function blockSummary(b: Block): string {
   const text =
@@ -213,13 +262,15 @@ function blockSummary(b: Block): string {
 async function Review({ slug, search }: { slug: string; search: Search }) {
   const guide = await getGuide(slug);
   if (!guide) notFound();
-  const [comments, revisions, published, settings, taken, run] = await Promise.all([
+  const [comments, revisions, published, settings, taken, run, proposals, linkState] = await Promise.all([
     listComments(slug),
     listRevisions(slug),
     listPublishedGuides().catch(() => []),
     getEngineSettings(),
     takenSlots(),
     getRun(slug),
+    listProposals({ target: slug }),
+    listBacklinkStates().then((all) => all.find((s) => s.target === slug)),
   ]);
   const articles = new Set(published.map((g) => g.slug));
   const action = one(search.action);
@@ -350,6 +401,69 @@ async function Review({ slug, search }: { slug: string; search: Search }) {
                 </ul>
               </>
             ))}
+        </section>
+      )}
+
+      {/* ── Links from older articles to this one ── */}
+      {(proposals.length > 0 || linkState) && (
+        <section id="links" className="space-y-3 rounded-lg border p-4">
+          <h3 className="font-headline font-bold">Links from older articles</h3>
+          {proposals.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No suggestions{linkState?.note ? `: ${linkState.note}` : '.'}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Each suggestion adds one link to this article inside an older one. Accepted links go in when this article is live, as a new
+                revision of the older article.
+              </p>
+              <ul className="space-y-4">
+                {proposals.map((p) => {
+                  const source = published.find((g) => g.slug === p.source);
+                  return (
+                    <li key={p.id} className="space-y-2 rounded-md bg-secondary/40 p-3">
+                      <p className="text-sm">
+                        In{' '}
+                        <Link className="font-semibold underline underline-offset-4" href={`${BASE}/${p.source}`}>
+                          {source?.title ?? p.source}
+                        </Link>
+                        , block {p.block + 1} · <span className="text-muted-foreground">{LINK_STATUS[p.status]}{p.note ? ` (${p.note})` : ''}</span>
+                      </p>
+                      <ArticleBody slug={p.source} blocks={[{ type: 'paragraph', text: p.after }]} articles={new Set([...articles, p.target])} />
+                      <p className="text-sm">
+                        Link words: <strong>{linkWords(p)}</strong>
+                      </p>
+                      {(p.status === 'proposed' || p.status === 'accepted' || p.status === 'skipped') && (
+                        <div className="flex flex-wrap gap-2">
+                          {p.status !== 'accepted' && (
+                            <form action={decideLinkAction}>
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="source" value={p.source} />
+                              <input type="hidden" name="decision" value="accept" />
+                              <Button type="submit" size="sm">
+                                Accept
+                              </Button>
+                            </form>
+                          )}
+                          {p.status !== 'skipped' && (
+                            <form action={decideLinkAction}>
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="source" value={p.source} />
+                              <input type="hidden" name="decision" value="skip" />
+                              <Button type="submit" size="sm" variant="outline">
+                                Skip
+                              </Button>
+                            </form>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
         </section>
       )}
 
@@ -593,7 +707,11 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
     <div className="space-y-8">
       <div>
         <h2 className="font-headline text-xl font-bold">Topics</h2>
-        <p className="text-sm text-muted-foreground">The engine drafts from the top, passing over topics whose tool is not built yet.</p>
+        <p className="text-sm text-muted-foreground">
+          The engine drafts from the top, passing over topics whose tool is not built yet. Each week the search harvest puts your own
+          questions and anything you moved up first, then topics people are searching for, highest score first, then the rest. Anything
+          you move down stays at the back.
+        </p>
       </div>
       {done && (
         <p role="status" className="rounded-md border-2 border-accent bg-accent/10 p-3 text-sm font-semibold">
@@ -633,6 +751,9 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
                   {t.tool ? ` · tool: ${TOOLS[t.tool].name}` : ''}
                   {!isDraftable(t) && t.needs ? ` · waits for the ${TOOL_NAMES[t.needs] ?? t.needs}` : ''}
                   {t.source === 'jon' ? ' · yours' : ''}
+                  {t.source === 'search' ? ' · from search' : ''}
+                  {t.search && t.search.score > 0 ? ` · ${t.search.impressions} impressions, position ${t.search.position}` : ''}
+                  {t.held ? ` · moved ${t.held} by you` : ''}
                   {t.failures ? ` · ${t.failures} failed attempt` : ''}
                 </span>
               </p>
@@ -685,6 +806,197 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
           </ul>
         </section>
       )}
+    </div>
+  );
+}
+
+/* ── Search Console ──────────────────────────────────────────────────────── */
+
+const DAY = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric', month: 'short', year: 'numeric' });
+
+async function SearchView() {
+  const [state, metrics, guides] = await Promise.all([getHarvestState(), listMetrics(), listAllGuides()]);
+  const record = state.lastHarvestId ? await getHarvest(state.lastHarvestId) : null;
+  const nextAt = state.lastHarvestAt ? new Date(Date.parse(state.lastHarvestAt) + HARVEST_EVERY_MS) : null;
+  const groups = record?.groups ?? [];
+  const refresh = groups.filter((g) => g.kind === 'refresh').slice(0, 20);
+  const elsewhere = groups.filter((g) => g.kind === 'covered' && g.guideSlug && g.pages[0] && g.pages[0].page !== `/guides/${g.guideSlug}`).slice(0, 10);
+  const added = new Set(record?.added.map((a) => a.question) ?? []);
+  const fresh = groups.filter((g) => g.kind === 'new' && !added.has(asQuestion(g.top))).slice(0, 10);
+  const owned = groups.filter((g) => g.kind === 'owned').slice(0, 10);
+  const published = guides.filter((g) => g.status === 'published');
+  const cell = 'px-3 py-2 text-left align-top';
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-1">
+        <h2 className="font-headline text-xl font-bold">Search</h2>
+        <p className="text-sm text-muted-foreground">
+          What people search for, read from Search Console once a week: 28 days ending three days before the harvest.
+        </p>
+        <p className="text-sm">
+          {record ? (
+            <>
+              Last harvest {DAY.format(new Date(record.at))} ({record.window.startDate} to {record.window.endDate}):{' '}
+              <strong>{record.clicks}</strong> clicks, <strong>{record.impressions}</strong> impressions, {record.rows} rows.
+              {nextAt && <> Next after {DAY.format(nextAt)}.</>}
+            </>
+          ) : (
+            'No harvest yet. The first runs on the hourly job once the site can read Search Console.'
+          )}
+        </p>
+        {state.error && (
+          <p role="alert" className="rounded-md border-2 border-foreground p-3 text-sm">
+            <strong>The last attempt failed:</strong> {state.error} It tries again a day after the attempt.
+          </p>
+        )}
+        <p className="flex flex-wrap gap-4 text-sm">
+          <a className="underline underline-offset-4" href="/api/admin/search-console-check">
+            Check access
+          </a>
+          {record && (
+            <a className="underline underline-offset-4" href={`/api/admin/search-console-export?harvest=${record.id}`}>
+              Download as CSV
+            </a>
+          )}
+        </p>
+      </div>
+
+      {record && (
+        <>
+          <section className="space-y-2">
+            <h3 className="font-headline font-bold">Added to the queue ({record.added.length})</h3>
+            {record.added.length ? (
+              <ul className="list-disc space-y-1 pl-5 text-sm">
+                {record.added.map((a) => (
+                  <li key={a.id}>
+                    {a.question} · {a.impressions} impressions · score {a.score}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nothing new was searched for often enough this time.</p>
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="font-headline font-bold">Pages to improve ({refresh.length})</h3>
+            <p className="text-sm text-muted-foreground">Ranking 4 to 20: close enough that a clearer answer can move them up. Highest score first.</p>
+            <ul className="divide-y rounded-lg border text-sm">
+              {refresh.map((g) => (
+                <li key={g.key} className="space-y-1 px-4 py-3">
+                  <p>
+                    <strong>&ldquo;{g.top}&rdquo;</strong> · {g.impressions} impressions · position {g.position.toFixed(1)} · score {g.score}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {g.why}
+                    {g.guideSlug && (
+                      <>
+                        {' '}
+                        <Link className="underline" href={`${BASE}/${g.guideSlug}/edit`}>
+                          Edit the article
+                        </Link>
+                      </>
+                    )}
+                  </p>
+                </li>
+              ))}
+              {!refresh.length && <li className="px-4 py-3 text-muted-foreground">None this week.</li>}
+            </ul>
+          </section>
+
+          {elsewhere.length > 0 && (
+            <section className="space-y-2">
+              <h3 className="font-headline font-bold">Answered, but searchers land elsewhere ({elsewhere.length})</h3>
+              <ul className="list-disc space-y-1 pl-5 text-sm">
+                {elsewhere.map((g) => (
+                  <li key={g.key}>
+                    &ldquo;{g.top}&rdquo;: {g.why}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="space-y-2">
+            <h3 className="font-headline font-bold">Other searches nothing answers yet</h3>
+            <p className="text-sm text-muted-foreground">Below the bar for adding automatically, or past this week&rsquo;s five. Add any you want written.</p>
+            <ul className="divide-y rounded-lg border text-sm">
+              {fresh.map((g) => (
+                <li key={g.key} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <span>
+                    <strong>&ldquo;{g.top}&rdquo;</strong> · {g.impressions} impressions · {pillarOf(g.pillar).name}
+                  </span>
+                  <form action={addTopicAction}>
+                    <input type="hidden" name="question" value={asQuestion(g.top)} />
+                    <input type="hidden" name="pillar" value={g.pillar} />
+                    <Button type="submit" size="sm" variant="outline">
+                      Add to the front
+                    </Button>
+                  </form>
+                </li>
+              ))}
+              {!fresh.length && <li className="px-4 py-3 text-muted-foreground">None.</li>}
+            </ul>
+          </section>
+
+          {owned.length > 0 && (
+            <section className="space-y-2">
+              <h3 className="font-headline font-bold">Already in the top three</h3>
+              <ul className="list-disc space-y-1 pl-5 text-sm">
+                {owned.map((g) => (
+                  <li key={g.key}>
+                    &ldquo;{g.top}&rdquo; · {g.page} · position {g.position.toFixed(1)} · {g.clicks} clicks
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+
+      <section className="space-y-2">
+        <h3 className="font-headline font-bold">Articles</h3>
+        {published.length ? (
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50">
+                <tr>
+                  <th className={cell}>Article</th>
+                  <th className={cell}>Clicks</th>
+                  <th className={cell}>Impressions</th>
+                  <th className={cell}>Position</th>
+                  <th className={cell}>Indexed</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {published.map((g) => {
+                  const m = metrics.find((x) => x.slug === g.slug);
+                  return (
+                    <tr key={g.slug}>
+                      <td className={cell}>
+                        <Link className="underline" href={`${BASE}/${g.slug}`}>
+                          {g.title}
+                        </Link>
+                        {m?.queries?.length ? <p className="text-xs text-muted-foreground">{m.queries.join(' · ')}</p> : null}
+                      </td>
+                      <td className={cell}>{m?.clicks ?? '–'}</td>
+                      <td className={cell}>{m?.impressions ?? '–'}</td>
+                      <td className={cell}>{m?.position ?? '–'}</td>
+                      <td className={cell}>
+                        {m?.index ? (m.index.verdict === 'PASS' ? 'Yes' : m.index.coverageState ?? m.index.verdict) : 'Not checked yet'}
+                        {m?.index && <p className="text-xs text-muted-foreground">checked {DAY.format(new Date(m.index.checkedAt))}</p>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nothing published yet.</p>
+        )}
+      </section>
     </div>
   );
 }

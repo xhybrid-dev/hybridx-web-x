@@ -48,8 +48,11 @@ import { pruneRateLimits } from '@/lib/rate-limit';
 import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
 import { runMonthlyReview } from '@/lib/plan-finder/monthly-review';
 import { publishDueGuides } from '@/lib/guides/store';
+import { applyAcceptedLinks } from '@/lib/guides/backlinks';
 import { runEngineStep } from '@/lib/guides/engine/run';
 import { liveDeps } from '@/lib/guides/engine/live';
+import { runSearchHarvest } from '@/lib/guides/harvest/run';
+import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -74,8 +77,9 @@ export async function GET(request: Request) {
   // sacrificing to the other's bad day, and neither is worth sacrificing to a
   // housekeeping sweep.
   // Guides go live at their slot whether or not this runs (the public pages
-  // decide that when they are read); this records them as published.
-  const [outbox, mirror, limits, rollups, notes, review, guides, engine] = await Promise.allSettled([
+  // decide that when they are read); this records them as published, and puts
+  // in the links from older articles Jon accepted once their target is live.
+  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -83,7 +87,9 @@ export async function GET(request: Request) {
     blankOldNotes(),
     runMonthlyReview(),
     publishDueGuides(),
+    applyAcceptedLinks(),
     runEngineStep(liveDeps),
+    runSearchHarvest(liveHarvestDeps),
   ]);
 
   const result = {
@@ -115,13 +121,21 @@ export async function GET(request: Request) {
       guides.status === 'fulfilled'
         ? guides.value
         : { error: String((guides.reason as Error)?.message ?? guides.reason) },
+    guideLinks:
+      links.status === 'fulfilled'
+        ? links.value
+        : { error: String((links.reason as Error)?.message ?? links.reason) },
     guideEngine:
       engine.status === 'fulfilled'
         ? engine.value
         : { error: String((engine.reason as Error)?.message ?? engine.reason) },
+    searchHarvest:
+      search.status === 'fulfilled'
+        ? search.value
+        : { error: String((search.reason as Error)?.message ?? search.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides, engine].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
+import PillarQuestions from '@/components/guides/PillarQuestions';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import { createHowToSchema, createFAQSchema } from '@/lib/seo';
@@ -93,6 +94,11 @@ const stations = [
   { name: 'Sandbag Lunges',   dist: '100m',   tip: 'These destroy your legs for the final run. Pace yourself. Shorter steps are more efficient.' },
   { name: 'Wall Balls',       dist: '100 reps',tip: 'The last station. Break into sets of 10–20 from the start — do not go unbroken and fail out.' },
 ];
+
+// Built ahead of time and refreshed hourly, so the guides under this pillar
+// (PillarQuestions) appear without a deploy and without a Firestore read
+// while the site is built.
+export const revalidate = 3600;
 
 export default function HowToTrainForHyrox() {
   return (
@@ -358,6 +364,8 @@ export default function HowToTrainForHyrox() {
             </div>
           </div>
         </section>
+
+        <PillarQuestions pillar="hyrox" className="border-t border-border" />
 
         {/* ── Related Resources ────────────────────────────────────────────── */}
         <section className="py-14 md:py-16 bg-secondary/30">

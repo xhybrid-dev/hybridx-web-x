@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import styles from './athx.module.css';
 import EnduranceCalculator from '@/components/athx/EnduranceCalculator';
 import AthxGuideForm from '@/components/athx/AthxGuideForm';
+import Link from 'next/link';
+import { pillarQuestions } from '@/components/guides/PillarQuestions';
 import {
   ATHX_EUROPE_CITIES,
   ATHX_FAQS,
@@ -174,6 +176,44 @@ const INSIGHT_CARDS = [
     body: 'Every zone is scored in absolute terms. Nothing is divided by your bodyweight, and the only place mass costs you is a run that doesn’t score.',
   },
 ];
+
+// Built ahead of time and refreshed hourly, so the guides under this pillar
+// (PillarQuestions) appear without a deploy and without a Firestore read
+// while the site is built.
+export const revalidate = 3600;
+
+/** The ATHX guides, in this page's own type: rendered only once there is one. */
+async function AthxQuestions() {
+  const { shown, total } = await pillarQuestions('athx');
+  if (!shown.length) return null;
+  return (
+    <section className={styles.section} aria-labelledby="athx-questions">
+      <div className={styles.container}>
+        <h2 className={styles.h2} id="athx-questions">
+          Questions answered
+        </h2>
+        <hr className={styles.rule} />
+        <ul className={styles.faqList} style={{ listStyle: 'none', padding: 0 }}>
+          {shown.map((g) => (
+            <li className={styles.faqItem} key={g.slug}>
+              <Link className={styles.faqQuestion} href={`/guides/${g.slug}`} style={{ textDecoration: 'none' }}>
+                <span>{g.title}</span>
+                <span className={styles.faqIndicator} aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className={styles.caption} style={{ marginTop: 16 }}>
+          <Link href="/guides#pillar-athx" style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 4 }}>
+            {total > shown.length ? `All ${total} ATHX guides` : 'Every HybridX guide'}
+          </Link>
+        </p>
+      </div>
+    </section>
+  );
+}
 
 export default function AthxFunnelPage() {
   return (
@@ -511,6 +551,8 @@ export default function AthxFunnelPage() {
             </div>
           </div>
         </section>
+
+        <AthxQuestions />
 
         {/* ── Final capture ──────────────────────────────────────────── */}
         <section className={styles.section} id="guide">

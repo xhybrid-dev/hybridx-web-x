@@ -190,6 +190,8 @@ PRODUCT
 
 LINKS
 - Link only to the pages listed in the brief, using their exact paths, in the form [link text](/path). Link once to the pillar page. Never invent a URL.
+- When the brief lists related articles, link to one or two of them in the body text, at the point where the reader would want to go next. The link words say what the reader will find there ("how to break up 100 wall balls"), never "click here", "this article" or a bare URL.
+- One link per page. Never link the same page twice, and never more than five links in an article.
 
 FORMATTING
 - Section headings are heading blocks of their own. Never put a markdown heading (#) inside a text field.

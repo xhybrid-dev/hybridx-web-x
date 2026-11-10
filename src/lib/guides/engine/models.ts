@@ -1,11 +1,12 @@
 // src/lib/guides/engine/models.ts
 //
-// The two model calls the engine makes, behind one interface so the state
+// The model calls the engine makes, behind one interface so the state
 // machine can be tested with stand-ins:
 //
 //   write   Gemini, through the site's existing Genkit setup (src/ai/genkit.ts,
 //           where its model is chosen), with the coaching bible as the system
 //           instruction and structured output. Drafts, fixes and revisions.
+//   link    the same, for where links to a new article go in older ones.
 //   review  Claude, through the Anthropic SDK and the same model and pattern as
 //           the monthly analytics review. Lists problems, never rewrites.
 //
@@ -20,6 +21,7 @@ import { ai } from '@/ai/genkit';
 import { MODEL as CLAUDE_MODEL } from '@/lib/plan-finder/monthly-review';
 import { BIBLE } from '../bible';
 import { REVIEWER_SYSTEM } from './prompts';
+import type { LinkSuggestion } from '../backlinks';
 import type { LooseDraft } from './shape';
 
 export interface ReviewNote {
@@ -41,6 +43,8 @@ export type ReviewOutcome = ModelReview | { skipped: string };
 
 export interface EngineModels {
   write(prompt: string): Promise<LooseDraft>;
+  /** Where links to a new article would read naturally in older ones. */
+  link(prompt: string): Promise<LinkSuggestion[]>;
   review(prompt: string): Promise<ReviewOutcome>;
   /** False when a review cannot happen, so a draft does not wait a tick for one. */
   canReview?(): boolean;
@@ -91,6 +95,21 @@ async function write(prompt: string): Promise<LooseDraft> {
   });
   if (!output) throw new Error('The drafting model returned nothing usable');
   return output as LooseDraft;
+}
+
+const LinksZ = gz.object({
+  links: gz.array(gz.object({ article: gz.string(), paragraph: gz.number(), text: gz.string() })),
+});
+
+async function link(prompt: string): Promise<LinkSuggestion[]> {
+  const { output } = await ai.generate({
+    system: BIBLE,
+    prompt,
+    output: { schema: LinksZ },
+    config: { temperature: 0.2 },
+  });
+  if (!output) throw new Error('The drafting model returned no link suggestions');
+  return output.links;
 }
 
 /* ── Claude: the reviewer ───────────────────────────────────────────────── */
@@ -150,4 +169,4 @@ async function review(prompt: string): Promise<ReviewOutcome> {
   return { ...ReviewZ.parse(JSON.parse(text.text)), model: response.model };
 }
 
-export const liveModels: EngineModels = { write, review, canReview: () => !!process.env.ANTHROPIC_API_KEY };
+export const liveModels: EngineModels = { write, link, review, canReview: () => !!process.env.ANTHROPIC_API_KEY };

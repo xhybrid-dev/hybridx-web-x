@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Route, Dumbbell, ClipboardList, ArrowRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
+import PillarQuestions from '@/components/guides/PillarQuestions';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -73,6 +74,11 @@ const calculatorCategories: CalculatorCategory[] = [
   },
 ];
 
+// Built ahead of time and refreshed hourly, so the guides under this pillar
+// (PillarQuestions) appear without a deploy and without a Firestore read
+// while the site is built.
+export const revalidate = 3600;
+
 export default function CalculatorsHubPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -126,6 +132,7 @@ export default function CalculatorsHubPage() {
             </div>
           </div>
         </section>
+        <PillarQuestions pillar="tools" className="border-t border-border" />
         <ShopEventLink />
       </main>
       <Footer />

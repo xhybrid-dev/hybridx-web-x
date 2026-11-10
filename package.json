@@ -53,6 +53,7 @@
     "firebase": "^11.9.1",
     "firebase-admin": "^14.1.0",
     "genkit": "^1.39.0",
+    "google-auth-library": "^9.15.1",
     "gpx-js": "^1.0.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.2",

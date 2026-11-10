@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import HyroxDominationForm from '@/components/hyrox/HyroxDominationForm';
 import TrackedLink from '@/components/TrackedLink';
+import PillarQuestions from '@/components/guides/PillarQuestions';
 import { createFAQSchema } from '@/lib/seo';
 import { fetchHyroxEvents, type HyroxEvent } from '@/lib/hyrox-events';
 
@@ -238,6 +239,7 @@ export default async function FreeHyroxPlanPage() {
         <WhatsIncludedSection />
         <AppUpsellSection />
         <FaqSection />
+        <PillarQuestions pillar="starting-out" className="bg-secondary/30" />
         <ShopEventLink />
       </main>
       <Footer />

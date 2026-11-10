@@ -12,8 +12,9 @@
 
 import { APP, ATHLETES, DIVISIONS, UNCOVERED_FORMATS } from '@/lib/facts';
 import { BANNED_DASHES, BANNED_PHRASES, MEDICAL_PHRASES, UNITS_AFTER_A_NUMBER, US_SPELLINGS, findWordViolations } from './bible';
-import { parseInline, plainText } from './inline';
-import { pillar as pillarOf } from './topics';
+import { plainText } from './inline';
+import { linkCandidates, linkedArticles, linksIn, type Subject } from './related';
+import { RESERVED_GUIDE_SLUGS, pillar as pillarOf } from './topics';
 import type { Block, Guide } from './types';
 
 export interface Issue {
@@ -30,6 +31,8 @@ export interface CheckResult {
 }
 
 export const WORDS = { min: 300, low: 350, high: 800, max: 900 } as const;
+/** Links in the text, not counting the call to action. */
+export const MAX_LINKS = 5;
 
 /** Every piece of reader-visible text, with the block it came from. */
 export function textUnits(blocks: Block[]): { block: number; text: string }[] {
@@ -190,8 +193,8 @@ const normalTitle = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').t
 /* ── The whole check ────────────────────────────────────────────────────── */
 
 export function checkDraft(
-  guide: Pick<Guide, 'slug' | 'title' | 'pillar' | 'blocks'>,
-  published: Pick<Guide, 'slug' | 'title' | 'blocks'>[] = [],
+  guide: Pick<Guide, 'slug' | 'title' | 'pillar' | 'blocks'> & Partial<Pick<Guide, 'point' | 'description'>>,
+  published: (Subject & Pick<Guide, 'slug' | 'blocks'>)[] = [],
   opts: { fromModel?: boolean } = {},
 ): CheckResult {
   const errors: Issue[] = [];
@@ -232,12 +235,23 @@ export function checkDraft(
   if (sections > 4) warnings.push({ code: 'too-many-sections', message: `${sections} section headings: one point needs four at most.` });
   if (guide.title.length > 60) warnings.push({ code: 'long-title', message: `The title is ${guide.title.length} characters; Google shows about 60.` });
 
-  // Links up to the pillar page, and a call to action.
+  // Links up to the pillar page, across to a related article, and a call to action.
   const pillarPage = pillarOf(guide.pillar).page;
-  const links = guide.blocks.flatMap((b) =>
-    'text' in b && typeof b.text === 'string' ? parseInline(b.text).filter((t) => t.kind === 'link').map((t) => (t as { href: string }).href) : [],
-  );
+  const links = linksIn(guide.blocks).map((href) => href.split('#')[0]);
   if (!links.includes(pillarPage)) warnings.push({ code: 'no-pillar-link', message: `Link once to the topic's main page, ${pillarPage}.` });
+  const twice = [...new Set(links.filter((href, i) => links.indexOf(href) !== i))];
+  if (twice.length) warnings.push({ code: 'repeat-link', message: `Linked more than once: ${twice.join(', ')}. Once each is enough.` });
+  if (links.length > MAX_LINKS) warnings.push({ code: 'too-many-links', message: `${links.length} links: keep it to ${MAX_LINKS} or fewer.` });
+  const live = new Set(published.map((g) => g.slug));
+  const linked = linkedArticles(guide.blocks).filter((s) => !(RESERVED_GUIDE_SLUGS as readonly string[]).includes(s));
+  for (const slug of linked.filter((s) => !live.has(s))) {
+    warnings.push({ code: 'dead-article-link', message: `/guides/${slug} is not published, so that link shows as plain text.` });
+  }
+  const related = linkCandidates(guide, published, 2);
+  if (related.length && !linked.some((s) => live.has(s))) {
+    const suggest = related.map((g) => `/guides/${g.slug} ("${g.title}")`).join(' or ');
+    warnings.push({ code: 'no-related-link', message: `No link to a related article. Link one in the text, such as ${suggest}.` });
+  }
   if (!guide.blocks.some((b) => b.type === 'cta')) warnings.push({ code: 'no-cta', message: 'No call to action.' });
 
   errors.push(...checkStandards(units), ...checkClaims(units));

@@ -18,6 +18,7 @@ import {
   unschedule,
 } from '@/lib/guides/review';
 import { EngineSettingsSchema } from '@/lib/guides/slots';
+import { LinkDecisionError, decideProposal } from '@/lib/guides/backlinks';
 import { engineOn } from '@/lib/guides/engine/run';
 import { addTopic, ensureQueueSeeded, moveTopic, requeueTopic, skipTopic } from '@/lib/guides/queue';
 import {
@@ -62,6 +63,24 @@ export async function approveGuide(form: FormData) {
   const slug = slugOf(form);
   const when = form.get('when') === 'now' ? 'now' : 'slot';
   await step(slug, () => approve(slug, when), when === 'now' ? 'published' : 'scheduled');
+}
+
+/** Accept or skip one suggested link from an older article to this one. */
+export async function decideLinkAction(form: FormData) {
+  await requireAdmin();
+  const slug = slugOf(form);
+  const source = String(form.get('source') ?? '');
+  const decision = form.get('decision') === 'accept' ? 'accept' : 'skip';
+  if (!SLUG.test(source) || source.length > 80) throw new Error('Bad request');
+  let done: string;
+  try {
+    const p = await decideProposal(`${slug}__${source}`, decision);
+    done = p.status === 'applied' ? 'link-applied' : p.status === 'accepted' ? 'link-accepted' : p.status === 'stale' ? 'link-stale' : 'link-skipped';
+  } catch (error) {
+    if (error instanceof LinkDecisionError) redirect(`${BASE}/${slug}?error=${encodeURIComponent(error.message)}#links`);
+    throw error;
+  }
+  redirect(`${BASE}/${slug}?done=${done}#links`);
 }
 
 export async function unscheduleGuide(form: FormData) {

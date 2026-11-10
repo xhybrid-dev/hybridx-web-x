@@ -91,6 +91,23 @@ export async function listPublishedGuides(now = Date.now()): Promise<Guide[]> {
     .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''));
 }
 
+/**
+ * Published articles for a page that is built ahead of time and refreshed
+ * hourly (the pillar pages). Never reads Firestore while the site is built, as
+ * the build has no credentials, and never fails: a pillar page must render
+ * whether or not the articles can be read. Built pages show no articles until
+ * their first refresh.
+ */
+export async function listPublishedGuidesOutsideBuild(): Promise<Guide[]> {
+  if (process.env.NEXT_PHASE === 'phase-production-build') return [];
+  try {
+    return await listPublishedGuides();
+  } catch (error) {
+    console.error('[guides] page served without articles:', error instanceof Error ? error.message : error);
+    return [];
+  }
+}
+
 /** A published or retired article, or null. Drafts are never public. */
 export async function getPublicGuide(slug: string, now = Date.now()): Promise<Guide | null> {
   return (await listPublicGuides(now)).find((g) => g.slug === slug) ?? null;

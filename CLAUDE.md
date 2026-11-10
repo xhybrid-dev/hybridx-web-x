@@ -149,6 +149,31 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **The reviewer key,** `ANTHROPIC_API_KEY`, is optional: without it drafts
     arrive marked "second review skipped". Bind it in `apphosting.yaml` only
     after the secret exists and is granted.
+- **Links between articles** (plan step 4b): `related.ts` scores relatedness;
+  `backlinks.ts` turns the engine's suggestions into links from older articles
+  to a newly approved one.
+  - **A suggestion may only wrap existing words in the link, or add one short
+    sentence at the end of a paragraph.** `checkLinkEdit` enforces it; don't
+    loosen it to let the model rewrite published text.
+  - **Accepted links go in only once the new article is live,** applied by
+    `applyAcceptedLinks` in the hourly job, engine on or not. A changed
+    paragraph makes the suggestion stale, never forced.
+  - **Pillar pages are ISR** (`revalidate = 3600`) and read articles through
+    `listPublishedGuidesOutsideBuild`, which returns nothing during a build.
+    Any other built-ahead page that lists articles must do the same.
+- **Search Console** (plan step 6) is read by `src/lib/google/search-console.ts`
+  with the runtime's own identity and a read-only scope: no key, no secret.
+  The property is `sc-domain:hybridx.club` unless `SEARCH_CONSOLE_SITE` says
+  otherwise. `/api/admin/search-console-check` says what is wrong when it
+  cannot read.
+  - **The weekly harvest** (`src/lib/guides/harvest/`) feeds the topic queue:
+    at most five new topics a week, only searches with a training word, and
+    never one Jon skipped. Query text is untrusted (anyone can type anything
+    into Google): it is compared and shown, never followed, and the CSV export
+    defuses spreadsheet formulas.
+  - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
+    questions and topics he moved up, then search demand by score, then the
+    rest, then topics he moved down. Keep his moves ahead of the data.
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back
