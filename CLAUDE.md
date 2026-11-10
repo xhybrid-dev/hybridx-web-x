@@ -130,7 +130,13 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **A scheduled article is public from its slot,** decided when it is read;
     the hourly job only records it as published afterwards.
 - **The drafting engine** (`src/lib/guides/engine/`) runs as a step of the
-  hourly maintenance job and is off unless `CONTENT_ENGINE_MODE` is `"on"`.
+  hourly maintenance job and is off unless `CONTENT_ENGINE_MODE` is `"on"`
+  (on since 10 November 2026; Pause in `/admin/guides/settings` stops it
+  without a deploy).
+  - **Assume a tick can be cut off at any moment** (App Hosting's request
+    limit is unconfirmed): count every model call before it starts, start
+    none after `CALL_WINDOW_MS`, and keep `recoverStalled` able to resume
+    anything left half-done.
   - **Pace:** one stage per tick, at most two model calls, a lease lock. The
     review gets a tick of its own.
   - **Never publishes:** it drafts, checks, reviews, emails Jon and stops.

@@ -42,6 +42,8 @@ export type ReviewOutcome = ModelReview | { skipped: string };
 export interface EngineModels {
   write(prompt: string): Promise<LooseDraft>;
   review(prompt: string): Promise<ReviewOutcome>;
+  /** False when a review cannot happen, so a draft does not wait a tick for one. */
+  canReview?(): boolean;
 }
 
 /* ── Gemini: the writer ─────────────────────────────────────────────────── */
@@ -148,4 +150,4 @@ async function review(prompt: string): Promise<ReviewOutcome> {
   return { ...ReviewZ.parse(JSON.parse(text.text)), model: response.model };
 }
 
-export const liveModels: EngineModels = { write, review };
+export const liveModels: EngineModels = { write, review, canReview: () => !!process.env.ANTHROPIC_API_KEY };

@@ -272,7 +272,7 @@ and their order can change.
   - New article, then edit it, approve it, and see it go live at the slot, or
     Publish now and see it at `/guides/<slug>`.
 
-### Step 4: AI drafting and the email loop (L). Built, switched off
+### Step 4: AI drafting and the email loop (L). Built, switched on 10 November 2026
 
 - **Builds** (`src/lib/guides/`):
   - **`bible.ts`:** the coaching bible, drawn from your published method (three
@@ -337,6 +337,16 @@ and their order can change.
   stand-in models) and `guides-queue.test.ts` (6). The whole suite has 609.
 - **Checked by hand:** the Topics page (load, add, reorder, skip) and the
   findings panel in a browser, against an in-memory Firestore.
+- **Safe to cut off** (added when switching on): App Hosting's request time
+  limit could not be confirmed, so the engine assumes a tick can be killed at
+  any moment:
+  - every model call is counted before it starts, so three cut-off reviews
+    mean "review skipped" rather than a retry every hour;
+  - no new call starts more than 25 seconds into a tick;
+  - the next tick puts a topic stuck "drafting" back in the queue, and gives a
+    draft saved without its run a new one;
+  - without the reviewer key, a draft is emailed in the same tick rather than
+    waiting an hour for a review that cannot happen.
 - **Not yet run against the real models.** There are no API keys in my session,
   and a real run spends money, so the first live draft is the real test. It is
   safe to try, because nothing publishes without you.
