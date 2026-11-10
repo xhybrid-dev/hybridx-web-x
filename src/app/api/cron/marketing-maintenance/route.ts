@@ -23,6 +23,11 @@
 //      passed as published (src/lib/guides/store.ts). Visitors see them from
 //      the slot itself either way; this keeps Firestore saying so too.
 //
+//   5. **Draft guides.** One step of the drafting engine
+//      (src/lib/guides/engine/run.ts): checks, a review, a revision or a new
+//      draft, then any review email that is due. Off unless
+//      CONTENT_ENGINE_MODE is "on". It never publishes anything.
+//
 // All are safe to run repeatedly and safe to miss: the outbox is keyed on
 // per-lead state and the mirror is a full replacement. A skipped run delays
 // work, it does not corrupt anything.
@@ -43,6 +48,8 @@ import { pruneRateLimits } from '@/lib/rate-limit';
 import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
 import { runMonthlyReview } from '@/lib/plan-finder/monthly-review';
 import { publishDueGuides } from '@/lib/guides/store';
+import { runEngineStep } from '@/lib/guides/engine/run';
+import { liveDeps } from '@/lib/guides/engine/live';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -68,7 +75,7 @@ export async function GET(request: Request) {
   // housekeeping sweep.
   // Guides go live at their slot whether or not this runs (the public pages
   // decide that when they are read); this records them as published.
-  const [outbox, mirror, limits, rollups, notes, review, guides] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review, guides, engine] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -76,6 +83,7 @@ export async function GET(request: Request) {
     blankOldNotes(),
     runMonthlyReview(),
     publishDueGuides(),
+    runEngineStep(liveDeps),
   ]);
 
   const result = {
@@ -107,9 +115,13 @@ export async function GET(request: Request) {
       guides.status === 'fulfilled'
         ? guides.value
         : { error: String((guides.reason as Error)?.message ?? guides.reason) },
+    guideEngine:
+      engine.status === 'fulfilled'
+        ? engine.value
+        : { error: String((engine.reason as Error)?.message ?? engine.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, engine].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

@@ -25,7 +25,8 @@ import { VERSION as ROUTE_VERSION } from './routing';
 import { addDays, dayMs, isoDay } from './dates';
 import { loadRange, reportFor } from './store';
 
-const MODEL = 'claude-opus-5-5';
+/** The Claude model for analysis and review. The guide reviewer uses it too. */
+export const MODEL ='claude-opus-5-5';
 const MAX_NOTES = 200;
 const MAX_ATTEMPTS = 3;
 /** Below this many visits in the month, a review would only restate noise. */

@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { getAdminSession } from '@/lib/admin-auth';
 import { loginUrlFor } from '@/lib/admin-return';
 import { canEdit, stillHasPlaceholders } from '@/lib/guides/review';
+import { engineOn, getRun } from '@/lib/guides/engine/run';
+import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
 import {
   getEngineSettings,
@@ -21,12 +23,17 @@ import {
   reviewAddress,
   takenSlots,
 } from '@/lib/guides/store';
-import { PILLARS, pillar as pillarOf } from '@/lib/guides/topics';
+import { PILLARS, TOOLS, pillar as pillarOf } from '@/lib/guides/topics';
 import type { Block, Guide, GuideStatus } from '@/lib/guides/types';
 import {
+  addTopicAction,
   approveGuide,
   commentOnGuide,
   createGuide,
+  moveTopicAction,
+  requeueTopicAction,
+  seedTopicsAction,
+  skipTopicAction,
   rejectGuide,
   resolveGuideComment,
   retireGuide,
@@ -44,7 +51,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Guides', robots: { index: false, follow: false } };
 
 const BASE = '/admin/guides';
-const RESERVED = new Set(['new', 'settings']);
+const RESERVED = new Set(['new', 'settings', 'topics']);
 
 const STATUS_WORDS: Record<GuideStatus, string> = {
   drafting: 'Being drafted',
@@ -86,6 +93,7 @@ export default async function GuidesAdmin({
   if (view.length === 0) body = <Queue />;
   else if (view.length === 1 && view[0] === 'new') body = <NewArticle error={one(search.error)} />;
   else if (view.length === 1 && view[0] === 'settings') body = <Settings done={one(search.done)} error={one(search.error)} />;
+  else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} />;
   else if (view.length === 1 && !RESERVED.has(view[0])) body = await Review({ slug: view[0], search });
   else if (view.length === 2 && view[1] === 'edit') body = await Edit({ slug: view[0] });
   else notFound();
@@ -106,6 +114,9 @@ export default async function GuidesAdmin({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm">
+            <Link href={`${BASE}/topics`} className="underline underline-offset-4">
+              Topics
+            </Link>
             <Link href={`${BASE}/new`} className="underline underline-offset-4">
               New article
             </Link>
@@ -189,6 +200,7 @@ const DONE: Record<string, (g: Guide) => string> = {
   rejected: () => 'Turned down.',
   retired: (g) => (g.redirectTo ? `Retired. Its readers now go to ${g.redirectTo}.` : 'Retired. Its page is gone.'),
   commented: () => 'Comment saved.',
+  revising: () => 'Comment saved. The engine revises the article on its next hourly run, and emails you when it is ready.',
   saved: (g) => `Saved as revision ${g.revision}.`,
 };
 
@@ -201,12 +213,13 @@ function blockSummary(b: Block): string {
 async function Review({ slug, search }: { slug: string; search: Search }) {
   const guide = await getGuide(slug);
   if (!guide) notFound();
-  const [comments, revisions, published, settings, taken] = await Promise.all([
+  const [comments, revisions, published, settings, taken, run] = await Promise.all([
     listComments(slug),
     listRevisions(slug),
     listPublishedGuides().catch(() => []),
     getEngineSettings(),
     takenSlots(),
+    getRun(slug),
   ]);
   const articles = new Set(published.map((g) => g.slug));
   const action = one(search.action);
@@ -296,6 +309,48 @@ async function Review({ slug, search }: { slug: string; search: Search }) {
         <p className="rounded-lg border p-4 text-sm">
           <strong>Turned down:</strong> {guide.rejectionReason}
         </p>
+      )}
+
+      {/* ── What the checks and the reviewer found (drafts from the engine) ── */}
+      {run && (run.checks || run.review || run.error) && (
+        <section className="space-y-2 rounded-lg border p-4 text-sm">
+          <h3 className="font-headline font-bold">What the checks and the reviewer found</h3>
+          {run.error && <p>A step failed: {run.error}</p>}
+          {run.checks && (
+            <>
+              <p>{run.checks.errors.length ? `${run.checks.errors.length} problem(s) still flagged` : 'All checks passed'} · {run.checks.words} words</p>
+              <ul className="list-disc space-y-1 pl-5">
+                {run.checks.errors.map((i, n) => (
+                  <li key={`e${n}`}>
+                    <strong>Problem{i.block ? ` (block ${i.block})` : ''}:</strong> {i.message}
+                  </li>
+                ))}
+                {run.checks.warnings.map((i, n) => (
+                  <li key={`w${n}`}>
+                    For you to judge{i.block ? ` (block ${i.block})` : ''}: {i.message}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {run.review &&
+            ('skipped' in run.review ? (
+              <p>Second-model review skipped: {run.review.skipped}.</p>
+            ) : (
+              <>
+                <p>
+                  Reviewer: {run.review.verdict === 'publishable' ? 'publishable' : 'needs fixes'}. {run.review.summary}
+                </p>
+                <ul className="list-disc space-y-1 pl-5">
+                  {run.review.notes.map((note, n) => (
+                    <li key={n}>
+                      <strong>{note.severity === 'serious' ? 'Serious' : 'Minor'}{note.block ? ` (block ${note.block})` : ''}:</strong> &ldquo;{note.quote}&rdquo; {note.problem}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ))}
+        </section>
       )}
 
       {/* ── The article, as it will appear, block by block ── */}
@@ -502,7 +557,134 @@ async function Settings({ done, error }: { done?: string; error?: string }) {
           <strong>Pause</strong>: no new drafts or review emails. Articles you have already approved still go live in their slots.
         </span>
       </label>
+      <div className="space-y-1 rounded-md bg-secondary/50 p-3 text-sm">
+        <p>
+          <strong>Drafting engine:</strong>{' '}
+          {engineOn() ? 'on (CONTENT_ENGINE_MODE is "on")' : 'off. It drafts nothing until CONTENT_ENGINE_MODE is set to "on" in apphosting.yaml.'}
+        </p>
+        <p>
+          <strong>Second-model reviewer:</strong>{' '}
+          {process.env.ANTHROPIC_API_KEY ? 'key present' : 'no key yet: drafts arrive without the second review, and say so'}
+        </p>
+      </div>
       <Button type="submit">Save settings</Button>
     </form>
+  );
+}
+
+/* ── The topic queue ─────────────────────────────────────────────────────── */
+
+const TOOL_NAMES: Record<string, string> = { 'week-planner': 'week planner', 'strength-test': 'strength and engine test', 'hyrox-pacer': 'HYROX pacer' };
+
+async function Topics({ done, error }: { done?: string; error?: string }) {
+  const topics = await listTopics();
+  if (!topics.length) {
+    return (
+      <form action={seedTopicsAction} className="space-y-3 rounded-lg border p-4">
+        <h2 className="font-headline text-xl font-bold">Topics</h2>
+        <p className="text-sm">The queue is empty. The engine loads the starting list of 32 questions on its first run, or you can load it now.</p>
+        <Button type="submit">Load the starting list</Button>
+      </form>
+    );
+  }
+  const queued = topics.filter((t) => t.status === 'queued');
+  const history = topics.filter((t) => t.status !== 'queued');
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-headline text-xl font-bold">Topics</h2>
+        <p className="text-sm text-muted-foreground">The engine drafts from the top, passing over topics whose tool is not built yet.</p>
+      </div>
+      {done && (
+        <p role="status" className="rounded-md border-2 border-accent bg-accent/10 p-3 text-sm font-semibold">
+          {done === 'added' ? 'Added to the front of the queue.' : done === 'skipped' ? 'Skipped. It will not be drafted.' : 'Back in the queue.'}
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="rounded-md border-2 border-foreground p-3 text-sm font-semibold">
+          {error}
+        </p>
+      )}
+      <form action={addTopicAction} className="space-y-2 rounded-lg border p-4">
+        <label htmlFor="question" className="block text-sm font-semibold">
+          Your own question, drafted next
+        </label>
+        <Input id="question" name="question" maxLength={160} placeholder="How long should I rest between wall ball sets?" />
+        <select name="pillar" aria-label="Topic" className="h-10 w-full rounded-md border bg-background px-3 text-sm">
+          {PILLARS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <Button type="submit">Add to the front</Button>
+      </form>
+
+      <section className="space-y-2">
+        <h3 className="font-headline font-bold">Queued ({queued.length})</h3>
+        <ol className="divide-y rounded-lg border">
+          {queued.map((t, i) => (
+            <li key={t.id} className="space-y-2 px-4 py-3 text-sm">
+              <p>
+                <span className="font-semibold">{t.question}</span>
+                <span className="text-muted-foreground">
+                  {' '}
+                  · {pillarOf(t.pillar).name}
+                  {t.tool ? ` · tool: ${TOOLS[t.tool].name}` : ''}
+                  {!isDraftable(t) && t.needs ? ` · waits for the ${TOOL_NAMES[t.needs] ?? t.needs}` : ''}
+                  {t.source === 'jon' ? ' · yours' : ''}
+                  {t.failures ? ` · ${t.failures} failed attempt` : ''}
+                </span>
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                {(['up', 'down'] as const).map((direction) => (
+                  <form key={direction} action={moveTopicAction}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="direction" value={direction} />
+                    <Button type="submit" size="sm" variant="ghost" disabled={direction === 'up' ? i === 0 : i === queued.length - 1}>
+                      Move {direction}
+                    </Button>
+                  </form>
+                ))}
+                <form action={skipTopicAction} className="flex items-center gap-2">
+                  <input type="hidden" name="id" value={t.id} />
+                  <Input name="reason" placeholder="Why skip?" className="h-8 w-40" aria-label="Reason for skipping" />
+                  <Button type="submit" size="sm" variant="outline">
+                    Skip
+                  </Button>
+                </form>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {history.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="font-headline font-bold">Drafted and skipped</h3>
+          <ul className="divide-y rounded-lg border text-sm">
+            {history.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                <span>
+                  {t.guideSlug ? <Link className="underline" href={`${BASE}/${t.guideSlug}`}>{t.question}</Link> : t.question}
+                  <span className="text-muted-foreground">
+                    {' '}
+                    · {t.status === 'skipped' ? `skipped${t.skipReason ? `: ${t.skipReason}` : ''}` : t.status}
+                  </span>
+                </span>
+                {t.status === 'skipped' && (
+                  <form action={requeueTopicAction}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <Button type="submit" size="sm" variant="ghost">
+                      Put back
+                    </Button>
+                  </form>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
   );
 }

@@ -67,6 +67,15 @@ export const SAMPLE_GUIDES: Guide[] = [
         kind: 'warning',
         text: 'Hips rising is the first sign the set is too heavy. Lower the load before you lose the angle.',
       },
+      { type: 'heading', level: 2, text: 'The mistake to avoid' },
+      {
+        type: 'paragraph',
+        text: 'Training the position and the leg drive on different days. The race takes both from you at once, straight after a 1 km run, so do the leg work first and run immediately after, as the race-pace option does. If you only have time for one part, choose the **tired-leg drive**: the position comes back quickly with a few wall drives before your race, the endurance does not.',
+      },
+      {
+        type: 'paragraph',
+        text: 'For where this session fits in a full training week, see [how to train for HYROX](/how-to-train-for-hyrox).',
+      },
       { type: 'calculator', tool: 'one-rep-max' },
       {
         type: 'faq',
@@ -74,6 +83,10 @@ export const SAMPLE_GUIDES: Guide[] = [
           {
             question: 'Can I push a switched-off treadmill instead?',
             answer: 'Some gyms allow it and some do not. Ask first, and never on a treadmill that could start under you.',
+          },
+          {
+            question: 'How often should I do this session?',
+            answer: 'Once a week from about week 4 of a 12-week plan, on a day at least 6 to 8 hours away from a hard run.',
           },
         ],
       },

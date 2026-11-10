@@ -59,8 +59,8 @@ italics.
 | D2 | ~~Trial length~~ **Decided:** 14 days | Step 1 |
 | D3 | ~~"Over 2,000 athletes"~~ **Decided:** true, worded as athletes who have trained with HybridX plans | Step 1 |
 | D4 | ~~Publishing slots~~ **Decided:** Monday, Wednesday and Friday at 07:00; emails 07:00–20:00 | Step 3 |
-| D5 | Review address. *Your admin address* | Step 4 |
-| D6 | The reviewer model. *Claude, so a different model family checks Gemini's work.* This needs `ANTHROPIC_API_KEY` bound on the site, which also switches on the dormant monthly analytics review (Anthropic is already named in the privacy policy for that) | Step 4 |
+| D5 | ~~Review address~~ **Decided:** the admin address (editable in settings) | Step 4 |
+| D6 | ~~The reviewer model~~ **Decided:** Claude reviews Gemini's drafts. Needs `ANTHROPIC_API_KEY` (step 4), which also switches on the dormant monthly analytics review | Step 4 |
 | D7 | Week planner: standalone, or the plan finder's result screen. *Standalone first* | Step 5 |
 | D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
 | D9 | The HYROX pacer versus the £5 Pacing Pack. *A free tool for run splits and budgets; the station-by-station table emailed or in the pack until 14 March 2027* | Step 9 |
@@ -272,45 +272,90 @@ and their order can change.
   - New article, then edit it, approve it, and see it go live at the slot, or
     Publish now and see it at `/guides/<slug>`.
 
-### Step 4: AI drafting and the email loop (L). Articles start flowing here
+### Step 4: AI drafting and the email loop (L). Built, switched off
 
-- **Builds:**
-  - `src/lib/guides/bible.ts` (section 8);
-  - `src/lib/guides/engine/`:
-    - `brief.ts`, `draft.ts` (Gemini, structured output) and `checks.ts`;
-    - `review.ts` (Claude) and `revise.ts`;
-    - `run.ts`, a resumable state machine;
-    - `notify.ts`, which sends the review emails through the existing
-      `sendEmail`;
-  - an engine step in the hourly job that runs one stage per tick and respects
-    the quota (section 6.3);
-  - "Draft this question" in admin, so you can type in any question;
-  - the candidate list from section 9, loaded as the starting queue;
-  - `CONTENT_ENGINE_MODE` in `apphosting.yaml`, shipping as `off`.
-- **Tests:**
-  - the checker against deliberately bad drafts: a wrong load, a missing proof
-    element, an unknown link, a banned phrase, over length, US spelling;
-  - the state machine with stubbed models;
-  - no email link ever performs an action.
-- **You, before merge:**
-  - D5 and D6;
-  - create and grant `ANTHROPIC_API_KEY`:
+- **Builds** (`src/lib/guides/`):
+  - **`bible.ts`:** the coaching bible, drawn from your published method (three
+    weekly pillars, 12-week phases, 6–8 hours between strength and hard
+    running, 80/20, the 10% rule, deloads, a 40–50% taper, fuelling) and the
+    brand voice (UK English, no em dashes). It also lists the banned phrases,
+    US spellings and medical words the checks catch. **Yours to correct:** it
+    is the standing instruction for every draft.
+  - **`candidates.ts` and `queue.ts`:** the 32 starting questions, seeded once
+    into `guideTopics`. Nine wait for a tool that isn't built yet (week planner,
+    strength and engine test, HYROX pacer) and are passed over until it is.
+  - **`checks.ts`:** the deterministic checks (section 6.3):
+    - **errors:** the answer is not first or has no number; no proof element; a
+      coach's note written by the model; out of length; banned phrases; medical
+      claims; a race load, wall ball weight or target that disagrees with the
+      registry (training loads are left alone); relay loads; product claims
+      (price, trial, store apps, partnership, guarantees, user counts, "most
+      affordable"); a duplicate title;
+    - **warnings for you:** US spelling, em dashes, more than four sections, a
+      long title, no link to the topic page, no CTA, heavy overlap with a
+      published article.
+  - **`engine/`:**
+    - `prompts.ts`: each brief carries only that topic's facts (no HYROX facts
+      for ATHX), the allowed links, tools and CTAs, the published titles, and
+      the sample article as the worked example of the format;
+    - `shape.ts`: the model's loose JSON becomes strict typed blocks, then must
+      pass the article schema;
+    - `models.ts`: Gemini writes, through the existing Genkit setup; Claude
+      reviews, through the same model and call pattern as the monthly analytics
+      review, with refusal fallback;
+    - `run.ts`: the state machine;
+    - `live.ts`: the real dependencies.
+  - **`email.ts`:** the Ready, Revised, Still waiting and Needs you emails:
+    - the whole article, escaped, with blocks numbered;
+    - the findings first;
+    - Approve and Comment buttons that only open the review page.
+- **How a tick goes (hourly, within the maintenance job):**
+  1. Advance a draft under way: checks, with one fix if they fail. Then, on a
+     tick of its own, the review, with one fix for serious notes.
+  2. Otherwise, revise an article you commented on (at most three rounds, then
+     "Needs you").
+  3. Otherwise, draft the next topic if the pipeline has room: fewer than two
+     waiting for you, and fewer than three waiting or scheduled ahead.
+  4. Send due emails, within your email hours.
 
-    ```bash
-    echo -n "<key>" | firebase apphosting:secrets:set ANTHROPIC_API_KEY --project hybridx-hub
-    firebase apphosting:secrets:grantaccess ANTHROPIC_API_KEY --project hybridx-hub --backend hybridx-web-x
-    ```
+  At most two model calls per tick, and a lease lock. Pause stops all of it.
+  An email is dropped if you have already dealt with the article.
+- **Admin:**
+  - **`/admin/guides/topics`:** the queue. Move up and down, skip with a reason,
+    put back, or add your own question to the front.
+  - **The review page** shows what the checks and the reviewer found.
+  - **A comment, with the engine on,** sets the article to "being revised" for
+    the next tick.
+  - **Settings** say whether the engine and the reviewer key are on.
+- **Tests:** `guides-checks.test.ts` (24), `guides-engine.test.ts` (23,
+  stand-in models) and `guides-queue.test.ts` (6). The whole suite has 609.
+- **Checked by hand:** the Topics page (load, add, reorder, skip) and the
+  findings panel in a browser, against an in-memory Firestore.
+- **Not yet run against the real models.** There are no API keys in my session,
+  and a real run spends money, so the first live draft is the real test. It is
+  safe to try, because nothing publishes without you.
+- **You, to switch it on** (in this order):
+  1. Optional but recommended, the second reviewer:
 
-  - set a budget alert on the Gemini key's billing account.
-- **Check on the live site:** set `CONTENT_ENGINE_MODE` to `on`, then:
-  1. type a question in admin;
-  2. a draft arrives by email;
-  3. comment on it;
-  4. a revised draft arrives with the changes listed;
-  5. approve it;
-  6. it publishes in the next slot.
-- **Then:** three a week from the candidate list. We review how drafts and
-  comments are going after two weeks, before automating topic choice.
+     ```bash
+     echo -n "<key>" | firebase apphosting:secrets:set ANTHROPIC_API_KEY --project hybridx-hub
+     firebase apphosting:secrets:grantaccess ANTHROPIC_API_KEY --project hybridx-hub --backend hybridx-web-x
+     ```
+
+     Then tell me, and I add its binding to `apphosting.yaml`. The binding
+     must never land before the secret exists (CLAUDE.md). Without the key,
+     drafts arrive saying the second review was skipped. This key also
+     switches on the dormant monthly analytics review.
+  2. A budget alert on the Gemini key's billing account.
+  3. `CONTENT_ENGINE_MODE` from `"off"` to `"on"` in `apphosting.yaml` (a
+     deploy).
+
+  The first draft arrives an hour or two later. Watch the first few closely.
+- **Changed from the original plan:**
+  - The brief is assembled by code, not by a separate model call.
+  - The review waits for a tick of its own.
+  - The pipeline rule ("two waiting, three in hand") replaces "three this
+    week", so drafts keep pace with slots rather than calendar weeks.
 
 ### Step 5: the week planner (M)
 
@@ -930,7 +975,7 @@ weekly summary email cover the questions the proposal wanted it for.
 | 1 | You | Check the four singles rows in `DIVISIONS` against the official 2026/27 Singles rulebook |
 | 2 | You | Nothing: the existing deny-all Firestore rule already covers the new collections |
 | 3 | You | After merge: enable the IAM Credentials API and grant `roles/iam.serviceAccountTokenCreator` (commands in step 3). Admin works before then, with one-hour sign-in |
-| 4 | You | D5 and D6; create and grant `ANTHROPIC_API_KEY`; set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `on` when ready |
+| 4 | You | To switch on: create and grant `ANTHROPIC_API_KEY` (optional; I then add the binding); set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `"on"` |
 | 6 | You | Enable the Search Console API in `hybridx-hub`; add the service account to `sc-domain:hybridx.club` as Restricted; confirm the sitemap was submitted once |
 | 10 | You | A Google Ads account and developer token. An OAuth client with its consent screen **set to "In production"**: left in "Testing", Google expires refresh tokens after seven days. A one-time sign-in; create and grant the secrets |
 | 11 | Both | The hybridx-app work in section 7.3 |
