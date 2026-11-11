@@ -5,6 +5,7 @@ import { Download, Mail } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
+import { withTracking } from '@/lib/app-links';
 import { DIVISION_PROFILES, finishOptions, formatDuration, fullSplits } from '@/lib/hyrox-pacing';
 
 export interface PackOffer {
@@ -49,7 +50,7 @@ export default function HyroxPacer({ pack }: { pack: PackOffer | null }) {
     const f = next.finish ?? minutes;
     if (next.division) setDivision(next.division);
     if (next.finish) setFinish(next.finish);
-    window.history.replaceState(null, '', `?division=${d}&finish=${f}`);
+    window.history.replaceState(null, '', `?${withTracking(`division=${d}&finish=${f}`, window.location.search)}`);
     if (!used.current) {
       used.current = true;
       trackEvent('hyrox_pacer_used', { division: d });

@@ -35,6 +35,7 @@ export const APP = {
     'session logging and progress tracking',
     'race-date alignment: set your race date and the plan lines up to it',
     'Edge Coach, an AI coach for technique, pacing and plan questions',
+    "the ATHX 2027 twelve-week plan, in Men's and Women's editions with Lite, ATHX and Pro loads",
   ],
   /**
    * Where it can be used today. The iOS and Android apps are built

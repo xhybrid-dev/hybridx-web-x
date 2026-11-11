@@ -3,6 +3,9 @@ import styles from './athx.module.css';
 import EnduranceCalculator from '@/components/athx/EnduranceCalculator';
 import AthxGuideForm from '@/components/athx/AthxGuideForm';
 import Link from 'next/link';
+import TrackedLink from '@/components/TrackedLink';
+import { appSignupHref, seedForAthx } from '@/lib/app-seed';
+import { APP, appPriceLabel } from '@/lib/facts/product';
 import { pillarQuestions } from '@/components/guides/PillarQuestions';
 import {
   ATHX_EUROPE_CITIES,
@@ -500,6 +503,32 @@ export default function AthxFunnelPage() {
                   7 × 10 in · 12-week plan · 84 daily pages · Lite, ATHX and Pro loadings
                 </p>
               </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ── The plan in the app (step 11) ──────────────────────────── */}
+        <section className={styles.section} id="app">
+          <div className={styles.container}>
+            <h2 className={styles.h2}>Or train it in the app</h2>
+            <hr className={styles.rule} />
+            <p className={styles.body}>
+              The ATHX 2027 plan is in the HybridX app as well: twelve weeks with Lite, ATHX or Pro
+              loads, lined up to your event date, and every day&rsquo;s session, fuelling and
+              recovery on your phone. {APP.trialDays}-day free trial, then {appPriceLabel('words')}.
+            </p>
+            <div className={styles.appChoices}>
+              {(['men', 'women'] as const).map((edition) => (
+                <TrackedLink
+                  key={edition}
+                  href={appSignupHref(seedForAthx(edition))}
+                  className={styles.downloadButton}
+                  event="cta_app_click"
+                  eventParams={{ location: 'athx_page_app', edition }}
+                >
+                  {edition === 'men' ? 'Men’s edition' : 'Women’s edition'}
+                </TrackedLink>
+              ))}
             </div>
           </div>
         </section>

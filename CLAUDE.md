@@ -205,6 +205,27 @@ AI-drafted, reviewed and approved by Jon before publishing.
   article's tool and call-to-action links go through `/api/guides/out`, which
   counts a total per article and redirects to a destination looked up by id.
   Keep it that way: never redirect to a URL taken from the query string.
+- **The app hand-off** (plan step 11) joins this site to app sign-ups.
+  - **Every link into the app carries `src`** (`src/lib/app-links.ts`): the
+    article that sent the reader (`guide-<slug>`), else the page
+    (`page-<path>`). Link to the app with `TrackedLink`, which adds it. A
+    plain `<a>` loses the credit.
+  - **Never UTM tags on our own links into the app.** They restart the GA4
+    session as a campaign, and the app reads them as email campaigns.
+  - **A tool that rewrites its own query string** wraps it in `withTracking`,
+    or the `src` is gone after the first change.
+  - **Seeded sign-up links** (`src/lib/app-seed.ts`) carry a tool's answers to
+    the app's `/signup`. The coaching mapping lives here; the programmes live
+    in the app. Plain parameters, not signed: each is an answer the athlete
+    can see and change.
+  - **`/admin/guides/performance` reads app sign-ups** from the app's
+    `GET /api/marketing/signups-by-src` over the bridge: counts only, never a
+    person.
+  - **A new value crossing the two repos** (a `src` shape, a seed parameter, a
+    lead field) goes in `cross-repo-agreement.test.ts` here and in the app's
+    own pin (`acquisition-src.test.ts`, `signup-seed.test.ts`).
+  - **The `athx` call to action is for ATHX articles only,** and every ATHX
+    article ends on it (`checks.ts`).
 - **Admin sign-in lasts 14 days** only once the App Hosting service account
   holds `roles/iam.serviceAccountTokenCreator` on itself, and the IAM
   Credentials API is enabled. Until then `createAdminSessionCookie` falls back

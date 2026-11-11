@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { CalendarPlus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMagnetCapture } from '@/hooks/use-magnet-capture';
+import AppSeedCta from '@/components/AppSeedCta';
+import { seedFromPlanner } from '@/lib/app-seed';
 import { trackEvent } from '@/lib/analytics';
+import { withTracking } from '@/lib/app-links';
 import {
   DAY_COUNTS,
   GOALS,
@@ -53,7 +56,7 @@ export default function WeekPlanner() {
     const next = { ...input, ...patch };
     setInput(next);
     const extra = allWeeks ? '&weeks=4' : '';
-    window.history.replaceState(null, '', `?${plannerQuery(next)}${extra}`);
+    window.history.replaceState(null, '', `?${withTracking(`${plannerQuery(next)}${extra}`, window.location.search)}`);
     trackEvent('week_planner_change', { plan: plannerKey(next) });
   };
 
@@ -217,7 +220,26 @@ export default function WeekPlanner() {
       </section>
 
       {!allWeeks && <EmailFourWeeks input={input} />}
+
+      <TrainInTheApp input={input} />
     </div>
+  );
+}
+
+/** The next rung: the same answers, carried into the app's sign-up (src/lib/app-seed.ts). */
+function TrainInTheApp({ input }: { input: PlannerInput }) {
+  const athx = input.goal === 'athx';
+  return (
+    <AppSeedCta
+      seed={seedFromPlanner(input)}
+      location={`week_planner_${input.goal}`}
+      heading={athx ? 'Train for ATHX in the app' : 'Train these weeks in the app'}
+      body={
+        athx
+          ? 'The app has the ATHX 2027 twelve-week plan, with Lite, ATHX or Pro loads, lined up to your event date. Your answers here are filled in for you.'
+          : `The app turns this into a full programme matched to your answers, set up for ${input.days} days a week, with every session logged. Your answers here are filled in for you.`
+      }
+    />
   );
 }
 

@@ -1,7 +1,7 @@
 # The content engine: the plan we're working to
 
 **Status:** plan only. Nothing here has been built.
-**Last revised:** 10 November 2026.
+**Last revised:** 11 November 2026 (step 11 built).
 **Built from:**
 - a review of "HybridX mega strategy" (.docx), called *the proposal* below;
 - this repo at `4b70c7f`;
@@ -65,7 +65,7 @@ italics.
 | D8 | ~~Strength and engine test thresholds~~ **Decided:** the table in step 8 | Step 8 |
 | D9 | ~~The HYROX pacer versus the Pacing Pack~~ **Decided:** the whole table free on the page; download or email it with the Pacing Pack | Step 9 |
 | D10 | A Google Ads account and developer token for Keyword Planner volumes. **Code built;** waiting for the access steps in step 10 | Step 10 |
-| D11 | The app-side work in hybridx-app (section 7.3) | Step 11 |
+| D11 | ~~The app-side work~~ **Decided:** a `src` on every link into the app, a `src` on bridged leads, and plain (unsigned) seed parameters on `/signup`; ATHX joins sign-up (section 7.3) | Step 11 |
 
 ---
 
@@ -461,9 +461,9 @@ between heavy legs and a hard run (10 November 2026).
   7. nothing that needs kit they don't have, and no distance given to a
      swap done for reps or time;
   8. weeks build, and week 4 is lighter than week 3.
-- **Not built:** the mapping to named app programmes. The app's programme
-  list is not in this repo; the CTA stays the free 12-week plan and the app's
-  existing wording. Revisit at step 11.
+- **Mapping to app programmes:** built at step 11 (`src/lib/app-seed.ts`). The
+  planner's "Train these weeks in the app" carries days and goal into the
+  app's sign-up, which picks the programme.
 - **You, after merge:** read a few weeks on the live page (the session
   wording is mine, built on your rules) and tell me anything to change.
 
@@ -550,7 +550,8 @@ actually search for decides what gets written next.
   from the URL, so it is not an open redirect. Bots are not counted.
 - **Leads:** a call to action carries `src=guide-<slug>`; the free-plan form
   now records `src` on the lead, so sign-ups are credited to the article.
-  App trials happen on app.hybridx.club and are not counted here (step 11).
+  App sign-ups, trials and paying users are counted per article since step 11,
+  read from the app over the bridge.
 - **Tests:** `guides-performance.test.ts`.
 - **Baseline:** the search page's CSV export from step 6 is the "before"
   for existing pages; download one now and keep it.
@@ -681,10 +682,52 @@ is available; downloading or emailing it is the Pacing Pack.
 - **Ongoing:** bump `ADS_API_VERSION` about once a year; a failing call shows
   in the summary email and on the search page.
 
-### Step 11: app hand-off (M, mostly in hybridx-app)
+### Step 11: app hand-off (M, both repos). Built
 
-- **This repo:** the CTA registry `src/lib/guides/ctas.ts` and signed seed links.
-- **hybridx-app:** section 7.3. At store launch, section 7.4.
+Three parts, built and merged in order, each working on its own whatever
+order the two deploys land in.
+
+- **A. Which page sent a sign-up.**
+  - Every link into the app carries `src` (`src/lib/app-links.ts`): the article
+    that brought the reader (`guide-<slug>`), else the page itself
+    (`page-<path>`). `TrackedLink` adds it, and the calculators keep it when
+    they rewrite their own address.
+  - Trial buttons go straight to `app.hybridx.club/signup`.
+  - The app records it on the user as `acquisitionSrc`, first touch.
+  - Not UTM tags: on links between our own two domains they restart the GA4
+    session as a campaign, and the app counts them as email campaigns.
+- **B. Sign-ups that came by email.**
+  - A lead is forwarded with its `src` (bridge contract 1.3.0). The app keeps
+    the first one on the subscriber.
+  - An account opened later, without a `src` of its own, is credited to it
+    once the nightly account sync has matched the address.
+- **The report.** `GET /api/marketing/signups-by-src` in the app (bridge
+  secret, counts only, no personal data) feeds `/admin/guides/performance`:
+  - app sign-ups, trials and paying per article;
+  - a table of every page that has brought an account.
+- **C. Sign-up opens filled in.**
+  - Links built by `src/lib/app-seed.ts` carry a tool's answers to `/signup`:
+    `tool`, `event`, `experience`, `days`, `goal`, `edition`, `division`,
+    `race`.
+  - Plain parameters, not a signed seed: every value is an answer the athlete
+    gives on that form anyway, shown and changeable, so signing would protect
+    nothing and need a secret in both projects.
+  - The week planner, the strength test and the ATHX page link this way. The
+    pacer does not (D9).
+- **ATHX in the app.**
+  - Sign-up asks HYROX or ATHX, then the ATHX edition and division, and offers
+    the three ATHX 2027 plans of that edition.
+  - A new `athx` call to action, for ATHX articles only (checked), lands on the
+    ATHX page's app section.
+  - The ATHX plan is now in the product facts.
+- **Pinned:** the `src` rule, the report's shape, the seed's values and the
+  lead's `src` are in both repos' cross-repo tests.
+- **Check on the live site, after both deploy:**
+  - follow an article's app call to action to the app's sign-up and confirm
+    the address bar carries `src=guide-<slug>`;
+  - open `/admin/guides/performance`: the app columns read 0, not blank (blank
+    means the bridge call failed).
+- **At store launch:** section 7.4.
 
 ### Step 12: the 90-day review
 
@@ -855,7 +898,8 @@ Rules common to all tools:
   free. The station-by-station table is emailed, or in the Pacing Pack while it
   is on sale.
 - **The CTA** is about training for the time. The app has no target finish time
-  (section 7.3).
+  (section 7.3), and the buttons stay on the Pacing Pack while it is on sale
+  (D9), so the pacer has no app link yet.
 
 ---
 
@@ -1003,12 +1047,29 @@ reminder; after 14 days it is archived, and you can revive it.
 and you see it in review. Copy may only state product facts. One switch controls
 store badges.
 
-### 7.3 Work in hybridx-app (D11)
+### 7.3 Work in hybridx-app (D11). Built at step 11
 
-- **Signup source:** record it (UTM, seed, referrer) on the user document.
-  Nothing is recorded today, so no trial can be credited to an article.
-- **Seeds:** accept a signed seed (`/signup?seed=…`) or a lead's `extra`, and map
-  it to a programme.
+- **Signup source:** the app already recorded first-touch UTM tags. It now also
+  records `src` (`acquisitionSrc` on the user, `src` on the subscriber) and
+  reports sign-ups per `src` back to the site.
+- **Seeds:** plain parameters on `/signup`, checked against the form's own
+  answers (`src/lib/signup-seed.ts` there). Not a signed seed, and not the
+  lead's `extra`, which the bridge never carried.
+- **Mapping to a programme** (`src/lib/app-seed.ts` here):
+
+| From | Pre-fills |
+|---|---|
+| Planner, first HYROX | beginner, strength and engine together |
+| Planner, faster HYROX | intermediate, strength and engine together |
+| Planner, ATHX | ATHX; edition and division asked |
+| Planner, faster 10k and stronger | strength and engine together; level asked |
+| Planner, any | days a week |
+| Strength test | goal from the verdict (force-limited: strength; engine-limited: endurance; balanced: both); Pro division: advanced, Open: intermediate |
+| ATHX page | ATHX, and the edition its button names |
+
+- **ATHX plans** are found by exact name once the account exists (their ids
+  come from the admin import). A plan is set up as written, not condensed to
+  fewer days.
 - **Target finish time:** only if the pacer's CTA is to promise "load this
   target".
 
@@ -1114,7 +1175,7 @@ step 6, demand data.
 These are server-side: complete, and no consent needed.
 
 - Leads by `source` and `placement` (they exist today).
-- App signups by source, after step 11.
+- App sign-ups, trials and paying users by `src` (step 11), on the performance page.
 
 ### 9.3 Behaviour (a consented sample)
 
@@ -1222,7 +1283,7 @@ weekly summary email cover the questions the proposal wanted it for.
 | 4 | You | To switch on: create and grant `ANTHROPIC_API_KEY` (optional; I then add the binding); set a Gemini budget alert; set `CONTENT_ENGINE_MODE` to `"on"` |
 | 6 | You | Enable the Search Console API in `hybridx-hub`; add the service account to `sc-domain:hybridx.club` as Restricted; confirm the sitemap was submitted once |
 | 10 | You | A Google Ads account and developer token. An OAuth client with its consent screen **set to "In production"**: left in "Testing", Google expires refresh tokens after seven days. A one-time sign-in; create and grant the secrets |
-| 11 | Both | The hybridx-app work in section 7.3 |
+| 11 | You | Merge the app's branch and the site's; either order works. Then the two checks in step 11 |
 | After step 2 | Me | A "Guides" section in CLAUDE.md, in the style of "Adding a lead magnet" |
 
 ---

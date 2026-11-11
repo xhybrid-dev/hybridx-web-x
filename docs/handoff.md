@@ -1,4 +1,4 @@
-# Hand-off: the content engine, 11 November 2026
+# Hand-off: the content engine, 11 November 2026 (updated after step 11)
 
 For the next session, which has this repo (`xhybrid-dev/hybridx-web-x`) and the app
 (`xhybrid-dev/hybridx-app`). Read this, then `CLAUDE.md` and
@@ -16,18 +16,29 @@ designs). Jon Lee is the owner and HybridX trainer; he reviews and merges every 
 | 5 | Week planner `/calculators/week-planner` | Live |
 | 6 | Search Console weekly harvest, `/admin/guides/search` | Live, access confirmed |
 | 7 | Performance page `/admin/guides/performance`, click counter `/api/guides/out` | Live |
-| 8 | Strength and engine test `/calculators/strength-engine-test` | **In PR #38** |
-| 9 | HYROX pacer `/calculators/hyrox-pacer` | **In PR #38** |
-| 10 | Keyword Planner volumes | **In PR #38**, off until Jon's setup |
-| 11 | App hand-off | **Next: needs hybridx-app** |
+| 8 | Strength and engine test `/calculators/strength-engine-test` | Live (PR #38) |
+| 9 | HYROX pacer `/calculators/hyrox-pacer` | Live (PR #38) |
+| 10 | Keyword Planner volumes | Live (PR #38), off until Jon's setup |
+| 11 | App hand-off, both repos | **Built on `claude/pensive-meitner-rpv3pp` in both repos, waiting to merge** |
 | 12 | 90-day review | Around early February 2027 |
 
-Work branch in this repo: `claude/strategy-proposal-review-plan-gbkqya`. If PR #38
-is merged, restart the branch from `master` before new work.
+Work branch in both repos: `claude/pensive-meitner-rpv3pp`. Once merged,
+restart it from the default branch before new work.
 
 ## Waiting on Jon
 
-- **Merge PR #38.** Then check the strength test's three worked examples give the
+- **Merge step 11 in both repos** (either order: each side tolerates the other
+  being older). Then the two live checks in the plan's step 11.
+- **Step 11 decisions to confirm:**
+  - the tool-to-programme mapping (plan section 7.3);
+  - that the app's ATHX 2027 plan is the book's plan (the ATHX page now says so);
+  - ATHX plans are set up as written, never condensed to fewer days.
+- **ATHX dates in the plan text.** The app lines an ATHX plan up to the
+  athlete's own event date, but the programme's notes say "Starts Monday 2
+  November 2026" and "week commencing 2026-11-02". For Glasgow, Dublin,
+  Birmingham or Liverpool those dates are wrong. Fix in
+  `src/data/athx-2027/source` in the app and re-import, or leave for London only.
+- **Check PR #38's results:** the strength test's three worked examples give the
   verdicts he would (they are in `strength-engine.test.ts`), and read the planner's
   and the test's session wording (written by Claude on his rules).
 - **Keyword Planner setup** (plan, step 10): developer token at Basic access; an
@@ -39,21 +50,25 @@ is merged, restart the branch from `master` before new work.
   alert, `ANTHROPIC_API_KEY` for the second review.
 - **Pacer:** the strongest/weakest-station adjustment needs his numbers.
 
-## Step 11: what to do next
+## Step 11: what was built
 
-Plan sections 7.3 and 7.4. Today no app trial can be credited to an article.
+Plan step 11 and section 7.3 have the detail. In short:
 
-1. Read hybridx-app's sign-up flow: what it records about where a user came from
-   (UTM, referrer, `src`), how a programme is chosen, and the marketing bridge
-   contract (`src/lib/__tests__/cross-repo-agreement.test.ts` here pins its
-   field names).
-2. Agree D11 with Jon before building: how the app receives a reader's context
-   ("came from article X", "built this week in the planner"). The plan's option
-   is a signed seed (`/signup?seed=…`) or the lead's `extra`, mapped to a programme.
-   Any new field crossing the two projects goes in the cross-repo test.
-3. The site already sends `src=guide-<slug>` on article call-to-action and tool
-   links (`/api/guides/out`), and records `src` on free-plan, planner and
-   strength-test leads. The app CTA (`/app`) does not yet pass anything on.
+- **A.** Every link into the app carries `src`, and the app records it on the
+  user.
+- **B.** Leads carry `src` over the bridge (contract 1.3.0), so a sign-up that
+  came by email is credited too.
+- **C.** Tools open the app's sign-up already filled in, and ATHX is part of
+  sign-up.
+- **The report:** `/admin/guides/performance` shows app sign-ups, trials and
+  paying users per article, and per page.
+
+## Next
+
+- **Step 12, the 90-day review,** around early February 2027. App sign-ups per
+  article are now part of it.
+- **At store launch,** plan section 7.4.
+- **A pacer app link** once the Pacing Pack is off sale (D9).
 
 ## Things that bit us (keep them)
 
@@ -61,6 +76,11 @@ Plan sections 7.3 and 7.4. Today no app trial can be credited to an article.
   the build; locally `NODE_OPTIONS=--max-old-space-size=3072 npm run build`.
 - **Nothing may read Firestore during a build.** Built-ahead pages that list
   articles use `listPublishedGuidesOutsideBuild`.
+- **This clone is shallow.** `sitemap.test.ts` compares page dates with git
+  history and fails on a shallow clone; `git fetch --unshallow origin master`
+  first.
+- **`next dev` in the app writes a block into its CLAUDE.md.** Revert it
+  before committing.
 - **Edit a hand-built page, bump its date** in `src/lib/page-dates.ts` the same
   commit (sitemap lastmod; a test enforces it).
 - **Tests with times use a fixed clock.** One used the real clock and broke the

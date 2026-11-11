@@ -31,11 +31,14 @@ export async function GET(request: NextRequest) {
 
   const target =
     cta && Object.hasOwn(CTAS, cta)
-      ? { kind: 'cta' as const, href: `${CTAS[cta as CtaId].href}${SLUG.test(slug) ? `?src=${guideSrc(slug)}` : ''}` }
+      ? { kind: 'cta' as const, path: CTAS[cta as CtaId].href, hash: CTAS[cta as CtaId].hash }
       : tool && Object.hasOwn(TOOLS, tool)
-        ? { kind: 'tool' as const, href: `${TOOLS[tool as ToolId].route}${SLUG.test(slug) ? `?src=${guideSrc(slug)}` : ''}` }
+        ? { kind: 'tool' as const, path: TOOLS[tool as ToolId].route, hash: undefined }
         : null;
   if (!target) return NextResponse.redirect(new URL('/guides', request.url), 302);
+  const destination = new URL(target.path, request.url);
+  if (SLUG.test(slug)) destination.searchParams.set('src', guideSrc(slug));
+  if (target.hash) destination.hash = target.hash;
 
   if (SLUG.test(slug) && !BOT.test(request.headers.get('user-agent') ?? '')) {
     try {
@@ -46,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.redirect(new URL(target.href, request.url), 302);
+  const response = NextResponse.redirect(destination, 302);
   response.headers.set('Cache-Control', 'no-store');
   response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return response;

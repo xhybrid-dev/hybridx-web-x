@@ -4,6 +4,18 @@ import { join } from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
 import { guideSrc, pageSrc, parseSrc, SRC_MAX_LENGTH, SRC_PARAM, SRC_PATTERN } from '../app-links';
 import { getAppSignupsBySrc } from '../marketing-bridge';
+import {
+  appSignupHref,
+  ATHX_DIVISIONS,
+  ATHX_EDITIONS,
+  SEED_EVENTS,
+  SEED_TOOLS,
+  seedForAthx,
+  seedFromPlanner,
+  seedFromStrengthTest,
+} from '../app-seed';
+import { DAY_COUNTS, GOALS as GOALS_OF_PLANNER } from '../calculators/week-planner';
+import { DIVISIONS as STRENGTH_DIVISIONS } from '../calculators/strength-engine';
 import { PAGE_UPDATED } from '../page-dates';
 import { isValidLeadSource, leadSrc } from '../leads';
 import { hashEmail } from '../suppression-mirror';
@@ -231,6 +243,42 @@ describe('a lead carries its src to the mailing system (contract 1.3.0)', () => 
   it('only ever sends a src the app accepts', () => {
     for (const path of ['/free-hyrox-plan', '/athx-2027', '/hyrox-rule-changes-2026', '/calculators/week-planner']) {
       expect(parseSrc(leadSrc({ page: path }))).toBe(leadSrc({ page: path }));
+    }
+  });
+});
+
+describe('sign-up links carry a tool’s answers the app will read', () => {
+  // The app's src/lib/signup-seed.ts reads these parameters on /signup and
+  // checks each against its own answers; src/lib/__tests__/signup-seed.test.ts
+  // there pins the same literal lists. A value it does not know is ignored,
+  // so a drift here shows up only as a form that opens blank.
+  it('uses the tools, events, editions and divisions the app declares', () => {
+    expect([...SEED_TOOLS]).toEqual(['week-planner', 'strength-engine-test', 'athx']);
+    expect([...SEED_EVENTS]).toEqual(['hyrox', 'athx']);
+    expect([...ATHX_EDITIONS]).toEqual(['men', 'women']);
+    expect([...ATHX_DIVISIONS]).toEqual(['lite', 'athx', 'pro']);
+  });
+
+  it('builds links in the shape the app’s own test reads', () => {
+    // signup-seed.test.ts there: "reads a week planner link".
+    expect(appSignupHref(seedFromPlanner({ days: 4, goal: 'first-hyrox' }))).toBe(
+      'https://app.hybridx.club/signup?tool=week-planner&event=hyrox&experience=beginner&days=4&goal=hybrid',
+    );
+    expect(appSignupHref(seedForAthx('women'))).toBe('https://app.hybridx.club/signup?tool=athx&event=athx&edition=women');
+  });
+
+  it('only ever sends answers from the app’s own lists', () => {
+    const EXPERIENCE = ['beginner', 'intermediate', 'advanced'];
+    const GOALS = ['strength', 'endurance', 'hybrid'];
+    const seeds = [
+      ...GOALS_OF_PLANNER.flatMap((goal) => DAY_COUNTS.map((days) => seedFromPlanner({ days, goal }))),
+      ...STRENGTH_DIVISIONS.flatMap((d) => (['force-limited', 'engine-limited', 'balanced'] as const).map((v) => seedFromStrengthTest(d, v))),
+    ];
+    for (const seed of seeds) {
+      if (seed.experience) expect(EXPERIENCE).toContain(seed.experience);
+      if (seed.goal) expect(GOALS).toContain(seed.goal);
+      if (seed.days !== undefined) expect(seed.days >= 1 && seed.days <= 7).toBe(true);
+      expect(SEED_EVENTS).toContain(seed.event);
     }
   });
 });

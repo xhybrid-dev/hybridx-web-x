@@ -35,6 +35,10 @@ describe('the click counter', () => {
     expect((await out(`g=${sample.slug}&tool=week-planner`)).headers.get('location')).toBe(`https://hybridx.club/calculators/week-planner?src=guide-${sample.slug}`);
   });
 
+  it('lands the ATHX call to action on the ATHX page’s app section, still credited to the article', async () => {
+    expect((await out(`g=${sample.slug}&cta=athx`)).headers.get('location')).toBe(`https://hybridx.club/athx-2027?src=guide-${sample.slug}#app`);
+  });
+
   it('never redirects anywhere the registry does not name', async () => {
     for (const q of ['g=x&cta=https://evil.example', 'g=x&tool=//evil.example', 'g=x', 'g=x&cta=constructor']) {
       expect((await out(q)).headers.get('location')).toBe('https://hybridx.club/guides');

@@ -75,3 +75,21 @@ export function withSrc(href: string, src: string): string {
 
 /** Where a trial starts. The app's own landing page repeats /app, so a sign-up link skips it. */
 export const APP_SIGNUP_URL = `${APP.url}/signup`;
+
+const KEPT = [SRC_PARAM, 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+/**
+ * A tool's own query string, with the visitor's src and UTM tags kept. The
+ * calculators rewrite the address bar as answers change (so a result can be
+ * shared); without this the rewrite dropped src=guide-<slug>, and a sign-up
+ * after the first change was no longer credited to the article.
+ */
+export function withTracking(query: string, currentSearch: string): string {
+  const next = new URLSearchParams(query);
+  const current = new URLSearchParams(currentSearch);
+  for (const key of KEPT) {
+    const value = current.get(key);
+    if (value && !next.has(key)) next.set(key, value);
+  }
+  return next.toString();
+}

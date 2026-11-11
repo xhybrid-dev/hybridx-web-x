@@ -133,7 +133,7 @@ export function draftPrompt(topic: BriefTopic, published: BriefArticle[]): strin
     TOOL_IDS.map((id) => `${id}: ${TOOLS[id].name}, ${TOOLS[id].blurb}`).join('\n'),
     '',
     'CALLS TO ACTION (variant: headline). Choose the one that fits the reader:',
-    CTA_IDS.map((id) => `${id}: ${CTAS[id].headline}`).join('\n'),
+    CTA_IDS.map((id) => `${id}: ${CTAS[id].headline}${CTAS[id].use ? ` (for ${CTAS[id].use})` : ''}`).join('\n'),
     '',
     'FACTS. Use only these for race standards, loads, distances and product details:',
     JSON.stringify(factsFor(topic.pillar), null, 1),

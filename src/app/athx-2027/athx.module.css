@@ -1125,3 +1125,11 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── The plan in the app (step 11): one sign-up button per edition ───────── */
+.appChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
