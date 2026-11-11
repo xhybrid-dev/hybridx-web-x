@@ -29,15 +29,16 @@ restart it from the default branch before new work.
 
 - **Merge step 11 in both repos** (either order: each side tolerates the other
   being older). Then the two live checks in the plan's step 11.
-- **Step 11 decisions to confirm:**
-  - the tool-to-programme mapping (plan section 7.3);
-  - that the app's ATHX 2027 plan is the book's plan (the ATHX page now says so);
-  - ATHX plans are set up as written, never condensed to fewer days.
-- **ATHX dates in the plan text.** The app lines an ATHX plan up to the
-  athlete's own event date, but the programme's notes say "Starts Monday 2
-  November 2026" and "week commencing 2026-11-02". For Glasgow, Dublin,
-  Birmingham or Liverpool those dates are wrong. Fix in
-  `src/data/athx-2027/source` in the app and re-import, or leave for London only.
+- **Step 11 decisions: confirmed** (11 November 2026). The mapping in plan
+  section 7.3 stands; the app's ATHX 2027 plan is the book's plan; ATHX plans
+  are never condensed, being the more advanced plan the competition demands.
+- **ATHX dates in the plan text: Jon is reworking them.** The app lines an ATHX
+  plan up to the athlete's own event date, but the programme's notes say
+  "Starts Monday 2 November 2026" and "week commencing 2026-11-02". Once the
+  source in the app's `src/data/athx-2027/source` is date-free, regenerate with
+  `scripts/build-athx-2027-programs.py` and re-import. Keep the six program
+  names unchanged, or the app's `signup-seed.test.ts` fails until
+  `src/lib/athx-programs.ts` agrees.
 - **Check PR #38's results:** the strength test's three worked examples give the
   verdicts he would (they are in `strength-engine.test.ts`), and read the planner's
   and the test's session wording (written by Claude on his rules).

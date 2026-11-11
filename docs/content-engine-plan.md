@@ -1069,7 +1069,12 @@ store badges.
 
 - **ATHX plans** are found by exact name once the account exists (their ids
   come from the admin import). A plan is set up as written, not condensed to
-  fewer days.
+  fewer days: it is the more advanced plan the competition demands (owner,
+  11 November 2026).
+- **Confirmed by the owner, 11 November 2026:** the mapping above; the app's
+  ATHX 2027 plan is the same plan as the book; ATHX plans are never condensed.
+  The plan text's fixed London dates ("week commencing 2026-11-02") are his to
+  rework so the plan suits any event date.
 - **Target finish time:** only if the pacer's CTA is to promise "load this
   target".
 
