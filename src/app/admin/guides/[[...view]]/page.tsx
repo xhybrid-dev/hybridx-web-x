@@ -1045,7 +1045,9 @@ async function Performance() {
           Search numbers are the 28 days of the latest weekly harvest. Tool and call-to-action clicks are counted on the server for every
           reader, with nothing stored about them. Leads are sign-ups (the free plan, or the week planner) that came from an article&rsquo;s call to action or tool.
           App sign-ups are accounts the app credits to the article: the reader clicked through and signed up, or left an address here first and
-          signed up later. Each counts once, for the first page that brought them. Trials and paying are where those accounts are today.
+          signed up later. Each account counts once: for the page it clicked through from, or else the page where it first left an address. An
+          account found by email shows up the day after, once the app&rsquo;s nightly sync has matched the address. Trials and paying are where
+          those accounts are today.
         </p>
         {!app && (
           <p className="text-sm font-semibold">

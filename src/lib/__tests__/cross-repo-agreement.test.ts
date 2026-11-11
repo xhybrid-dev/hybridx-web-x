@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { guideSrc, pageSrc, parseSrc, SRC_MAX_LENGTH, SRC_PARAM, SRC_PATTERN } from '../app-links';
 import { getAppSignupsBySrc } from '../marketing-bridge';
 import { PAGE_UPDATED } from '../page-dates';
-import { isValidLeadSource } from '../leads';
+import { isValidLeadSource, leadSrc } from '../leads';
 import { hashEmail } from '../suppression-mirror';
 import { requireMagnet } from '../magnets';
 
@@ -204,6 +204,33 @@ describe('the src on links into the app agrees with the app', () => {
       fetchSpy.mockRestore();
       delete process.env.MARKETING_APP_URL;
       delete process.env.LEAD_BRIDGE_SECRET;
+    }
+  });
+});
+
+describe('a lead carries its src to the mailing system (contract 1.3.0)', () => {
+  // The app's bridge-contract.ts reads an optional `src`, checked with the same
+  // rule as above, and keeps the first one on the subscriber. Spell the field
+  // differently and zod drops it, and no account opened after an email is ever
+  // credited to the article that started it.
+  const leadsSource = readFileSync(join(process.cwd(), 'src/lib/leads.ts'), 'utf8');
+
+  it('sends it on both forwards that start a lead', () => {
+    // saveLead and upsertPendingLead. markLeadConfirmed has no src to send, and
+    // the app fills a blank src from whichever arrives.
+    expect(leadsSource.match(/src: leadSrc\(input\),/g)).toHaveLength(2);
+  });
+
+  it('names the article that sent the visitor, else the form’s page, never "direct"', () => {
+    expect(leadSrc({ extra: { src: 'guide-wall-balls' }, page: '/free-hyrox-plan' })).toBe('guide-wall-balls');
+    expect(leadSrc({ extra: { src: 'direct' }, page: '/free-hyrox-plan' })).toBe('page-free-hyrox-plan');
+    expect(leadSrc({ extra: { src: 'Not_Ours' }, page: '/calculators/week-planner' })).toBe('page-calculators-week-planner');
+    expect(leadSrc({ extra: { src: 'direct' } })).toBeUndefined();
+  });
+
+  it('only ever sends a src the app accepts', () => {
+    for (const path of ['/free-hyrox-plan', '/athx-2027', '/hyrox-rule-changes-2026', '/calculators/week-planner']) {
+      expect(parseSrc(leadSrc({ page: path }))).toBe(leadSrc({ page: path }));
     }
   });
 });

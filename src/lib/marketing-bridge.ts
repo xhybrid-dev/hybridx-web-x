@@ -87,6 +87,14 @@ export interface ForwardLeadInput {
   consentPolicy?: 'implied' | 'explicit' | 'confirmed' | 'none';
   utm?: Record<string, string>;
   tags?: string[];
+  /**
+   * Where on this site the address was left (contract 1.3.0): the article
+   * that sent the visitor (guide-<slug>), or the form's own page
+   * (page-<path>). The mailing system keeps the first one on the subscriber,
+   * so an account opened later is credited to it (getAppSignupsBySrc,
+   * viaEmail). An app older than 1.3.0 ignores it.
+   */
+  src?: string;
 }
 
 /**
