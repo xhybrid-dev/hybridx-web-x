@@ -758,6 +758,7 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
                   {t.source === 'jon' ? ' · yours' : ''}
                   {t.source === 'search' ? ' · from search' : ''}
                   {t.search && t.search.score > 0 ? ` · ${t.search.impressions} impressions, position ${t.search.position}` : ''}
+                  {t.volume && t.volume.avgMonthly > 0 ? ` · ${t.volume.avgMonthly.toLocaleString('en-GB')} UK searches a month ("${t.volume.keyword}")` : ''}
                   {t.held ? ` · moved ${t.held} by you` : ''}
                   {t.failures ? ` · ${t.failures} failed attempt` : ''}
                 </span>
@@ -855,9 +856,20 @@ async function SearchView() {
             <strong>The last attempt failed:</strong> {state.error} It tries again a day after the attempt.
           </p>
         )}
+        <p className="text-sm">
+          Keyword Planner:{' '}
+          {state.volumeError
+            ? `the last volume check failed: ${state.volumeError}`
+            : state.volumesAt
+              ? `${state.volumesChecked ?? 0} topic(s) checked ${DAY.format(new Date(state.volumesAt))}.`
+              : 'not run yet. It runs with the weekly harvest once its credentials are set up (plan, step 10).'}
+        </p>
         <p className="flex flex-wrap gap-4 text-sm">
           <a className="underline underline-offset-4" href="/api/admin/search-console-check">
             Check access
+          </a>
+          <a className="underline underline-offset-4" href="/api/admin/keyword-planner-check">
+            Check Keyword Planner
           </a>
           {record && (
             <a className="underline underline-offset-4" href={`/api/admin/search-console-export?harvest=${record.id}`}>

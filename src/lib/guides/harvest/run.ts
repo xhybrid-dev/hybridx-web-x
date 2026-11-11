@@ -11,7 +11,10 @@
 //      a skip is a veto.
 //   4. Record each article's clicks, impressions and position (guideMetrics),
 //      and keep the harvest (guideHarvests) for the search page in admin.
-//   5. Over the next ticks, check whether recent articles are indexed, a few
+//   5. On the next tick, if Keyword Planner is set up (step 10), fetch the
+//      monthly UK searches for every queued topic not checked in four weeks,
+//      and reorder the queue again (volumes.ts).
+//   6. Over the next ticks, check whether recent articles are indexed, a few
 //      per tick, then email Jon a summary.
 //
 // Like the engine, it assumes a tick can be cut off: each stage is saved
@@ -33,7 +36,9 @@ import {
 } from '@/lib/google/search-console';
 import { inEmailHours, type SummaryEmail } from '../email';
 import { engineOn } from '../engine/run';
+import { adsConfig, type KeywordPlannerDeps } from '@/lib/google/keyword-planner';
 import { addSearchTopic, listTopics, reorderQueue, setTopic, type Topic, type TopicSearch } from '../queue';
+import { refreshVolumes } from './volumes';
 import { getEngineSettings, listAllGuides, reviewAddress } from '../store';
 import type { Guide } from '../types';
 import { analyse, asQuestion, fit, type RoutedGroup } from './analyse';
@@ -66,6 +71,12 @@ export interface HarvestState {
   inspect?: string[];
   /** The harvest whose summary email is still to send. */
   summaryFor?: string;
+  /** Keyword Planner volumes still to fetch for this harvest. */
+  volumes?: boolean;
+  /** The outcome of the last volume fetch, for the summary and the search page. */
+  volumesChecked?: number;
+  volumeError?: string;
+  volumesAt?: string;
 }
 
 export interface HarvestRecord {
@@ -94,6 +105,10 @@ export interface GuideMetric {
 
 export interface HarvestDeps {
   sc: SearchConsoleDeps;
+  /** Keyword Planner (step 10). Off when its credentials are missing. */
+  ads?: KeywordPlannerDeps;
+  /** The environment to read Keyword Planner's credentials from; process.env when absent. */
+  env?: Record<string, string | undefined>;
   send(email: SummaryEmail): Promise<void>;
   now(): Date;
 }
@@ -232,8 +247,33 @@ async function harvest(deps: HarvestDeps, state: HarvestState, now: Date, log: s
   const inspect = published
     .filter((g) => g.status === 'published' && g.publishedAt && now.getTime() - Date.parse(g.publishedAt) <= INSPECT_WITHIN_MS)
     .map((g) => g.slug);
-  await saveState({ lastHarvestAt: now.toISOString(), lastHarvestId: id, lastAttemptAt: now.toISOString(), inspect, summaryFor: id });
+  const ads = deps.ads && adsConfig(deps.env ?? process.env).ok;
+  await saveState({
+    lastHarvestAt: now.toISOString(),
+    lastHarvestId: id,
+    lastAttemptAt: now.toISOString(),
+    inspect,
+    summaryFor: id,
+    ...(ads ? { volumes: true } : {}),
+  });
   log.push(`search harvest ${id}: ${rows.length} rows, ${groups.length} groups, ${added.length} new topic(s)`);
+}
+
+async function fetchVolumes(deps: HarvestDeps, state: HarvestState, now: Date, log: string[]): Promise<void> {
+  // Cleared first: a cut-off fetch waits for next week rather than retrying every hour.
+  await saveState({ ...state, volumes: undefined });
+  const config = adsConfig(deps.env ?? process.env);
+  if (!deps.ads || !config.ok) return;
+  try {
+    const checked = await refreshVolumes(deps.ads, config.config, await listTopics(), now);
+    const moved = await reorderQueue(now);
+    await saveState({ ...state, volumes: undefined, volumesChecked: checked, volumeError: undefined, volumesAt: now.toISOString() });
+    log.push(`keyword planner: ${checked} topic(s) checked, ${moved} moved`);
+  } catch (e) {
+    const error = e instanceof Error ? e.message : String(e);
+    await saveState({ ...state, volumes: undefined, volumeError: error, volumesAt: now.toISOString() });
+    log.push(`keyword planner failed: ${error}`);
+  }
 }
 
 async function inspectSome(deps: HarvestDeps, state: HarvestState, now: Date, log: string[]): Promise<void> {
@@ -259,14 +299,22 @@ async function sendSummary(deps: HarvestDeps, state: HarvestState, now: Date, lo
   const to = reviewAddress(settings);
   if (record && to && !settings.paused) {
     const [guides, topics, metrics] = await Promise.all([listAllGuides(), listTopics(), listMetrics()]);
-    await deps.send(summaryFor(record, guides, topics, metrics, to, now));
+    await deps.send(summaryFor(record, guides, topics, metrics, to, now, state));
     log.push(`search summary ${record.id} emailed`);
   }
   await saveState({ ...state, summaryFor: undefined });
 }
 
 /** What the weekly summary says, from the harvest and the current state of things. */
-export function summaryFor(record: HarvestRecord, guides: Guide[], topics: Topic[], metrics: GuideMetric[], to: string, now: Date): SummaryEmail {
+export function summaryFor(
+  record: HarvestRecord,
+  guides: Guide[],
+  topics: Topic[],
+  metrics: GuideMetric[],
+  to: string,
+  now: Date,
+  state: HarvestState = {},
+): SummaryEmail {
   const week = now.getTime() - 7 * DAY_MS;
   return {
     kind: 'summary',
@@ -280,6 +328,10 @@ export function summaryFor(record: HarvestRecord, guides: Guide[], topics: Topic
       .filter((g) => g.kind === 'refresh' && g.page)
       .slice(0, 5)
       .map((g) => ({ page: g.page!, query: g.top, position: Math.round(g.position * 10) / 10, impressions: g.impressions })),
+    // Only when this week's fetch ran: a failing call must show here (plan, step 10).
+    ...(state.volumesAt && state.volumesAt >= record.at
+      ? { keywordPlanner: state.volumeError ? { checked: 0, error: state.volumeError } : { checked: state.volumesChecked ?? 0 } }
+      : {}),
     notIndexed: metrics
       .filter((m) => m.index && m.index.verdict !== 'PASS')
       .filter((m) => {
@@ -297,7 +349,8 @@ export async function runSearchHarvest(deps: HarvestDeps): Promise<{ skipped?: s
   const state = await getHarvestState();
   const log: string[] = [];
 
-  if (state.inspect?.length) await inspectSome(deps, state, now, log);
+  if (state.volumes) await fetchVolumes(deps, state, now, log);
+  else if (state.inspect?.length) await inspectSome(deps, state, now, log);
   else if (state.summaryFor) await sendSummary(deps, state, now, log);
   else {
     const since = (at?: string) => (at ? now.getTime() - Date.parse(at) : Infinity);

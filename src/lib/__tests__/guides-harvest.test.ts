@@ -322,3 +322,94 @@ describe('the summary email', () => {
     expect([...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1])).toEqual(['https://hybridx.club/admin/guides/search', 'https://hybridx.club/admin/guides/settings']);
   });
 });
+
+describe('Keyword Planner volumes, after the harvest (step 10)', () => {
+  const NOW = '2026-11-10T09:00:00Z';
+  const ENV = {
+    GOOGLE_ADS_DEVELOPER_TOKEN: 'dev',
+    GOOGLE_ADS_CLIENT_ID: 'id',
+    GOOGLE_ADS_CLIENT_SECRET: 'secret',
+    GOOGLE_ADS_REFRESH_TOKEN: 'refresh',
+    GOOGLE_ADS_CUSTOMER_ID: '1234567890',
+  };
+
+  /** Search Console as above; Keyword Planner answering `volumes` (phrase to monthly searches), or failing. */
+  function harness(volumes: Record<string, number> | 'fail', env: Record<string, string> = ENV) {
+    const sc = fakeSc([row('what shoes for hyrox', '/', 60, 18)]);
+    const asked: string[][] = [];
+    const ads = {
+      fetch: (async (url: string, init?: RequestInit) => {
+        if (url.startsWith('https://oauth2')) return Response.json({ access_token: 'a' });
+        const { keywords } = JSON.parse(String(init?.body)) as { keywords: string[] };
+        asked.push(keywords);
+        if (volumes === 'fail') {
+          return Response.json({ error: { details: [{ errors: [{ errorCode: { authorizationError: 'DEVELOPER_TOKEN_NOT_APPROVED' }, message: 'no' }] }] } }, { status: 403 });
+        }
+        return Response.json({ results: keywords.map((k) => ({ text: k, keywordMetrics: { avgMonthlySearches: String(volumes[k] ?? 0) } })) });
+      }) as typeof fetch,
+    };
+    const sent: SummaryEmail[] = [];
+    const clock = { at: NOW };
+    const deps = { sc: sc.deps, ads, env, send: async (e: SummaryEmail) => void sent.push(e), now: () => new Date(clock.at) };
+    return { sent, asked, clock, tick: () => harvest.runSearchHarvest(deps) };
+  }
+
+  beforeEach(async () => {
+    await queue.ensureQueueSeeded(new Date(NOW));
+  });
+
+  it('does nothing until the credentials exist', async () => {
+    const h = harness({}, {});
+    await h.tick();
+    expect((await harvest.getHarvestState()).volumes).toBeUndefined();
+    expect(h.asked).toEqual([]);
+  });
+
+  it('asks once for the whole queue on the tick after the harvest, and moves searched-for topics up', async () => {
+    const h = harness({ 'how should i break up 100 wall balls': 2400 });
+    await h.tick();
+    expect((await harvest.getHarvestState()).volumes).toBe(true);
+    h.clock.at = '2026-11-10T10:00:00Z';
+    expect((await h.tick()).log?.[0]).toMatch(/^keyword planner: \d+ topic\(s\) checked/);
+    expect(h.asked).toHaveLength(1);
+
+    const topics = await queue.listTopics();
+    const wallBalls = topics.find((t) => t.question === 'How should I break up 100 wall balls?')!;
+    expect(wallBalls.volume).toMatchObject({ keyword: 'how should i break up 100 wall balls', avgMonthly: 2400, score: 720 });
+    // 2,400 searches a month outranks the 80 impressions behind "What shoes for hyrox?".
+    const queued = topics.filter((t) => t.status === 'queued');
+    expect(queued[0].question).toBe('How should I break up 100 wall balls?');
+    expect(queue.demandScore(wallBalls)).toBe(720);
+  });
+
+  it('puts the result in the summary, and a failure too', async () => {
+    for (const [answer, says] of [[{}, /checked for \d+ topics/], ['fail', /Test access/]] as const) {
+      db.reset();
+      await queue.ensureQueueSeeded(new Date(NOW));
+      const h = harness(answer);
+      for (const at of ['09:00', '10:00', '11:00']) {
+        h.clock.at = `2026-11-10T${at}:00Z`;
+        await h.tick();
+      }
+      expect(h.sent).toHaveLength(1);
+      expect(buildSummaryEmail(h.sent[0]).text).toMatch(says);
+    }
+  });
+
+  it('checks a topic again only after four weeks, and only while it is queued', async () => {
+    const { needsVolume } = await import('../guides/harvest/volumes');
+    const now = new Date('2026-12-08T09:00:00Z');
+    const vol = (checkedAt: string) => ({ keyword: 'k', avgMonthly: 1, recent: 1, score: 0.3, checkedAt });
+    expect(needsVolume({ status: 'queued' }, now)).toBe(true);
+    expect(needsVolume({ status: 'queued', volume: vol('2026-11-11T09:00:00Z') }, now)).toBe(false);
+    expect(needsVolume({ status: 'queued', volume: vol('2026-11-10T09:00:00Z') }, now)).toBe(true);
+    expect(needsVolume({ status: 'drafted' }, now)).toBe(false);
+  });
+
+  it("takes a topic's best phrase, matched as Google spells it", async () => {
+    const { bestVolume } = await import('../guides/harvest/volumes');
+    const r = (keyword: string, avgMonthly: number) => ({ keyword, avgMonthly, months: [], recent: 0 });
+    expect(bestVolume(['sled push alternative', 'train sled push without sled'], [r('Sled Push Alternative', 90), r('train sled push without sled', 30)])?.avgMonthly).toBe(90);
+    expect(bestVolume(['nothing matches'], [r('other', 5)])).toBeNull();
+  });
+});

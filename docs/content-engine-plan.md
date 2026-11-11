@@ -64,7 +64,7 @@ italics.
 | D7 | ~~Week planner~~ **Decided:** standalone | Step 5 |
 | D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
 | D9 | ~~The HYROX pacer versus the Pacing Pack~~ **Decided:** the whole table free on the page; download or email it with the Pacing Pack | Step 9 |
-| D10 | A Google Ads account and developer token for Keyword Planner volumes. *Apply early; nothing waits on it* | Step 10 |
+| D10 | A Google Ads account and developer token for Keyword Planner volumes. **Code built;** waiting for the access steps in step 10 | Step 10 |
 | D11 | The app-side work in hybridx-app (section 7.3) | Step 11 |
 
 ---
@@ -596,20 +596,61 @@ is available; downloading or emailing it is the Pacing Pack.
   stations needs your numbers (how much to give your weakest, how much to take
   from your strongest); until then the table is the division average.
 
-### Step 10: Keyword Planner volumes (S–M). Optional, when D10 is ready
+### Step 10: Keyword Planner volumes (S–M). Built, off until its credentials exist
 
-- **Builds:**
-  - `src/lib/google/keyword-planner.ts`:
-    `generateKeywordHistoricalMetrics` for queued candidates, UK and English,
-    monthly, with the API version in one constant;
-  - volumes feed scoring.
-- **You, before merge:**
-  - D10;
-  - a one-time Google sign-in to produce a refresh token (the OAuth app must be
-    "In production", section 11);
-  - create and grant the secrets. The names are set in step 10.
-- **Ongoing:** Google retires Ads API versions roughly yearly, so the constant
-  needs a bump about once a year. A failing call shows in the summary email.
+- **Built:**
+  - `src/lib/google/keyword-planner.ts`: `GenerateKeywordHistoricalMetrics`
+    over REST, UK (`geoTargetConstants/2826`) and English
+    (`languageConstants/1000`), Google Search only, with the API version in one
+    constant, `ADS_API_VERSION` = `v26` (released 14 October 2026; sunset
+    expected around November 2027). Google's errors are explained: a Test-only
+    developer token, a missing manager id, an expired refresh token, a retired
+    version;
+  - a stage of the weekly harvest (`harvest/volumes.ts`): the tick after the
+    Search Console harvest, one request for every queued topic not checked in
+    four weeks. Each topic is asked about with up to three phrases (the search
+    people used, if Search Console has one; the question; its core words) and
+    keeps the best;
+  - volumes feed scoring: monthly searches scored like a search we do not rank
+    for (`× 0.3 × our subject`), and the queue's search band orders by the
+    stronger of that and the Search Console score (`queue.ts`, `demandScore`);
+  - the topics page shows each topic's UK monthly searches; the search page
+    says when the last check ran or why it failed; the weekly summary email
+    reports it, failures included;
+  - `/api/admin/keyword-planner-check`: which credentials are present (names
+    only), whether the refresh token works, and one real request;
+  - `scripts/google-ads-auth.ts`: the one-time sign-in, run on your computer.
+- **Tests:** `keyword-planner.test.ts` (the credentials, the request, the
+  parsing, each explained error, the phrases) and the harvest tests (nothing
+  until configured, one request for the queue, reordering, the summary,
+  failures, the four-week recheck).
+- **Not verified here:** `developers.google.com` is not reachable from the
+  build session, so the request follows the long-stable shape of this call.
+  The check route confirms it against the real API once the credentials exist.
+- **You, in this order** (the site works throughout; volumes start once all of
+  it is done):
+  1. **Developer token access:** Google Ads, Tools, API Center. "Test" access
+     cannot read real data: apply for Basic.
+  2. **An OAuth client:** in the Google Cloud console for hybridx-hub, APIs and
+     Services: enable the Google Ads API; set the OAuth consent screen to
+     **In production** (in "Testing" the refresh token dies after seven days);
+     create an OAuth client of type **Desktop app**.
+  3. **The sign-in:** `npx tsx scripts/google-ads-auth.ts <client-id> <client-secret>`
+     on your computer. It prints the refresh token once.
+  4. **The secrets**, created and granted before anything binds them:
+
+     ```bash
+     firebase apphosting:secrets:set GOOGLE_ADS_DEVELOPER_TOKEN --project hybridx-hub
+     firebase apphosting:secrets:set GOOGLE_ADS_CLIENT_SECRET --project hybridx-hub
+     firebase apphosting:secrets:set GOOGLE_ADS_REFRESH_TOKEN --project hybridx-hub
+     firebase apphosting:secrets:grantaccess GOOGLE_ADS_DEVELOPER_TOKEN,GOOGLE_ADS_CLIENT_SECRET,GOOGLE_ADS_REFRESH_TOKEN --project hybridx-hub --backend hybridx-web-x
+     ```
+
+  5. **Tell me** the client id, the Ads customer id and, if access comes
+     through a manager account, its id. They are not secrets: I add them and
+     the three secret bindings to `apphosting.yaml` in one change, after step 4.
+- **Ongoing:** bump `ADS_API_VERSION` about once a year; a failing call shows
+  in the summary email and on the search page.
 
 ### Step 11: app hand-off (M, mostly in hybridx-app)
 

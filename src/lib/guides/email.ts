@@ -57,6 +57,8 @@ export interface SummaryEmail {
   next: string[];
   refresh: { page: string; query: string; position: number; impressions: number }[];
   notIndexed: { slug: string; state: string }[];
+  /** Keyword Planner's run this week, if it is set up (step 10). */
+  keywordPlanner?: { checked: number; error?: string };
 }
 
 /** Every email the engine sends. */
@@ -255,6 +257,14 @@ export function buildSummaryEmail(e: SummaryEmail): { subject: string; html: str
     ['Next in the queue', e.next],
     ['Pages to improve (ranking 4 to 20)', e.refresh.map((r) => `${r.page}: "${r.query}", position ${r.position}, ${fmt(r.impressions)} impressions`)],
     ['Not indexed after a week', e.notIndexed.map((n) => `/guides/${n.slug}: ${n.state}`)],
+    [
+      'Keyword Planner',
+      !e.keywordPlanner
+        ? []
+        : e.keywordPlanner.error
+          ? [`The volume check failed: ${e.keywordPlanner.error}`]
+          : [`Monthly UK searches checked for ${e.keywordPlanner.checked} topic${e.keywordPlanner.checked === 1 ? '' : 's'}, and the queue reordered.`],
+    ],
   ];
   const shown = sections.filter(([, items]) => items.length);
   const html = frame(`

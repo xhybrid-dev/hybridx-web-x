@@ -178,6 +178,11 @@ AI-drafted, reviewed and approved by Jon before publishing.
     never one Jon skipped. Query text is untrusted (anyone can type anything
     into Google): it is compared and shown, never followed, and the CSV export
     defuses spreadsheet formulas.
+  - **Keyword Planner** (plan step 10, `src/lib/google/keyword-planner.ts`)
+    adds UK monthly volumes to queued topics, the tick after each harvest. It
+    is off until its credentials exist; the three secrets are bound in
+    `apphosting.yaml` only after they are created and granted. The API version
+    is one constant, `ADS_API_VERSION`: bump it when Google retires it.
   - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
     questions and topics he moved up, then search demand by score, then the
     rest, then topics he moved down. Keep his moves ahead of the data.
