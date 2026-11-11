@@ -29,8 +29,8 @@ describe('the starting list', () => {
     }
   });
 
-  it('frees the topics that waited for the week planner (4) and the HYROX pacer (3)', () => {
-    for (const [tool, n] of [['week-planner', 4], ['hyrox-pacer', 3]] as const) {
+  it('frees the topics that waited for the week planner (4), the HYROX pacer (3) and the strength test (2)', () => {
+    for (const [tool, n] of [['week-planner', 4], ['hyrox-pacer', 3], ['strength-test', 2]] as const) {
       expect(CANDIDATES.filter((c) => c.needs === tool)).toHaveLength(n);
       expect(Object.keys(TOOLS)).toContain(tool);
       expect(UNBUILT_TOOLS).not.toContain(tool);
@@ -80,8 +80,9 @@ describe('ordering', () => {
   it('never offers a topic whose tool is not built', async () => {
     const all = await queue.listTopics();
     const unbuilt = (t: (typeof all)[number]) => !!t.needs && (UNBUILT_TOOLS as readonly string[]).includes(t.needs);
-    expect(all.filter(unbuilt).length).toBe(2);
-    for (const t of all) await queue.setTopic(t.id, { status: unbuilt(t) ? 'queued' : 'drafted' }, at);
+    // Every planned tool is built now, so nothing waits.
+    expect(all.filter(unbuilt).length).toBe(0);
+    for (const t of all) await queue.setTopic(t.id, { status: 'drafted' }, at);
     expect(await queue.nextTopic()).toBeNull();
   });
 });

@@ -97,6 +97,7 @@ export const SITE_PAGES: readonly SitePage[] = [
   { route: '/calculators/garmin-tcx-generator', title: 'Treadmill FIT/TCX generator', pillar: 'tools' },
   { route: '/calculators/week-planner', title: 'Week planner', pillar: 'tools', hub: 'A 3, 4 or 5-day week of running and strength, built on HybridX rules, with a calendar file.' },
   { route: '/calculators/hyrox-pacer', title: 'HYROX pacer', pillar: 'tools', hub: 'Every run and station split, the Roxzone and the halfway clock for your target finish.' },
+  { route: '/calculators/strength-engine-test', title: 'Strength and engine test', pillar: 'tools', hub: 'Is strength or your engine holding you back? Three lifts and a 5 km, and the eight weeks that follow.' },
   { route: '/app', title: 'The HybridX app' },
   { route: '/books', title: 'HybridX training books' },
   { route: '/una', title: 'The X family for UNA Watch' },
@@ -169,6 +170,11 @@ export const TOOLS = {
     name: 'HYROX pacer',
     route: '/calculators/hyrox-pacer',
     blurb: 'Pick your division and target finish, and get every run and station split, the Roxzone budget and the halfway clock.',
+  },
+  'strength-test': {
+    name: 'Strength and engine test',
+    route: '/calculators/strength-engine-test',
+    blurb: 'Three lifts and a 5 km against your division: whether strength or your engine holds you back, and an eight-week focus.',
   },
   'athx-endurance': {
     name: 'ATHX endurance pacing calculator',

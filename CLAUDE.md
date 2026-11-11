@@ -196,6 +196,11 @@ AI-drafted, reviewed and approved by Jon before publishing.
   measured from the Pacing Pack's printed tables. The whole table is free on
   the page (Jon's decision); its download and email buttons go to the Pacing
   Pack while it is on sale, and vanish when sales close.
+- **The strength and engine test** (plan step 8,
+  `/calculators/strength-engine-test`): Jon's targets and the scoring are in
+  `src/lib/calculators/strength-engine.ts`; three worked examples in
+  `strength-engine.test.ts` pin them to the number. Change a target only with
+  Jon, and update the examples with it. It never asks for a true max.
 - **Article performance** (plan step 7, `/admin/guides/performance`): an
   article's tool and call-to-action links go through `/api/guides/out`, which
   counts a total per article and redirects to a destination looked up by id.

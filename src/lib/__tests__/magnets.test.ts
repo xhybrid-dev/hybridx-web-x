@@ -91,6 +91,18 @@ describe('delivery and asset must agree', () => {
     expect(magnet.asset.url(form({ days: '6', goal: 'first-hyrox', kit: 'home', long: 'sat' }))).toBeNull();
     expect(magnet.asset.url(form({ days: '4', goal: 'https://evil.example', kit: 'home', long: 'sat' }))).toBeNull();
   });
+
+  it('builds the strength test link only from a complete, valid form', () => {
+    const magnet = MAGNETS.find((m) => m.slug === 'strength_engine_test')!;
+    if (magnet.asset.kind !== 'personal') throw new Error('expected a personal asset');
+    const ok = { division: 'men-open', bw: '80', sq: '100', sqr: '5', dl: '120', dlr: '5', pr: '50', prr: '5', '5k': '21:00' };
+    const form = (o: Record<string, string>) => ({ get: (k: string) => o[k] ?? null });
+    expect(magnet.asset.url(form(ok))).toBe(
+      '/calculators/strength-engine-test?division=men-open&bw=80&sq=100&sqr=5&dl=120&dlr=5&pr=50&prr=5&5k=21%3A00#result',
+    );
+    expect(magnet.asset.url(form({ ...ok, sqr: '15' }))).toBeNull();
+    expect(magnet.asset.url(form({ ...ok, division: 'elite' }))).toBeNull();
+  });
 });
 
 describe('the files actually exist', () => {

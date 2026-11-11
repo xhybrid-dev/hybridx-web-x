@@ -119,7 +119,7 @@ export async function submitMagnetLead(
   // and sends no broken link.
   const personalPath = magnet.asset.kind === 'personal' ? magnet.asset.url(formData) : null;
   if (magnet.asset.kind === 'personal' && !personalPath) {
-    return { status: 'error', message: 'Choose your days, goal, kit and long-run day first.' };
+    return { status: 'error', message: 'Fill in every answer first, then ask for the email.' };
   }
 
   const hdrs = await headers();

@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import ShopEventLink from '@/components/shop/ShopEventLink';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Route, Dumbbell, ClipboardList, ArrowRight, CalendarDays, Timer } from 'lucide-react';
+import { Route, Dumbbell, ClipboardList, ArrowRight, CalendarDays, Timer, Scale } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import PillarQuestions from '@/components/guides/PillarQuestions';
@@ -87,6 +87,14 @@ const calculatorCategories: CalculatorCategory[] = [
     icon: Timer,
     href: '/calculators/hyrox-pacer',
     ctaText: 'Pace My Race',
+  },
+  {
+    id: 'strength-engine-test',
+    title: 'Strength and Engine Test',
+    description: 'Three lifts and a 5 km against your division: find out whether strength or your engine is holding you back.',
+    icon: Scale,
+    href: '/calculators/strength-engine-test',
+    ctaText: 'Take the Test',
   },
 ];
 

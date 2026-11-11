@@ -62,7 +62,7 @@ italics.
 | D5 | ~~Review address~~ **Decided:** the admin address (editable in settings) | Step 4 |
 | D6 | ~~The reviewer model~~ **Decided:** Claude reviews Gemini's drafts. Needs `ANTHROPIC_API_KEY` (step 4), which also switches on the dormant monthly analytics review | Step 4 |
 | D7 | ~~Week planner~~ **Decided:** standalone | Step 5 |
-| D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
+| D8 | ~~Strength and engine test thresholds~~ **Decided:** the table in step 8 | Step 8 |
 | D9 | ~~The HYROX pacer versus the Pacing Pack~~ **Decided:** the whole table free on the page; download or email it with the Pacing Pack | Step 9 |
 | D10 | A Google Ads account and developer token for Keyword Planner volumes. **Code built;** waiting for the access steps in step 10 | Step 10 |
 | D11 | The app-side work in hybridx-app (section 7.3) | Step 11 |
@@ -555,14 +555,43 @@ actually search for decides what gets written next.
 - **Baseline:** the search page's CSV export from step 6 is the "before"
   for existing pages; download one now and keep it.
 
-### Step 8: strength and engine test (M)
+### Step 8: strength and engine test (M). Built
 
-- **Builds:**
-  - `src/lib/calculators/strength-engine.ts`;
-  - its page, embed and magnet.
-- **Tests:** your worked examples, to the number.
-- **You, before merge:** D8.
-- **Then:** candidates 25–26 enter the queue.
+D8 decided (you, 11 November 2026).
+
+- **Targets** (`src/lib/calculators/strength-engine.ts`), the estimated
+  one-rep max as a multiple of bodyweight, and a 5 km time:
+
+  | Division | Squat | Deadlift | Press | 5 km |
+  |---|---|---|---|---|
+  | Men Open | 1.25 | 1.5 | 0.6 | 22:00 |
+  | Women Open | 1.0 | 1.25 | 0.45 | 25:00 |
+  | Men Pro | 1.5 | 2.0 | 1.0 | 20:00 |
+  | Women Pro | 1.25 | 1.5 | 0.6 | 23:00 |
+
+  Women Pro takes the Men Open strength targets: they race at the Men Open
+  loads. Doubles use their equivalent singles division; mixed doubles, Men
+  Open.
+- **Scoring:** each lift as a share of its target, capped at 120% so one big
+  lift cannot hide a weak one, averaged; the engine is the target 5 km over the
+  athlete's, capped the same. Whichever is more than 10% behind the other is
+  the limiter; otherwise balanced. The weakest lift is named.
+- **No true max:** each lift is a set of 1 to 10 reps, estimated with Epley,
+  the site's 1RM calculator's default.
+- **Built:** the scoring; `/calculators/strength-engine-test` with the result,
+  the per-lift table and an eight-week focus per verdict (the week, four
+  blocks, the retest); the `strength_engine_test` magnet ("email me my result
+  and the eight weeks", a personal asset like the planner's);
+  `strength-test` in the tool registry, so its two topics are draftable; links
+  from the calculators hub, the sitemap and `llms.txt`. Every planned tool is
+  now built.
+- **Tests:** `strength-engine.test.ts`, three worked examples to the number
+  (each worked by hand in the test): Men Open 80 kg, 21:00, engine-limited;
+  Women Open 65 kg, 24:00, force-limited on the deadlift; Men Pro 85 kg, 20:30,
+  balanced. Plus the cap, the estimate, the inputs, and the bible's wording
+  rules on the focus text.
+- **You, after merge:** check the three examples' verdicts are the ones you
+  would give, and read the eight-week focus text (mine, on your targets).
 
 ### Step 9: HYROX pacer (M). Built
 
