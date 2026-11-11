@@ -19,7 +19,7 @@ import type { PlannerInput } from '@/lib/calculators/week-planner';
 import type { Division, Verdict } from '@/lib/calculators/strength-engine';
 import { APP_SIGNUP_URL } from '@/lib/app-links';
 
-export const SEED_TOOLS = ['week-planner', 'strength-engine-test', 'athx'] as const;
+export const SEED_TOOLS = ['week-planner', 'strength-engine-test', 'athx', 'free-plan'] as const;
 export type SeedTool = (typeof SEED_TOOLS)[number];
 
 export const SEED_EVENTS = ['hyrox', 'athx'] as const;
@@ -90,6 +90,15 @@ export function seedFromStrengthTest(division: Division, verdict: Verdict): AppS
     experience: division.endsWith('-pro') ? 'advanced' : 'intermediate',
     goal: verdict === 'force-limited' ? 'strength' : verdict === 'engine-limited' ? 'endurance' : 'hybrid',
   };
+}
+
+/**
+ * The free 12-week plan's success screen: the race date the reader has just
+ * given, so the app plan finishes on race day too. Only the date: the free
+ * plan runs on three or four days, so it says nothing about level or days.
+ */
+export function seedFromFreePlan(raceDate: string): AppSeed {
+  return { tool: 'free-plan', event: 'hyrox', ...(/^\d{4}-\d{2}-\d{2}$/.test(raceDate) ? { race: raceDate } : {}) };
 }
 
 /** The ATHX page: the ATHX 2027 plans, in the edition the athlete picks there. */

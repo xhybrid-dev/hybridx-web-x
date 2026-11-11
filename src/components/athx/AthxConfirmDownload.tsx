@@ -81,6 +81,10 @@ export default function AthxConfirmDownload({ token }: { token: string }) {
           <a className={styles.textLink} href="/athx-2027#calculator">
             Work out your own Endurance Zone number
           </a>
+          {/* The next rung: the ATHX 2027 plan in the app (plan step 11). */}
+          <a className={styles.textLink} href="/athx-2027#app">
+            Train for it with the ATHX 2027 plan in the app
+          </a>
         </div>
       </div>
     );

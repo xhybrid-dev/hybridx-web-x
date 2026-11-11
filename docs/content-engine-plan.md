@@ -712,8 +712,9 @@ order the two deploys land in.
   - Plain parameters, not a signed seed: every value is an answer the athlete
     gives on that form anyway, shown and changeable, so signing would protect
     nothing and need a secret in both projects.
-  - The week planner, the strength test and the ATHX page link this way. The
-    pacer does not (D9).
+  - The week planner, the strength test, the ATHX page and the free plan's
+    success screen (its race date) link this way. The ATHX guide's download
+    page points to the ATHX page's app section. The pacer does not (D9).
 - **ATHX in the app.**
   - Sign-up asks HYROX or ATHX, then the ATHX edition and division, and offers
     the three ATHX 2027 plans of that edition.
@@ -1066,6 +1067,7 @@ store badges.
 | Planner, any | days a week |
 | Strength test | goal from the verdict (force-limited: strength; engine-limited: endurance; balanced: both); Pro division: advanced, Open: intermediate |
 | ATHX page | ATHX, and the edition its button names |
+| Free plan, after download | the race date only; the free plan runs on 3 or 4 days, so level and days are asked |
 
 - **ATHX plans** are found by exact name once the account exists (their ids
   come from the admin import). A plan is set up as written, not condensed to

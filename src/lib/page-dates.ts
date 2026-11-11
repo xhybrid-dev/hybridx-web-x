@@ -30,7 +30,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/calculators/week-planner': '2026-11-11',
   '/calculators/hyrox-pacer': '2026-11-11',
   '/calculators/strength-engine-test': '2026-11-11',
-  '/free-hyrox-plan': '2026-11-10',
+  '/free-hyrox-plan': '2026-11-11',
   '/build-a-bigger-engine': '2026-06-24',
   '/app': '2026-11-11',
   '/store': '2026-07-07',

@@ -11,6 +11,7 @@ import {
   SEED_EVENTS,
   SEED_TOOLS,
   seedForAthx,
+  seedFromFreePlan,
   seedFromPlanner,
   seedFromStrengthTest,
 } from '../app-seed';
@@ -253,7 +254,7 @@ describe('sign-up links carry a tool’s answers the app will read', () => {
   // there pins the same literal lists. A value it does not know is ignored,
   // so a drift here shows up only as a form that opens blank.
   it('uses the tools, events, editions and divisions the app declares', () => {
-    expect([...SEED_TOOLS]).toEqual(['week-planner', 'strength-engine-test', 'athx']);
+    expect([...SEED_TOOLS]).toEqual(['week-planner', 'strength-engine-test', 'athx', 'free-plan']);
     expect([...SEED_EVENTS]).toEqual(['hyrox', 'athx']);
     expect([...ATHX_EDITIONS]).toEqual(['men', 'women']);
     expect([...ATHX_DIVISIONS]).toEqual(['lite', 'athx', 'pro']);
@@ -265,6 +266,9 @@ describe('sign-up links carry a tool’s answers the app will read', () => {
       'https://app.hybridx.club/signup?tool=week-planner&event=hyrox&experience=beginner&days=4&goal=hybrid',
     );
     expect(appSignupHref(seedForAthx('women'))).toBe('https://app.hybridx.club/signup?tool=athx&event=athx&edition=women');
+    // "reads a free plan link" there.
+    expect(appSignupHref(seedFromFreePlan('2027-06-06'))).toBe('https://app.hybridx.club/signup?tool=free-plan&event=hyrox&race=2027-06-06');
+    expect(appSignupHref(seedFromFreePlan(''))).toBe('https://app.hybridx.club/signup?tool=free-plan&event=hyrox');
   });
 
   it('only ever sends answers from the app’s own lists', () => {
