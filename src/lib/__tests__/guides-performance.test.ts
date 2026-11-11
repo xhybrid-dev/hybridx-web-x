@@ -88,4 +88,20 @@ describe('the performance rows', () => {
   it('leaves out anything not published', () => {
     expect(perf.performanceRows([{ slug: 'd', title: 'd', status: 'scheduled', publishedAt: undefined }], [], [], new Map(), now)).toEqual([]);
   });
+  it('credits app sign-ups to an article both ways in, and leaves them blank when the app could not be asked', () => {
+    const app = {
+      direct: { 'guide-good': { signups: 3, trials: 2, paying: 1 }, 'page-home': { signups: 5, trials: 5, paying: 0 } },
+      viaEmail: { 'guide-good': { signups: 1, trials: 0, paying: 1 }, 'page-free-hyrox-plan': { signups: 9, trials: 4, paying: 5 } },
+      truncated: false,
+      generatedAt: '',
+    };
+    const [row] = perf.performanceRows([guide('good', '2027-02-01T07:00:00Z')], [], [], new Map(), now, app);
+    expect(row.app).toEqual({ signups: 4, trials: 2, paying: 2 });
+    expect(perf.performanceRows([guide('good', '2027-02-01T07:00:00Z')], [], [], new Map(), now)[0]).not.toHaveProperty('app');
+    expect(perf.appSourceRows(app).map((r) => [r.src, r.total.signups])).toEqual([
+      ['page-free-hyrox-plan', 9],
+      ['page-home', 5],
+      ['guide-good', 4],
+    ]);
+  });
 });

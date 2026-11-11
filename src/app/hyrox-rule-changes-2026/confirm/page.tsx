@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import TrackedLink from '@/components/TrackedLink';
+import { APP_SIGNUP_URL } from '@/lib/app-links';
 import { AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import { verifyLeadToken } from '@/lib/lead-tokens';
 import { markLeadConfirmed } from '@/lib/leads';
@@ -142,7 +143,7 @@ export default async function ConfirmRaceCardPage({
               </Button>
               <Button className="bg-foreground font-headline text-background hover:opacity-90" asChild>
                 <TrackedLink
-                  href="https://app.hybridx.club"
+                  href={APP_SIGNUP_URL}
                   event="cta_app_click"
                   eventParams={{ location: 'race_card_confirm' }}
                 >

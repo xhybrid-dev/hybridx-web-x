@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { guideSrc, pageSrc, parseSrc, SRC_MAX_LENGTH, SRC_PARAM, SRC_PATTERN } from '../app-links';
+import { getAppSignupsBySrc } from '../marketing-bridge';
+import { PAGE_UPDATED } from '../page-dates';
 import { isValidLeadSource } from '../leads';
 import { hashEmail } from '../suppression-mirror';
 import { requireMagnet } from '../magnets';
@@ -152,5 +155,55 @@ describe('consent posture travels with the lead, not just the answer', () => {
     // relabel the route as one that never asked twice.
     expect(sent.filter((p) => p === 'confirmed')).toHaveLength(2);
     expect(sent.filter((p) => p === 'implied')).toHaveLength(1);
+  });
+});
+
+describe('the src on links into the app agrees with the app', () => {
+  // The app declares the same rule in src/lib/acquisition-src.ts and pins
+  // these literal values in src/lib/__tests__/acquisition-src.test.ts. A src
+  // the app does not accept is dropped there without a word, and the sign-up
+  // it would have credited reads as unattributed.
+  it('uses the parameter, pattern and length the app declares', () => {
+    expect(SRC_PARAM).toBe('src');
+    expect(SRC_PATTERN.source).toBe('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+    expect(SRC_MAX_LENGTH).toBe(90);
+  });
+
+  it('fits the longest article slug inside the app’s limit', () => {
+    // GuideSchema caps a slug at 80 characters.
+    expect(parseSrc(guideSrc('a'.repeat(80)))).toBe(`guide-${'a'.repeat(80)}`);
+  });
+
+  it('gives every hand-built page a src the app accepts', () => {
+    for (const path of Object.keys(PAGE_UPDATED)) {
+      expect(parseSrc(pageSrc(path)), path).toBe(pageSrc(path));
+    }
+  });
+
+  it('reads the report in the shape the app sends', async () => {
+    // The app's GET /api/marketing/signups-by-src, version 1.
+    process.env.MARKETING_APP_URL = 'https://app.example';
+    process.env.LEAD_BRIDGE_SECRET = 's'.repeat(40);
+    const body = {
+      version: 1,
+      direct: { 'guide-a': { signups: 2, trials: 1, paying: 1 } },
+      viaEmail: { 'page-home': { signups: 1, trials: 0, paying: 0 } },
+      truncated: false,
+      generatedAt: '2026-11-11T09:00:00.000Z',
+    };
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(body)));
+    try {
+      expect(await getAppSignupsBySrc()).toEqual({
+        direct: body.direct,
+        viaEmail: body.viaEmail,
+        truncated: false,
+        generatedAt: body.generatedAt,
+      });
+      expect(String(fetchSpy.mock.calls[0][0])).toBe('https://app.example/api/marketing/signups-by-src');
+    } finally {
+      fetchSpy.mockRestore();
+      delete process.env.MARKETING_APP_URL;
+      delete process.env.LEAD_BRIDGE_SECRET;
+    }
   });
 });
