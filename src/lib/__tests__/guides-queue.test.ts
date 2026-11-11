@@ -29,11 +29,12 @@ describe('the starting list', () => {
     }
   });
 
-  it('frees the four week-planner topics now the planner is built', () => {
-    const planner = CANDIDATES.filter((c) => c.needs === 'week-planner');
-    expect(planner).toHaveLength(4);
-    expect(Object.keys(TOOLS)).toContain('week-planner');
-    expect(UNBUILT_TOOLS).not.toContain('week-planner');
+  it('frees the topics that waited for the week planner (4) and the HYROX pacer (3)', () => {
+    for (const [tool, n] of [['week-planner', 4], ['hyrox-pacer', 3]] as const) {
+      expect(CANDIDATES.filter((c) => c.needs === tool)).toHaveLength(n);
+      expect(Object.keys(TOOLS)).toContain(tool);
+      expect(UNBUILT_TOOLS).not.toContain(tool);
+    }
   });
 
   it('seeds the queue once, and never again', async () => {
@@ -79,7 +80,7 @@ describe('ordering', () => {
   it('never offers a topic whose tool is not built', async () => {
     const all = await queue.listTopics();
     const unbuilt = (t: (typeof all)[number]) => !!t.needs && (UNBUILT_TOOLS as readonly string[]).includes(t.needs);
-    expect(all.filter(unbuilt).length).toBe(5);
+    expect(all.filter(unbuilt).length).toBe(2);
     for (const t of all) await queue.setTopic(t.id, { status: unbuilt(t) ? 'queued' : 'drafted' }, at);
     expect(await queue.nextTopic()).toBeNull();
   });

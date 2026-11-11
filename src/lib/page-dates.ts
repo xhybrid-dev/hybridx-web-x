@@ -13,7 +13,7 @@
 
 export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/': '2026-09-29',
-  '/calculators': '2026-11-10',
+  '/calculators': '2026-11-11',
   '/calculators/running': '2026-07-07',
   '/calculators/strength': '2026-07-07',
   '/calculators/general-health': '2026-07-07',
@@ -28,6 +28,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/calculators/split-time-calculator': '2026-07-07',
   '/calculators/garmin-tcx-generator': '2026-07-14',
   '/calculators/week-planner': '2026-11-10',
+  '/calculators/hyrox-pacer': '2026-11-11',
   '/free-hyrox-plan': '2026-11-10',
   '/build-a-bigger-engine': '2026-06-24',
   '/app': '2026-07-09',

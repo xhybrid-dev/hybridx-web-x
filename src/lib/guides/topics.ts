@@ -96,6 +96,7 @@ export const SITE_PAGES: readonly SitePage[] = [
   { route: '/calculators/calorie-macronutrient-calculator', title: 'Calorie and macronutrient calculator', pillar: 'tools' },
   { route: '/calculators/garmin-tcx-generator', title: 'Treadmill FIT/TCX generator', pillar: 'tools' },
   { route: '/calculators/week-planner', title: 'Week planner', pillar: 'tools', hub: 'A 3, 4 or 5-day week of running and strength, built on HybridX rules, with a calendar file.' },
+  { route: '/calculators/hyrox-pacer', title: 'HYROX pacer', pillar: 'tools', hub: 'Every run and station split, the Roxzone and the halfway clock for your target finish.' },
   { route: '/app', title: 'The HybridX app' },
   { route: '/books', title: 'HybridX training books' },
   { route: '/una', title: 'The X family for UNA Watch' },
@@ -163,6 +164,11 @@ export const TOOLS = {
     name: 'Week planner',
     route: '/calculators/week-planner',
     blurb: 'Pick 3, 4 or 5 days, your goal and kit, and get a week of running and strength that never stacks the hard sessions.',
+  },
+  'hyrox-pacer': {
+    name: 'HYROX pacer',
+    route: '/calculators/hyrox-pacer',
+    blurb: 'Pick your division and target finish, and get every run and station split, the Roxzone budget and the halfway clock.',
   },
   'athx-endurance': {
     name: 'ATHX endurance pacing calculator',

@@ -186,6 +186,11 @@ AI-drafted, reviewed and approved by Jon before publishing.
   checks all 336 input combinations in every week. Change a session there, never
   in the page. Its magnet is the one `personal` asset: the emailed link is the
   planner page rebuilt from the validated form fields.
+- **The HYROX pacer** (plan step 9, `/calculators/hyrox-pacer`): the profiles
+  are in `src/lib/hyrox-pacing.ts`, shared with the Glasgow preview, and
+  measured from the Pacing Pack's printed tables. The whole table is free on
+  the page (Jon's decision); its download and email buttons go to the Pacing
+  Pack while it is on sale, and vanish when sales close.
 - **Article performance** (plan step 7, `/admin/guides/performance`): an
   article's tool and call-to-action links go through `/api/guides/out`, which
   counts a total per article and redirects to a destination looked up by id.

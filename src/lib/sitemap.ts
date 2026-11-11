@@ -177,6 +177,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/calculators/hyrox-pacer`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
       url: `${baseUrl}/12-week-running-hyrox`,
       changeFrequency: 'monthly' as const,
       priority: 0.8,

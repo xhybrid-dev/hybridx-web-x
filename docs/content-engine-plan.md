@@ -63,7 +63,7 @@ italics.
 | D6 | ~~The reviewer model~~ **Decided:** Claude reviews Gemini's drafts. Needs `ANTHROPIC_API_KEY` (step 4), which also switches on the dormant monthly analytics review | Step 4 |
 | D7 | ~~Week planner~~ **Decided:** standalone | Step 5 |
 | D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
-| D9 | The HYROX pacer versus the £5 Pacing Pack. *A free tool for run splits and budgets; the station-by-station table emailed or in the pack until 14 March 2027* | Step 9 |
+| D9 | ~~The HYROX pacer versus the Pacing Pack~~ **Decided:** the whole table free on the page; download or email it with the Pacing Pack | Step 9 |
 | D10 | A Google Ads account and developer token for Keyword Planner volumes. *Apply early; nothing waits on it* | Step 10 |
 | D11 | The app-side work in hybridx-app (section 7.3) | Step 11 |
 
@@ -564,15 +564,37 @@ actually search for decides what gets written next.
 - **You, before merge:** D8.
 - **Then:** candidates 25–26 enter the queue.
 
-### Step 9: HYROX pacer (M)
+### Step 9: HYROX pacer (M). Built
 
-- **Builds:**
-  - `src/lib/shop/glasgow-2027-pacing.ts` moved to a shared
-    `src/lib/hyrox-pacing.ts`, with the Glasgow tests unchanged and green;
-  - the station-time model and the strongest/weakest-station rule;
-  - its page, embed and gating.
-- **You, before merge:** D9, and the source for station times.
-- **Then:** candidates 10–12 enter the queue.
+D9 decided (you, 11 November 2026): everything free on the page, to show what
+is available; downloading or emailing it is the Pacing Pack.
+
+- **Built:**
+  - `src/lib/hyrox-pacing.ts`: the division profiles and the arithmetic, moved
+    out of `src/lib/shop/glasgow-2027-pacing.ts`, which re-exports them, so the
+    Glasgow page and its tests are unchanged and green;
+  - `fullSplits`: all 16 segments in race order, with the race clock after
+    each (the Roxzone spread evenly, as on the race cards), rounded so the
+    clock lands on the finish to the second;
+  - `/calculators/hyrox-pacer`: division and target finish (each division's
+    range, every five minutes), the average run, all runs, all stations,
+    the Roxzone and the halfway clock, and the whole table;
+  - **the paywall:** "Download as PDF" and "Email it to me" go to the Pacing
+    Pack on `/hyrox-glasgow-2027#buy`, at its price from the shop config,
+    while it is on sale. The page refreshes hourly, so the offer disappears
+    when sales close (14 March 2027) without a deploy;
+  - `hyrox-pacer` in the tool registry; the three topics that waited for it
+    (first 1 km, Roxzone, SkiErg) are draftable, with the pacer as their proof;
+  - links from the calculators hub, the sitemap and `llms.txt`.
+- **Station times come from** the Pacing Pack's own printed tables: the shares
+  measured from them, which reproduce every printed split to within three
+  seconds (`glasgow-pacing.test.ts`).
+- **Tests:** `hyrox-pacing.test.ts`, every division at every finish time it
+  offers: race order, a clock that only goes forward and ends on the finish,
+  and the same runs and halfway as the Glasgow preview.
+- **Not built:** the strongest/weakest-station rule. Shifting time between
+  stations needs your numbers (how much to give your weakest, how much to take
+  from your strongest); until then the table is the division average.
 
 ### Step 10: Keyword Planner volumes (S–M). Optional, when D10 is ready
 
