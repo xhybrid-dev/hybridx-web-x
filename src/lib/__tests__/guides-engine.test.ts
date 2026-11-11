@@ -185,7 +185,7 @@ describe('pacing', () => {
 
   it('passes over topics whose tool is not built yet', () => {
     const t = { status: 'queued', needs: 'strength-test' } as never;
-    expect(queue.isDraftable(t)).toBe(false);
+    expect(queue.isDraftable(t, ['strength-test'])).toBe(false);
     expect(queue.isDraftable(t, [])).toBe(true);
   });
 });
@@ -515,7 +515,8 @@ describe('links from older articles to an approved one', () => {
     await setUp();
     const h = harness({ link: async () => [suggestion] });
     await h.tick();
-    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'accept');
+    // A fixed clock before the slot: with the real one, the test broke once its date passed.
+    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'accept', new Date('2026-11-10T12:00:00Z'));
     const current = (await store.getGuide(older.slug))!;
     const { revision: _r, updatedAt: _u, ...rest } = current;
     await store.saveGuide({ ...rest, blocks: current.blocks.map((b, i) => (i === 2 ? { type: 'paragraph' as const, text: 'Rewritten by Jon.' } : b)) });
@@ -527,7 +528,7 @@ describe('links from older articles to an approved one', () => {
     await setUp();
     const h = harness({ link: async () => [suggestion] });
     await h.tick();
-    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'skip');
+    await backlinks.decideProposal(`sled-pull-grip__${older.slug}`, 'skip', new Date('2026-11-10T12:00:00Z'));
     expect(await backlinks.applyAcceptedLinks(new Date('2026-11-11T08:00:00Z'))).toEqual({ applied: [], stale: [] });
   });
 

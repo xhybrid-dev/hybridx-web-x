@@ -62,9 +62,9 @@ italics.
 | D5 | ~~Review address~~ **Decided:** the admin address (editable in settings) | Step 4 |
 | D6 | ~~The reviewer model~~ **Decided:** Claude reviews Gemini's drafts. Needs `ANTHROPIC_API_KEY` (step 4), which also switches on the dormant monthly analytics review | Step 4 |
 | D7 | ~~Week planner~~ **Decided:** standalone | Step 5 |
-| D8 | Strength and engine test: your thresholds and three worked examples | Step 8 |
-| D9 | The HYROX pacer versus the £5 Pacing Pack. *A free tool for run splits and budgets; the station-by-station table emailed or in the pack until 14 March 2027* | Step 9 |
-| D10 | A Google Ads account and developer token for Keyword Planner volumes. *Apply early; nothing waits on it* | Step 10 |
+| D8 | ~~Strength and engine test thresholds~~ **Decided:** the table in step 8 | Step 8 |
+| D9 | ~~The HYROX pacer versus the Pacing Pack~~ **Decided:** the whole table free on the page; download or email it with the Pacing Pack | Step 9 |
+| D10 | A Google Ads account and developer token for Keyword Planner volumes. **Code built;** waiting for the access steps in step 10 | Step 10 |
 | D11 | The app-side work in hybridx-app (section 7.3) | Step 11 |
 
 ---
@@ -555,39 +555,131 @@ actually search for decides what gets written next.
 - **Baseline:** the search page's CSV export from step 6 is the "before"
   for existing pages; download one now and keep it.
 
-### Step 8: strength and engine test (M)
+### Step 8: strength and engine test (M). Built
 
-- **Builds:**
-  - `src/lib/calculators/strength-engine.ts`;
-  - its page, embed and magnet.
-- **Tests:** your worked examples, to the number.
-- **You, before merge:** D8.
-- **Then:** candidates 25–26 enter the queue.
+D8 decided (you, 11 November 2026).
 
-### Step 9: HYROX pacer (M)
+- **Targets** (`src/lib/calculators/strength-engine.ts`), the estimated
+  one-rep max as a multiple of bodyweight, and a 5 km time:
 
-- **Builds:**
-  - `src/lib/shop/glasgow-2027-pacing.ts` moved to a shared
-    `src/lib/hyrox-pacing.ts`, with the Glasgow tests unchanged and green;
-  - the station-time model and the strongest/weakest-station rule;
-  - its page, embed and gating.
-- **You, before merge:** D9, and the source for station times.
-- **Then:** candidates 10–12 enter the queue.
+  | Division | Squat | Deadlift | Press | 5 km |
+  |---|---|---|---|---|
+  | Men Open | 1.25 | 1.5 | 0.6 | 22:00 |
+  | Women Open | 1.0 | 1.25 | 0.45 | 25:00 |
+  | Men Pro | 1.5 | 2.0 | 1.0 | 20:00 |
+  | Women Pro | 1.25 | 1.5 | 0.6 | 23:00 |
 
-### Step 10: Keyword Planner volumes (S–M). Optional, when D10 is ready
+  Women Pro takes the Men Open strength targets: they race at the Men Open
+  loads. Doubles use their equivalent singles division; mixed doubles, Men
+  Open.
+- **Scoring:** each lift as a share of its target, capped at 120% so one big
+  lift cannot hide a weak one, averaged; the engine is the target 5 km over the
+  athlete's, capped the same. Whichever is more than 10% behind the other is
+  the limiter; otherwise balanced. The weakest lift is named.
+- **No true max:** each lift is a set of 1 to 10 reps, estimated with Epley,
+  the site's 1RM calculator's default.
+- **Built:** the scoring; `/calculators/strength-engine-test` with the result,
+  the per-lift table and an eight-week focus per verdict (the week, four
+  blocks, the retest); the `strength_engine_test` magnet ("email me my result
+  and the eight weeks", a personal asset like the planner's);
+  `strength-test` in the tool registry, so its two topics are draftable; links
+  from the calculators hub, the sitemap and `llms.txt`. Every planned tool is
+  now built.
+- **Tests:** `strength-engine.test.ts`, three worked examples to the number
+  (each worked by hand in the test): Men Open 80 kg, 21:00, engine-limited;
+  Women Open 65 kg, 24:00, force-limited on the deadlift; Men Pro 85 kg, 20:30,
+  balanced. Plus the cap, the estimate, the inputs, and the bible's wording
+  rules on the focus text.
+- **You, after merge:** check the three examples' verdicts are the ones you
+  would give, and read the eight-week focus text (mine, on your targets).
 
-- **Builds:**
-  - `src/lib/google/keyword-planner.ts`:
-    `generateKeywordHistoricalMetrics` for queued candidates, UK and English,
-    monthly, with the API version in one constant;
-  - volumes feed scoring.
-- **You, before merge:**
-  - D10;
-  - a one-time Google sign-in to produce a refresh token (the OAuth app must be
-    "In production", section 11);
-  - create and grant the secrets. The names are set in step 10.
-- **Ongoing:** Google retires Ads API versions roughly yearly, so the constant
-  needs a bump about once a year. A failing call shows in the summary email.
+### Step 9: HYROX pacer (M). Built
+
+D9 decided (you, 11 November 2026): everything free on the page, to show what
+is available; downloading or emailing it is the Pacing Pack.
+
+- **Built:**
+  - `src/lib/hyrox-pacing.ts`: the division profiles and the arithmetic, moved
+    out of `src/lib/shop/glasgow-2027-pacing.ts`, which re-exports them, so the
+    Glasgow page and its tests are unchanged and green;
+  - `fullSplits`: all 16 segments in race order, with the race clock after
+    each (the Roxzone spread evenly, as on the race cards), rounded so the
+    clock lands on the finish to the second;
+  - `/calculators/hyrox-pacer`: division and target finish (each division's
+    range, every five minutes), the average run, all runs, all stations,
+    the Roxzone and the halfway clock, and the whole table;
+  - **the paywall:** "Download as PDF" and "Email it to me" go to the Pacing
+    Pack on `/hyrox-glasgow-2027#buy`, at its price from the shop config,
+    while it is on sale. The page refreshes hourly, so the offer disappears
+    when sales close (14 March 2027) without a deploy;
+  - `hyrox-pacer` in the tool registry; the three topics that waited for it
+    (first 1 km, Roxzone, SkiErg) are draftable, with the pacer as their proof;
+  - links from the calculators hub, the sitemap and `llms.txt`.
+- **Station times come from** the Pacing Pack's own printed tables: the shares
+  measured from them, which reproduce every printed split to within three
+  seconds (`glasgow-pacing.test.ts`).
+- **Tests:** `hyrox-pacing.test.ts`, every division at every finish time it
+  offers: race order, a clock that only goes forward and ends on the finish,
+  and the same runs and halfway as the Glasgow preview.
+- **Not built:** the strongest/weakest-station rule. Shifting time between
+  stations needs your numbers (how much to give your weakest, how much to take
+  from your strongest); until then the table is the division average.
+
+### Step 10: Keyword Planner volumes (S–M). Built, off until its credentials exist
+
+- **Built:**
+  - `src/lib/google/keyword-planner.ts`: `GenerateKeywordHistoricalMetrics`
+    over REST, UK (`geoTargetConstants/2826`) and English
+    (`languageConstants/1000`), Google Search only, with the API version in one
+    constant, `ADS_API_VERSION` = `v26` (released 14 October 2026; sunset
+    expected around November 2027). Google's errors are explained: a Test-only
+    developer token, a missing manager id, an expired refresh token, a retired
+    version;
+  - a stage of the weekly harvest (`harvest/volumes.ts`): the tick after the
+    Search Console harvest, one request for every queued topic not checked in
+    four weeks. Each topic is asked about with up to three phrases (the search
+    people used, if Search Console has one; the question; its core words) and
+    keeps the best;
+  - volumes feed scoring: monthly searches scored like a search we do not rank
+    for (`× 0.3 × our subject`), and the queue's search band orders by the
+    stronger of that and the Search Console score (`queue.ts`, `demandScore`);
+  - the topics page shows each topic's UK monthly searches; the search page
+    says when the last check ran or why it failed; the weekly summary email
+    reports it, failures included;
+  - `/api/admin/keyword-planner-check`: which credentials are present (names
+    only), whether the refresh token works, and one real request;
+  - `scripts/google-ads-auth.ts`: the one-time sign-in, run on your computer.
+- **Tests:** `keyword-planner.test.ts` (the credentials, the request, the
+  parsing, each explained error, the phrases) and the harvest tests (nothing
+  until configured, one request for the queue, reordering, the summary,
+  failures, the four-week recheck).
+- **Not verified here:** `developers.google.com` is not reachable from the
+  build session, so the request follows the long-stable shape of this call.
+  The check route confirms it against the real API once the credentials exist.
+- **You, in this order** (the site works throughout; volumes start once all of
+  it is done):
+  1. **Developer token access:** Google Ads, Tools, API Center. "Test" access
+     cannot read real data: apply for Basic.
+  2. **An OAuth client:** in the Google Cloud console for hybridx-hub, APIs and
+     Services: enable the Google Ads API; set the OAuth consent screen to
+     **In production** (in "Testing" the refresh token dies after seven days);
+     create an OAuth client of type **Desktop app**.
+  3. **The sign-in:** `npx tsx scripts/google-ads-auth.ts <client-id> <client-secret>`
+     on your computer. It prints the refresh token once.
+  4. **The secrets**, created and granted before anything binds them:
+
+     ```bash
+     firebase apphosting:secrets:set GOOGLE_ADS_DEVELOPER_TOKEN --project hybridx-hub
+     firebase apphosting:secrets:set GOOGLE_ADS_CLIENT_SECRET --project hybridx-hub
+     firebase apphosting:secrets:set GOOGLE_ADS_REFRESH_TOKEN --project hybridx-hub
+     firebase apphosting:secrets:grantaccess GOOGLE_ADS_DEVELOPER_TOKEN,GOOGLE_ADS_CLIENT_SECRET,GOOGLE_ADS_REFRESH_TOKEN --project hybridx-hub --backend hybridx-web-x
+     ```
+
+  5. **Tell me** the client id, the Ads customer id and, if access comes
+     through a manager account, its id. They are not secrets: I add them and
+     the three secret bindings to `apphosting.yaml` in one change, after step 4.
+- **Ongoing:** bump `ADS_API_VERSION` about once a year; a failing call shows
+  in the summary email and on the search page.
 
 ### Step 11: app hand-off (M, mostly in hybridx-app)
 

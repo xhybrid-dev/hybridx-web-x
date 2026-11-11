@@ -10,7 +10,8 @@
 // for, records the search numbers on topics they match, and reorders the queue
 // in four bands (reorderQueue):
 //   1. Jon's own questions, and topics he moved up, in his order;
-//   2. topics with search demand, highest score first;
+//   2. topics with search demand, highest score first: what Search Console
+//      says finds us, or what Keyword Planner says is searched for (step 10);
 //   3. the rest, in their order;
 //   4. topics he moved down, in his order.
 // So search data decides the order only where Jon has not.
@@ -38,6 +39,8 @@ export interface Topic {
   source: 'list' | 'jon' | 'search';
   /** Search Console numbers from the latest harvest that matched it (step 6). */
   search?: TopicSearch;
+  /** Keyword Planner's UK monthly searches for its best phrase (step 10). */
+  volume?: TopicVolume;
   /** Jon moved it: up keeps it ahead of search-ranked topics, down behind them. */
   held?: 'up' | 'down';
   skipReason?: string;
@@ -57,6 +60,21 @@ export interface TopicSearch {
   position: number;
   score: number;
   queries: string[];
+}
+
+export interface TopicVolume {
+  keyword: string;
+  avgMonthly: number;
+  /** The latest three months' average. */
+  recent: number;
+  /** avgMonthly scored like a search we do not rank for: see harvest/volumes.ts. */
+  score: number;
+  checkedAt: string;
+}
+
+/** What orders a topic within the search band: the stronger of what finds us and what is searched for. */
+export function demandScore(t: Pick<Topic, 'search' | 'volume'>): number {
+  return Math.max(t.search?.score ?? 0, t.volume?.score ?? 0);
 }
 
 const clean = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
@@ -131,7 +149,7 @@ export function bandOrder(queued: Topic[]): Topic[] {
   const first = queued.filter((t) => t.source === 'jon' || t.held === 'up').sort(byRank);
   const last = queued.filter((t) => t.held === 'down' && t.source !== 'jon').sort(byRank);
   const middle = queued.filter((t) => !first.includes(t) && !last.includes(t));
-  const searched = middle.filter((t) => (t.search?.score ?? 0) > 0).sort((a, b) => b.search!.score - a.search!.score || byRank(a, b));
+  const searched = middle.filter((t) => demandScore(t) > 0).sort((a, b) => demandScore(b) - demandScore(a) || byRank(a, b));
   const rest = middle.filter((t) => !searched.includes(t)).sort(byRank);
   return [...first, ...searched, ...rest, ...last];
 }

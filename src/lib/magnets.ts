@@ -22,6 +22,7 @@
 // persuading. Plumbing is generic; pages are bespoke.
 
 import { parsePlannerInput, plannerQuery } from '@/lib/calculators/week-planner';
+import { parseTestInput, testQuery } from '@/lib/calculators/strength-engine';
 
 /**
  * How the asset reaches the person.
@@ -290,6 +291,39 @@ export const MAGNETS: readonly MagnetDefinition[] = [
         'The rule the whole plan is built on: when strength and a run share a day, lift first, and leave at least 6 to 8 hours between heavy legs and a hard run. Move sessions around as life needs, but keep that one.',
       footerLinkLabel: 'Plan a different week',
       reason: 'you asked for your four-week plan at',
+      accent: '#fadb5c',
+      accentText: '#111111',
+    },
+  },
+  {
+    // The strength and engine test's "email me my result and the eight weeks".
+    // The asset is the test page, reopened on this person's answers.
+    slug: 'strength_engine_test',
+    name: 'Strength and engine test: result by email',
+    tag: 'strength-engine-test',
+    pagePath: '/calculators/strength-engine-test',
+    rateLimitBucket: 'strength-engine-test',
+    delivery: 'immediate',
+    asset: {
+      kind: 'personal',
+      url(form) {
+        const input = parseTestInput((key) => {
+          const v = form.get(key);
+          return typeof v === 'string' ? v : null;
+        });
+        return input ? `/calculators/strength-engine-test?${testQuery(input)}#result` : null;
+      },
+    },
+    email: {
+      subject: 'Your strength and engine result',
+      heading: 'Your result, and your eight weeks',
+      intro:
+        'Here is your strength and engine result, with the eight weeks that go with it. Keep it: in week 8 you retest the same lifts and your 5 km, and the page shows you what moved.',
+      buttonLabel: 'Open my result',
+      insight:
+        'Never test a true one-rep max for this. A clean set of 3 to 8 reps tells you almost as much, with a fraction of the risk, and you can repeat it every eight weeks.',
+      footerLinkLabel: 'Take the test again',
+      reason: 'you asked for your strength and engine result at',
       accent: '#fadb5c',
       accentText: '#111111',
     },

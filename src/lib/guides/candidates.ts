@@ -28,7 +28,7 @@ export interface Candidate {
 }
 
 /** Tools that are planned but not built. Remove one here when it ships. */
-export const UNBUILT_TOOLS: readonly FutureTool[] = ['strength-test', 'hyrox-pacer'];
+export const UNBUILT_TOOLS: readonly FutureTool[] = [];
 
 export const CANDIDATES: readonly Candidate[] = [
   { question: 'How do I train the sled push without a sled?', pillar: 'hyrox', proof: 'workout', note: 'Kit substitutions a commercial gym has.' },

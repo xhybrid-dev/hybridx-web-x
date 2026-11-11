@@ -178,6 +178,11 @@ AI-drafted, reviewed and approved by Jon before publishing.
     never one Jon skipped. Query text is untrusted (anyone can type anything
     into Google): it is compared and shown, never followed, and the CSV export
     defuses spreadsheet formulas.
+  - **Keyword Planner** (plan step 10, `src/lib/google/keyword-planner.ts`)
+    adds UK monthly volumes to queued topics, the tick after each harvest. It
+    is off until its credentials exist; the three secrets are bound in
+    `apphosting.yaml` only after they are created and granted. The API version
+    is one constant, `ADS_API_VERSION`: bump it when Google retires it.
   - **The queue's order is in bands** (`queue.ts`, `bandOrder`): Jon's own
     questions and topics he moved up, then search demand by score, then the
     rest, then topics he moved down. Keep his moves ahead of the data.
@@ -186,6 +191,16 @@ AI-drafted, reviewed and approved by Jon before publishing.
   checks all 336 input combinations in every week. Change a session there, never
   in the page. Its magnet is the one `personal` asset: the emailed link is the
   planner page rebuilt from the validated form fields.
+- **The HYROX pacer** (plan step 9, `/calculators/hyrox-pacer`): the profiles
+  are in `src/lib/hyrox-pacing.ts`, shared with the Glasgow preview, and
+  measured from the Pacing Pack's printed tables. The whole table is free on
+  the page (Jon's decision); its download and email buttons go to the Pacing
+  Pack while it is on sale, and vanish when sales close.
+- **The strength and engine test** (plan step 8,
+  `/calculators/strength-engine-test`): Jon's targets and the scoring are in
+  `src/lib/calculators/strength-engine.ts`; three worked examples in
+  `strength-engine.test.ts` pin them to the number. Change a target only with
+  Jon, and update the examples with it. It never asks for a true max.
 - **Article performance** (plan step 7, `/admin/guides/performance`): an
   article's tool and call-to-action links go through `/api/guides/out`, which
   counts a total per article and redirects to a destination looked up by id.
