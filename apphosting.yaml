@@ -158,6 +158,13 @@ env:
     secret: GEMINI_API_KEY
     availability:
       - RUNTIME
+  # Claude: the second review of each guide draft (src/lib/guides/engine/
+  # models.ts) and the monthly plan-finder analytics review. Created and
+  # granted to the hybridx-web-x backend by Jon, 12 November 2026.
+  - variable: ANTHROPIC_API_KEY
+    secret: ANTHROPIC_API_KEY
+    availability:
+      - RUNTIME
 
   # ── Shop (HYROX Glasgow 2027 PDFs) ────────────────────────────────────────
   # docs/shop-setup.md is the full procedure. The plain values below are safe
