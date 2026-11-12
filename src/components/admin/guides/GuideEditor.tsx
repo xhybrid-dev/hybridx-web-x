@@ -88,8 +88,11 @@ export default function GuideEditor({
         result = { ok: false, errors: [`The save did not go through: ${e instanceof Error ? e.message : 'unknown error'}. Your edits are still here; try again.`] };
       }
       if (result.ok) {
+        // Push alone: the article page is dynamic, so it is fetched fresh. A
+        // router.refresh() straight after the push, inside this transition,
+        // left the save button spinning for ever on Next 16 although the save
+        // had gone through (12 November 2026).
         router.push(`/admin/guides/${slug}?done=saved`);
-        router.refresh();
       } else {
         setErrors(result.errors);
         window.scrollTo({ top: 0, behavior: 'smooth' });
