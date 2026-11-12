@@ -62,6 +62,12 @@
   sets `NODE_OPTIONS=--max-old-space-size=3072` for the build only; build locally
   with the same (`NODE_OPTIONS=--max-old-space-size=3072 npm run build`).
 
+- **The build uses webpack, not Turbopack** (`next build --webpack` in
+  `package.json`). On 12 November 2026 Turbopack in Next 16.2.1 began failing
+  every `next/font/google` font with "next/font/google queries have exactly one
+  entry", on App Hosting and locally, with no change in the repo. Try
+  Turbopack again only after a Next upgrade, with a local build first.
+
 - **`LEAD_BRIDGE_SECRET` is not interchangeable with `CRON_SECRET`.** The bridge
   credential authorises pushing leads into the mailing system; the cron credential
   only authorises running maintenance. A scheduler job should not be able to do the
