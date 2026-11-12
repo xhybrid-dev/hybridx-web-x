@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ShopEventLink from '@/components/shop/ShopEventLink';
 import TrackedLink from '@/components/TrackedLink';
+import { APP_SIGNUP_URL } from '@/lib/app-links';
 import { Button } from '@/components/ui/button';
 import {
   AlertOctagon,
@@ -629,7 +630,7 @@ export default function HyroxRuleChanges2026() {
             <div className="flex flex-wrap justify-center gap-3">
               <Button size="lg" className="bg-accent font-headline text-black hover:bg-accent/90" asChild>
                 <TrackedLink
-                  href="https://app.hybridx.club"
+                  href={APP_SIGNUP_URL}
                   event="cta_app_click"
                   eventParams={{ location: 'rules_2026_footer_cta' }}
                 >

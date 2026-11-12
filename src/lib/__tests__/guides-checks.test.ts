@@ -174,3 +174,18 @@ describe('overlap with published articles', () => {
     expect(textUnits(sample.blocks).length).toBeGreaterThan(10);
   });
 });
+
+describe('the call to action fits the article', () => {
+  const withCta = (pillar: Guide['pillar'], variant: 'free-plan' | 'app' | 'athx'): Guide => ({
+    ...sample,
+    pillar,
+    blocks: [...sample.blocks.filter((b) => b.type !== 'cta'), { type: 'cta', variant }],
+  });
+
+  it('offers the ATHX plan on an ATHX article, and only there', () => {
+    expect(codes(checkDraft(withCta('athx', 'athx')), 'warnings')).not.toContain('cta-pillar');
+    expect(codes(checkDraft(withCta('athx', 'app')), 'warnings')).toContain('cta-pillar');
+    expect(codes(checkDraft(withCta('hyrox', 'athx')), 'warnings')).toContain('cta-pillar');
+    expect(codes(checkDraft(withCta('hyrox', 'free-plan')), 'warnings')).not.toContain('cta-pillar');
+  });
+});

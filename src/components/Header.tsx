@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggleButton } from '@/components/ThemeToggleButton';
 import TrackedLink from '@/components/TrackedLink';
+import { APP_SIGNUP_URL } from '@/lib/app-links';
 
 interface NavItem {
   label: string;
@@ -126,7 +127,7 @@ export default function Header() {
           <ThemeToggleButton />
           <Button className="hidden md:inline-flex bg-accent text-accent-foreground hover:bg-accent/90 font-headline" asChild>
             <TrackedLink
-              href="https://app.hybridx.club"
+              href={APP_SIGNUP_URL}
               target="_blank"
               rel="noopener noreferrer"
               event="cta_app_click"
@@ -207,7 +208,7 @@ export default function Header() {
                 <SheetClose asChild>
                   <Button className="bg-accent text-accent-foreground hover:bg-accent/90 mt-4 py-3 text-base font-headline w-full" asChild>
                     <TrackedLink
-                      href="https://app.hybridx.club"
+                      href={APP_SIGNUP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       event="cta_app_click"

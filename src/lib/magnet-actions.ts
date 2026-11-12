@@ -181,6 +181,7 @@ export async function submitMagnetLead(
     utm,
     ip,
     userAgent,
+    page: magnet.pagePath,
   };
 
   // 1) Record the lead. Best effort: it must never stand between somebody and

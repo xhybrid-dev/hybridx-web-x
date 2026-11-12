@@ -9,9 +9,13 @@
 // article: no cookie, no identifier, nothing about the visitor. So they count
 // everyone, not only the people who accepted analytics. Leads are attributed
 // by the `src` an article's call to action or tool link carries to the form
-// (guide-<slug>).
+// (guide-<slug>). App sign-ups come from the app over the bridge, by the same
+// src (getAppSignupsBySrc): a reader who clicked through and signed up, and
+// one who left an address first and signed up later.
 
+import { guideSrc } from '@/lib/app-links';
 import { adminFirestore } from '@/lib/firebase-admin';
+import type { AppSignups, SrcCounts } from '@/lib/marketing-bridge';
 import type { GuideMetric } from './harvest/run';
 import type { Guide } from './types';
 
@@ -23,8 +27,8 @@ export const NOT_INDEXED_AFTER_DAYS = 30;
 export const FEW_IMPRESSIONS_AFTER_DAYS = 90;
 export const FEW_IMPRESSIONS = 100;
 
-/** The `src` a lead from an article carries. */
-export const guideSrc = (slug: string) => `guide-${slug}`;
+/** The `src` a lead from an article carries. Declared with the app's src rule. */
+export { guideSrc };
 const SRC = /^guide-([a-z0-9-]{1,80})$/;
 
 export interface GuideClicks {
@@ -80,7 +84,44 @@ export interface PerformanceRow {
   ctaClicks: number;
   toolClicks: number;
   leads: number;
+  /** Absent when the app could not be asked. */
+  app?: SrcCounts;
   flags: Flag[];
+}
+
+const ZERO: SrcCounts = { signups: 0, trials: 0, paying: 0 };
+
+function plus(a: SrcCounts | undefined, b: SrcCounts | undefined): SrcCounts {
+  return {
+    signups: (a?.signups ?? 0) + (b?.signups ?? 0),
+    trials: (a?.trials ?? 0) + (b?.trials ?? 0),
+    paying: (a?.paying ?? 0) + (b?.paying ?? 0),
+  };
+}
+
+/** One src's app sign-ups, both ways in. */
+export function appCountsFor(app: AppSignups, src: string): SrcCounts {
+  return plus(app.direct[src] ?? ZERO, app.viaEmail[src]);
+}
+
+export interface AppSourceRow {
+  src: string;
+  direct: SrcCounts;
+  viaEmail: SrcCounts;
+  total: SrcCounts;
+}
+
+/** Every src the app has sign-ups for (articles, tools, pages), most sign-ups first. */
+export function appSourceRows(app: AppSignups): AppSourceRow[] {
+  const srcs = new Set([...Object.keys(app.direct), ...Object.keys(app.viaEmail)]);
+  return [...srcs]
+    .map((src) => ({
+      src,
+      direct: app.direct[src] ?? ZERO,
+      viaEmail: app.viaEmail[src] ?? ZERO,
+      total: appCountsFor(app, src),
+    }))
+    .sort((a, b) => b.total.signups - a.total.signups || b.total.paying - a.total.paying || a.src.localeCompare(b.src));
 }
 
 /** One row per published article, newest first, with its flags. */
@@ -90,6 +131,7 @@ export function performanceRows(
   clicks: GuideClicks[],
   leads: ReadonlyMap<string, number>,
   now: Date,
+  app: AppSignups | null = null,
 ): PerformanceRow[] {
   return guides
     .filter((g): g is typeof g & { publishedAt: string } => g.status === 'published' && !!g.publishedAt)
@@ -115,6 +157,7 @@ export function performanceRows(
         ctaClicks: c?.cta ?? 0,
         toolClicks: c?.tool ?? 0,
         leads: leads.get(g.slug) ?? 0,
+        ...(app ? { app: appCountsFor(app, guideSrc(g.slug)) } : {}),
         flags,
       };
     });

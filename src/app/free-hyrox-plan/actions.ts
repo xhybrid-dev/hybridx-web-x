@@ -59,6 +59,7 @@ export async function signUpForTrainingPlan(
       // Where they came from, when the link said (guide-<slug> from an article):
       // bounded and pattern-checked, since anyone can put anything in a URL.
       extra: { event, eventDate, ...(srcOf(formData) ? { src: srcOf(formData) } : {}) },
+      page: '/free-hyrox-plan',
       ip,
       userAgent,
     });

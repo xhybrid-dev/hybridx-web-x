@@ -87,6 +87,14 @@ export interface ForwardLeadInput {
   consentPolicy?: 'implied' | 'explicit' | 'confirmed' | 'none';
   utm?: Record<string, string>;
   tags?: string[];
+  /**
+   * Where on this site the address was left (contract 1.3.0): the article
+   * that sent the visitor (guide-<slug>), or the form's own page
+   * (page-<path>). The mailing system keeps the first one on the subscriber,
+   * so an account opened later is credited to it (getAppSignupsBySrc,
+   * viaEmail). An app older than 1.3.0 ignores it.
+   */
+  src?: string;
 }
 
 /**
@@ -270,6 +278,61 @@ export async function getComplaintHashes(): Promise<ComplaintList | null> {
       count: data.count ?? data.hashes.length,
       truncated: data.truncated === true,
       syncedAt: data.syncedAt ?? new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** One src's tally, as the app reports it. Counts only: no person crosses the bridge. */
+export interface SrcCounts {
+  signups: number;
+  trials: number;
+  paying: number;
+}
+
+export interface AppSignups {
+  /** Clicked through to the app from a page here and signed up (the user's acquisitionSrc). */
+  direct: Record<string, SrcCounts>;
+  /**
+   * Left an address here first (a lead carrying this src) and signed up
+   * later, by any route, without a src of their own. Contract 1.3.0; empty
+   * from an app that predates it.
+   */
+  viaEmail: Record<string, SrcCounts>;
+  truncated: boolean;
+  generatedAt: string;
+}
+
+const count = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0);
+
+function parseTally(raw: unknown): Record<string, SrcCounts> {
+  const out: Record<string, SrcCounts> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [src, c] of Object.entries(raw as Record<string, unknown>)) {
+    if (!c || typeof c !== 'object') continue;
+    const { signups, trials, paying } = c as Record<string, unknown>;
+    out[src] = { signups: count(signups), trials: count(trials), paying: count(paying) };
+  }
+  return out;
+}
+
+/**
+ * App sign-ups, trials and paying users per src (an article, a tool, a page
+ * here), for /admin/guides/performance. Null when the app cannot be reached,
+ * so the page can say the numbers are missing rather than show zeros.
+ */
+export async function getAppSignupsBySrc(): Promise<AppSignups | null> {
+  const response = await bridgeFetch('/api/marketing/signups-by-src', { method: 'GET' });
+  if (!response?.ok) return null;
+  try {
+    const data = (await response.json()) as Record<string, unknown>;
+    if (!data || typeof data !== 'object' || !data.direct) return null;
+    return {
+      direct: parseTally(data.direct),
+      viaEmail: parseTally(data.viaEmail),
+      truncated: data.truncated === true,
+      generatedAt: typeof data.generatedAt === 'string' ? data.generatedAt : new Date().toISOString(),
     };
   } catch {
     return null;

@@ -7,13 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import TrackedLink from '@/components/TrackedLink';
+import { APP_SIGNUP_URL } from '@/lib/app-links';
 import Script from 'next/script';
 import {
   Smartphone, Calendar, LineChart, Sparkles, ArrowRight, CheckCircle,
 } from 'lucide-react';
 import { createMetadata, createFAQSchema } from '@/lib/seo';
 
-const APP_URL = 'https://app.hybridx.club';
+// Every "Start your free trial" here goes straight to the app's sign-up form.
+const APP_URL = APP_SIGNUP_URL;
 
 export const metadata = createMetadata({
   title: 'HybridX App — Hyrox & Hybrid Training, £5/month',

@@ -13,6 +13,8 @@
 import { preload } from 'react-dom';
 import { ArrowRight, Check } from 'lucide-react';
 import { funnel } from '@/lib/plan-finder/content';
+import TrackedLink from '@/components/TrackedLink';
+import { APP } from '@/lib/facts/product';
 
 const XMARK = '/plan-finder/hybridx-x-mark.jpg';
 
@@ -138,9 +140,9 @@ export default function EntrySection({ mode }: { mode: 'entry' | 'page' }) {
                     books
                   </a>
                   , the{' '}
-                  <a href="https://app.hybridx.club" className="text-white underline">
+                  <TrackedLink href={APP.url} className="text-white underline">
                     app
-                  </a>{' '}
+                  </TrackedLink>{' '}
                   or the{' '}
                   <a href="/calculators" className="text-white underline">
                     free tools

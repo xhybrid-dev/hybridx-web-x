@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Form,
@@ -24,6 +23,8 @@ import { parseTrainingPlanCSV, groupWorkoutsByDay } from '@/lib/training-plan-ut
 import { downloadTrainingPlanPDF } from '@/lib/pdf-generator';
 import { downloadTrainingPlanICS } from '@/lib/ical-generator';
 import { trackEvent } from '@/lib/analytics';
+import TrackedLink from '@/components/TrackedLink';
+import { appSignupHref, seedFromFreePlan } from '@/lib/app-seed';
 
 export interface HyroxEvent {
     name: string;
@@ -105,6 +106,9 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
     setSrc(new URLSearchParams(window.location.search).get('src') ?? '');
   }, []);
   const [completed, setCompleted] = useState(false);
+  // The race date they chose, kept past the form's reset so the app link on
+  // the success screen can carry it into sign-up.
+  const [raceDate, setRaceDate] = useState('');
   const leadFiredRef = useRef(false);
 
   // zod validation for client side
@@ -189,6 +193,7 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
           const email = form.getValues('email');
           const event = form.getValues('event');
           const eventDate = form.getValues('eventDate');
+          setRaceDate(eventDate);
 
           // Parse the training plan CSV
           const trainingPlanRows = await parseTrainingPlanCSV('/training-plans/hyrox-fusion-86.csv');
@@ -255,15 +260,19 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
           <p className="font-headline font-bold text-primary mb-1">Want it guided, day by day?</p>
           <p className="font-body text-sm text-muted-foreground mb-4">
             The app delivers this plan one session at a time, tracks every rep and run, and adapts as you go.
+            Your race date comes with you, so the plan you start finishes on race day.
             14-day free trial — cancel anytime.
           </p>
           <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-headline">
-            <Link
-              href="/app"
-              onClick={() => trackEvent('cta_app_click', { location: 'free_plan_success' })}
+            {/* Straight to sign-up with the race date (src/lib/app-seed.ts);
+                TrackedLink adds the src that credits this page or article. */}
+            <TrackedLink
+              href={appSignupHref(seedFromFreePlan(raceDate))}
+              event="cta_app_click"
+              eventParams={{ location: 'free_plan_success', tool: 'free-plan' }}
             >
               Try the App Free <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            </TrackedLink>
           </Button>
         </div>
 

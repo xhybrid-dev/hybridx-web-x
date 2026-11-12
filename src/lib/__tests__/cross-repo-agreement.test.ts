@@ -1,8 +1,24 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, it, expect } from 'vitest';
-import { isValidLeadSource } from '../leads';
+import { describe, it, expect, vi } from 'vitest';
+import { guideSrc, pageSrc, parseSrc, SRC_MAX_LENGTH, SRC_PARAM, SRC_PATTERN } from '../app-links';
+import { getAppSignupsBySrc } from '../marketing-bridge';
+import {
+  appSignupHref,
+  ATHX_DIVISIONS,
+  ATHX_EDITIONS,
+  SEED_EVENTS,
+  SEED_TOOLS,
+  seedForAthx,
+  seedFromFreePlan,
+  seedFromPlanner,
+  seedFromStrengthTest,
+} from '../app-seed';
+import { DAY_COUNTS, GOALS as GOALS_OF_PLANNER } from '../calculators/week-planner';
+import { DIVISIONS as STRENGTH_DIVISIONS } from '../calculators/strength-engine';
+import { PAGE_UPDATED } from '../page-dates';
+import { isValidLeadSource, leadSrc } from '../leads';
 import { hashEmail } from '../suppression-mirror';
 import { requireMagnet } from '../magnets';
 
@@ -152,5 +168,121 @@ describe('consent posture travels with the lead, not just the answer', () => {
     // relabel the route as one that never asked twice.
     expect(sent.filter((p) => p === 'confirmed')).toHaveLength(2);
     expect(sent.filter((p) => p === 'implied')).toHaveLength(1);
+  });
+});
+
+describe('the src on links into the app agrees with the app', () => {
+  // The app declares the same rule in src/lib/acquisition-src.ts and pins
+  // these literal values in src/lib/__tests__/acquisition-src.test.ts. A src
+  // the app does not accept is dropped there without a word, and the sign-up
+  // it would have credited reads as unattributed.
+  it('uses the parameter, pattern and length the app declares', () => {
+    expect(SRC_PARAM).toBe('src');
+    expect(SRC_PATTERN.source).toBe('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+    expect(SRC_MAX_LENGTH).toBe(90);
+  });
+
+  it('fits the longest article slug inside the app’s limit', () => {
+    // GuideSchema caps a slug at 80 characters.
+    expect(parseSrc(guideSrc('a'.repeat(80)))).toBe(`guide-${'a'.repeat(80)}`);
+  });
+
+  it('gives every hand-built page a src the app accepts', () => {
+    for (const path of Object.keys(PAGE_UPDATED)) {
+      expect(parseSrc(pageSrc(path)), path).toBe(pageSrc(path));
+    }
+  });
+
+  it('reads the report in the shape the app sends', async () => {
+    // The app's GET /api/marketing/signups-by-src, version 1.
+    process.env.MARKETING_APP_URL = 'https://app.example';
+    process.env.LEAD_BRIDGE_SECRET = 's'.repeat(40);
+    const body = {
+      version: 1,
+      direct: { 'guide-a': { signups: 2, trials: 1, paying: 1 } },
+      viaEmail: { 'page-home': { signups: 1, trials: 0, paying: 0 } },
+      truncated: false,
+      generatedAt: '2026-11-11T09:00:00.000Z',
+    };
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(body)));
+    try {
+      expect(await getAppSignupsBySrc()).toEqual({
+        direct: body.direct,
+        viaEmail: body.viaEmail,
+        truncated: false,
+        generatedAt: body.generatedAt,
+      });
+      expect(String(fetchSpy.mock.calls[0][0])).toBe('https://app.example/api/marketing/signups-by-src');
+    } finally {
+      fetchSpy.mockRestore();
+      delete process.env.MARKETING_APP_URL;
+      delete process.env.LEAD_BRIDGE_SECRET;
+    }
+  });
+});
+
+describe('a lead carries its src to the mailing system (contract 1.3.0)', () => {
+  // The app's bridge-contract.ts reads an optional `src`, checked with the same
+  // rule as above, and keeps the first one on the subscriber. Spell the field
+  // differently and zod drops it, and no account opened after an email is ever
+  // credited to the article that started it.
+  const leadsSource = readFileSync(join(process.cwd(), 'src/lib/leads.ts'), 'utf8');
+
+  it('sends it on both forwards that start a lead', () => {
+    // saveLead and upsertPendingLead. markLeadConfirmed has no src to send, and
+    // the app fills a blank src from whichever arrives.
+    expect(leadsSource.match(/src: leadSrc\(input\),/g)).toHaveLength(2);
+  });
+
+  it('names the article that sent the visitor, else the form’s page, never "direct"', () => {
+    expect(leadSrc({ extra: { src: 'guide-wall-balls' }, page: '/free-hyrox-plan' })).toBe('guide-wall-balls');
+    expect(leadSrc({ extra: { src: 'direct' }, page: '/free-hyrox-plan' })).toBe('page-free-hyrox-plan');
+    expect(leadSrc({ extra: { src: 'Not_Ours' }, page: '/calculators/week-planner' })).toBe('page-calculators-week-planner');
+    expect(leadSrc({ extra: { src: 'direct' } })).toBeUndefined();
+  });
+
+  it('only ever sends a src the app accepts', () => {
+    for (const path of ['/free-hyrox-plan', '/athx-2027', '/hyrox-rule-changes-2026', '/calculators/week-planner']) {
+      expect(parseSrc(leadSrc({ page: path }))).toBe(leadSrc({ page: path }));
+    }
+  });
+});
+
+describe('sign-up links carry a tool’s answers the app will read', () => {
+  // The app's src/lib/signup-seed.ts reads these parameters on /signup and
+  // checks each against its own answers; src/lib/__tests__/signup-seed.test.ts
+  // there pins the same literal lists. A value it does not know is ignored,
+  // so a drift here shows up only as a form that opens blank.
+  it('uses the tools, events, editions and divisions the app declares', () => {
+    expect([...SEED_TOOLS]).toEqual(['week-planner', 'strength-engine-test', 'athx', 'free-plan']);
+    expect([...SEED_EVENTS]).toEqual(['hyrox', 'athx']);
+    expect([...ATHX_EDITIONS]).toEqual(['men', 'women']);
+    expect([...ATHX_DIVISIONS]).toEqual(['lite', 'athx', 'pro']);
+  });
+
+  it('builds links in the shape the app’s own test reads', () => {
+    // signup-seed.test.ts there: "reads a week planner link".
+    expect(appSignupHref(seedFromPlanner({ days: 4, goal: 'first-hyrox' }))).toBe(
+      'https://app.hybridx.club/signup?tool=week-planner&event=hyrox&experience=beginner&days=4&goal=hybrid',
+    );
+    expect(appSignupHref(seedForAthx('women'))).toBe('https://app.hybridx.club/signup?tool=athx&event=athx&edition=women');
+    // "reads a free plan link" there.
+    expect(appSignupHref(seedFromFreePlan('2027-06-06'))).toBe('https://app.hybridx.club/signup?tool=free-plan&event=hyrox&race=2027-06-06');
+    expect(appSignupHref(seedFromFreePlan(''))).toBe('https://app.hybridx.club/signup?tool=free-plan&event=hyrox');
+  });
+
+  it('only ever sends answers from the app’s own lists', () => {
+    const EXPERIENCE = ['beginner', 'intermediate', 'advanced'];
+    const GOALS = ['strength', 'endurance', 'hybrid'];
+    const seeds = [
+      ...GOALS_OF_PLANNER.flatMap((goal) => DAY_COUNTS.map((days) => seedFromPlanner({ days, goal }))),
+      ...STRENGTH_DIVISIONS.flatMap((d) => (['force-limited', 'engine-limited', 'balanced'] as const).map((v) => seedFromStrengthTest(d, v))),
+    ];
+    for (const seed of seeds) {
+      if (seed.experience) expect(EXPERIENCE).toContain(seed.experience);
+      if (seed.goal) expect(GOALS).toContain(seed.goal);
+      if (seed.days !== undefined) expect(seed.days >= 1 && seed.days <= 7).toBe(true);
+      expect(SEED_EVENTS).toContain(seed.event);
+    }
   });
 });

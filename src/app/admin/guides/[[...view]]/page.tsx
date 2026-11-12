@@ -14,7 +14,9 @@ import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guid
 import { parseInline } from '@/lib/guides/inline';
 import { HARVEST_EVERY_MS, getHarvest, getHarvestState, listMetrics } from '@/lib/guides/harvest/run';
 import { asQuestion } from '@/lib/guides/harvest/analyse';
-import { FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
+import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
+import { getAppSignupsBySrc } from '@/lib/marketing-bridge';
+import { guideSrc } from '@/lib/app-links';
 import { engineOn, getRun } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
@@ -1021,8 +1023,16 @@ async function SearchView() {
 /* ── Performance ─────────────────────────────────────────────────────────── */
 
 async function Performance() {
-  const [guides, metrics, clicks, leads] = await Promise.all([listAllGuides(), listMetrics(), listClicks(), leadsByGuide()]);
-  const rows = performanceRows(guides, metrics, clicks, leads, new Date());
+  const [guides, metrics, clicks, leads, app] = await Promise.all([
+    listAllGuides(),
+    listMetrics(),
+    listClicks(),
+    leadsByGuide(),
+    getAppSignupsBySrc(),
+  ]);
+  const rows = performanceRows(guides, metrics, clicks, leads, new Date(), app);
+  const sources = app ? appSourceRows(app) : [];
+  const titles = new Map(guides.map((g) => [guideSrc(g.slug), g.title]));
   const flagged = rows.filter((r) => r.flags.length);
   const cell = 'px-3 py-2 text-left align-top';
   const n = (v: number | undefined) => (v === undefined ? '–' : v);
@@ -1034,7 +1044,17 @@ async function Performance() {
         <p className="text-sm text-muted-foreground">
           Search numbers are the 28 days of the latest weekly harvest. Tool and call-to-action clicks are counted on the server for every
           reader, with nothing stored about them. Leads are sign-ups (the free plan, or the week planner) that came from an article&rsquo;s call to action or tool.
+          App sign-ups are accounts the app credits to the article: the reader clicked through and signed up, or left an address here first and
+          signed up later. Each account counts once: for the page it clicked through from, or else the page where it first left an address. An
+          account found by email shows up the day after, once the app&rsquo;s nightly sync has matched the address. Trials and paying are where
+          those accounts are today.
         </p>
+        {!app && (
+          <p className="text-sm font-semibold">
+            The app could not be asked for its numbers just now (the bridge is down, or not set up here), so the app columns are blank.
+          </p>
+        )}
+        {app?.truncated && <p className="text-sm font-semibold">The app counted only its first 20,000 accounts: the numbers are low.</p>}
       </div>
 
       {flagged.length > 0 && (
@@ -1059,7 +1079,7 @@ async function Performance() {
 
       {rows.length ? (
         <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[960px] text-sm">
             <thead className="bg-secondary/50">
               <tr>
                 <th className={cell}>Article</th>
@@ -1071,6 +1091,9 @@ async function Performance() {
                 <th className={cell}>Tool clicks</th>
                 <th className={cell}>CTA clicks</th>
                 <th className={cell}>Leads</th>
+                <th className={cell}>App sign-ups</th>
+                <th className={cell}>Trials</th>
+                <th className={cell}>Paying</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -1089,6 +1112,9 @@ async function Performance() {
                   <td className={cell}>{r.toolClicks}</td>
                   <td className={cell}>{r.ctaClicks}</td>
                   <td className={cell}>{r.leads}</td>
+                  <td className={cell}>{n(r.app?.signups)}</td>
+                  <td className={cell}>{n(r.app?.trials)}</td>
+                  <td className={cell}>{n(r.app?.paying)}</td>
                 </tr>
               ))}
             </tbody>
@@ -1096,6 +1122,40 @@ async function Performance() {
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">Nothing published yet.</p>
+      )}
+
+      {sources.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="font-headline text-lg font-bold">App sign-ups by page</h3>
+          <p className="text-sm text-muted-foreground">
+            Every page on the site that has brought an account, articles and hand-built pages alike. &ldquo;Clicked through&rdquo; signed up from a link here;
+            &ldquo;by email&rdquo; left an address here first.
+          </p>
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead className="bg-secondary/50">
+                <tr>
+                  <th className={cell}>Page</th>
+                  <th className={cell}>Clicked through</th>
+                  <th className={cell}>By email</th>
+                  <th className={cell}>Trials</th>
+                  <th className={cell}>Paying</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {sources.map((r) => (
+                  <tr key={r.src}>
+                    <td className={cell}>{titles.get(r.src) ?? r.src}</td>
+                    <td className={cell}>{r.direct.signups}</td>
+                    <td className={cell}>{r.viaEmail.signups}</td>
+                    <td className={cell}>{r.total.trials}</td>
+                    <td className={cell}>{r.total.paying}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
     </div>
   );

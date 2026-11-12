@@ -253,6 +253,15 @@ export function checkDraft(
     warnings.push({ code: 'no-related-link', message: `No link to a related article. Link one in the text, such as ${suggest}.` });
   }
   if (!guide.blocks.some((b) => b.type === 'cta')) warnings.push({ code: 'no-cta', message: 'No call to action.' });
+  // The ATHX call to action offers the ATHX plan: right for an ATHX article, and
+  // only for one. An ATHX article ending on the HYROX offers loses its reader.
+  const ctas = guide.blocks.flatMap((b) => (b.type === 'cta' ? [b.variant] : []));
+  if (ctas.includes('athx') && guide.pillar !== 'athx') {
+    warnings.push({ code: 'cta-pillar', message: 'The ATHX call to action is on an article that is not about ATHX. Use free-plan or app.' });
+  }
+  if (guide.pillar === 'athx' && ctas.some((v) => v !== 'athx')) {
+    warnings.push({ code: 'cta-pillar', message: 'An ATHX article: end on the athx call to action, which offers the ATHX plan.' });
+  }
 
   errors.push(...checkStandards(units), ...checkClaims(units));
   const wording = checkWording(units);

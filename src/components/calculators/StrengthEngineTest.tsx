@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMagnetCapture } from '@/hooks/use-magnet-capture';
 import { trackEvent } from '@/lib/analytics';
+import { withTracking } from '@/lib/app-links';
+import AppSeedCta from '@/components/AppSeedCta';
+import { seedFromStrengthTest } from '@/lib/app-seed';
 import {
   DIVISIONS,
   DIVISION_LABELS,
@@ -47,7 +50,7 @@ export default function StrengthEngineTest() {
   const lastVerdict = useRef('');
   useEffect(() => {
     if (!parsed || !result) return;
-    window.history.replaceState(null, '', `?${testQuery(parsed)}`);
+    window.history.replaceState(null, '', `?${withTracking(testQuery(parsed), window.location.search)}`);
     const key = `${parsed.division}:${result.verdict}`;
     if (key !== lastVerdict.current) {
       lastVerdict.current = key;
@@ -203,6 +206,19 @@ function Result({ input, result }: { input: TestInput; result: ReturnType<typeof
       </p>
 
       <EmailResult input={input} verdict={result.verdict} />
+
+      <AppSeedCta
+        seed={seedFromStrengthTest(input.division, result.verdict)}
+        location={`strength_engine_${result.verdict}`}
+        heading="Train your limiter in the app"
+        body={`The app matches you to a programme from this result, ${
+          result.verdict === 'force-limited'
+            ? 'built around strength'
+            : result.verdict === 'engine-limited'
+              ? 'built around your engine'
+              : 'balancing strength and engine'
+        }, with every session logged. Your answers are filled in for you.`}
+      />
     </section>
   );
 }

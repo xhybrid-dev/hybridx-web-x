@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminFirestore } from '@/lib/firebase-admin';
 import type { ForwardLeadInput } from '@/lib/marketing-bridge';
+import { pageSrc, parseSrc } from '@/lib/app-links';
 import { attemptForwardAsync, pendingOutbox } from '@/lib/lead-outbox';
 
 /**
@@ -53,6 +54,22 @@ export interface LeadInput {
   utm?: Record<string, string>;
   userAgent?: string;
   ip?: string;
+  /**
+   * The path of the page holding the form, e.g. /free-hyrox-plan. Names the
+   * lead's src when the visitor's link carried none (see leadSrc).
+   */
+  page?: string;
+}
+
+/**
+ * The src a lead is forwarded with: the one the visitor's link carried
+ * (extra.src, guide-<slug> from an article), or else the form's own page.
+ * "direct" is what a form records for no src at all, so it never travels.
+ */
+export function leadSrc(input: Pick<LeadInput, 'extra' | 'page'>): string | undefined {
+  const fromLink = parseSrc(input.extra?.src);
+  if (fromLink && fromLink !== 'direct') return fromLink;
+  return input.page ? pageSrc(input.page) : undefined;
 }
 
 /**
@@ -79,6 +96,7 @@ export async function saveLead(input: LeadInput): Promise<void> {
     consentPolicy: 'implied',
     utm: input.utm,
     tags: input.tags,
+    src: leadSrc(input),
   };
 
   const ref = await adminFirestore.collection('leads').add({
@@ -142,6 +160,7 @@ export async function upsertPendingLead(input: LeadInput): Promise<void> {
     consentPolicy: 'confirmed',
     utm: input.utm,
     tags: input.tags,
+    src: leadSrc(input),
   };
 
   const docId = leadDocId(input.source, email);
