@@ -15,6 +15,11 @@
  * 127.0.0.1, which prints the refresh token, once, for you to store as the
  * GOOGLE_ADS_REFRESH_TOKEN secret. Nothing is written to disk.
  *
+ * When the browser is on another machine (the script runs over SSH, in a
+ * container or in WSL), that last step lands on a "can't connect" page.
+ * Copy the whole address from the browser's address bar and paste it into
+ * this terminal instead: the script takes whichever arrives first.
+ *
  * The scope is Google Ads only. The site uses it for one read-only call,
  * GenerateKeywordHistoricalMetrics; it creates no campaigns and spends nothing.
  */
@@ -22,6 +27,7 @@ import 'dotenv/config';
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import { createInterface } from 'node:readline';
 import { CodeChallengeMethod, OAuth2Client } from 'google-auth-library';
 
 const SCOPE = 'https://www.googleapis.com/auth/adwords';
@@ -54,8 +60,33 @@ async function main() {
   console.log('\nOpen this link, sign in, and allow access:\n');
   console.log(url);
   console.log('\nWaiting for Google to send you back here...');
+  console.log('If your browser shows "can\'t connect" instead, copy the whole address from its');
+  console.log('address bar (it starts http://127.0.0.1) and paste it here, then press Enter:\n');
 
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
   const code = await new Promise<string>((resolve, reject) => {
+    const finish = (params: URLSearchParams): string | null => {
+      if (params.get('state') !== state) return 'That was not the sign-in this script started.';
+      const got = params.get('code');
+      server.close();
+      rl.close();
+      if (got) resolve(got);
+      else reject(new Error(params.get('error') ?? 'no code returned'));
+      return null;
+    };
+    rl.on('line', (line) => {
+      const text = line.trim();
+      if (!text) return;
+      let params: URLSearchParams;
+      try {
+        params = new URL(text).searchParams;
+      } catch {
+        console.log('That is not an address. Paste the whole http://127.0.0.1... address.');
+        return;
+      }
+      const problem = finish(params);
+      if (problem) console.log(`${problem} Paste the address from this run's sign-in.`);
+    });
     server.on('request', (req, res) => {
       const params = new URL(req.url ?? '/', redirectUri).searchParams;
       if (params.get('state') !== state) {
@@ -67,9 +98,7 @@ async function main() {
       res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' }).end(
         got ? 'Signed in. You can close this tab and go back to the terminal.' : `Sign-in failed: ${error ?? 'no code'}`,
       );
-      server.close();
-      if (got) resolve(got);
-      else reject(new Error(error ?? 'no code returned'));
+      finish(params);
     });
   });
 
