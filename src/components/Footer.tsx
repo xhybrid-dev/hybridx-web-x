@@ -32,6 +32,7 @@ const footerColumns = [
       { label: 'Store', href: '/store' },
       { label: 'FAQ', href: '/#faq' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Use', href: '/terms' },
     ],
   },
 ];

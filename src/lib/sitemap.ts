@@ -255,6 +255,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
+    {
+      url: `${baseUrl}/terms`,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
   ];
 
   // The guides hub, how they are written, and every published article.
