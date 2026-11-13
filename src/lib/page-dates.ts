@@ -48,6 +48,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/una': '2026-11-10',
   '/una/nerdy-bits': '2026-11-09',
   '/shop-terms': '2026-10-02',
+  '/terms': '2026-11-13',
   '/guides': '2026-11-10',
   '/guides/how-we-write': '2026-11-10',
   '/hyrox-glasgow-2027': '2026-10-04',
