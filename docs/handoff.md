@@ -42,11 +42,10 @@ restart it from the default branch before new work.
 - **Check PR #38's results:** the strength test's three worked examples give the
   verdicts he would (they are in `strength-engine.test.ts`), and read the planner's
   and the test's session wording (written by Claude on his rules).
-- **Keyword Planner setup** (plan, step 10): developer token at Basic access; an
-  OAuth Desktop client with the consent screen **In production**; run
-  `npx tsx scripts/google-ads-auth.ts`; create and grant the three secrets; send the
-  client id and customer id. Then add the bindings to `apphosting.yaml` in one
-  change, never before the secrets exist (CLAUDE.md, "Deploy gotchas").
+- **Keyword Planner** (plan, step 10): set up and bound, 14 November 2026. The
+  three secrets exist and are granted; the client, customer and manager ids are
+  in `apphosting.yaml`. If `/api/admin/keyword-planner-check` says the token is
+  for test accounts only, Basic access is still waiting on Google.
 - **Optional:** 14-day admin sign-in (IAM grant, plan step 3), a Gemini budget
   alert, `ANTHROPIC_API_KEY` for the second review.
 - **Pacer:** the strongest/weakest-station adjustment needs his numbers.
