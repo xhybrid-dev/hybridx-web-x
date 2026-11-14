@@ -170,9 +170,10 @@ env:
   # volumes for the topic queue, one read-only request a week. The three
   # secrets were created and granted to the hybridx-web-x backend by Jon,
   # 14 November 2026. The ids are not secrets. /api/admin/keyword-planner-check
-  # says what is missing or wrong.
+  # says what is missing or wrong. The client is the Desktop app one: its
+  # secret and the refresh token must come from the same client.
   - variable: GOOGLE_ADS_CLIENT_ID
-    value: "354413162075-0grc9jmj1h2spkd3ch0lvpq95cq46vsv.apps.googleusercontent.com"
+    value: "354413162075-l6g3vph0kpodrp4cuatej8f5152gt77u.apps.googleusercontent.com"
     availability:
       - RUNTIME
   - variable: GOOGLE_ADS_CUSTOMER_ID
