@@ -166,6 +166,36 @@ env:
     availability:
       - RUNTIME
 
+  # Keyword Planner (docs/content-engine-plan.md, step 10): UK monthly search
+  # volumes for the topic queue, one read-only request a week. The three
+  # secrets were created and granted to the hybridx-web-x backend by Jon,
+  # 14 November 2026. The ids are not secrets. /api/admin/keyword-planner-check
+  # says what is missing or wrong.
+  - variable: GOOGLE_ADS_CLIENT_ID
+    value: "354413162075-0grc9jmj1h2spkd3ch0lvpq95cq46vsv.apps.googleusercontent.com"
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_ADS_CUSTOMER_ID
+    value: "1002158262"
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_ADS_LOGIN_CUSTOMER_ID
+    value: "7736527486"
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_ADS_DEVELOPER_TOKEN
+    secret: GOOGLE_ADS_DEVELOPER_TOKEN
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_ADS_CLIENT_SECRET
+    secret: GOOGLE_ADS_CLIENT_SECRET
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_ADS_REFRESH_TOKEN
+    secret: GOOGLE_ADS_REFRESH_TOKEN
+    availability:
+      - RUNTIME
+
   # ── Shop (HYROX Glasgow 2027 PDFs) ────────────────────────────────────────
   # docs/shop-setup.md is the full procedure. The plain values below are safe
   # as they are: with SHOP_SALES_OPEN false the landing page shows "Sales have
