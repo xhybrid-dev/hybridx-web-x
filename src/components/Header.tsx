@@ -34,6 +34,7 @@ interface SubNavItem {
 const navItems: NavItem[] = [
   { label: 'Free Hyrox Plan', href: '/free-hyrox-plan' },
   { label: 'Our App', href: '/app' },
+  { label: 'UNA Watch Apps', href: '/una' },
   {
     label: 'Guides',
     isDropdown: true,

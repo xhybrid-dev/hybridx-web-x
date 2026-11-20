@@ -5,11 +5,15 @@
  *
  * Every function here mirrors a named piece of the watch repository
  * (xhybrid-dev/una-hyrox):
- *   - edwardsLoad        hybridx-link  TrainingLoad.hpp
- *   - stepLoad, formWord hybridx-streak LoadHistory.hpp
+ *   - edwardsLoad        hybridx-link     TrainingLoad.hpp
+ *   - stepLoad, formWord,
+ *     simulateWeekLoad   hybridx-streak   LoadHistory.hpp
  *   - acsmRunningCost,
  *     vo2maxFromMinute,
- *     tanakaMaxHr        hybridx-run   Vo2Run / Vo2Profile
+ *     tanakaMaxHr        hybridx-run      Vo2Run / Vo2Profile
+ *   - danielsVo2Cost,
+ *     danielsFraction,
+ *     danielsFitness     hybridx-training PaceModel.cpp
  *
  * src/lib/__tests__/una-maths.test.ts pins them to the same hand-worked
  * figures the watch's host tests use (54.4, and a load of 39). If a method
@@ -110,4 +114,95 @@ export function paceToSpeed(secondsPerKm: number): number {
 export function formatPace(secondsPerKm: number): string {
   const s = Math.round(secondsPerKm);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/** One simulated day from X Streak's Banister training-load model. */
+export type WeekLoadDay = {
+  fitness: number;
+  fatigue: number;
+  form: number;
+  word: FormWord;
+};
+
+/**
+ * Daniels–Gilbert oxygen cost of running on the level, in ml/kg/min, at
+ * `speedMPerMin` (metres per minute). Mirrors `PaceModel::vo2Cost` in
+ * `hybridx-training/Software/Libs/Core/Sources/PaceModel.cpp`.
+ *
+ * Returns `0` for non-positive or non-finite speeds, and clamps sub-walking
+ * speeds (< ~24.89 m/min) at `0` so oxygen cost is never negative.
+ */
+export function danielsVo2Cost(speedMPerMin: number): number {
+  if (!Number.isFinite(speedMPerMin) || speedMPerMin <= 0) return 0;
+  return Math.max(0, -4.6 + 0.182258 * speedMPerMin + 0.000104 * speedMPerMin * speedMPerMin);
+}
+
+/**
+ * Daniels–Gilbert fraction of VO2max sustainable for a race lasting
+ * `durationMin` minutes. Mirrors `PaceModel::fractionHeld` in
+ * `hybridx-training/Software/Libs/Core/Sources/PaceModel.cpp`.
+ *
+ * Strictly decreasing on `(0, ∞)` and bounded below by `0.8`.
+ * Returns `0` for non-positive or non-finite durations.
+ */
+export function danielsFraction(durationMin: number): number {
+  if (!Number.isFinite(durationMin) || durationMin <= 0) return 0;
+  return (
+    0.8 +
+    0.1894393 * Math.exp(-0.012778 * durationMin) +
+    0.2989558 * Math.exp(-0.1932605 * durationMin)
+  );
+}
+
+/**
+ * Daniels–Gilbert internal race-fitness index from a race distance in metres
+ * and duration in minutes (`danielsVo2Cost(D / t) / danielsFraction(t)`).
+ * Mirrors `PaceModel::fitness` in `PaceModel.cpp` (note: C++ takes seconds and
+ * divides by 60; here `durationMin` is already in minutes).
+ *
+ * Returns `0` if either input is non-positive or non-finite, or if the speed is
+ * too slow to produce a positive oxygen cost.
+ */
+export function danielsFitness(distanceM: number, durationMin: number): number {
+  if (
+    !Number.isFinite(distanceM) ||
+    !Number.isFinite(durationMin) ||
+    distanceM <= 0 ||
+    durationMin <= 0
+  ) {
+    return 0;
+  }
+  const cost = danielsVo2Cost(distanceM / durationMin);
+  const frac = danielsFraction(durationMin);
+  return cost > 0 && frac > 0 ? cost / frac : 0;
+}
+
+/**
+ * Simulates a sequence of daily training loads day-by-day through X Streak's
+ * Banister model (`stepLoad`, `form`, `formWord`), without mutating `loads`.
+ *
+ * Defaults `startFitness = 0` and `startFatigue = 0` (raw Banister initial
+ * state). For a settled athlete week (such as `AthleteWeekPreset`), pass the
+ * athlete's starting fitness and fatigue explicitly. Non-finite or negative
+ * inputs are safely clamped to `0`.
+ */
+export function simulateWeekLoad(
+  loads: readonly number[],
+  startFitness = 0,
+  startFatigue = 0,
+): WeekLoadDay[] {
+  let state: LoadState = {
+    fitness: Number.isFinite(startFitness) ? Math.max(0, startFitness) : 0,
+    fatigue: Number.isFinite(startFatigue) ? Math.max(0, startFatigue) : 0,
+  };
+  return loads.map((rawLoad) => {
+    const dayLoad = Number.isFinite(rawLoad) ? Math.max(0, rawLoad) : 0;
+    state = stepLoad(state, dayLoad);
+    return {
+      fitness: state.fitness,
+      fatigue: state.fatigue,
+      form: form(state),
+      word: formWord(state),
+    };
+  });
 }

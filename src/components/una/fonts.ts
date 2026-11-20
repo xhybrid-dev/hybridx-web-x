@@ -8,6 +8,7 @@ export const anton = Anton({
   weight: '400',
   variable: '--font-una-display',
   display: 'swap',
+  adjustFontFallback: false,
 });
 
 export const grotesk = Space_Grotesk({
@@ -15,6 +16,7 @@ export const grotesk = Space_Grotesk({
   weight: ['400', '500', '700'],
   variable: '--font-una-text',
   display: 'swap',
+  adjustFontFallback: false,
 });
 
 export const inter = Inter({
@@ -22,6 +24,7 @@ export const inter = Inter({
   weight: ['400', '500', '600'],
   variable: '--font-una-body',
   display: 'swap',
+  adjustFontFallback: false,
 });
 
 export const mono = JetBrains_Mono({
@@ -29,4 +32,5 @@ export const mono = JetBrains_Mono({
   weight: ['400', '500', '700'],
   variable: '--font-una-mono',
   display: 'swap',
+  adjustFontFallback: false,
 });

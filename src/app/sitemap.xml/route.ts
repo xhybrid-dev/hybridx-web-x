@@ -19,7 +19,14 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 function toXml(entries: MetadataRoute.Sitemap): string {
   const urls = entries.map((e) => {
-    const lastmod = e.lastModified ? `<lastmod>${esc(new Date(e.lastModified).toISOString())}</lastmod>` : '';
+    const rawMod = e.lastModified;
+    const modStr =
+      typeof rawMod === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawMod)
+        ? rawMod
+        : rawMod
+          ? new Date(rawMod).toISOString()
+          : '';
+    const lastmod = modStr ? `<lastmod>${esc(modStr)}</lastmod>` : '';
     const freq = e.changeFrequency ? `<changefreq>${e.changeFrequency}</changefreq>` : '';
     const priority = e.priority !== undefined ? `<priority>${e.priority}</priority>` : '';
     return `<url><loc>${esc(e.url)}</loc>${lastmod}${freq}${priority}</url>`;

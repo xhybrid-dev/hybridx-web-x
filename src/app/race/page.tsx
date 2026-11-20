@@ -149,9 +149,9 @@ const SCREENS = [
 ];
 
 const ROADMAP = [
-  { tag: 'Next', title: 'Custom simulations', body: 'Choose the stations and the rounds. Relay format for pairs.' },
-  { tag: 'Then', title: 'Target pacing', body: 'A target finish from your HybridX coaching, sent straight to your watch.' },
-  { tag: 'Later', title: 'Outdoor sims with GPS', body: 'Runs that end themselves at the set distance.' },
+  { tag: 'Built', title: 'Zero-GPS Pace Plan', body: 'Compare live against your last saved race (auto-scaling sim run distances) or a target finish time with ahead/behind delta.' },
+  { tag: 'Built', title: 'Connected to X Streak', body: 'Every saved race or sim counts automatically in X Streak as Hybrid with full Edwards heart-rate load.' },
+  { tag: 'Next', title: 'Custom simulations & pairs', body: 'Choose custom stations and rounds, plus relay format for pairs.' },
 ];
 
 export default function RacePage() {
@@ -177,7 +177,7 @@ export default function RacePage() {
             <a href="#features">Features</a>
             <a href="#screens">Screens</a>
             <a href="#film">The film</a>
-            <a href="#una">UNA Watch</a>
+            <a href={`${HYBRIDX_URL}/una`}>All 7 X Apps</a>
           </nav>
           <a href={UNA_URL} className={styles.navCta} target="_blank" rel="noopener">
             Meet UNA <Arrow />
@@ -193,22 +193,23 @@ export default function RacePage() {
               <div className={styles.heroCopy}>
                 <p className={styles.pill}>
                   <span className={styles.pulse} aria-hidden="true" />
-                  Coming to UNA Watch
+                  Part of the 7-app X family · for UNA Watch
                 </p>
                 <h1 className={styles.h1}>
                   Track your Hyrox <span className={styles.gradientText}>with UNA</span>
                 </h1>
                 <p className={styles.lead}>
                   HybridX Race is the HYROX-format race timer for UNA Watch. Press once at every
-                  transition, and every run and every station is timed as its own lap, with your
-                  heart rate — then exported to Strava through the UNA app.
+                  transition, and every run and every station is timed as its own lap with heart
+                  rate, zero-GPS Pace Plan and automatic X Streak sync — then exported to Strava
+                  through the UNA app.
                 </p>
                 <div className={styles.ctaRow}>
                   <a href={UNA_URL} className={styles.btnPrimary} target="_blank" rel="noopener">
                     Discover UNA Watch <Arrow />
                   </a>
-                  <a href="#format" className={styles.btnGhost}>
-                    See how it works
+                  <a href={`${HYBRIDX_URL}/una`} className={styles.btnGhost}>
+                    Explore all 7 X Apps
                   </a>
                 </div>
               </div>
@@ -306,7 +307,7 @@ export default function RacePage() {
             {SCREENS.map((s, i) => (
               <li key={s.src} className={styles.screen}>
                 <div className={styles.screenDial}>
-                  <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} className={styles.screenImg} />
+                  <Image src={s.src} alt={`${s.title} screen`} width={480} height={480} unoptimized loading="eager" className={styles.screenImg} />
                 </div>
                 <p className={styles.screenTitle}>
                   <span className={styles.screenNum}>{String(i + 1).padStart(2, '0')}</span>
@@ -317,7 +318,7 @@ export default function RacePage() {
             ))}
           </ol>
           <div className={styles.container}>
-            <p className={styles.footnote}>The app’s own screens, from version 0.1.0, captured in UNA’s simulator.</p>
+            <p className={styles.footnote}>The app’s own screens, captured in UNA’s simulator.</p>
           </div>
         </section>
 
@@ -346,15 +347,14 @@ export default function RacePage() {
           <div className={styles.container}>
             <div className={styles.loopGrid}>
               <div>
-                <p className={styles.eyebrow}>From your wrist to your coach</p>
+                <p className={styles.eyebrow}>Part of the X family</p>
                 <h2 className={styles.h2}>
                   More than a stopwatch.
-                  <span className={styles.dim}> An input to your training.</span>
+                  <span className={styles.dim}> Connected to your whole week.</span>
                 </h2>
                 <p className={styles.sectionLead}>
-                  Every lap knows whether it was a run, a station or a Roxzone. Next, we’re
-                  joining that up with HybridX coaching: your race comes back to your plan, and
-                  your targets go out to your wrist. Here’s what’s coming.
+                  Every lap knows whether it was a run, a station or a Roxzone, and every finished
+                  race or sim flows automatically into X Streak with full heart-rate load.
                 </p>
               </div>
               <ol className={styles.roadmap}>
@@ -378,8 +378,7 @@ export default function RacePage() {
               Race it on <span className={styles.gradientText}>UNA Watch.</span>
             </h2>
             <p className={styles.finalLead}>
-              HybridX Race is coming to the UNA app store. Get the watch, and be on the start line
-              when it lands.
+              HybridX Race is live on the UNA app store as part of the seven-app X family.
             </p>
             <div className={`${styles.ctaRow} ${styles.ctaCenter}`}>
               <a href={UNA_URL} className={styles.btnPrimary} target="_blank" rel="noopener">

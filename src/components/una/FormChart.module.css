@@ -1,8 +1,10 @@
 .figure {
   margin: 0;
-  background: #fff;
-  border: 2px solid #0a0a0a;
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.14);
+  border-radius: 18px;
   padding: 18px 18px 14px;
+  box-shadow: 0 10px 24px rgba(14, 19, 22, 0.05);
 }
 
 .legend {
@@ -14,6 +16,7 @@
   gap: 6px 22px;
   font-size: 14px;
   font-weight: 700;
+  color: #0e1316;
 }
 
 .legend li {
@@ -25,11 +28,12 @@
 .legend i {
   width: 18px;
   height: 4px;
+  border-radius: 999px;
 }
 
 .legend span {
   font-weight: 400;
-  color: #555;
+  color: #334149;
 }
 
 .plot {
@@ -44,34 +48,34 @@
 }
 
 .grid {
-  stroke: #0a0a0a;
-  stroke-opacity: 0.12;
+  stroke: #0e1316;
+  stroke-opacity: 0.1;
   stroke-width: 1;
 }
 
 .zero {
-  stroke: #0a0a0a;
-  stroke-opacity: 0.55;
+  stroke: #0e1316;
+  stroke-opacity: 0.45;
   stroke-width: 1;
 }
 
 .cross {
-  stroke: #0a0a0a;
-  stroke-width: 1;
+  stroke: #1b6b75;
+  stroke-width: 1.25;
   stroke-dasharray: 3 3;
 }
 
 .tick {
   font-family: var(--font-una-mono), monospace;
-  font-size: 10.5px;
-  fill: #555;
+  font-size: 11px;
+  fill: #334149;
 }
 
 .end {
   font-family: var(--font-una-text), sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
-  fill: #0a0a0a;
+  fill: #0e1316;
 }
 
 .tip {
@@ -79,12 +83,13 @@
   top: 6px;
   transform: translateX(12px);
   padding: 8px 10px;
-  background: #0a0a0a;
-  color: #fff;
+  border-radius: 10px;
+  background: #0b1f33;
+  color: #ffffff;
   display: grid;
   gap: 2px;
   font-family: var(--font-una-mono), monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -96,18 +101,21 @@
 .figure figcaption {
   margin-top: 10px;
   font-size: 14px;
-  line-height: 1.45;
-  color: #333;
+  line-height: 1.5;
+  color: #334149;
 }
 
 .table {
   margin-top: 10px;
   font-size: 13.5px;
+  color: #0e1316;
+  overflow-x: auto;
 }
 
 .table summary {
   cursor: pointer;
   font-weight: 700;
+  color: #1b6b75;
 }
 
 .table table {
@@ -120,9 +128,9 @@
 
 .table th,
 .table td {
-  padding: 5px 8px;
+  padding: 6px 8px;
   text-align: right;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(14, 19, 22, 0.12);
 }
 
 .table th:last-child,

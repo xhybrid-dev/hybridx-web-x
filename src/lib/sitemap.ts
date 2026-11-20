@@ -251,6 +251,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      // X Training: 10K, Half Marathon & 8-week VO2max running plans for UNA Watch.
+      url: `${baseUrl}/training`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
       url: `${baseUrl}/shop-terms`,
       changeFrequency: 'yearly' as const,
       priority: 0.3,

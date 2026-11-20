@@ -28,6 +28,8 @@ const footerColumns = [
     heading: 'HybridX',
     links: [
       { label: 'The App — £5/mo', href: '/app' },
+      { label: 'UNA Watch Apps (X Family)', href: '/una' },
+      { label: 'X Training for UNA Watch', href: '/training' },
       { label: 'Books', href: '/books' },
       { label: 'Store', href: '/store' },
       { label: 'FAQ', href: '/#faq' },

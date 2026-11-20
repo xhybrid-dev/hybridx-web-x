@@ -129,7 +129,7 @@ const FACES = [
     screen: 'map',
     alt: 'The map screen: the route as a magenta line, you as an arrow, north marked, a 100 m scale bar and the distance to the start.',
     title: 'The line, and you on it',
-    body: 'Heading up or north up. Zoom with the watch’s up and down buttons, from 60 m to 3.5 km to the edge of the screen, or the whole route. Before you reach the route, it tells you how far away the start is.',
+    body: 'Heading up or north up. Step across 10 zoom levels with the watch’s up and down buttons, from 60 m to 3.5 km to the edge of the screen, plus the whole route. Before you reach the route, it tells you how far away the start is.',
   },
   {
     screen: 'nav',
@@ -162,11 +162,10 @@ const SCREENS = [
 
 const PHASES = [
   { tag: 'Done', title: 'Reading routes', body: 'On the watch, a real 50 km route: 1,418 points read and 1,190 kept, 10 m apart, in a third of a second.' },
-  { tag: 'Done', title: 'The route engine', body: 'Following the line, the off-course alert, the map and the turns, checked by 135 automated tests.' },
-  { tag: 'Done', title: 'The app', body: 'Six screens: map, navigation, elevation, run, lap and status.' },
-  { tag: 'Now', title: 'On the watch', body: 'Field testing on real runs.' },
-  { tag: 'Next', title: 'Routes from your phone', body: 'A GPX on your phone, a tap, and it’s on the watch. Working in testing.' },
-  { tag: 'Last', title: 'Release', body: 'Into the UNA app store.' },
+  { tag: 'Done', title: 'The route engine', body: '10 zoom levels, GPS + compass fusion, precision-gated off-course alerts and route-locked turns.' },
+  { tag: 'Done', title: 'Connected to X Streak & X Run', body: 'Every trail run counts automatically in X Streak with heart-rate load and feeds steady minutes to X Run’s VO2max estimate.' },
+  { tag: 'Live', title: 'On the UNA app store', body: 'Available now as part of the seven-app HybridX X family for UNA Watch.' },
+  { tag: 'Next', title: 'Routes from your phone', body: 'Sending a GPX straight from your phone over Bluetooth when platform support lands.' },
 ];
 
 const LATER = ['Follow a route in reverse', 'Guidance back to the start', 'A breadcrumb of where you’ve been'];
@@ -191,7 +190,7 @@ export default function TrailPage() {
             <a href="#how">How it works</a>
             <a href="#try">Try it</a>
             <a href="#film">The film</a>
-            <a href="#una">UNA Watch</a>
+            <a href={`${HYBRIDX_URL}/una`}>All 7 X Apps</a>
           </nav>
           <a href={UNA_URL} className={base.navCta} target="_blank" rel="noopener">
             Meet UNA <Arrow />
@@ -203,22 +202,22 @@ export default function TrailPage() {
         <TrailHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />
-            Coming to UNA Watch
+            Part of the 7-app X family · for UNA Watch
           </p>
           <h1 className={styles.h1}>
             Follow the line <em>with UNA</em>
           </h1>
           <p className={styles.lead}>
             HybridX Trail puts your route on your wrist. Plan it in OS Maps, Komoot, Strava or
-            anything that exports a GPX, copy it to your watch, and follow the line. A buzz before
-            each turn, and another if you leave it.
+            anything that exports a GPX, copy it to your watch, and follow the line — while every
+            run counts automatically in X Streak and feeds your VO2max estimate in X Run.
           </p>
           <div className={base.ctaRow}>
             <a href="#try" className={base.btnPrimary}>
               Try it with your own route
             </a>
-            <a href={UNA_URL} className={base.btnGhost} target="_blank" rel="noopener">
-              Discover UNA Watch <Arrow />
+            <a href={`${HYBRIDX_URL}/una`} className={base.btnGhost}>
+              Explore all 7 X Apps
             </a>
           </div>
         </TrailHero>
@@ -389,7 +388,7 @@ export default function TrailPage() {
             <div className={styles.head}>
               <p className={styles.kicker}>Where it’s up to</p>
               <h2 className={styles.h2}>
-                Built one gate at a time. <em>Nearly at the finish.</em>
+                Built one gate at a time. <em>Live on the UNA app store.</em>
               </h2>
             </div>
             <ol className={styles.phases}>
@@ -421,8 +420,8 @@ export default function TrailPage() {
               Follow the line <em>with UNA.</em>
             </h2>
             <p className={styles.lead}>
-              HybridX Trail is coming to UNA Watch. Get the watch now, and be ready when the line
-              is.
+              HybridX Trail is live on the UNA app store as part of the seven-app X family, synced
+              automatically with X Streak and X Run.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">

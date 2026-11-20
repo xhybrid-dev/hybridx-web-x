@@ -1,0 +1,637 @@
+.root {
+  display: grid;
+  gap: clamp(32px, 5vw, 52px);
+}
+
+.hubCard {
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.1);
+  border-radius: 28px;
+  padding: clamp(20px, 3vw, 34px);
+  box-shadow: 0 20px 50px rgba(14, 19, 22, 0.06);
+  display: grid;
+  gap: 24px;
+}
+
+.hubTopBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(14, 19, 22, 0.08);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334149;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatchTeal,
+.swatchYellow,
+.swatchOrange {
+  width: 18px;
+  height: 4px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.swatchTeal {
+  background: #358d98;
+}
+
+.swatchYellow {
+  background: #d4a400;
+}
+
+.swatchOrange {
+  background: #ed8835;
+}
+
+.busBadge {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #174146;
+  background: #e7f4f5;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
+.diagramStage {
+  display: grid;
+  gap: 16px;
+}
+
+.groupsRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.vo2GroupBox {
+  border: 2px solid #ed8835;
+  background: #fffaf4;
+  border-radius: 22px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vo2GroupBox[data-active='true'] {
+  border-color: #a34b08;
+  box-shadow: 0 10px 26px rgba(163, 75, 8, 0.12);
+}
+
+.otherGroupBox {
+  border: 1.5px solid rgba(14, 19, 22, 0.14);
+  background: #f8fafb;
+  border-radius: 22px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.groupHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+}
+
+.vo2GroupPill {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a34b08;
+  background: #ffffff;
+  border: 1px solid rgba(237, 136, 53, 0.55);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.otherGroupPill {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #174146;
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.14);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.groupSub {
+  font-size: 12.5px;
+  color: #334149;
+}
+
+.groupThreeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.appNode {
+  position: relative;
+  appearance: none;
+  border: 1px solid rgba(14, 19, 22, 0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  color: #0e1316;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.appNode:hover {
+  transform: translateY(-2px);
+  border-color: #358d98;
+  background: #ffffff;
+}
+
+.appNode[data-active='true'] {
+  background: #ffffff;
+  border-color: #0b0d0f;
+  box-shadow: 0 10px 24px rgba(14, 19, 22, 0.1);
+}
+
+.appNode[data-dimmed='true'] {
+  opacity: 0.72;
+}
+
+.newBadge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  background: #fadb5c;
+  color: #0b0d0f;
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.iconRing {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid rgba(14, 19, 22, 0.12);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.nodeIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.nodeName {
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0e1316;
+  line-height: 1.2;
+}
+
+.nodeSport {
+  font-size: 12px;
+  color: #334149;
+  line-height: 1.25;
+}
+
+.connectorRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.connectorLine {
+  width: 2px;
+  height: 14px;
+  background: #358d98;
+}
+
+.connectorPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: #ecf5f6;
+  border: 1.5px solid #358d98;
+  color: #174146;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.hubRow {
+  display: flex;
+  justify-content: center;
+}
+
+.streakHubBtn {
+  width: min(100%, 720px);
+  appearance: none;
+  border: 2px solid #1b6b75;
+  background: linear-gradient(135deg, #ecf5f6 0%, #ffffff 100%);
+  border-radius: 22px;
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  color: #0e1316;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.streakHubBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(27, 107, 117, 0.16);
+}
+
+.streakHubBtn[data-active='true'] {
+  border-color: #0b0d0f;
+  box-shadow: 0 14px 32px rgba(14, 19, 22, 0.12);
+}
+
+.hubIconWrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #0b1f33;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.hubIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+.hubText {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+}
+
+.hubEyebrow {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #1b6b75;
+}
+
+.hubTitle {
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0e1316;
+}
+
+.hubSub {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #334149;
+}
+
+.hubFileChip {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0b0d0f;
+  background: #fadb5c;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* 3-Column Data-Flow Tracer */
+.tracer {
+  background: #f5f7f8;
+  border: 1px solid rgba(14, 19, 22, 0.1);
+  border-radius: 20px;
+  padding: clamp(18px, 2.5vw, 24px);
+  display: grid;
+  gap: 18px;
+}
+
+.tracerHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tracerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tracerIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tracerName {
+  margin: 0;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0e1316;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.tracerSportPill {
+  font-family: var(--font-una-body), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.tracerRole {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: #334149;
+}
+
+.tracerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fileSlot {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #174146;
+  border: 1px solid rgba(23, 65, 70, 0.2);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.tracerDeepLink {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0e1316;
+  text-decoration: none;
+  border-bottom: 2px solid #fadb5c;
+}
+
+.tracerCols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tracerCol {
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.colIndex {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #1b6b75;
+}
+
+.tracerCol p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #334149;
+}
+
+.tracerCol ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: #0e1316;
+}
+
+.peerStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.peerLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334149;
+}
+
+.peerPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.peerPill {
+  appearance: none;
+  border: 1px solid rgba(14, 19, 22, 0.14);
+  background: #ffffff;
+  color: #0e1316;
+  border-radius: 999px;
+  padding: 5px 12px 5px 7px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.peerPill:hover {
+  border-color: #1b6b75;
+  background: #ecf5f6;
+}
+
+.peerIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+/* Inside X Streak: 3 Visual Pillars */
+.pillars {
+  display: grid;
+  gap: 20px;
+}
+
+.pillarsHead {
+  display: grid;
+  gap: 6px;
+}
+
+.pillarsKicker {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #1b6b75;
+}
+
+.pillarsTitle {
+  margin: 0;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0e1316;
+}
+
+.pillarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pillarCard {
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.1);
+  border-radius: 22px;
+  padding: 22px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.pillarDialWrap {
+  width: 144px;
+  height: 144px;
+  margin: 0 auto 2px;
+  border-radius: 50%;
+  padding: 6px;
+  background: #0b0d0f;
+  box-shadow: 0 12px 24px rgba(14, 19, 22, 0.16);
+}
+
+.pillarDial {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+}
+
+.pillarHeading {
+  margin: 0;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #0e1316;
+}
+
+.pillarBody {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #334149;
+}
+
+@media (max-width: 900px) {
+  .groupsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .tracerCols,
+  .pillarGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .groupThreeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .appNode {
+    padding: 10px 4px;
+  }
+
+  .nodeName {
+    font-size: 12.5px;
+  }
+
+  .streakHubBtn {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .hubFileChip {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appNode,
+  .streakHubBtn,
+  .peerPill {
+    transition: none;
+  }
+
+  .appNode:hover,
+  .streakHubBtn:hover {
+    transform: none;
+  }
+}
