@@ -68,6 +68,18 @@
   entry", on App Hosting and locally, with no change in the repo. Try
   Turbopack again only after a Next upgrade, with a local build first.
 
+- **`next/font/google` can fail the deploy build while the local one passes.**
+  On 20 November 2026 App Hosting's build died with "Cannot read properties of
+  null (reading '1')" in `next/font` on `src/components/una/fonts.ts` and
+  `src/components/trail/fonts.ts`: Google returned a font URL with no file
+  extension and Next's loader reads the extension unguarded. The response
+  varies by where it is asked, so a green local build proves nothing. Those two
+  files now use `next/font/local` with latin woff2 files in `src/fonts/`
+  (recipe in its README). If another file fails the same way, self-host it
+  too. Declare local fonts under unique names (`unaInter`, not `inter`): the
+  family name is the variable's name, and CSS family names are case-insensitive,
+  so `inter` would merge with the site's Google `Inter`.
+
 - **`LEAD_BRIDGE_SECRET` is not interchangeable with `CRON_SECRET`.** The bridge
   credential authorises pushing leads into the mailing system; the cron credential
   only authorises running maintenance. A scheduler job should not be able to do the
