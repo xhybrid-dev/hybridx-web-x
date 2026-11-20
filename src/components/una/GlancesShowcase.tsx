@@ -30,7 +30,7 @@ export default function GlancesShowcase() {
                 width={40}
                 height={40}
                 unoptimized
-                loading="eager"
+                loading="lazy"
                 className={styles.icon}
               />
               <div>
@@ -48,7 +48,7 @@ export default function GlancesShowcase() {
                   width={360}
                   height={220}
                   unoptimized
-                  loading="eager"
+                  loading="lazy"
                   className={styles.previewImg}
                 />
               </div>

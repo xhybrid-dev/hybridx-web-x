@@ -160,6 +160,12 @@ export const TRAINING_MEDICAL_NOTICE =
 export const VO2_ESTIMATE_NOTICE =
   'VO2max is an estimate for tracking your own trend, not a lab test.';
 
+/**
+ * The apps cost nothing once you own the watch. Say it this way, not "100% free":
+ * next to a hardware link, a bare "free" reads as the watch itself being free.
+ */
+export const FREE_ON_WATCH_LINE = 'Free on UNA Watch';
+
 export const INDEPENDENCE_NOTICE =
   'The X family are independent apps for UNA Watch, made by HybridX. They are not made, endorsed or sponsored by UNA Watch Ltd or by HYROX. UNA and UNA Watch are trademarks of UNA Watch Ltd; HYROX is a trademark of its owner.';
 

@@ -303,13 +303,23 @@ the wire format between this site and `hyroxedgeai`, it belongs in
 
 ## The X family pages (`/una`, `/una/nerdy-bits`)
 
-`/una` is the sales page for the six linked UNA Watch apps; `/una/nerdy-bits`
+`/una` is the sales page for the seven linked UNA Watch apps; `/una/nerdy-bits`
 is the method and its references. The apps live in `xhybrid-dev/una-hyrox`.
 
-- **`/una` is short and jargon-free on purpose** (Jon, 10 November 2026: clean
-  and to the point, from the athlete's side, no long scroll). One picture of
-  how the apps join up, tabs to pick an app, and the watch. Anything about
-  *how* it works goes on the nerdy page, not here.
+- **`/una` stays short by interaction, not by cutting the family** (Jon,
+  20 November 2026: the ecosystem has grown and is shown off on one page; the
+  earlier "clean, no long scroll" brief of 10 November still holds for length).
+  Three bands: hero, one `FamilyExplorer` for all seven apps (the diagram is the
+  selector, one panel below it, inner tabs for plans / dashboard / features /
+  family links), then the Glances and the watch. Anything long is a scroll-snap
+  swipe row on phones, never a stack. Check a change at 375 px before 1280 px,
+  and keep every panel in the DOM (`hidden`, not unmounted) so the copy stays
+  readable to crawlers. `/una#<slug>`, `#x-training`, `#ecosystem` and `#apps`
+  must keep working (`family-hash.ts`, pinned by `una-family-hash.test.ts`).
+  Anything about *how* it works still goes on the nerdy page.
+- **Say "Free on UNA Watch", not "100% free"** (`FREE_ON_WATCH_LINE`). The apps
+  cost nothing once you own the watch; a bare "free" beside a hardware link
+  reads as the watch being free.
 - **Facts come from that repo's checked store text**
   (`hybridx-link/docs/STORE_RELEASE.md`) and live in `src/lib/una-family.ts`.
   What that document lists under "Not claimed" stays unclaimed here.

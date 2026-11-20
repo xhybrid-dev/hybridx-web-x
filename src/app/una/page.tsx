@@ -4,23 +4,27 @@ import Link from 'next/link';
 import { HYBRIDX_APP_URL, HYBRIDX_URL, UNA_URL } from '@/components/una-app/Chrome';
 import { grotesk, inter, mono } from '@/components/una/fonts';
 import HeroWatchTrio from '@/components/una/HeroWatchTrio';
-import EcosystemHub from '@/components/una/EcosystemHub';
-import XTrainingShowcase from '@/components/una/XTrainingShowcase';
-import AppDeepDive from '@/components/una/AppDeepDive';
+import FamilyExplorer from '@/components/una/FamilyExplorer';
 import GlancesShowcase from '@/components/una/GlancesShowcase';
+import SectionNav from '@/components/una/SectionNav';
 import {
   APPS,
+  FREE_ON_WATCH_LINE,
   INDEPENDENCE_NOTICE,
-  STANDALONE_APPS,
   TRAINING_MEDICAL_NOTICE,
   VO2_ESTIMATE_NOTICE,
-  WATCH_RENDERS,
 } from '@/lib/una-family';
 import styles from './una.module.css';
 
 /*
  * hybridx.club/una: the X family — seven connected HybridX apps and three
  * live Glances for UNA Watch, united around X Streak as the central dashboard.
+ *
+ * Layout: the family has grown, so the page stays short by interaction rather
+ * than by cutting content. Three bands: hero, one explorer for all seven apps
+ * (diagram as selector, one panel, swipe rows on phones), then Glances and the
+ * watch. Old #ecosystem / #apps / #x-training / #<slug> links still work
+ * (see family-hash.ts).
  *
  * Honesty & trademark guardrails:
  *   - Every feature claim is verified against xhybrid-dev/una-hyrox source &
@@ -102,7 +106,6 @@ export default function UnaFamilyPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }}
       />
 
-      {/* Section 1: Sticky Translucent Header */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a href="#top" className={styles.brandMark} aria-label="HybridX X Apps for UNA Watch, back to top">
@@ -111,13 +114,7 @@ export default function UnaFamilyPage() {
             <span className={styles.brandFor}>for UNA Watch</span>
           </a>
 
-          <nav className={styles.navLinks} aria-label="Page sections">
-            <a href="#ecosystem">Ecosystem</a>
-            <a href="#x-training">X Training</a>
-            <a href="#apps">All 7 Apps</a>
-            <a href="#glances">Glances</a>
-            <Link href="/una/nerdy-bits">The Maths</Link>
-          </nav>
+          <SectionNav className={styles.navLinks} />
 
           <a href={UNA_URL} className={styles.headerCta} target="_blank" rel="noopener">
             Get UNA Watch <span aria-hidden="true">↗</span>
@@ -138,42 +135,41 @@ export default function UnaFamilyPage() {
                 </span>
               </h1>
               <p className={styles.heroLead}>
-                An independent suite built natively for UNA Watch — combining{' '}
-                <strong>X Training</strong>, <strong>HybridX Race</strong>, <strong>X Run</strong>,{' '}
-                <strong>X Trail</strong>, <strong>X Ride</strong>, <strong>X Workout</strong> and{' '}
-                <strong>X Streak</strong>. Train in the exact tool built for today’s session; every
-                workout flows automatically into X Streak for one honest dashboard of your weekly
-                habit, training load and form.
+                An independent suite built natively for UNA Watch: <strong>X Training</strong>,{' '}
+                <strong>HybridX Race</strong>, <strong>X Run</strong>, <strong>X Trail</strong>,{' '}
+                <strong>X Ride</strong>, <strong>X Workout</strong> and <strong>X Streak</strong>. Train in
+                the app built for today’s session; every workout flows into one honest dashboard of your
+                weekly habit, training load and form.
               </p>
 
               <div className={styles.ctaRow}>
-                <a href="#ecosystem" className={styles.btnPrimary}>
-                  See How It Connects <span aria-hidden="true">↓</span>
+                <a href="#family" className={styles.btnPrimary}>
+                  Explore the apps <span aria-hidden="true">↓</span>
                 </a>
                 <a href="#x-training" className={styles.btnSecondary}>
-                  Explore X Training <span aria-hidden="true">↓</span>
+                  New: X Training
                 </a>
                 <Link href="/una/nerdy-bits" className={styles.textLink}>
-                  Read the sports science <span aria-hidden="true">→</span>
+                  The sports science <span aria-hidden="true">→</span>
                 </Link>
               </div>
 
               <ul className={styles.trustStrip}>
                 <li>
                   <span className={styles.trustDot} aria-hidden="true" />
-                  100% Local Apps
+                  {FREE_ON_WATCH_LINE}
                 </li>
                 <li>
                   <span className={styles.trustDot} aria-hidden="true" />
-                  4-Button Control
+                  100% local
                 </li>
                 <li>
                   <span className={styles.trustDot} aria-hidden="true" />
-                  Strava-Ready Exports
+                  4-button control
                 </li>
                 <li>
                   <span className={styles.trustDot} aria-hidden="true" />
-                  100% Free
+                  Strava-ready exports
                 </li>
               </ul>
             </div>
@@ -182,106 +178,80 @@ export default function UnaFamilyPage() {
           </div>
         </section>
 
-        {/* Section 01: The Ecosystem Heart */}
-        <section id="ecosystem" className={styles.bandWhite} aria-labelledby="ecosystem-heading">
+        {/* The family: one selector, one panel, all seven apps */}
+        <section id="family" className={styles.bandWhite} aria-labelledby="family-heading">
           <div className={styles.container}>
             <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// 01 · THE ECOSYSTEM</div>
-              <h2 id="ecosystem-heading" className={styles.h2}>
-                Six specialist engines. One central dashboard.
+              <div className={styles.eyebrow}>// THE FAMILY · {APPS.length} APPS</div>
+              <h2 id="family-heading" className={styles.h2}>
+                Six specialist apps. One dashboard.
               </h2>
               <p className={styles.sectionLead}>
-                Every X app works cleanly on its own — and the moment you pair them with{' '}
-                <strong>X Streak</strong>, your watch becomes one connected system. Select any app
-                below to see how it fits alongside the rest.
+                Each app works on its own; pair them with <strong>X Streak</strong> and your watch becomes one
+                system. Pick an app to see its screens, features and how it connects.
               </p>
             </div>
-            <EcosystemHub />
+            <FamilyExplorer />
           </div>
         </section>
 
-        {/* Section 02: Flagship Spotlight — X Training */}
-        <section id="x-training" className={styles.bandTeal} aria-labelledby="x-training-heading">
-          <div className={styles.container}>
-            <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// 02 · NEW APP · X TRAINING</div>
-              <h2 id="x-training-heading" className={styles.h2}>
-                Full 10K, Half Marathon &amp; VO2max coaching on your wrist.
-              </h2>
-              <p className={styles.sectionLead}>
-                Not a static list of workouts. X Training builds personalised paces from your 5K time,
-                works outdoors or on a treadmill, adapts when real life interrupts your week, and
-                feeds straight into X Streak and X Run.
-              </p>
-            </div>
-            <XTrainingShowcase />
-          </div>
-        </section>
-
-        {/* Section 03: All 7 Apps in Clarity */}
-        <section id="apps" className={styles.bandWhite} aria-labelledby="apps-heading">
-          <div className={styles.container}>
-            <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// 03 · ALL SEVEN APPS</div>
-              <h2 id="apps-heading" className={styles.h2}>
-                What each app does — and how it works alongside the rest.
-              </h2>
-              <p className={styles.sectionLead}>
-                Compare all seven connected apps at a glance, then open any app below to inspect its
-                latest features, how it connects with the family, and its watch-screen gallery.
-              </p>
-            </div>
-            <AppDeepDive />
-          </div>
-        </section>
-
-        {/* Section 04: Watch-Face Glances */}
+        {/* On the wrist: Glances, then the watch itself */}
         <section id="glances" className={styles.bandSoft} aria-labelledby="glances-heading">
           <div className={styles.container}>
             <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// 04 · WATCH-FACE GLANCES</div>
+              <div className={styles.eyebrow}>// ON THE WRIST</div>
               <h2 id="glances-heading" className={styles.h2}>
-                Everything that matters, one wrist glance away.
+                Everything that matters, one glance away.
               </h2>
               <p className={styles.sectionLead}>
-                Three lightweight companion Glances stay up to date automatically — toggle their
-                real states below to see what appears before you even open an app.
+                Three Glances stay up to date on their own. Swipe through them and tap a state to see what
+                shows before you open an app.
               </p>
             </div>
             <GlancesShowcase />
-          </div>
-        </section>
 
-        {/* Section 05: Built for UNA Watch Hardware */}
-        <section id="hardware" className={styles.bandTeal} aria-labelledby="hardware-heading">
-          <div className={`${styles.container} ${styles.hardwareGrid}`}>
-            <div className={styles.hardwareCopy}>
-              <div className={styles.eyebrow}>// 05 · BUILT FOR UNA WATCH</div>
-              <h2 id="hardware-heading" className={styles.h2}>
-                Engineered for the modular watch built to evolve.
-              </h2>
-              <p className={styles.sectionLead}>
-                UNA Watch is the modular GPS sports watch designed in Scotland — built to be repaired
-                and upgraded rather than replaced, and open to specialist apps crafted for the exact
-                way you train.
-              </p>
+            <div id="hardware" className={styles.hardwareBlock} aria-labelledby="hardware-heading">
+              <div className={styles.hardwareHead}>
+                <h3 id="hardware-heading" className={styles.h3}>
+                  Built for the modular watch made to last.
+                </h3>
+                <p className={styles.hardwareLead}>
+                  UNA Watch is the modular GPS sports watch designed in Scotland, built to be repaired and
+                  upgraded rather than replaced.
+                </p>
+              </div>
 
-              <ul className={styles.hardwareSpecs}>
+              <ul className={styles.specStrip}>
                 <li>
                   <strong>Modular &amp; repairable</strong>
-                  <span>Six swappable modules designed to be opened, repaired and upgraded over years.</span>
+                  <span>Six swappable modules, opened and upgraded over years.</span>
                 </li>
                 <li>
-                  <strong>Sunlight-readable MIP dial</strong>
-                  <span>Always-on round 240×240 screen engineered to stay crisp in bright outdoor sun.</span>
+                  <strong>Sunlight-readable</strong>
+                  <span>Always-on round 240×240 MIP screen.</span>
                 </li>
                 <li>
                   <strong>4 physical buttons</strong>
-                  <span>Tactile control built for rain, gloves, sweat and 180 bpm transitions.</span>
+                  <span>Built for rain, gloves, sweat and 180 bpm.</span>
                 </li>
                 <li>
-                  <strong>Open specialist platform</strong>
-                  <span>Native apps running directly on the wrist with universal USB-C access.</span>
+                  <strong>Open platform</strong>
+                  <span>Native apps on the wrist, USB-C access.</span>
+                </li>
+              </ul>
+
+              <ul className={styles.craftStrip}>
+                <li>
+                  <strong>Local on your watch.</strong> Load, Fitness/Fatigue, VO2max estimates and paces
+                  compute on the wrist: no cloud server, no subscription.
+                </li>
+                <li>
+                  <strong>Crash-safe.</strong> Safe local saves and interrupted-session recovery protect a
+                  race even if the battery runs flat.
+                </li>
+                <li>
+                  <strong>Inspectable science.</strong> Every published equation and its limits are on{' '}
+                  <Link href="/una/nerdy-bits">the nerdy bits</Link>.
                 </li>
               </ul>
 
@@ -290,93 +260,12 @@ export default function UnaFamilyPage() {
                   Explore UNA Watch <span aria-hidden="true">↗</span>
                 </a>
                 <Link href="/una/nerdy-bits" className={styles.btnSecondary}>
-                  Read the Maths &amp; References
+                  Maths &amp; references
                 </Link>
                 <a href={HYBRIDX_APP_URL} className={styles.textLink}>
                   Train with HybridX <span aria-hidden="true">→</span>
                 </a>
               </div>
-            </div>
-
-            <div className={styles.hardwareVisual}>
-              <div className={styles.hardwareWatch}>
-                <Image
-                  src="/una/screens/streak/session-found.png"
-                  alt="X Streak auto-counting a newly saved session"
-                  width={480}
-                  height={480}
-                  unoptimized
-                  loading="eager"
-                  className={styles.hardwareScreen}
-                />
-                <Image
-                  src={WATCH_RENDERS.teal}
-                  alt="UNA Watch Teal displaying X Streak"
-                  fill
-                  sizes="240px"
-                  className={styles.hardwareRender}
-                />
-              </div>
-
-              <ul className={styles.craftList}>
-                <li>
-                  <strong>100% local on your watch:</strong> Training load, Fitness/Fatigue, VO2max
-                  estimates and training paces compute natively without a cloud server or subscription.
-                </li>
-                <li>
-                  <strong>Crash-safe by design:</strong> Safe local saves and interrupted-session
-                  recovery keep races and workouts protected even if a battery runs flat.
-                </li>
-                <li>
-                  <strong>Open, inspectable science:</strong> Every published equation and its limits
-                  are written out plainly on <Link href="/una/nerdy-bits">/una/nerdy-bits</Link>.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 06: More Independent Apps (Outside X Streak) */}
-        <section id="more-apps" className={styles.bandWhite} aria-labelledby="more-apps-heading">
-          <div className={styles.container}>
-            <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// 06 · MORE FOR UNA WATCH</div>
-              <h2 id="more-apps-heading" className={styles.h2}>
-                Standalone tools — intentionally outside X Streak.
-              </h2>
-              <p className={styles.sectionLead}>
-                Two more independent HybridX apps for UNA Watch that live outside your workout streak
-                by design.
-              </p>
-            </div>
-
-            <div className={styles.standaloneGrid}>
-              {STANDALONE_APPS.map((app) => (
-                <article key={app.slug} className={styles.standaloneCard}>
-                  <div className={styles.standaloneHead}>
-                    {app.icon && (
-                      <Image
-                        src={app.icon}
-                        alt=""
-                        width={48}
-                        height={48}
-                        className={styles.standaloneIcon}
-                      />
-                    )}
-                    <div>
-                      <h3 className={styles.standaloneTitle}>{app.name}</h3>
-                      <span className={styles.standaloneRole}>{app.role}</span>
-                    </div>
-                  </div>
-                  <p className={styles.standaloneBody}>{app.summary}</p>
-                  <div className={styles.standaloneFoot}>
-                    <span className={styles.standaloneHighlight}>{app.highlight}</span>
-                    <Link href={app.href} className={styles.standaloneLink}>
-                      Explore {app.name} <span aria-hidden="true">→</span>
-                    </Link>
-                  </div>
-                </article>
-              ))}
             </div>
           </div>
         </section>

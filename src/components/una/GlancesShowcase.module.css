@@ -93,8 +93,9 @@
   background: #f5f7f8;
   color: #0e1316;
   border-radius: 999px;
-  padding: 5px 11px;
-  font-size: 12.5px;
+  min-height: 40px;
+  padding: 5px 13px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -119,9 +120,29 @@
   color: #334149;
 }
 
-@media (max-width: 960px) {
+/* Below 960px the three Glances become a swipe row instead of three stacked cards. */
+@media (max-width: 959px) {
   .grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pad, 16px);
+    margin: 0 calc(var(--pad, 16px) * -1);
+    padding: 2px var(--pad, 16px) 8px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 min(84%, 340px);
+    scroll-snap-align: start;
+    padding: 16px;
+    gap: 12px;
   }
 }
 
