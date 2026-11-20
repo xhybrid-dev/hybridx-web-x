@@ -68,7 +68,7 @@ const URL_CANONICAL = 'https://hybridx.club/weigh-in';
 
 const TITLE = 'X Weigh-in — the weight trend tracker for UNA Watch';
 const DESCRIPTION =
-  'Weigh in on your watch in seconds, in kg, and see the smoothed trend beneath the day-to-day swings: the change over the week, a 30-day graph, BMI and resting kcal. Your weigh-ins stay on the watch. By HybridX.';
+  'Weigh in on your watch in seconds — in kg, stones & pounds, or pounds — and see the smoothed trend beneath the day-to-day swings: the change over the week, a 30-day graph, BMI and resting kcal. Your weigh-ins stay on the watch. By HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -107,7 +107,6 @@ const appSchema = {
   name: 'X Weigh-in',
   applicationCategory: 'HealthApplication',
   operatingSystem: 'UNA Watch',
-  softwareVersion: '1.0.0',
   description: DESCRIPTION,
   url: URL_CANONICAL,
   publisher: { '@type': 'Organization', name: 'HybridX', url: HYBRIDX_URL },
@@ -117,7 +116,7 @@ const STEPS = [
   {
     n: '01',
     title: 'Step on any scale',
-    body: 'The one in your bathroom, the one at the gym, any scale at all. Nothing to pair and no phone needed: you read the number.',
+    body: 'The one in your bathroom, the one at the gym, any scale at all. Nothing to pair and no phone needed: read the number in kg, stones & pounds, or pounds.',
     visual: (
       <div className={styles.scaleArt} aria-label="A bathroom scale reading 81.8 kg">
         <span className={styles.scaleLcd}>
@@ -129,7 +128,7 @@ const STEPS = [
   {
     n: '02',
     title: 'Dial it in on your watch',
-    body: 'SELECT, then UP or DOWN in 0.1 kg steps, then SELECT. It starts from your last weigh-in, so the number is usually a press or two away. Hold either button to move quickly.',
+    body: 'SELECT, then UP or DOWN in 0.1 kg, 0.2 lb or st lb steps, then SELECT. Switch units any time losslessly — your history and companion Glance follow automatically.',
     visual: <Shot src="/weigh-in/screens/weigh-in.png" alt="The Weigh in screen: 81.8 kg, and Last 81.5, today." size={220} />,
   },
   {
@@ -195,9 +194,8 @@ const GLANCES = [
 const PHASES = [
   { tag: 'Done', title: 'The first look', body: 'Your height and weight from your UNA profile, read on a real watch.' },
   { tag: 'Done', title: 'The trend', body: 'The log and the trend. 20% a day, chosen by measuring it on twenty sample logs.' },
-  { tag: 'Done', title: 'The screens', body: 'Home, Graph, Recent and Body, and weighing in.' },
-  { tag: 'Done', title: 'The glance', body: 'Your trend on the glances screen, checked on the watch.' },
-  { tag: 'Now', title: 'Version 1.0', body: 'Released: the app and its glance, with 113 automated tests behind them.' },
+  { tag: 'Done', title: 'The screens & glance', body: 'Home, Graph, Recent, Body and X Weigh-in Glance on the watch.' },
+  { tag: 'Done', title: 'Multi-unit switching', body: 'Lossless switching across kg, stones & pounds, and pounds — synced directly to X Weigh-in Glance.' },
   { tag: 'Next', title: 'The sweat-rate test', body: 'Weigh before and after a session, enter what you drank, and see your sweat rate.' },
 ];
 
@@ -236,7 +234,7 @@ export default function WeighInPage() {
             <a href="#how">How it works</a>
             <a href="#try">Try it</a>
             <a href="#glance">The glance</a>
-            <a href="#una">UNA Watch</a>
+            <a href={`${HYBRIDX_URL}/una`}>All X Apps</a>
           </nav>
           <a href={UNA_URL} className={base.navCta} target="_blank" rel="noopener">
             Meet UNA <Arrow />
@@ -248,7 +246,7 @@ export default function WeighInPage() {
         <WeighHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />
-            Version 1.0 · for UNA Watch
+            kg · st lb · lb · for UNA Watch
           </p>
           <h1 className={styles.h1}>
             Weigh in <em>with UNA</em>
@@ -444,7 +442,7 @@ export default function WeighInPage() {
             <div className={styles.head}>
               <p className={styles.kicker}>Where it’s up to</p>
               <h2 className={styles.h2}>
-                Version 1.0. <em>Built one gate at a time.</em>
+                Built one gate at a time. <em>Now in kg, st lb &amp; lb.</em>
               </h2>
             </div>
             <ol className={styles.phases}>
@@ -472,8 +470,8 @@ export default function WeighInPage() {
               Weigh in <em>with UNA.</em>
             </h2>
             <p className={styles.lead}>
-              X Weigh-in 1.0 is released for UNA Watch, with its glance alongside. Get the watch,
-              step on the scale, and see where you’re heading.
+              X Weigh-in is live for UNA Watch with its companion Glance and lossless kg, st lb and
+              lb switching. Get the watch, step on the scale, and see where you’re heading.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">

@@ -1,0 +1,153 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(14, 19, 22, 0.1);
+  border-radius: 24px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 12px 30px rgba(14, 19, 22, 0.05);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0e1316;
+  line-height: 1.2;
+}
+
+.headline {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #334149;
+}
+
+.bezelStage {
+  background: #0b0d0f;
+  border-radius: 18px;
+  padding: 16px 14px 12px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.bezelFrame {
+  width: 100%;
+  max-width: 240px;
+  min-height: 128px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  padding: 8px;
+}
+
+.previewImg {
+  width: 100%;
+  height: auto;
+  max-height: 132px;
+  object-fit: contain;
+  display: block;
+}
+
+.stateLabel {
+  font-family: var(--font-una-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fadb5c;
+}
+
+.toggleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toggleBtn {
+  appearance: none;
+  border: 1.5px solid rgba(14, 19, 22, 0.14);
+  background: #f5f7f8;
+  color: #0e1316;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 5px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.toggleBtn:hover {
+  border-color: #1b6b75;
+  background: #ecf5f6;
+}
+
+.toggleBtn[data-selected='true'] {
+  background: #0b0d0f;
+  border-color: #0b0d0f;
+  color: #fadb5c;
+}
+
+.detail {
+  margin: 0;
+  margin-top: auto;
+  font-size: 14px;
+  line-height: 1.52;
+  color: #334149;
+}
+
+/* Below 960px the three Glances become a swipe row instead of three stacked cards. */
+@media (max-width: 959px) {
+  .grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pad, 16px);
+    margin: 0 calc(var(--pad, 16px) * -1);
+    padding: 2px var(--pad, 16px) 8px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 min(84%, 340px);
+    scroll-snap-align: start;
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggleBtn {
+    transition: none;
+  }
+}

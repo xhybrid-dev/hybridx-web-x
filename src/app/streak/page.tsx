@@ -61,7 +61,7 @@ const URL_CANONICAL = 'https://streak.hybridx.club';
 
 const TITLE = 'HybridX Streak — the weekly training streak for UNA Watch';
 const DESCRIPTION =
-  'Set your own weekly target and log each session on your watch in a few presses. Hit it and you climb a mountain, one week at a time. The weekly training streak for UNA Watch, by HybridX.';
+  'Set your weekly target and climb from Arthur’s Seat to Everest. Sessions saved in all six HybridX activity apps for UNA Watch count automatically into your weekly streak and 42-day/7-day Training Load — plus quick manual logging for anything else.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -120,25 +120,25 @@ const STEPS = [
     body: 'Choose how many sessions make a week, from one to seven — three to start. Pick the day your week begins, and whether everything counts or just one kind of training.',
   },
   {
-    title: 'Train, then log it',
-    body: 'Run, ride, lift, row, race. Then log it on your watch: pick the kind of session and whether it was today or yesterday. A few presses, and it counts.',
+    title: 'Train across all six X apps',
+    body: 'Save a session in X Training, HybridX Race, X Run, X Trail, X Ride or X Workout and it appears automatically in your week with Edwards heart-rate load — or log any extra session by hand in seconds.',
   },
   {
-    title: 'Climb',
-    body: 'Hit your target and the week is banked: one step up the mountain. Keep going, and the steps add up to summits.',
+    title: 'Climb & balance your load',
+    body: 'Hit your target and the week is banked: one step up the mountain, while 42-day Fitness, 7-day Fatigue and Form show when to build and when to rest.',
   },
 ];
 
 // The kit list. Icons are simple line drawings in the page's own stroke.
 const KIT = [
   {
-    title: 'Logged in seconds',
-    body: 'Run, strength, ride, walk, row, hybrid, a workout or anything else. Choose it, choose today or yesterday, done. Your phone can stay in your bag.',
+    title: 'Auto-counts all six X apps',
+    body: 'Every session saved in X Training, HybridX Race, X Run, X Trail, X Ride or X Workout lands automatically under its watch name, with quick manual logging for anything else.',
     icon: <path d="M4 7h16M4 12h16M4 17h10" />,
   },
   {
-    title: 'A coach on your side',
-    body: '“1 more · 3 days left.” “Week banked. Rest up.” Short, warm, and it tells you what’s left. Never a telling-off.',
+    title: 'Fitness, Fatigue & Form',
+    body: 'Blends Edwards 5-zone heart-rate load from every X app into 42-day Fitness, 7-day Fatigue and Form (Fresh, Steady, Building or Overreaching) after an honest 14-day baseline.',
     icon: <path d="M4 5h16v10H9l-5 4z" />,
   },
   {
@@ -237,7 +237,7 @@ export default function StreakPage() {
             <a href="#climb">The climb</a>
             <a href="#screens">Screens</a>
             <a href="#film">The film</a>
-            <a href="#una">UNA Watch</a>
+            <a href={`${HYBRIDX_URL}/una`}>All 7 X Apps</a>
           </nav>
           <a href={UNA_URL} className={base.navCta} target="_blank" rel="noopener">
             Meet UNA <Arrow />
@@ -253,22 +253,23 @@ export default function StreakPage() {
           <div className={`${base.container} ${styles.heroCopy}`}>
             <p className={base.pill}>
               <span className={base.pulse} aria-hidden="true" />
-              Coming to UNA Watch
+              Central hub of the 7-app X family · for UNA Watch
             </p>
             <h1 className={styles.h1}>
               Build your streak <em>with UNA</em>
             </h1>
             <p className={styles.lead}>
               HybridX Streak counts your training in weeks, not days. Set your own target — three
-              sessions a week, say — and log each session on your watch in a few presses. Hit your
-              target, and you take a step up the mountain.
+              sessions a week, say — and every workout saved in all six X activity apps counts
+              automatically alongside your 42-day/7-day Training Load, climbing one step up the
+              mountain each week you hit.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">
                 Discover UNA Watch <Arrow />
               </a>
-              <a href="#how" className={base.btnGhost}>
-                See how it works
+              <a href={`${HYBRIDX_URL}/una`} className={base.btnGhost}>
+                Explore all 7 X Apps
               </a>
             </div>
           </div>
@@ -423,7 +424,7 @@ export default function StreakPage() {
                   </li>
                 ))}
               </ol>
-              <p className={styles.footnote}>Pre-release screens. The finished app may differ slightly.</p>
+              <p className={styles.footnote}>Captured directly from the UNA Watch simulator.</p>
             </div>
           </section>
 
@@ -453,8 +454,8 @@ export default function StreakPage() {
               Start climbing <em>with UNA.</em>
             </h2>
             <p className={styles.lead}>
-              HybridX Streak is coming to the UNA app store. Get the watch, and your first week
-              starts the day you install it.
+              HybridX Streak is live on the UNA app store as the central hub of the seven-app X
+              family. Get the watch, and your first week starts the day you install it.
             </p>
             <div className={`${base.ctaRow} ${styles.center}`}>
               <a href={UNA_URL} className={base.btnPrimary} target="_blank" rel="noopener">

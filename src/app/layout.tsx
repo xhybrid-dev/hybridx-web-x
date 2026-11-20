@@ -15,6 +15,7 @@ const inter = Inter({
   // 600 is the semibold used for emphasis in body copy on the ATHX funnel,
   // which sets its type from the printed books rather than from the site.
   weight: ['400', '600', '700'],
+  adjustFontFallback: false,
 });
 
 const spaceGrotesk = Space_Grotesk({
@@ -22,6 +23,7 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
   variable: '--font-space-grotesk',
   weight: ['300', '400', '500', '700'],
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {

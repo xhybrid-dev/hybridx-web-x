@@ -1,22 +1,29 @@
 /*
- * /una/nerdy-bits. A lab notebook: graph paper, ink, one red pen. Same type
- * and the same hard edges as /una, so it reads as the back of the same book.
+ * /una/nerdy-bits — Inviting light technical companion to /una, fusing
+ * HybridX typography & contrast (#0E1316 / #FADB5C) with UNA Watch teal
+ * (#358D98 / #1B6B75 / #ECF5F6) on clean daylight surfaces.
  */
 
 .page {
-  --ink: #0a0a0a;
-  --red: #c1121f;
-  --ox: #5c0f1a;
+  --canvas: #ffffff;
+  --surface: #f5f7f8;
+  --teal-soft: #ecf5f6;
+  --teal: #1b6b75;
+  --teal-deep: #174146;
+  --ink: #0e1316;
+  --muted: #334149;
+  --yellow: #fadb5c;
+  --orange-text: #a34b08;
+  --border: rgba(14, 19, 22, 0.12);
   --pad: clamp(16px, 4vw, 56px);
+
+  isolation: isolate;
+  color-scheme: light;
+  background-color: var(--surface);
   color: var(--ink);
-  font-family: var(--font-una-text), system-ui, sans-serif;
-  font-size: 17px;
-  line-height: 1.55;
-  background-color: #fbf5ef;
-  background-image:
-    linear-gradient(rgba(92, 15, 26, 0.11) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(92, 15, 26, 0.11) 1px, transparent 1px);
-  background-size: 24px 24px;
+  font-family: var(--font-una-body), var(--font-una-text), system-ui, sans-serif;
+  font-size: 16.5px;
+  line-height: 1.6;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
@@ -26,18 +33,23 @@
 }
 
 .page :focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--teal);
   outline-offset: 3px;
 }
 
 .bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px var(--pad);
-  background: var(--ink);
-  color: #fff;
+  padding: 13px var(--pad);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
 }
 
 .back {
@@ -45,176 +57,197 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  font-family: var(--font-una-display), sans-serif;
-  font-size: 20px;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-family: var(--font-una-text), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.back:hover {
+  color: var(--teal);
 }
 
 .back img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .barUna {
   font-family: var(--font-una-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  opacity: 0.8;
+  color: var(--teal);
+  background: var(--teal-soft);
+  padding: 5px 11px;
+  border-radius: 999px;
 }
 
 .head {
-  padding: clamp(40px, 6vw, 88px) var(--pad) clamp(28px, 4vw, 56px);
-  max-width: 1320px;
+  padding: clamp(36px, 5vw, 72px) var(--pad) clamp(28px, 4vw, 48px);
+  max-width: 1240px;
   margin: 0 auto;
 }
 
 .over {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-family: var(--font-una-mono), monospace;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ox);
+  color: var(--teal);
 }
 
 .h1 {
   margin: 0;
-  font-family: var(--font-una-display), sans-serif;
-  font-weight: 400;
-  font-size: clamp(3.6rem, 14vw, 13rem);
-  line-height: 0.86;
-  text-transform: uppercase;
+  font-family: var(--font-una-text), sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 6vw, 4.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: var(--ink);
 }
 
 .h1 em {
   font-style: normal;
-  color: var(--red);
+  color: var(--teal-deep);
+  box-shadow: inset 0 -0.32em 0 var(--yellow);
 }
 
 .lead {
-  margin: 24px 0 0;
-  max-width: 32em;
-  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
-  line-height: 1.4;
-  font-weight: 500;
+  margin: 18px 0 0;
+  max-width: 58ch;
+  font-size: clamp(1.05rem, 1.5vw, 1.24rem);
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .body {
-  max-width: 1320px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 var(--pad) clamp(64px, 8vw, 120px);
+  padding: 0 var(--pad) clamp(64px, 8vw, 112px);
   display: grid;
-  grid-template-columns: 220px minmax(0, 760px);
-  gap: clamp(24px, 5vw, 80px);
+  grid-template-columns: 230px minmax(0, 780px);
+  gap: clamp(24px, 5vw, 72px);
   align-items: start;
 }
 
-/* Contents: a ruler down the margin. */
 .toc {
   position: sticky;
-  top: 24px;
+  top: 76px;
 }
 
 .toc ol {
   list-style: none;
   margin: 0;
-  padding: 0;
-  border-left: 3px solid var(--ink);
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  display: grid;
+  gap: 2px;
 }
 
 .toc a {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 7px 0 7px 14px;
+  padding: 7px 10px;
+  border-radius: 10px;
   text-decoration: none;
-  font-size: 14.5px;
-  font-weight: 500;
-  position: relative;
-}
-
-.toc a::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 8px;
-  height: 3px;
-  margin-top: -1.5px;
-  background: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .toc a:hover {
-  color: var(--red);
+  background: var(--teal-soft);
+  color: var(--ink);
 }
 
 .toc b {
   font-family: var(--font-una-mono), monospace;
   font-size: 12px;
-  color: var(--red);
+  color: var(--teal);
 }
 
 .main section {
-  padding-top: 8px;
-  scroll-margin-top: 16px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: clamp(22px, 3vw, 34px);
+  scroll-margin-top: 80px;
+  box-shadow: 0 10px 28px rgba(14, 19, 22, 0.04);
 }
 
 .main section + section {
-  margin-top: clamp(48px, 6vw, 84px);
-  border-top: 3px solid var(--ink);
-  padding-top: 26px;
+  margin-top: 22px;
 }
 
 .main h2 {
-  margin: 0 0 18px;
-  font-family: var(--font-una-display), sans-serif;
-  font-weight: 400;
-  font-size: clamp(2.2rem, 5.4vw, 4rem);
-  line-height: 0.95;
-  text-transform: uppercase;
+  margin: 0 0 16px;
+  font-family: var(--font-una-text), sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: var(--ink);
   display: flex;
   align-items: baseline;
-  gap: 16px;
+  gap: 12px;
 }
 
 .main h2 b {
-  font-weight: 400;
-  color: var(--red);
+  font-family: var(--font-una-mono), monospace;
+  font-size: 0.72em;
+  font-weight: 700;
+  color: var(--teal);
 }
 
 .main h3 {
-  margin: 34px 0 10px;
+  margin: 28px 0 10px;
   font-family: var(--font-una-mono), monospace;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ox);
+  color: var(--teal-deep);
 }
 
 .main p {
   margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.main p strong,
+.rules li strong,
+.rules li b,
+.notes li strong,
+.notes li b,
+.limits li strong,
+.limits li b {
+  color: var(--ink);
 }
 
 .main p a,
 .limits a {
-  font-weight: 700;
+  color: var(--teal);
+  font-weight: 600;
   text-underline-offset: 3px;
 }
 
 .cite a {
   font-family: var(--font-una-mono), monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--red);
+  color: var(--teal);
   text-decoration: none;
-  padding: 0 1px;
+  padding: 0 2px;
 }
 
 .cite a:hover {
@@ -223,46 +256,49 @@
 
 .formula {
   margin: 18px 0 20px;
-  background: #fff;
-  border: 2px solid var(--ink);
-  box-shadow: 8px 8px 0 var(--ox);
-  padding: 14px 18px 16px;
+  background: var(--teal-soft);
+  border: 1px solid rgba(27, 107, 117, 0.22);
+  border-left: 4px solid var(--teal);
+  border-radius: 14px;
+  padding: 15px 18px;
   display: grid;
   gap: 6px;
 }
 
 .formula span {
   font-family: var(--font-una-mono), monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ox);
+  color: var(--teal-deep);
 }
 
 .formula code {
   font-family: var(--font-una-mono), monospace;
-  font-size: clamp(0.92rem, 1.6vw, 1.2rem);
-  font-weight: 500;
-  line-height: 1.6;
+  font-size: clamp(0.9rem, 1.45vw, 1.1rem);
+  font-weight: 600;
+  line-height: 1.65;
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 
 .worked {
   margin: 20px 0;
-  padding: 16px 18px;
-  background: var(--ink);
-  color: #fff;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: #0b1f33;
+  color: #f4fafb;
 }
 
 .workedHead {
   margin: 0 0 10px !important;
   font-family: var(--font-una-mono), monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #fadb5c;
+  color: #fadb5c !important;
 }
 
 .worked code {
@@ -271,6 +307,7 @@
   font-size: 13.5px;
   line-height: 1.75;
   overflow-wrap: anywhere;
+  color: #e6f3f5;
 }
 
 .worked code b {
@@ -279,7 +316,8 @@
 
 .worked p:last-child {
   margin: 10px 0 0;
-  font-size: 14.5px;
+  font-size: 14px;
+  color: #b7d3d8;
 }
 
 .rules,
@@ -294,33 +332,36 @@
 .notes li,
 .limits li {
   position: relative;
-  padding: 10px 0 10px 28px;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+  padding: 11px 0 11px 30px;
+  border-bottom: 1px solid rgba(14, 19, 22, 0.08);
+  color: var(--muted);
 }
 
 .rules li::before,
 .notes li::before {
   content: '';
   position: absolute;
-  left: 2px;
-  top: 18px;
-  width: 12px;
-  height: 12px;
-  background: var(--ink);
+  left: 4px;
+  top: 20px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--teal);
 }
 
-/* Limits are marked in red pen. */
 .limits li::before {
   content: '!';
   position: absolute;
   left: 0;
-  top: 11px;
-  width: 18px;
-  height: 18px;
+  top: 13px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--red);
-  color: #fff;
+  background: #fff7ed;
+  border: 1.5px solid var(--orange-text);
+  color: var(--orange-text);
   font-family: var(--font-una-mono), monospace;
   font-size: 12px;
   font-weight: 700;
@@ -334,57 +375,64 @@
 .fields {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border: 2px solid var(--ink);
-  font-size: 15px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14.5px;
 }
 
 .fields th,
 .fields td {
-  padding: 9px 12px;
+  padding: 10px 13px;
   text-align: left;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+  border-bottom: 1px solid rgba(14, 19, 22, 0.08);
   vertical-align: top;
 }
 
 .fields th {
-  background: var(--ink);
-  color: #fff;
+  background: #0b0d0f;
+  color: #ffffff;
   font-family: var(--font-una-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .fields td:last-child {
   font-family: var(--font-una-mono), monospace;
   font-size: 13px;
+  color: var(--ink);
 }
 
 .minuteRules {
   margin: 16px 0;
-  background: #fff;
-  border: 2px solid var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .minuteRules div {
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 4px 18px;
-  padding: 11px 14px;
+  padding: 12px 16px;
 }
 
 .minuteRules div + div {
-  border-top: 1px solid rgba(10, 10, 10, 0.25);
+  border-top: 1px solid rgba(14, 19, 22, 0.08);
 }
 
 .minuteRules dt {
   font-weight: 700;
+  color: var(--ink);
 }
 
 .minuteRules dd {
   margin: 0;
-  font-size: 15.5px;
+  font-size: 15px;
+  color: var(--muted);
 }
 
 .refs {
@@ -397,10 +445,11 @@
 .refs li {
   counter-increment: ref;
   position: relative;
-  padding: 10px 0 10px 40px;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
-  font-size: 15px;
-  scroll-margin-top: 16px;
+  padding: 10px 0 10px 38px;
+  border-bottom: 1px solid rgba(14, 19, 22, 0.08);
+  font-size: 14.5px;
+  color: var(--muted);
+  scroll-margin-top: 84px;
 }
 
 .refs li::before {
@@ -411,46 +460,62 @@
   width: 26px;
   font-family: var(--font-una-mono), monospace;
   font-weight: 700;
-  color: var(--red);
+  color: var(--teal);
 }
 
 .refs li:target {
-  background: #fadb5c;
+  background: #fdf8e1;
+  border-radius: 8px;
 }
 
 .refs a {
   font-family: var(--font-una-mono), monospace;
   font-size: 12px;
   font-weight: 700;
+  color: var(--teal);
   white-space: nowrap;
 }
 
 .small {
   font-size: 14px;
-  color: #333;
+  color: var(--muted);
 }
 
 .btn {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 13px 18px;
-  background: var(--ink);
-  color: #fff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #0b0d0f !important;
+  font-family: var(--font-una-text), sans-serif;
   font-weight: 700;
   font-size: 15px;
   text-decoration: none;
 }
 
+.btn:hover {
+  background: #f5ce30;
+}
+
 .footer {
-  background: var(--ink);
-  color: rgba(255, 255, 255, 0.78);
-  padding: 28px var(--pad) 40px;
+  background: #ffffff;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  padding: 28px var(--pad) 44px;
   font-size: 13.5px;
 }
 
 .footer p {
   margin: 0 auto;
-  max-width: 1320px;
+  max-width: 1240px;
+}
+
+.footer a {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 @media (max-width: 900px) {
@@ -463,7 +528,6 @@
   }
 
   .toc ol {
-    display: grid;
     grid-template-columns: 1fr 1fr;
   }
 
@@ -474,15 +538,10 @@
 
 @media (max-width: 520px) {
   .page {
-    font-size: 16px;
+    font-size: 15.5px;
   }
 
-  .formula,
-  .formula code {
-    box-shadow: none;
-  }
-
-  .formula {
-    box-shadow: 5px 5px 0 var(--ox);
+  .toc ol {
+    grid-template-columns: 1fr;
   }
 }

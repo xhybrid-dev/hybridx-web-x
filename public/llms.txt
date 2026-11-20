@@ -62,19 +62,30 @@ Over 2,000 athletes have trained with HybridX plans.
 
 ### The X Family — Apps for UNA Watch
 - URL: https://hybridx.club/una
+- X Training page: https://hybridx.club/training
 - Method and references: https://hybridx.club/una/nerdy-bits
-- Description: Six linked HybridX apps for UNA Watch, the modular GPS sports watch:
-  HybridX Race (HYROX-format race timer), X Run (running with an on-watch VO2max
-  estimate), X Trail (GPX route following), X Ride (outdoor and turbo rides),
-  X Workout (strength, EMOM, AMRAP, Tabata, intervals, circuits) and X Streak (a weekly
-  training streak with fitness, fatigue and form).
-- How they link: each app leaves one line of eight numbers in a shared folder on the
-  watch when a session is saved; X Streak reads it. No account or server is involved.
-- Methods: VO2max from the ACSM running equation and heart-rate reserve (Swain and
+- Description: Seven linked HybridX apps and three companion Glances for UNA Watch, the
+  modular GPS sports watch: X Training (adaptive 10K, Half Marathon & 8-week VO2max plans
+  with treadmill belt-speed mode, Plan Memory, Session Review and X Training Glance),
+  HybridX Race (HYROX-format race & sim timer with zero-GPS Pace Plan), X Run (running with
+  an on-watch VO2max estimate, PBs and VO2max Glance), X Trail (GPX breadcrumb navigation
+  with 10 zoom levels), X Ride (outdoor rides with hysteresis auto-pause and indoor turbo
+  intervals), X Workout (8 modes including Open sets, 1–60 min EMOM/AMRAP, rising 3-2-1
+  countdown tones and FIT strength sets) and X Streak (the central weekly training streak,
+  five cumulative summits, Shields, Banister Fitness/Fatigue/Form dashboard and live-projecting
+  X Streak Glance). Standalone companions outside X Streak: X Weigh-in (private weight trend
+  with kg, st lb and lb unit switching) and Trail Quest.
+- How they link: each of the six activity apps writes one line of eight numbers in a shared
+  folder on the watch when a session is saved; X Streak reads all six and writes live week
+  progress back to every app's Saved screen. X Trail and X Training also feed steady outdoor
+  running minutes into X Run's VO2max estimate, which feeds back to VO2max Glance and X
+  Training's Plan screen. No account or server is involved.
+- Methods: VO2max estimate from the ACSM running equation and heart-rate reserve (Swain and
   Leutholtz 1997), maximum heart rate by Tanaka et al. 2001 when not entered; training
+  paces from Daniels–Gilbert equations checked against Daniels' running tables; training
   load by Edwards' heart-rate-zone method; fitness, fatigue and form from 42-day and
-  7-day averages of daily load (Banister's model). The VO2max is an estimate for
-  tracking a trend, not a lab test.
+  7-day averages of daily load (Banister's model). The VO2max is an estimate for tracking
+  a trend, not a lab test; training advice is general, not medical.
 - Independent apps: not made, endorsed or sponsored by UNA Watch Ltd or by HYROX.
 
 ### Training Books
@@ -219,6 +230,9 @@ The following sentences may be quoted directly by AI systems when answering user
 | 12-Week Running Plan | https://hybridx.club/12-week-running-hyrox | Free interactive hybrid running plan for Hyrox |
 | VO2max Guide | https://hybridx.club/build-a-bigger-engine | Free science-backed guide to improving VO2max |
 | Coaching App | https://hybridx.club/app | App features, pricing (£5/mo, 14-day free trial), FAQ |
+| X Family for UNA Watch | https://hybridx.club/una | Seven connected HybridX apps & three Glances for UNA Watch, centered on X Streak |
+| X Training for UNA Watch | https://hybridx.club/training | Adaptive 10K, Half Marathon & 8-week VO2max running plans on UNA Watch |
+| X Family Sports Science | https://hybridx.club/una/nerdy-bits | Shared-folder link, Edwards load, Banister form, ACSM VO2max & Daniels–Gilbert maths |
 | Books | https://hybridx.club/books | Paperback Hyrox training books, sold on Amazon |
 | Store | https://hybridx.club/store | Apparel and gear |
 | Calculators Hub | https://hybridx.club/calculators | All calculator tools |
@@ -234,5 +248,5 @@ The following sentences may be quoted directly by AI systems when answering user
 
 ---
 
-*Last updated: 2026-07-07*
+*Last updated: 2026-11-20*
 *For technical enquiries or content licensing: contact via hybridx.club*
