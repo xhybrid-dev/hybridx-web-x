@@ -141,6 +141,35 @@ async function takeLock(now: Date): Promise<boolean> {
   });
 }
 
+/* ── What the last run did ──────────────────────────────────────────────── */
+
+const STATUS = { collection: 'contentSettings', id: 'engineStatus' } as const;
+
+export interface EngineStatus {
+  at: string;
+  /** Why the run did nothing at all (paused). */
+  skipped?: string;
+  /** What threw, if the run failed. */
+  error?: string;
+  /** What it did or why it held back, one line each. Empty: nothing was due. */
+  log: string[];
+}
+
+/** Best effort: noting a run must never fail the run. */
+async function saveStatus(status: EngineStatus): Promise<void> {
+  try {
+    await adminFirestore.collection(STATUS.collection).doc(STATUS.id).set(clean(status));
+  } catch (e) {
+    console.error('[guides/engine] could not record the run:', message(e));
+  }
+}
+
+/** The last run's note, for the admin queue. Null before the first run. */
+export async function getEngineStatus(): Promise<EngineStatus | null> {
+  const snap = await adminFirestore.collection(STATUS.collection).doc(STATUS.id).get();
+  return snap.exists ? (snap.data() as EngineStatus) : null;
+}
+
 async function releaseLock(): Promise<void> {
   await adminFirestore.collection(LOCK.collection).doc(LOCK.id).set({ lockedUntil: 0 });
 }
@@ -456,11 +485,16 @@ async function recoverStalled(t: Tick): Promise<void> {
   }
 }
 
-/** Whether the pipeline has room for another draft. */
-export function pipelineHasRoom(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): boolean {
+/** Where the pipeline stands, and whether it has room for another draft. */
+export function pipelineStatus(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): { room: boolean; waiting: number; ahead: number } {
   const waiting = guides.filter((g) => g.status === 'drafting' || g.status === 'awaiting_review' || g.status === 'revising').length;
   const ahead = guides.filter((g) => g.status === 'scheduled' && g.publishAt && Date.parse(g.publishAt) > now.getTime()).length;
-  return waiting < 2 && waiting + ahead < 3;
+  return { room: waiting < 2 && waiting + ahead < 3, waiting, ahead };
+}
+
+/** Whether the pipeline has room for another draft. */
+export function pipelineHasRoom(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): boolean {
+  return pipelineStatus(guides, now).room;
 }
 
 async function sendDue(settings: EngineSettings, t: Tick): Promise<void> {
@@ -512,7 +546,10 @@ export async function runEngineStep(deps: EngineDeps): Promise<{ skipped?: strin
   if (!(await takeLock(now))) return { skipped: 'another tick is running' };
   try {
     const settings = await getEngineSettings();
-    if (settings.paused) return { skipped: 'paused in settings' };
+    if (settings.paused) {
+      await saveStatus({ at: now.toISOString(), skipped: 'paused in settings', log: [] });
+      return { skipped: 'paused in settings' };
+    }
     const t: Tick = { deps, now, calls: MODEL_CALLS_PER_TICK, startedMs: Date.now(), published: await listPublishedGuides(now.getTime()), log: [] };
     await recoverStalled(t);
 
@@ -533,7 +570,13 @@ export async function runEngineStep(deps: EngineDeps): Promise<{ skipped?: strin
     }
 
     await sendDue(settings, t);
+    await saveStatus({ at: now.toISOString(), log: t.log });
     return { log: t.log };
+  } catch (e) {
+    // The hourly job reports a thrown error in its own response, which nobody
+    // reads. Keep it where the admin shows it.
+    await saveStatus({ at: now.toISOString(), error: message(e), log: [] });
+    throw e;
   } finally {
     await releaseLock();
   }
