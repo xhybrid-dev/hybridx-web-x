@@ -17,7 +17,7 @@ import { asQuestion } from '@/lib/guides/harvest/analyse';
 import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
 import { getAppSignupsBySrc } from '@/lib/marketing-bridge';
 import { guideSrc } from '@/lib/app-links';
-import { engineOn, getRun } from '@/lib/guides/engine/run';
+import { engineOn, getRun, pipelineStatus } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
 import {
@@ -175,6 +175,17 @@ async function Queue() {
         Next free slot: <strong>{describeSlot(next)}</strong>
         {settings.paused && <> · <strong>Paused</strong>: no new drafts until you resume it in settings.</>}
       </p>
+      {(() => {
+        const p = pipelineStatus(guides, new Date());
+        if (!engineOn() || settings.paused || p.room) return null;
+        const parts = [`${p.waiting} waiting for you`, `${p.ahead} scheduled and not yet live`];
+        return (
+          <p role="status" className="rounded-md border p-3 text-sm">
+            <strong>The engine is holding back new drafts</strong> ({parts.join(', ')}). It drafts only while fewer than two articles wait for you
+            and fewer than three are waiting or scheduled ahead. Approve, schedule or turn down a waiting article, and the next hourly run drafts another.
+          </p>
+        );
+      })()}
       {linkTargets.length > 0 && (
         <section className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
           <h2 className="font-headline text-lg font-bold">Links to check</h2>

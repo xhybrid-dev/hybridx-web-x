@@ -456,11 +456,16 @@ async function recoverStalled(t: Tick): Promise<void> {
   }
 }
 
-/** Whether the pipeline has room for another draft. */
-export function pipelineHasRoom(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): boolean {
+/** Where the pipeline stands, and whether it has room for another draft. */
+export function pipelineStatus(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): { room: boolean; waiting: number; ahead: number } {
   const waiting = guides.filter((g) => g.status === 'drafting' || g.status === 'awaiting_review' || g.status === 'revising').length;
   const ahead = guides.filter((g) => g.status === 'scheduled' && g.publishAt && Date.parse(g.publishAt) > now.getTime()).length;
-  return waiting < 2 && waiting + ahead < 3;
+  return { room: waiting < 2 && waiting + ahead < 3, waiting, ahead };
+}
+
+/** Whether the pipeline has room for another draft. */
+export function pipelineHasRoom(guides: Pick<Guide, 'status' | 'publishAt'>[], now: Date): boolean {
+  return pipelineStatus(guides, now).room;
 }
 
 async function sendDue(settings: EngineSettings, t: Tick): Promise<void> {

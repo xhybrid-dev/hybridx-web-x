@@ -7,7 +7,7 @@ vi.mock('@/lib/firebase-admin', () => ({ adminFirestore: db, adminApp: {}, admin
 const { SAMPLE_GUIDES } = await import('../guides/fixtures');
 const store = await import('../guides/store');
 const queue = await import('../guides/queue');
-const { runEngineStep, pipelineHasRoom, changedBlocks, getRun } = await import('../guides/engine/run');
+const { runEngineStep, pipelineHasRoom, pipelineStatus, changedBlocks, getRun } = await import('../guides/engine/run');
 const { toContent, toLoose } = await import('../guides/engine/shape');
 const { buildEngineEmail, buildReviewEmail, inEmailHours } = await import('../guides/email');
 const backlinks = await import('../guides/backlinks');
@@ -172,6 +172,16 @@ describe('pacing', () => {
     expect(pipelineHasRoom([g('awaiting_review'), g('drafting')], now)).toBe(false);
     expect(pipelineHasRoom([g('awaiting_review'), g('scheduled', '2026-11-11T07:00:00Z'), g('scheduled', '2026-11-13T07:00:00Z')], now)).toBe(false);
     expect(pipelineHasRoom([g('scheduled', '2026-11-09T07:00:00Z'), g('published')], now)).toBe(true);
+  });
+
+  it('reports how many wait and how many are scheduled ahead, for the admin to say why drafting stopped', () => {
+    const now = new Date('2026-11-10T10:00:00Z');
+    const g = (status: string, publishAt?: string) => ({ status, publishAt }) as never;
+    expect(pipelineStatus([g('awaiting_review'), g('revising'), g('scheduled', '2026-11-11T07:00:00Z'), g('scheduled', '2026-11-09T07:00:00Z')], now)).toEqual({
+      room: false,
+      waiting: 2,
+      ahead: 1,
+    });
   });
 
   it('stops drafting when the pipeline is full', async () => {
