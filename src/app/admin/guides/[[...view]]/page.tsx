@@ -17,7 +17,7 @@ import { asQuestion } from '@/lib/guides/harvest/analyse';
 import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
 import { getAppSignupsBySrc } from '@/lib/marketing-bridge';
 import { guideSrc } from '@/lib/app-links';
-import { engineOn, getRun, pipelineStatus } from '@/lib/guides/engine/run';
+import { engineOn, getEngineStatus, getRun, pipelineStatus } from '@/lib/guides/engine/run';
 import { isDraftable, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
 import {
@@ -154,11 +154,12 @@ export default async function GuidesAdmin({
 /* ── The queue ───────────────────────────────────────────────────────────── */
 
 async function Queue() {
-  const [guides, settings, taken, waitingLinks] = await Promise.all([
+  const [guides, settings, taken, waitingLinks, lastRun] = await Promise.all([
     listAllGuides(),
     getEngineSettings(),
     takenSlots(),
     listProposals({ status: 'proposed' }),
+    getEngineStatus().catch(() => null),
   ]);
   const linkTargets = [...new Set(waitingLinks.map((p) => p.target))];
   const next = nextFreeSlot(new Date(), taken, settings);
@@ -186,6 +187,19 @@ async function Queue() {
           </p>
         );
       })()}
+      {engineOn() && (
+        <p role="status" className="rounded-md border p-3 text-sm">
+          <strong>Engine, last hourly run:</strong>{' '}
+          {!lastRun
+            ? 'not recorded yet. The next hourly run will note what it did here.'
+            : (() => {
+                const when = DATE_TIME.format(new Date(lastRun.at));
+                if (lastRun.error) return `${when}. It failed: ${lastRun.error}`;
+                if (lastRun.skipped) return `${when}. Did nothing: ${lastRun.skipped}.`;
+                return `${when}. ${lastRun.log.length ? lastRun.log.join(' · ') : 'Nothing was due.'}`;
+              })()}
+        </p>
+      )}
       {linkTargets.length > 0 && (
         <section className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
           <h2 className="font-headline text-lg font-bold">Links to check</h2>

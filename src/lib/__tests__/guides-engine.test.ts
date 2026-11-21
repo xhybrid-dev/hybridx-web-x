@@ -7,7 +7,7 @@ vi.mock('@/lib/firebase-admin', () => ({ adminFirestore: db, adminApp: {}, admin
 const { SAMPLE_GUIDES } = await import('../guides/fixtures');
 const store = await import('../guides/store');
 const queue = await import('../guides/queue');
-const { runEngineStep, pipelineHasRoom, pipelineStatus, changedBlocks, getRun } = await import('../guides/engine/run');
+const { runEngineStep, pipelineHasRoom, pipelineStatus, changedBlocks, getRun, getEngineStatus } = await import('../guides/engine/run');
 const { toContent, toLoose } = await import('../guides/engine/shape');
 const { buildEngineEmail, buildReviewEmail, inEmailHours } = await import('../guides/email');
 const backlinks = await import('../guides/backlinks');
@@ -73,6 +73,24 @@ describe('switching it on', () => {
   it('does nothing while another tick holds the lock', async () => {
     db.rawSet('contentSettings', 'engineLock', { lockedUntil: Date.parse('2026-11-10T10:05:00Z') });
     expect((await harness().tick()).skipped).toBe('another tick is running');
+  });
+});
+
+describe('what the last run did, for the admin', () => {
+  it('notes a run that drafted, and a paused one', async () => {
+    const h = harness();
+    expect(await getEngineStatus()).toBeNull();
+    await h.tick();
+    expect((await getEngineStatus())?.log.join(' ')).toContain('drafted from');
+    await store.saveEngineSettings({ ...DEFAULT_SETTINGS, paused: true });
+    await h.tick();
+    expect(await getEngineStatus()).toMatchObject({ skipped: 'paused in settings', log: [] });
+  });
+
+  it('notes why a draft failed, so the reason shows in the admin and not only in the server log', async () => {
+    const h = harness({ write: async () => { throw new Error('quota exceeded'); } });
+    await h.tick();
+    expect((await getEngineStatus())?.log.join(' ')).toContain('quota exceeded');
   });
 });
 
