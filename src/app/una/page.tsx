@@ -5,6 +5,7 @@ import { HYBRIDX_APP_URL, HYBRIDX_URL, UNA_URL } from '@/components/una-app/Chro
 import { grotesk, inter, mono } from '@/components/una/fonts';
 import HeroWatchTrio from '@/components/una/HeroWatchTrio';
 import FamilyExplorer from '@/components/una/FamilyExplorer';
+import EcosystemReel from '@/components/una/EcosystemReel';
 import GlancesShowcase from '@/components/una/GlancesShowcase';
 import SectionNav from '@/components/una/SectionNav';
 import {
@@ -22,8 +23,8 @@ import styles from './una.module.css';
  *
  * Layout: the family has grown, so the page stays short by interaction rather
  * than by cutting content. Three bands: hero, one explorer for all seven apps
- * (diagram as selector, one panel, swipe rows on phones), then Glances and the
- * watch. Old #ecosystem / #apps / #x-training / #<slug> links still work
+ * (diagram as selector, one panel, swipe rows on phones) with the 20-second
+ * ecosystem reel beside its heading, then Glances and the watch. Old #ecosystem / #apps / #x-training / #<slug> links still work
  * (see family-hash.ts).
  *
  * Honesty & trademark guardrails:
@@ -181,15 +182,18 @@ export default function UnaFamilyPage() {
         {/* The family: one selector, one panel, all seven apps */}
         <section id="family" className={styles.bandWhite} aria-labelledby="family-heading">
           <div className={styles.container}>
-            <div className={styles.sectionHead}>
-              <div className={styles.eyebrow}>// THE FAMILY · {APPS.length} APPS</div>
-              <h2 id="family-heading" className={styles.h2}>
-                Six specialist apps. One dashboard.
-              </h2>
-              <p className={styles.sectionLead}>
-                Each app works on its own; pair them with <strong>X Streak</strong> and your watch becomes one
-                system. Pick an app to see its screens, features and how it connects.
-              </p>
+            <div className={styles.familyIntro}>
+              <div className={styles.sectionHead}>
+                <div className={styles.eyebrow}>// THE FAMILY · {APPS.length} APPS</div>
+                <h2 id="family-heading" className={styles.h2}>
+                  Six specialist apps. One dashboard.
+                </h2>
+                <p className={styles.sectionLead}>
+                  Each app works on its own; pair them with <strong>X Streak</strong> and your watch becomes one
+                  system. Pick an app to see its screens, features and how it connects.
+                </p>
+              </div>
+              <EcosystemReel />
             </div>
             <FamilyExplorer />
           </div>
