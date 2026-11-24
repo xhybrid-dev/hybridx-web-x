@@ -84,6 +84,26 @@
   fill: currentColor;
 }
 
+/* Wider screens: the centrepiece of the family section, centred under its
+   heading and a good deal larger, on a soft glow in the page's yellow. The
+   phone zoom below never applies here. */
+@media (min-width: 760px) {
+  .reel {
+    --w0: clamp(300px, 27vw, 360px);
+    position: relative;
+    isolation: isolate;
+  }
+
+  .reel::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -8% -120%;
+    background: radial-gradient(closest-side, rgba(250, 219, 92, 0.22), rgba(250, 219, 92, 0) 72%);
+    pointer-events: none;
+  }
+}
+
 /* Keep this query in step with PHONE and REDUCED in EcosystemReel.tsx. */
 @media (max-width: 759px) and (prefers-reduced-motion: no-preference) {
   .stage {

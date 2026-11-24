@@ -331,11 +331,24 @@
   margin-bottom: 0;
 }
 
+/* Wider screens: the reel is the centrepiece. Heading and lead centred above
+   it, the video centred and larger below (its size is in EcosystemReel). */
 @media (min-width: 760px) {
   .familyIntro {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: clamp(28px, 5vw, 72px);
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: clamp(30px, 3.6vw, 48px);
+  }
+
+  .familyIntro .sectionHead {
+    max-width: 900px;
+    justify-items: center;
+  }
+
+  .familyIntro .sectionLead {
+    max-width: 62ch;
+    text-wrap: balance;
   }
 }
 
