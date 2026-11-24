@@ -197,7 +197,10 @@ async function Queue() {
                 if (lastRun.error) return `${when}. It failed: ${lastRun.error}`;
                 if (lastRun.skipped) return `${when}. Did nothing: ${lastRun.skipped}.`;
                 return `${when}. ${lastRun.log.length ? lastRun.log.join(' · ') : 'Nothing was due.'}`;
-              })()}
+              })()}{' '}
+          <a className="underline underline-offset-4" href="/api/admin/engine-check">
+            Check the engine
+          </a>
         </p>
       )}
       {linkTargets.length > 0 && (
@@ -711,6 +714,12 @@ async function Settings({ done, error }: { done?: string; error?: string }) {
         <p>
           <strong>Second-model reviewer:</strong>{' '}
           {process.env.ANTHROPIC_API_KEY ? 'key present' : 'no key yet: drafts arrive without the second review, and say so'}
+        </p>
+        <p>
+          <a className="underline underline-offset-4" href="/api/admin/engine-check">
+            Check the engine
+          </a>
+          : says why nothing is being drafted, and tests Gemini with a one-word prompt.
         </p>
       </div>
       <Button type="submit">Save settings</Button>

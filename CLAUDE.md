@@ -174,6 +174,13 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **The reviewer key,** `ANTHROPIC_API_KEY`, is optional: without it drafts
     arrive marked "second review skipped". Bind it in `apphosting.yaml` only
     after the secret exists and is granted.
+  - **When it stops drafting,** open `/api/admin/engine-check` (signed in;
+    linked from the queue and settings). It pings Gemini with one word and
+    names the likely cause (`diagnose.ts`): settings, scheduling, gemini, time
+    limit, code, reviewer, queue, or `waiting`, a full pipeline, which is by
+    design. With nobody reviewing, the engine stops at two drafts.
+  - **An outage must not use up the queue:** a draft that throws counts
+    against its topic only if that ping still works.
 - **Links between articles** (plan step 4b): `related.ts` scores relatedness;
   `backlinks.ts` turns the engine's suggestions into links from older articles
   to a newly approved one.

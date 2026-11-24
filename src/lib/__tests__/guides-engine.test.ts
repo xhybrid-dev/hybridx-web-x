@@ -15,6 +15,7 @@ const { DEFAULT_SETTINGS } = await import('../guides/slots');
 import type { EngineModels, ReviewOutcome } from '../guides/engine/models';
 import type { EngineEmail, LinksEmail, ReviewEmail } from '../guides/email';
 import type { LooseDraft } from '../guides/engine/shape';
+import type { EngineDeps } from '../guides/engine/run';
 
 /*
  * The drafting engine, with stand-in models: what happens on each hourly tick,
@@ -44,8 +45,9 @@ function harness(over: Partial<EngineModels> = {}, at = '2026-11-10T10:00:00Z') 
     link: over.link ?? (async (p) => (links.push(p), [])),
     review: over.review ?? (async () => (calls.review++, publishable)),
     canReview: over.canReview,
+    ping: over.ping,
   };
-  const deps = { models, send: async (e: EngineEmail) => void (e.kind === 'links' ? linkEmails.push(e) : sent.push(e)), now: () => new Date(clock.at) };
+  const deps: EngineDeps = { models, send: async (e: EngineEmail) => void (e.kind === 'links' ? linkEmails.push(e) : sent.push(e)), now: () => new Date(clock.at) };
   const clock = { at };
   return { deps, sent, linkEmails, calls, links, clock, tick: () => runEngineStep(deps) };
 }
@@ -91,6 +93,47 @@ describe('what the last run did, for the admin', () => {
     const h = harness({ write: async () => { throw new Error('quota exceeded'); } });
     await h.tick();
     expect((await getEngineStatus())?.log.join(' ')).toContain('quota exceeded');
+  });
+});
+
+describe('when the writer fails', () => {
+  const down = { write: async () => { throw new Error('API key not valid'); }, ping: async () => { throw new Error('API key not valid'); } };
+
+  it('leaves the queue as it was while Gemini cannot answer a one-word ping either', async () => {
+    const h = harness(down);
+    for (let i = 0; i < 80; i++) {
+      h.clock.at = new Date(Date.parse('2026-11-10T10:00:00Z') + i * 3_600_000).toISOString();
+      await h.tick();
+    }
+    const topics = await queue.listTopics();
+    expect(topics.filter((t) => t.status === 'skipped')).toEqual([]);
+    expect(topics[0]).toMatchObject({ status: 'queued', lastError: 'API key not valid' });
+    expect(topics[0].failures ?? 0).toBe(0);
+    expect((await getEngineStatus())?.log.join(' ')).toContain('the writer (Gemini) is not answering: API key not valid');
+  });
+
+  it('drafts the same topic once Gemini answers again', async () => {
+    const h = harness(down);
+    await h.tick();
+    const first = (await queue.listTopics())[0].question;
+    const h2 = harness();
+    h2.clock.at = '2026-11-10T11:00:00Z';
+    await h2.tick();
+    expect((await store.listAllGuides()).map((g) => g.title)).toEqual([first]);
+  });
+
+  it('counts the failure against the topic when Gemini still answers the ping', async () => {
+    const h = harness({ write: async () => { throw new Error('Schema validation failed'); }, ping: async () => {} });
+    await h.tick();
+    expect((await queue.listTopics())[0]).toMatchObject({ status: 'queued', failures: 1, lastError: 'Schema validation failed' });
+  });
+
+  it('notes a run that ran out of time before its model call, instead of reading as one with nothing due', async () => {
+    const h = harness();
+    h.deps.callWindowMs = 0;
+    await h.tick();
+    expect(h.calls.write).toBe(0);
+    expect((await getEngineStatus())?.log.join(' ')).toMatch(/^stopped starting model calls \d+ s into the run \(none starts after 0 s\)$/);
   });
 });
 

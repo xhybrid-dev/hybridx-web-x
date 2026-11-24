@@ -48,6 +48,13 @@ export interface EngineModels {
   review(prompt: string): Promise<ReviewOutcome>;
   /** False when a review cannot happen, so a draft does not wait a tick for one. */
   canReview?(): boolean;
+  /**
+   * The smallest possible call to the writer: resolves if it answers at all,
+   * throws with the provider's reason if not. Tells "the writer is down" (a bad
+   * key, an exhausted quota, a retired model) from "this topic's draft failed",
+   * so an outage does not use up the topic queue.
+   */
+  ping?(): Promise<void>;
 }
 
 /* ── Gemini: the writer ─────────────────────────────────────────────────── */
@@ -112,6 +119,11 @@ async function link(prompt: string): Promise<LinkSuggestion[]> {
   return output.links;
 }
 
+async function ping(): Promise<void> {
+  const { text } = await ai.generate({ prompt: 'Reply with the single word OK.', config: { temperature: 0, maxOutputTokens: 16 } });
+  if (!text.trim()) throw new Error('the writer answered with nothing');
+}
+
 /* ── Claude: the reviewer ───────────────────────────────────────────────── */
 
 const str = { type: 'string' };
@@ -169,4 +181,4 @@ async function review(prompt: string): Promise<ReviewOutcome> {
   return { ...ReviewZ.parse(JSON.parse(text.text)), model: response.model };
 }
 
-export const liveModels: EngineModels = { write, link, review, canReview: () => !!process.env.ANTHROPIC_API_KEY };
+export const liveModels: EngineModels = { write, link, review, ping, canReview: () => !!process.env.ANTHROPIC_API_KEY };

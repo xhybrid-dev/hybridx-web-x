@@ -7,7 +7,10 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: '.env' });
 }
 
+/** The Gemini model behind every ai.generate call: the treadmill generator and the guide writer. */
+export const WRITER_MODEL = 'googleai/gemini-3.5-flash';
+
 export const ai = genkit({
   plugins: [googleAI()],
-  model: 'googleai/gemini-3.5-flash',
+  model: WRITER_MODEL,
 });
