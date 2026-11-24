@@ -57,6 +57,25 @@ describe('ordering', () => {
     expect((await queue.nextTopic())?.question).toBe(first.question);
   });
 
+  it("carries Jon's brief as the topic's note, trimmed and capped, and writes none when there is no brief", async () => {
+    await queue.addTopic('How long should I rest between wall ball sets?', 'hyrox', at, '  For gym-goers; keep it to one workout.  ');
+    await queue.addTopic('Is a weighted vest worth it?', 'hyrox', at);
+    await queue.addTopic('Could a long brief be cut?', 'hyrox', at, 'x'.repeat(queue.BRIEF_MAX + 500));
+    const mine = (await queue.listTopics()).filter((t) => t.source === 'jon');
+    const by = (q: string) => mine.find((t) => t.question === q)!;
+    expect(by('How long should I rest between wall ball sets?').note).toBe('For gym-goers; keep it to one workout.');
+    expect('note' in by('Is a weighted vest worth it?')).toBe(false);
+    expect(by('Could a long brief be cut?').note).toHaveLength(queue.BRIEF_MAX);
+  });
+
+  it('knows a question already waiting or being drafted, whatever its case, but not one drafted or skipped', async () => {
+    await queue.addTopic('Is a weighted vest worth it?', 'hyrox', at);
+    expect(await queue.isInQueue('  is a WEIGHTED vest worth it? ')).toBe(true);
+    const [t] = (await queue.listTopics()).filter((x) => x.question === 'Is a weighted vest worth it?');
+    await queue.setTopic(t.id, { status: 'drafted' }, at);
+    expect(await queue.isInQueue('Is a weighted vest worth it?')).toBe(false);
+  });
+
   it('moves a topic up or down by one, and not past either end', async () => {
     const [a, b] = await questions();
     const second = (await queue.listTopics())[1];
@@ -77,6 +96,14 @@ describe('ordering', () => {
     expect([t.status, t.skipReason]).toEqual(['queued', '']);
   });
 
+  it('clears the failure count on a put-back, so one more failure does not skip it again', async () => {
+    const first = (await queue.listTopics())[0];
+    await queue.setTopic(first.id, { status: 'skipped', failures: 2, lastError: 'quota exceeded', skipReason: 'twice' }, at);
+    await queue.requeueTopic(first.id, at);
+    const t = (await queue.listTopics()).find((x) => x.id === first.id)!;
+    expect([t.status, t.failures, t.lastError]).toEqual(['queued', 0, '']);
+  });
+
   it('never offers a topic whose tool is not built', async () => {
     const all = await queue.listTopics();
     const unbuilt = (t: (typeof all)[number]) => !!t.needs && (UNBUILT_TOOLS as readonly string[]).includes(t.needs);
@@ -84,5 +111,35 @@ describe('ordering', () => {
     expect(all.filter(unbuilt).length).toBe(0);
     for (const t of all) await queue.setTopic(t.id, { status: 'drafted' }, at);
     expect(await queue.nextTopic()).toBeNull();
+  });
+});
+
+describe('putting back what the engine skipped', () => {
+  beforeEach(async () => {
+    await queue.ensureQueueSeeded(at);
+  });
+
+  it('puts back every topic the engine skipped, leaves the ones Jon skipped, and says how many', async () => {
+    const [a, b, c, d] = await queue.listTopics();
+    // a and b: the engine gave up after two failed drafts (an outage). c: Jon's own skip. d: queued.
+    for (const t of [a, b]) {
+      await queue.setTopic(t.id, { status: 'skipped', failures: 2, lastError: '402 Payment Required', skipReason: 'The drafting model could not produce a usable draft twice.' }, at);
+    }
+    await queue.skipTopic(c.id, 'Covered by the how-to guide');
+
+    expect(await queue.requeueEngineSkipped(at)).toBe(2);
+
+    const now = new Map((await queue.listTopics()).map((t) => [t.id, t]));
+    for (const t of [a, b]) expect([now.get(t.id)!.status, now.get(t.id)!.failures, now.get(t.id)!.lastError, now.get(t.id)!.skipReason]).toEqual(['queued', 0, '', '']);
+    expect([now.get(c.id)!.status, now.get(c.id)!.skipReason]).toEqual(['skipped', 'Covered by the how-to guide']);
+    expect(now.get(d.id)!.status).toBe('queued');
+    expect(await queue.requeueEngineSkipped(at)).toBe(0);
+  });
+
+  it('tells the two kinds of skip apart', () => {
+    expect(queue.isEngineSkipped({ status: 'skipped', failures: 2 })).toBe(true);
+    expect(queue.isEngineSkipped({ status: 'skipped' })).toBe(false);
+    expect(queue.isEngineSkipped({ status: 'skipped', failures: 1 })).toBe(false);
+    expect(queue.isEngineSkipped({ status: 'queued', failures: 2 })).toBe(false);
   });
 });

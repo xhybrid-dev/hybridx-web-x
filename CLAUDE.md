@@ -187,8 +187,18 @@ AI-drafted, reviewed and approved by Jon before publishing.
     `hybridx-hub`, with its own billing account and prepaid credits. On
     24 November 2026 the credits ran out: every draft failed with `402 Payment
     Required: Your prepayment credits are depleted`, and the engine had skipped
-    34 topics before anyone saw it. Top up in AI Studio, then "Put back" the
-    skipped topics in `/admin/guides/topics`.
+    34 topics before anyone saw it. Top up in AI Studio, then press "Put all
+    back in the queue" in `/admin/guides/topics`: it puts back only the topics
+    the engine skipped (`isEngineSkipped`: two failures), never ones Jon
+    skipped, and clears their failure count.
+  - **New article** (`/admin/guides/new`) has two buttons. "Draft it with the
+    engine" adds the title and optional brief to the *front* of the topic queue
+    (`addTopic`, source `jon`); the brief is the topic's `note`, which the
+    draft prompt passes to the writer as "NOTE FROM THE EDITOR". It is drafted
+    by the hourly job like any topic, so it waits while the pipeline is full
+    (the form says so). "Write it myself" makes an empty article for the
+    editor. Add to the queue only after `ensureQueueSeeded`, or the starting
+    list never loads.
 - **Links between articles** (plan step 4b): `related.ts` scores relatedness;
   `backlinks.ts` turns the engine's suggestions into links from older articles
   to a newly approved one.

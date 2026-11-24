@@ -20,7 +20,7 @@ import {
 import { EngineSettingsSchema } from '@/lib/guides/slots';
 import { LinkDecisionError, decideProposal } from '@/lib/guides/backlinks';
 import { engineOn } from '@/lib/guides/engine/run';
-import { addTopic, ensureQueueSeeded, moveTopic, requeueTopic, skipTopic } from '@/lib/guides/queue';
+import { addTopic, ensureQueueSeeded, isInQueue, moveTopic, requeueEngineSkipped, requeueTopic, skipTopic } from '@/lib/guides/queue';
 import {
   addComment,
   getGuide,
@@ -132,12 +132,27 @@ export async function resolveGuideComment(form: FormData) {
   redirect(`${BASE}/${slug}#comments`);
 }
 
+/**
+ * New article. Two buttons on one form: "engine" puts the title and brief at the
+ * front of the topic queue for the drafting engine (the default), anything else
+ * creates an empty article for Jon to write in the editor.
+ */
 export async function createGuide(form: FormData) {
   await requireAdmin();
   const title = String(form.get('title') ?? '').trim();
   const pillar = String(form.get('pillar') ?? '') as PillarId;
   if (title.length < 5 || !PILLAR_IDS.includes(pillar)) {
     redirect(`${BASE}/new?error=${encodeURIComponent('Give it a title of at least a few words, and pick its topic.')}`);
+  }
+  if (form.get('mode') === 'engine') {
+    // Seeded first: adding to a queue that has never held anything would stop
+    // the starting list ever being loaded.
+    await ensureQueueSeeded();
+    if (await isInQueue(title)) {
+      redirect(`${BASE}/new?error=${encodeURIComponent('That question is already in the queue. It will be drafted from there.')}`);
+    }
+    await addTopic(title, pillar, new Date(), String(form.get('brief') ?? ''));
+    redirect(`${BASE}/topics?done=added`);
   }
   const base = slugify(title);
   if (!base || base === 'how-we-write') redirect(`${BASE}/new?error=${encodeURIComponent('That title cannot be made into an address. Try other words.')}`);
@@ -231,7 +246,10 @@ export async function addTopicAction(form: FormData) {
     redirect(`${BASE}/topics?error=${encodeURIComponent('Write the question in full, and pick its topic.')}`);
   }
   await ensureQueueSeeded();
-  await addTopic(question, pillar);
+  if (await isInQueue(question)) {
+    redirect(`${BASE}/topics?error=${encodeURIComponent('That question is already in the queue.')}`);
+  }
+  await addTopic(question, pillar, new Date(), String(form.get('brief') ?? ''));
   redirect(`${BASE}/topics?done=added`);
 }
 
@@ -251,6 +269,13 @@ export async function requeueTopicAction(form: FormData) {
   await requireAdmin();
   await requeueTopic(topicId(form));
   redirect(`${BASE}/topics?done=requeued`);
+}
+
+/** After an outage: every topic the engine skipped goes back. Topics Jon skipped stay skipped. */
+export async function requeueEngineSkippedAction() {
+  await requireAdmin();
+  const n = await requeueEngineSkipped();
+  redirect(`${BASE}/topics?done=requeued-all&n=${n}`);
 }
 
 export async function seedTopicsAction() {

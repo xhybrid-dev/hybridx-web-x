@@ -137,6 +137,32 @@ describe('when the writer fails', () => {
   });
 });
 
+describe('a new article asked for in the admin', () => {
+  it("is drafted before the starting list, with Jon's brief passed to the writer as the editor's note", async () => {
+    const prompts: string[] = [];
+    const h = harness({ write: async (p) => (prompts.push(p), sampleFor(p)) });
+    await queue.ensureQueueSeeded();
+    await queue.addTopic('Is a weighted vest worth it for HYROX?', 'hyrox', new Date('2026-11-10T09:00:00Z'), 'For gym-goers only. Keep it to one workout.');
+
+    await h.tick();
+
+    expect(prompts[0]).toContain('QUESTION: Is a weighted vest worth it for HYROX?');
+    expect(prompts[0]).toContain('NOTE FROM THE EDITOR: For gym-goers only. Keep it to one workout.');
+    const topic = (await queue.listTopics()).find((t) => t.question === 'Is a weighted vest worth it for HYROX?')!;
+    expect(topic.status).toBe('drafted');
+    expect((await store.listAllGuides()).map((g) => g.title)).toEqual(['Is a weighted vest worth it for HYROX?']);
+  });
+
+  it('sends no note line when there is no brief', async () => {
+    const prompts: string[] = [];
+    const h = harness({ write: async (p) => (prompts.push(p), sampleFor(p)) });
+    await queue.ensureQueueSeeded();
+    await queue.addTopic('Is a weighted vest worth it for HYROX?', 'hyrox');
+    await h.tick();
+    expect(prompts[0]).not.toContain('NOTE FROM THE EDITOR');
+  });
+});
+
 describe('from topic to review email', () => {
   it('seeds the queue, drafts the first topic, reviews it on the next tick, then emails Jon', async () => {
     const h = harness();
