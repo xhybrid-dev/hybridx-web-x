@@ -1,26 +1,44 @@
 /*
  * The 20-second ecosystem reel: a dark 9:16 story card on /una's light page.
- * Uses the page's tokens (--obsidian, --yellow, --ink-muted, --font-una-mono).
+ * Uses the page's tokens (--obsidian, --yellow).
+ *
+ * Wide screens and reduced motion: the stage and the pin add no boxes, so the
+ * card is a plain grid item of the family intro.
+ *
+ * Phones, motion allowed: the stage is tall and the pin sticks under the
+ * header for the whole of it. EcosystemReel.tsx writes --zoom (0 to 1) and
+ * --hdr as the page scrolls; the card's width runs from --w0 to --w1 with it.
+ * The part of the stage after the zoom has finished is the hold: --hold of
+ * scrolling with the video pinned at full width before the page moves on.
  */
 
+.stage,
+.pin {
+  display: contents;
+}
+
 .reel {
+  /* Card at rest, and the zoomed size: the full screen width, unless the
+     screen is too short to show the whole 9:16 frame under the header. */
+  --w0: clamp(200px, 58vw, 248px);
+  --w1: min(100vw, calc((100svh - var(--hdr, 58px)) * 9 / 16));
   margin: 0;
-  width: clamp(200px, 58vw, 248px);
+  width: var(--w0);
   justify-self: center;
-  display: grid;
-  gap: 10px;
 }
 
 .frame {
   position: relative;
   aspect-ratio: 9 / 16;
-  border-radius: 22px;
+  border-radius: calc(22px * (1 - var(--zoom, 0)));
   overflow: hidden;
   background: var(--obsidian, #0b0d0f);
-  border: 1px solid rgba(14, 19, 22, 0.14);
+  /* The hairline, the yellow ring and the drop shadow fade out as it goes
+     full width, so it ends as a clean full-bleed video. */
   box-shadow:
-    0 34px 60px -32px rgba(11, 13, 15, 0.55),
-    0 0 0 6px rgba(250, 219, 92, 0.16);
+    0 34px 60px -32px rgba(11, 13, 15, calc(0.55 * (1 - var(--zoom, 0)))),
+    0 0 0 1px rgba(14, 19, 22, calc(0.14 * (1 - var(--zoom, 0)))),
+    0 0 0 6px rgba(250, 219, 92, calc(0.16 * (1 - var(--zoom, 0))));
 }
 
 .video {
@@ -66,15 +84,30 @@
   fill: currentColor;
 }
 
-.caption {
-  font-family: var(--font-una-mono), ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-align: center;
-  white-space: nowrap;
-  color: var(--ink-muted, #334149);
+/* Keep this query in step with PHONE and REDUCED in EcosystemReel.tsx. */
+@media (max-width: 759px) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    display: block;
+    --hdr: 58px;
+    --hold: 80svh;
+    --zoom: 0;
+    height: calc(100svh - var(--hdr) + var(--hold));
+  }
+
+  .pin {
+    position: sticky;
+    top: var(--hdr);
+    height: calc(100svh - var(--hdr));
+    display: grid;
+    /* minmax(0, 1fr) keeps the track the width of the column, so the card,
+       once wider than it, overflows evenly to both screen edges. */
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+  }
+
+  .reel {
+    width: calc(var(--w0) + (var(--w1) - var(--w0)) * var(--zoom));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

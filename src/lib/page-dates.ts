@@ -45,7 +45,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/athx-2027': '2026-11-11',
   '/weigh-in': '2026-11-20',
   '/trail-quest': '2026-10-23',
-  '/una': '2026-11-23',
+  '/una': '2026-11-24',
   '/una/nerdy-bits': '2026-11-20',
   '/training': '2026-11-20',
   '/shop-terms': '2026-10-02',
