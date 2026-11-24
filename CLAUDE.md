@@ -75,8 +75,9 @@
   extension and Next's loader reads the extension unguarded. The response
   varies by where it is asked, so a green local build proves nothing. Those two
   files now use `next/font/local` with latin woff2 files in `src/fonts/`
-  (recipe in its README). If another file fails the same way, self-host it
-  too. Declare local fonts under unique names (`unaInter`, not `inter`): the
+  (recipe in its README), and so does `src/components/weighin/fonts.ts`, which
+  failed the same way on 24 November. If another file fails the same way,
+  self-host it too. Declare local fonts under unique names (`unaInter`, not `inter`): the
   family name is the variable's name, and CSS family names are case-insensitive,
   so `inter` would merge with the site's Google `Inter`.
 
