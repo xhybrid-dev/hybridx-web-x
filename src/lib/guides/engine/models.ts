@@ -120,8 +120,12 @@ async function link(prompt: string): Promise<LinkSuggestion[]> {
 }
 
 async function ping(): Promise<void> {
-  const { text } = await ai.generate({ prompt: 'Reply with the single word OK.', config: { temperature: 0, maxOutputTokens: 16 } });
-  if (!text.trim()) throw new Error('the writer answered with nothing');
+  // Reaching Google and being accepted is the test: a bad key, a spent quota or
+  // credit (402/429) and a retired model all throw here. The answer's text is
+  // not checked, and there is no output cap: the writer is a thinking model,
+  // whose thinking tokens count against the cap, so a cap of 16 returned an
+  // empty answer from a healthy API and reported an outage that was not one.
+  await ai.generate({ prompt: 'Reply with the single word OK.', config: { temperature: 0 } });
 }
 
 /* ── Claude: the reviewer ───────────────────────────────────────────────── */

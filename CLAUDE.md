@@ -181,7 +181,14 @@ AI-drafted, reviewed and approved by Jon before publishing.
     limit, code, reviewer, queue, or `waiting`, a full pipeline, which is by
     design. With nobody reviewing, the engine stops at two drafts.
   - **An outage must not use up the queue:** a draft that throws counts
-    against its topic only if that ping still works.
+    against its topic only if that ping still works. The ping must not cap
+    output tokens (a thinking model spends them thinking and answers empty).
+  - **`GEMINI_API_KEY` lives in project `studio-6984360429-4d8e0`**, not
+    `hybridx-hub`, with its own billing account and prepaid credits. On
+    24 November 2026 the credits ran out: every draft failed with `402 Payment
+    Required: Your prepayment credits are depleted`, and the engine had skipped
+    34 topics before anyone saw it. Top up in AI Studio, then "Put back" the
+    skipped topics in `/admin/guides/topics`.
 - **Links between articles** (plan step 4b): `related.ts` scores relatedness;
   `backlinks.ts` turns the engine's suggestions into links from older articles
   to a newly approved one.
