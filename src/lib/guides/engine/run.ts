@@ -31,6 +31,11 @@
 // failed try), no new call starts late in a tick, and the next tick recovers
 // anything left half-done: a topic stuck "drafting" goes back in the queue, a
 // draft saved without its run gets one.
+//
+// A draft that throws counts against its topic only if the writer still
+// answers a one-word ping, so an outage leaves the queue as it was. Whatever
+// a run did or held back on, out of time included, goes in its note for the
+// admin; /api/admin/engine-check turns that into a diagnosis (diagnose.ts).
 
 import { adminFirestore } from '@/lib/firebase-admin';
 import {
@@ -170,6 +175,17 @@ export async function getEngineStatus(): Promise<EngineStatus | null> {
   return snap.exists ? (snap.data() as EngineStatus) : null;
 }
 
+/** When the lease lock lapses, in epoch ms; 0 when free. For the engine check. */
+export async function getLockedUntil(): Promise<number> {
+  const snap = await adminFirestore.collection(LOCK.collection).doc(LOCK.id).get();
+  return Number((snap.data() as { lockedUntil?: number } | undefined)?.lockedUntil ?? 0);
+}
+
+/** Runs not yet finished (checks, review, or an email still to send). For the engine check. */
+export async function listActiveRuns(): Promise<Run[]> {
+  return [...(await runsAt('check')), ...(await runsAt('review')), ...(await runsAt('notify'))];
+}
+
 async function releaseLock(): Promise<void> {
   await adminFirestore.collection(LOCK.collection).doc(LOCK.id).set({ lockedUntil: 0 });
 }
@@ -228,11 +244,27 @@ interface Tick {
   startedMs: number;
   published: Guide[];
   log: string[];
+  /** Set once the call window has closed, so the log says so once. */
+  outOfTime?: boolean;
 }
 
-/** Takes one model call from the tick's budget, if there is budget and time left. */
+/** The note a run leaves when the call window closed on it. */
+export const OUT_OF_TIME = 'stopped starting model calls';
+
+/**
+ * Takes one model call from the tick's budget, if there is budget and time
+ * left. Running out of time is noted: a run that is always too slow to reach
+ * its model call otherwise looks exactly like one with nothing to do.
+ */
 const spend = (t: Tick) => {
-  if (t.calls <= 0 || Date.now() - t.startedMs >= (t.deps.callWindowMs ?? CALL_WINDOW_MS)) return false;
+  if (t.calls <= 0) return false;
+  const elapsed = Date.now() - t.startedMs;
+  const window = t.deps.callWindowMs ?? CALL_WINDOW_MS;
+  if (elapsed >= window) {
+    if (!t.outOfTime) t.log.push(`${OUT_OF_TIME} ${Math.round(elapsed / 1000)} s into the run (none starts after ${Math.round(window / 1000)} s)`);
+    t.outOfTime = true;
+    return false;
+  }
   t.calls--;
   return true;
 };
@@ -390,6 +422,29 @@ async function failTopic(topic: Topic, reason: string, t: Tick): Promise<void> {
   t.log.push(`topic "${topic.question}": ${reason}`);
 }
 
+/** The note a run leaves when the writer did not answer a one-word ping. */
+export const WRITER_DOWN = 'the writer (Gemini) is not answering';
+
+/**
+ * A write that threw. It counts against the topic only if the writer still
+ * answers a one-word ping: if it does not (a bad key, a spent quota, a retired
+ * model), the topic goes back unchanged. Otherwise an outage of under three
+ * days would skip the whole queue, two failures a topic, and stay that way
+ * after the outage ended.
+ */
+async function writeFailed(topic: Topic, reason: string, t: Tick): Promise<void> {
+  if (t.deps.models.ping && spend(t)) {
+    try {
+      await t.deps.models.ping();
+    } catch (e) {
+      await setTopic(topic.id, { status: 'queued', lastError: reason }, t.now);
+      t.log.push(`${WRITER_DOWN}: ${message(e)}. "${topic.question}" stays in the queue, unchanged`);
+      return;
+    }
+  }
+  return failTopic(topic, reason, t);
+}
+
 async function draft(t: Tick): Promise<void> {
   await ensureQueueSeeded(t.now);
   const topic = await nextTopic();
@@ -405,7 +460,7 @@ async function draft(t: Tick): Promise<void> {
   try {
     content = toContent(await t.deps.models.write(brief));
   } catch (e) {
-    return failTopic(topic, message(e), t);
+    return writeFailed(topic, message(e), t);
   }
   const slug = await uniqueSlug(content.title || topic.question);
   const candidate = () => ({ ...content, slug, status: 'drafting', pillar: topic.pillar });
