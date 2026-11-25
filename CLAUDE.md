@@ -291,6 +291,32 @@ AI-drafted, reviewed and approved by Jon before publishing.
   to the one-hour ID token and logs why; the Guides admin header says which you
   have.
 
+## Page conventions
+
+- **Every page's `<main>` is `<main id="main-content" tabIndex={-1}>`.** The skip link in
+  the root layout (`SkipLink`) targets it, and `skip-link.test.ts` fails on a page that lacks
+  it. `globals.css` removes the focus ring from a programmatically focused `<main>`.
+- **A page that deliberately looks unlike the site** (the engine funnel, ATHX, the running
+  plan, the X family pages) still carries a way back: `StandaloneBar` or its own logo link,
+  and Terms, Contact and Cookie settings (`ConsentSettingsButton`) beside Privacy.
+  `standalone-pages.test.ts` pins it.
+- **The older calculator pages use `CalculatorShell`** (breadcrumb, FAQ and WebApplication
+  structured data, "How it works", related tools). What each page says about its formula is
+  in `src/lib/calculators/registry.ts`, and `calculators-registry.test.ts` checks every such
+  sentence against the constant in the form: change a formula, change its sentence.
+  A new calculator is a registry entry, a guide and a page.
+- **The running plan's calendar (`src/lib/12-week-running-hyrox/schedule.ts`) works on
+  `YYYY-MM-DD` strings, never `Date` instants.** A date typed into an `<input type="date">` is
+  a day, not a moment; the old code turned it into UTC midnight and put sessions on the wrong
+  day in some time zones. Race day lands on the chosen date whatever its weekday. Event ids carry
+  no date, so a second import updates the events rather than adding a second set.
+- **Icon-only buttons inside a form need `type="button"` and a name**, or pressing one submits
+  the form.
+- **The privacy policy was written from what the code does** and is a draft for Jon's review:
+  the controller's legal name and address (UK GDPR Art. 13(1)(a)) are not in the repository and
+  belong in its section 1. When a new processor, a new field in a form, or a new place a lead is
+  sent is added, change the policy in the same commit.
+
 ## The shop (paid PDFs)
 
 `/hyrox-glasgow-2027` sells PDFs through Stripe Checkout; everything is in
