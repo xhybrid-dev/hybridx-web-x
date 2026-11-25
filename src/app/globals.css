@@ -29,6 +29,10 @@
 
     --accent: 47 95% 67%; /* Yellow #fadb5c */
     --accent-foreground: 0 0% 0%; /* Black */
+    /* Yellow as TEXT or an icon on a light surface. #fadb5c on white is 1.4:1,
+       so light mode uses this deep amber (#825E03, 5.9:1 on white); dark mode
+       goes back to the bright yellow. Fills stay on --accent. */
+    --accent-ink: 43 96% 26%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -75,6 +79,7 @@
 
     --accent: 47 95% 67%; /* Yellow #fadb5c */
     --accent-foreground: 0 0% 0%; /* Black */
+    --accent-ink: 47 95% 67%; /* Bright yellow reads well on dark surfaces (15:1 on black) */
 
     --destructive: 0 80% 55%; /* Strong Red */
     --destructive-foreground: 0 0% 98%;

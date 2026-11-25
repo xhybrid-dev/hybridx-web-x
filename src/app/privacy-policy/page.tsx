@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             <CardHeader className="text-center pb-8">
               <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
-                Last Updated: October 2, 2026
+                Last Updated: November 25, 2026
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -74,6 +74,17 @@ export default function PrivacyPolicyPage() {
                     <strong>Third-Party Service Providers:</strong> We may share your data with third-party service providers that perform services for us or on our behalf, including data analysis (Google Analytics) and email delivery (for training plans and newsletters).
                   </li>
                 </ul>
+              </section>
+
+              <section id="store">
+                <h2 className="text-2xl font-headline text-primary mb-3">Our online store (Ecwid)</h2>
+                <p className="text-muted-foreground">
+                  The apparel shelves at <code>/store</code> are run by Ecwid, an online store service from Lightspeed Commerce. They
+                  load only after you press &quot;Load the store&quot;. Once loaded, Ecwid receives your IP address and browser details
+                  and sets its own cookies so that your basket and checkout work, and it handles the order, your delivery details and
+                  your payment as our service provider. The consent banner on this site does not cover the store: pressing the button is
+                  how you choose to use it. If you do not press it, nothing is sent to Ecwid.
+                </p>
               </section>
 
               <section id="cookies">
