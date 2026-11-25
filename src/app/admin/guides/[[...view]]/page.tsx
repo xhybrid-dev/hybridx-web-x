@@ -18,7 +18,7 @@ import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } 
 import { getAppSignupsBySrc } from '@/lib/marketing-bridge';
 import { guideSrc } from '@/lib/app-links';
 import { engineOn, getEngineStatus, getRun, pipelineStatus } from '@/lib/guides/engine/run';
-import { isDraftable, listTopics } from '@/lib/guides/queue';
+import { BRIEF_MAX, isDraftable, isEngineSkipped, listTopics } from '@/lib/guides/queue';
 import { DAY_NAMES, describeSlot, nextFreeSlot, type EngineSettings } from '@/lib/guides/slots';
 import {
   getEngineSettings,
@@ -39,6 +39,7 @@ import {
   decideLinkAction,
   createGuide,
   moveTopicAction,
+  requeueEngineSkippedAction,
   requeueTopicAction,
   seedTopicsAction,
   skipTopicAction,
@@ -99,9 +100,9 @@ export default async function GuidesAdmin({
 
   let body: React.ReactNode;
   if (view.length === 0) body = <Queue />;
-  else if (view.length === 1 && view[0] === 'new') body = <NewArticle error={one(search.error)} />;
+  else if (view.length === 1 && view[0] === 'new') body = await NewArticle({ error: one(search.error) });
   else if (view.length === 1 && view[0] === 'settings') body = <Settings done={one(search.done)} error={one(search.error)} />;
-  else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} />;
+  else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} count={one(search.n)} />;
   else if (view.length === 1 && view[0] === 'search') body = <SearchView />;
   else if (view.length === 1 && view[0] === 'performance') body = <Performance />;
   else if (view.length === 1 && !RESERVED.has(view[0])) body = await Review({ slug: view[0], search });
@@ -623,7 +624,16 @@ async function Edit({ slug }: { slug: string }) {
 
 /* ── A new article ───────────────────────────────────────────────────────── */
 
-function NewArticle({ error }: { error?: string }) {
+async function NewArticle({ error }: { error?: string }) {
+  const [guides, settings] = await Promise.all([listAllGuides(), getEngineSettings()]);
+  const pipeline = pipelineStatus(guides, new Date());
+  const next = !engineOn()
+    ? 'The drafting engine is switched off (CONTENT_ENGINE_MODE), so nothing is drafted until it is on. You can still write it yourself.'
+    : settings.paused
+      ? 'The engine is paused in settings, so this waits until you resume it.'
+      : !pipeline.room
+        ? `The engine is holding back new drafts (${pipeline.waiting} waiting for you, ${pipeline.ahead} scheduled and not yet live), so this waits until you have reviewed one.`
+        : 'The engine drafts it on its next hourly run, ahead of everything else queued, then emails you when it is ready to review.';
   return (
     <form action={createGuide} className="space-y-4 rounded-lg border p-4">
       <h2 className="font-headline text-xl font-bold">New article</h2>
@@ -650,7 +660,30 @@ function NewArticle({ error }: { error?: string }) {
           ))}
         </select>
       </div>
-      <Button type="submit">Create and edit</Button>
+      <div className="space-y-1.5">
+        <label htmlFor="brief" className="text-sm font-semibold">
+          Brief (optional): the angle, what to cover, what to leave out
+        </label>
+        <Textarea
+          id="brief"
+          name="brief"
+          rows={4}
+          maxLength={BRIEF_MAX}
+          placeholder="For gym-goers with no sled. Use a prowler or a heavy bench push. Keep it to one workout."
+        />
+        <p className="text-xs text-muted-foreground">Used only by "Draft it with the engine". The engine still checks every fact against the site's own.</p>
+      </div>
+      <p role="status" className="rounded-md bg-secondary/50 p-3 text-sm">
+        <strong>Draft it with the engine</strong> puts this at the front of the topic queue. {next}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" name="mode" value="engine">
+          Draft it with the engine
+        </Button>
+        <Button type="submit" name="mode" value="write" variant="outline">
+          Write it myself
+        </Button>
+      </div>
     </form>
   );
 }
@@ -731,7 +764,7 @@ async function Settings({ done, error }: { done?: string; error?: string }) {
 
 const TOOL_NAMES: Record<string, string> = { 'week-planner': 'week planner', 'strength-test': 'strength and engine test', 'hyrox-pacer': 'HYROX pacer' };
 
-async function Topics({ done, error }: { done?: string; error?: string }) {
+async function Topics({ done, error, count }: { done?: string; error?: string; count?: string }) {
   const topics = await listTopics();
   if (!topics.length) {
     return (
@@ -744,6 +777,7 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
   }
   const queued = topics.filter((t) => t.status === 'queued');
   const history = topics.filter((t) => t.status !== 'queued');
+  const stopped = topics.filter(isEngineSkipped).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   return (
     <div className="space-y-8">
       <div>
@@ -756,13 +790,29 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
       </div>
       {done && (
         <p role="status" className="rounded-md border-2 border-accent bg-accent/10 p-3 text-sm font-semibold">
-          {done === 'added' ? 'Added to the front of the queue.' : done === 'skipped' ? 'Skipped. It will not be drafted.' : 'Back in the queue.'}
+          {done === 'added'
+            ? 'Added to the front of the queue. The engine drafts it on an hourly run while fewer than two articles are waiting for you.'
+            : done === 'skipped'
+              ? 'Skipped. It will not be drafted.'
+              : done === 'requeued-all'
+                ? `${/^\d{1,4}$/.test(count ?? '') ? count : 'The'} skipped topics are back in the queue. The engine drafts one per hourly run, only while fewer than two articles wait for you.`
+                : 'Back in the queue.'}
         </p>
       )}
       {error && (
         <p role="alert" className="rounded-md border-2 border-foreground p-3 text-sm font-semibold">
           {error}
         </p>
+      )}
+      {stopped.length > 0 && (
+        <form action={requeueEngineSkippedAction} className="space-y-2 rounded-lg border-2 border-accent p-4 text-sm">
+          <p>
+            <strong>The engine skipped {stopped.length} topic{stopped.length === 1 ? '' : 's'}</strong> after two failed drafts each. If the cause was an
+            outage (a spent Gemini balance, a bad key) and not the topics, put them all back. Topics you skipped yourself stay skipped.
+          </p>
+          <p className="text-muted-foreground">Latest reason: {(stopped[0].lastError ?? 'none recorded').slice(0, 240)}</p>
+          <Button type="submit">Put all {stopped.length} back in the queue</Button>
+        </form>
       )}
       <form action={addTopicAction} className="space-y-2 rounded-lg border p-4">
         <label htmlFor="question" className="block text-sm font-semibold">
@@ -776,6 +826,7 @@ async function Topics({ done, error }: { done?: string; error?: string }) {
             </option>
           ))}
         </select>
+        <Textarea name="brief" rows={2} maxLength={BRIEF_MAX} aria-label="Brief (optional)" placeholder="Brief (optional): the angle, what to cover, what to leave out" />
         <Button type="submit">Add to the front</Button>
       </form>
 

@@ -113,22 +113,38 @@ export async function setTopic(id: string, patch: Partial<Omit<Topic, 'id'>>, no
   await adminFirestore.collection(TOPICS_COLLECTION).doc(id).update(clean({ ...patch, updatedAt: now.toISOString() }));
 }
 
-/** Jon's own question, to the front of the queue. */
-export async function addTopic(question: string, pillar: PillarId, now = new Date()): Promise<string> {
+/** The longest brief a topic carries. The drafting prompt passes it on as the editor's note. */
+export const BRIEF_MAX = 1000;
+
+/**
+ * Jon's own question, to the front of the queue. An optional brief goes to the
+ * drafting model as "a note from the editor": the angle, what to cover, what to
+ * leave out.
+ */
+export async function addTopic(question: string, pillar: PillarId, now = new Date(), brief?: string): Promise<string> {
   const topics = await listTopics();
   const first = topics.filter((t) => t.status === 'queued')[0]?.rank ?? 10;
   const at = now.toISOString();
-  const ref = await adminFirestore.collection(TOPICS_COLLECTION).add({
-    question: question.trim().slice(0, 160),
-    pillar,
-    proof: 'any',
-    rank: first - 10,
-    status: 'queued',
-    source: 'jon',
-    createdAt: at,
-    updatedAt: at,
-  });
+  const ref = await adminFirestore.collection(TOPICS_COLLECTION).add(
+    clean({
+      question: question.trim().slice(0, 160),
+      pillar,
+      proof: 'any',
+      note: brief?.trim().slice(0, BRIEF_MAX) || undefined,
+      rank: first - 10,
+      status: 'queued',
+      source: 'jon',
+      createdAt: at,
+      updatedAt: at,
+    }),
+  );
   return ref.id;
+}
+
+/** Whether a question is already waiting or being drafted, so a double click adds it once. */
+export async function isInQueue(question: string): Promise<boolean> {
+  const wanted = question.trim().toLowerCase();
+  return (await listTopics()).some((t) => (t.status === 'queued' || t.status === 'drafting') && t.question.trim().toLowerCase() === wanted);
 }
 
 /** Swaps a queued topic with its neighbour, up (-1) or down (+1). */
@@ -184,8 +200,23 @@ export async function skipTopic(id: string, reason: string): Promise<void> {
 }
 
 /** Back into the queue, after a skip or a draft that was turned down. */
-export async function requeueTopic(id: string): Promise<void> {
+export async function requeueTopic(id: string, now = new Date()): Promise<void> {
   // Empty strings rather than undefined: an undefined field is not written, so
-  // the old reason would survive the requeue.
-  await setTopic(id, { status: 'queued', skipReason: '', guideSlug: '' });
+  // the old reason would survive the requeue. The failure count goes too: a
+  // topic put back with two failures would be skipped again on its next one.
+  await setTopic(id, { status: 'queued', skipReason: '', guideSlug: '', failures: 0, lastError: '' }, now);
+}
+
+/**
+ * A topic the engine skipped itself, after two drafts that came to nothing, as
+ * opposed to one Jon skipped (which has no failures). Usually an outage rather
+ * than anything wrong with the topic.
+ */
+export const isEngineSkipped = (t: Pick<Topic, 'status' | 'failures'>): boolean => t.status === 'skipped' && (t.failures ?? 0) >= 2;
+
+/** Puts back every topic the engine skipped, leaving Jon's own skips alone. Returns how many. */
+export async function requeueEngineSkipped(now = new Date()): Promise<number> {
+  const skipped = (await listTopics()).filter(isEngineSkipped);
+  await Promise.all(skipped.map((t) => requeueTopic(t.id, now)));
+  return skipped.length;
 }

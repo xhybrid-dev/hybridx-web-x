@@ -17,7 +17,7 @@
 //   queue        nothing left that can be drafted
 //   ok           nothing found: the next hourly run should draft
 
-import type { Topic } from '../queue';
+import { isEngineSkipped, type Topic } from '../queue';
 import { OUT_OF_TIME, WRITER_DOWN, type EngineStatus, type Run } from './run';
 
 export type Area = 'settings' | 'scheduling' | 'gemini' | 'time limit' | 'code' | 'reviewer' | 'waiting' | 'queue' | 'ok';
@@ -53,8 +53,7 @@ const hoursAgo = (ms: number) => {
 };
 
 /** Topics the engine itself skipped, after two drafts that came to nothing. */
-export const engineSkipped = (topics: EngineSnapshot['topics']) =>
-  topics.filter((t) => t.status === 'skipped' && (t.failures ?? 0) >= 2).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+export const engineSkipped = (topics: EngineSnapshot['topics']) => topics.filter(isEngineSkipped).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
 export function diagnose(s: EngineSnapshot): Finding[] {
   const out: Finding[] = [];
