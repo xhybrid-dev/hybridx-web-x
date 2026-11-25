@@ -45,3 +45,7 @@ firebase-debug.log
 firestore-debug.log
 # Shop source PDFs: uploaded to private Storage by scripts/shop-upload.ts, never deployed
 /private/shop-source/
+
+# firebase CLI deploy cache, and source archives that must never be served from public/
+.firebase/
+/public/*.zip
