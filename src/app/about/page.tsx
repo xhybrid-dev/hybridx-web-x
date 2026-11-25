@@ -14,7 +14,8 @@ import { createBreadcrumbSchema, createMetadata, createPersonSchema, ORGANIZATIO
 // point of the page. If a section stops being true, change it in the same commit.
 
 export const metadata: Metadata = createMetadata({
-  title: 'About HybridX',
+  // The brand is added by the title template, so it is not in the title itself.
+  title: 'About Us',
   description:
     'Who runs HybridX, how our plans, guides and tools are made and checked, how we earn, and how we stay independent of HYROX and ATHX.',
   path: '/about',
