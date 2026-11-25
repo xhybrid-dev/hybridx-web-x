@@ -25,7 +25,7 @@ export default function ShopTermsPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-3xl flex-grow px-4 py-12 sm:px-6 md:py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-grow px-4 py-12 sm:px-6 md:py-16">
         <h1 className="font-headline text-3xl font-bold">Shop terms</h1>
         <p className="mt-2 text-sm text-muted-foreground">Last updated: 2 October 2026</p>
 

@@ -100,7 +100,7 @@ export default function VDOTCalculatorPage() {
       <JsonLd data={breadcrumbSchema} />
 
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-lg mx-auto space-y-8">
 
           {/* Calculator card */}

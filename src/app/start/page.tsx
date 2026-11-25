@@ -20,7 +20,7 @@ export default function StartPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-grow bg-black">
+      <main id="main-content" tabIndex={-1} className="flex-grow bg-black">
         <EntrySection mode="page" />
       </main>
       <Footer />

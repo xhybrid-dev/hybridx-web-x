@@ -194,7 +194,7 @@ export default function TrailPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <TrailHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />

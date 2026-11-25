@@ -238,7 +238,7 @@ export default function WeighInPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <WeighHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />

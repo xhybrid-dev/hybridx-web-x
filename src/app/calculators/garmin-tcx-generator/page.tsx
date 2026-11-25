@@ -43,7 +43,7 @@ export default function GarminTcxGeneratorPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-10">
             <h1 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">

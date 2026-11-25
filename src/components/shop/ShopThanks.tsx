@@ -56,7 +56,7 @@ export default async function ShopThanks({ event, sessionId }: { event: ShopEven
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-2xl flex-grow px-4 py-12 sm:px-6 md:py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-grow px-4 py-12 sm:px-6 md:py-16">
         <h1 className="mb-4 font-headline text-3xl font-bold">{heading}</h1>
         <div className="space-y-4 text-muted-foreground">{body}</div>
         <p className="mt-8">

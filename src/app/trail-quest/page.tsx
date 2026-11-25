@@ -183,7 +183,7 @@ export default function TrailQuestPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className={styles.hero}>
           <div className={`${base.container} ${styles.heroGrid}`}>

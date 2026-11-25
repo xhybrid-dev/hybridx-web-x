@@ -49,7 +49,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-3xl flex-grow px-4 py-10 sm:px-6 md:py-14">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-grow px-4 py-10 sm:px-6 md:py-14">
         <h1 className="font-headline text-3xl font-bold">Your downloads</h1>
         <p className="mt-2 text-muted-foreground">
           Order {order.shortId}

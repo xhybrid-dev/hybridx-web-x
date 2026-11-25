@@ -103,7 +103,7 @@ export default function HomePage({ planFinder, variant = null }: { planFinder: '
           existing homepage, unchanged. */}
       {planFinder === 'entry' && <EntrySection mode="entry" />}
       <div id="hx-home" tabIndex={-1} className="flex flex-grow flex-col">
-      <main className="flex-grow space-y-20 md:space-y-28">
+      <main id="main-content" tabIndex={-1} className="flex-grow space-y-20 md:space-y-28">
         <HeroSection />
         <SocialProofSection />
         <TrainingPlanShowcase />

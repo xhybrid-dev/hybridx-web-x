@@ -232,7 +232,7 @@ export default function StreakPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero: a night sky, and the watch rising over the ridges ──── */}
         <section className={styles.hero}>
           <Stars className={styles.stars} />

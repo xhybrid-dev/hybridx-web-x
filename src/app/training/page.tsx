@@ -90,7 +90,7 @@ export default function TrainingPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero} aria-labelledby="training-hero-heading">
           <div className={`${styles.container} ${styles.heroGrid}`}>
             <div className={styles.heroCopy}>

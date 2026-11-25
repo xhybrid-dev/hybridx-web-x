@@ -234,7 +234,7 @@ export default async function FreeHyroxPlanPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <HeroSection />
         <WhyThisPlanSection />
         <GetThePlanSection events={events} />

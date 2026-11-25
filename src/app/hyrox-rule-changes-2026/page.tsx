@@ -126,7 +126,7 @@ export default function HyroxRuleChanges2026() {
 
       <Header />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ───────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-black py-16 text-white md:py-24">
           <div

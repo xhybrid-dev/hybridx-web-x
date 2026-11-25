@@ -181,7 +181,7 @@ export default function RacePage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className={styles.hero}>
           <div className={styles.container}>

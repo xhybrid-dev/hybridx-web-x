@@ -212,7 +212,7 @@ export default function HyroxGlasgow2027Page() {
       <ShopViewEvent event={EVENT.slug} />
       <Header />
 
-      <main className="flex-grow">
+      <main id="main-content" tabIndex={-1} className="flex-grow">
         <GlasgowHero
           guide={{
             name: 'Preparation Guide',

@@ -54,7 +54,7 @@ export default function StrengthCalculatorsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <section id="strength-calculators-overview" className="py-12 md:py-16">
           <div className="text-center mb-12 md:mb-16">
             <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">

@@ -56,7 +56,7 @@ export default async function AthxConfirmPage({
 
   return (
     <div className={styles.page}>
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero}>
           <div className={styles.container}>
             {errorCopy ? (

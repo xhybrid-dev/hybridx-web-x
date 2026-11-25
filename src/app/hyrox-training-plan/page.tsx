@@ -112,7 +112,7 @@ export default function HyroxTrainingPlan() {
       <JsonLd data={courseSchema} />
       <JsonLd data={faqSchema} />
       <Header />
-      <main>
+      <main id="main-content" tabIndex={-1}>
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative bg-gradient-to-b from-neutral-900 to-black text-white py-20 md:py-28 overflow-hidden">

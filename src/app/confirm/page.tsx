@@ -63,7 +63,7 @@ export default async function ConfirmPage({
   return (
     <>
       <Header />
-      <main className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-20 text-center">
+      <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-20 text-center">
         {error ? (
           <>
             <AlertCircle className="h-12 w-12 text-destructive" aria-hidden="true" />

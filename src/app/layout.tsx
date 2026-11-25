@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import ConsentBanner from '@/components/consent/ConsentBanner';
+import SkipLink from '@/components/SkipLink';
 import GoogleAnalytics from '@/components/consent/GoogleAnalytics';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { inter, spaceGrotesk } from '@/lib/fonts';
@@ -99,7 +100,8 @@ export default function RootLayout({
         <JsonLd data={[organizationSchema, webSiteSchema]} />
       </head>
       <body className="font-body antialiased">
-        {/* First in the page so keyboard and screen reader users meet it first;
+        <SkipLink />
+        {/* Next in the page so keyboard and screen reader users meet it early;
             fixed to the bottom of the screen, so it never moves the layout. */}
         <ConsentBanner />
         <GoogleAnalytics />

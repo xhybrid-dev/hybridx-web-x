@@ -119,7 +119,7 @@ export default function UnaFamilyPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* Hero */}
         <section className={styles.heroSection} aria-labelledby="una-hero-heading">
           <div className={`${styles.container} ${styles.heroGrid}`}>

@@ -70,7 +70,7 @@ export default function TwelveWeekRunningHyroxPage() {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12">
           <div className="max-w-5xl mx-auto pb-12">
 
             {selectedWeekNum === -1 ? (

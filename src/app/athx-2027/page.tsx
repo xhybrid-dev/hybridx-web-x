@@ -265,11 +265,7 @@ export default function AthxFunnelPage() {
       <JsonLd data={toolSchema} />
       <JsonLd data={speakableSchema} />
 
-      <a className={styles.skipLink} href="#main">
-        Skip to content
-      </a>
-
-      <main id="main">
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <header className={styles.hero}>
           <div className={styles.container}>

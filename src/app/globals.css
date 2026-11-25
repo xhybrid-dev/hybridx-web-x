@@ -221,7 +221,8 @@ dialog.hx-finder::backdrop {
 html.hx-lock {
   overflow: hidden;
 }
-#hx-home:focus {
+#hx-home:focus,
+main[tabindex='-1']:focus {
   outline: none;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -79,7 +79,7 @@ export default function AppLandingPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <JsonLd data={faqSchema} />
       <Header />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* Hero */}
         <section className="relative bg-background py-16 md:py-24 overflow-hidden">
           <div className="container mx-auto px-6">

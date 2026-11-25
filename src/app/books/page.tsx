@@ -40,7 +40,7 @@ export default function BooksPage() {
         <JsonLd key={i} data={schema} />
       ))}
       <Header />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className="relative bg-background text-center py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-subtle-x-light dark:bg-subtle-x-dark opacity-30 dark:opacity-20 mix-blend-multiply dark:mix-blend-screen"></div>
           <div className="container mx-auto px-6 relative z-10">

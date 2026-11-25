@@ -227,7 +227,7 @@ export default function NerdyBitsPage() {
           </ol>
         </nav>
 
-        <main className={styles.main}>
+        <main id="main-content" tabIndex={-1} className={styles.main}>
           {/* 0 ─ Ground rules */}
           <section id="rules">
             <h2>
