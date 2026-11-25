@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Poppins } from 'next/font/google';
+import { watchPoppins } from '@/lib/fonts';
 import { buildSegments } from '@/lib/race-content';
 import styles from './LiveWatch.module.css';
 
@@ -29,12 +29,7 @@ import styles from './LiveWatch.module.css';
  * plays while on screen.
  */
 
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-});
+const poppins = watchPoppins;
 
 const SEGMENTS = buildSegments('full', false);
 

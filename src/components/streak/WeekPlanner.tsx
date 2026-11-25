@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Poppins } from 'next/font/google';
+import { watchPoppins } from '@/lib/fonts';
 import {
   coachLine,
   DEFAULT_TARGET,
@@ -20,7 +20,7 @@ import styles from './WeekPlanner.module.css';
  */
 
 // The watch's typeface, for the face only.
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600'], display: 'swap' });
+const poppins = watchPoppins;
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 

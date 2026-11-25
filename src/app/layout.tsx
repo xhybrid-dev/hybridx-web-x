@@ -4,28 +4,10 @@ import { Toaster } from "@/components/ui/toaster";
 import ConsentBanner from '@/components/consent/ConsentBanner';
 import GoogleAnalytics from '@/components/consent/GoogleAnalytics';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { inter, spaceGrotesk } from '@/lib/fonts';
 import { SITE_CONFIG, createOrganizationSchema, createWebSiteSchema } from '@/lib/seo';
 
 import JsonLd from '@/components/JsonLd';
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-  // 600 is the semibold used for emphasis in body copy on the ATHX funnel,
-  // which sets its type from the printed books rather than from the site.
-  weight: ['400', '600', '700'],
-  adjustFontFallback: false,
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-space-grotesk',
-  weight: ['300', '400', '500', '700'],
-  adjustFontFallback: false,
-});
-
 export const viewport: Viewport = {
   // The browser's address bar colour follows the theme the visitor is using.
   themeColor: [

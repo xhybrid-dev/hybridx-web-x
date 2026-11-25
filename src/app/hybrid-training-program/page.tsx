@@ -57,7 +57,7 @@ const faqSchema = createFAQSchema([
   {
     question: 'Does cardio kill gains?',
     answer:
-      'No — this is the "interference effect" myth. A 2022 meta-analysis of concurrent training found that combining strength and endurance training produced strength gains with an effect size of 1.44, compared to 1.76 for strength-only training — a very small difference. The interference effect is real but is primarily caused by poor recovery and session timing, not the combination itself.',
+      'No — this is the "interference effect" myth. An earlier meta-analysis of concurrent training (2012) found that combining strength and endurance training produced strength gains with an effect size of 1.44, compared to 1.76 for strength-only training — a small difference, and a 2022 meta-analysis of 43 studies found no meaningful loss of muscle size or maximal strength. The interference effect is real but is primarily caused by poor recovery and session timing, not the combination itself.',
   },
   {
     question: 'How do you structure a hybrid training week?',
@@ -116,14 +116,14 @@ const pillars = [
 
 const sciencePoints = [
   {
-    stat: '+8–15%',
-    label: 'VO₂max improvement',
-    detail: 'Concurrent training consistently produces significant improvements in aerobic capacity, even in already-trained athletes.',
+    stat: '8 × 1 km',
+    label: 'Running in a HYROX race',
+    detail: 'A HYROX race is eight 1 km runs between eight stations, so your aerobic fitness and your strength both set your time.',
   },
   {
-    stat: '+10–20%',
-    label: 'Strength gains',
-    detail: 'Strength gains from concurrent training are only marginally lower than strength-only training (effect size 1.44 vs 1.76).',
+    stat: '1.44 vs 1.76',
+    label: 'Strength gains, combined vs strength only',
+    detail: 'A 2012 meta-analysis found strength gains from concurrent training only marginally lower than strength-only training (effect size 1.44 vs 1.76).',
   },
   {
     stat: '43 studies',

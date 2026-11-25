@@ -40,7 +40,7 @@ const faqItems: FaqItem[] = [
     icon: Clock,
     question: 'What is a good Hyrox time for a beginner?',
     answer:
-      'For a first Hyrox race, a realistic and respectable target is 1:45–2:10 for men and 2:00–2:20 for women — this puts you comfortably in the top half of all finishers. The global average finish time is approximately 1:40 for men and 1:54 for women across all divisions. The encouraging news: most athletes improve their time by 15–25 minutes between their first and second race through experience and smarter pacing alone — no extra fitness required. Rather than chasing a specific time on your debut, focus on finishing strong and not blowing up on the early stations. Our training plans teach you exactly how to pace each run and each station to get the most from your first race.',
+      'For a first Hyrox race, a realistic and respectable target is 1:45–2:10 for men and 2:00–2:20 for women — a sensible range for a first race, a little slower than the global average finish time of approximately 1:40 for men and 1:54 for women across all divisions. The encouraging news: most athletes improve their time by 15–25 minutes between their first and second race through experience and smarter pacing alone — no extra fitness required. Rather than chasing a specific time on your debut, focus on finishing strong and not blowing up on the early stations. Our training plans teach you exactly how to pace each run and each station to get the most from your first race.',
   },
   {
     id: 'faq3',
@@ -76,7 +76,7 @@ const faqItems: FaqItem[] = [
     icon: Dumbbell,
     question: 'What is Hybrid Training and how does it apply to Hyrox?',
     answer:
-      'Hybrid training is the practice of developing strength and cardiovascular endurance simultaneously within a single structured programme — rather than specialising in just one. For Hyrox, this means combining running (aerobic base and compromised running), strength work (sled push, carries, lunges), and functional endurance (SkiErg, rowing) into a concurrent training system. The science is clear: a 2022 meta-analysis found concurrent training produces strong gains in both disciplines, with VO₂max improvements of 8–15% and strength gains of 10–20% in key lifts. The long-held myth that "cardio kills your gains" has been largely debunked — the interference effect is primarily caused by poor recovery and poor session timing, not the combination itself. Our plans are built on these principles, with careful sequencing of strength and endurance sessions to maximise adaptations in both.',
+      'Hybrid training is the practice of developing strength and cardiovascular endurance simultaneously within a single structured programme — rather than specialising in just one. For Hyrox, this means combining running (aerobic base and compromised running), strength work (sled push, carries, lunges), and functional endurance (SkiErg, rowing) into a concurrent training system. The research is encouraging: a 2022 meta-analysis of 43 studies found that adding endurance training does not meaningfully reduce gains in muscle size or maximal strength. The long-held myth that "cardio kills your gains" has been largely debunked — the interference effect is primarily caused by poor recovery and poor session timing, not the combination itself. Our plans are built on these principles, with careful sequencing of strength and endurance sessions to maximise adaptations in both.',
   },
   {
     id: 'faq7',

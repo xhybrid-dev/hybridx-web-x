@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { Fraunces, IBM_Plex_Mono } from 'next/font/google';
+import { fraunces, plexMono } from '@/lib/fonts';
 import base from '@/components/una-app/app-page.module.css';
 import {
   AppFooter,
@@ -105,14 +105,6 @@ const appSchema = {
 };
 
 // Streak's own type: an editorial serif for headlines, a mono for map labels.
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-plex-mono',
-  display: 'swap',
-});
-
 const STEPS = [
   {
     title: 'Set your week',
