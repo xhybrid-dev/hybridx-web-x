@@ -133,7 +133,7 @@ export default function HeartRateZoneCalculatorForm() {
             Age (Years) <span className="text-destructive ml-1">*</span>
              <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
+                    <Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg" side="top">
                     <p>Your current age in years. Used to estimate Max Heart Rate if not provided.</p>
@@ -156,7 +156,7 @@ export default function HeartRateZoneCalculatorForm() {
             Resting Heart Rate (bpm) <span className="text-destructive ml-1">*</span>
             <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
+                    <Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg" side="top">
                     <p>Your heart rate at complete rest, usually measured in the morning. Average is 60-80 bpm.</p>
@@ -179,7 +179,7 @@ export default function HeartRateZoneCalculatorForm() {
             Max Heart Rate (bpm) (Optional)
             <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
+                    <Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg" side="top">
                     <p>Your highest achieved heart rate. If unknown, it will be estimated as 220 - Age.</p>
@@ -201,7 +201,7 @@ export default function HeartRateZoneCalculatorForm() {
             VO2 Max (ml/kg/min) (Optional)
             <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
+                    <Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg" side="top">
                     <p>Your maximal oxygen uptake. Currently for informational input, not used in standard Karvonen calculation.</p>

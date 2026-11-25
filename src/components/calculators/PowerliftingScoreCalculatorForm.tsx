@@ -170,7 +170,7 @@ export default function PowerliftingScoreCalculatorForm() {
                 <Label htmlFor="wilks" className={`flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground ${formula === 'wilks' ? 'border-primary ring-2 ring-primary' : 'border-muted bg-popover'}`}>
                 Wilks
                 <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
+                    <TooltipTrigger asChild><Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
                     <TooltipContent className="max-w-xs text-xs" side="bottom"><p>The original Wilks formula, widely used for many years.</p></TooltipContent>
                 </Tooltip>
                 </Label>
@@ -180,7 +180,7 @@ export default function PowerliftingScoreCalculatorForm() {
                 <Label htmlFor="dots" className={`flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground ${formula === 'dots' ? 'border-primary ring-2 ring-primary' : 'border-muted bg-popover'}`}>
                 DOTS
                 <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
+                    <TooltipTrigger asChild><Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
                     <TooltipContent className="max-w-xs text-xs" side="bottom"><p>Dynamic Objective Team Scoring, a newer formula that has largely replaced Wilks in powerlifting meets.</p></TooltipContent>
                 </Tooltip>
                 </Label>

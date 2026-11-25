@@ -431,7 +431,7 @@ export default function SplitTimeCalculatorForm() {
             Upload GPX (Optional for AI Splits)
             <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
+                    <Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg" side="top">
                     <p>Upload a GPX file from your GPS device or app to get AI-powered, elevation-adjusted split recommendations. Target distance will be auto-filled from the GPX.</p>

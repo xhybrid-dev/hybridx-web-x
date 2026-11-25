@@ -29,10 +29,10 @@ export default function Header() {
             src="/Full Logo (2).png"
             alt="HybridX Logo"
             width={110}
-            height={40}
-            className="dark:filter dark:invert"
+            height={62}
+            // The file is 1400 x 785; left to its own height it filled the 64px header and sat on its border.
+            className="h-12 w-auto dark:filter dark:invert"
             priority
-            style={{ objectFit: 'contain' }}
           />
         </Link>
         <nav aria-label="Primary" className="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
@@ -110,9 +110,8 @@ export default function Header() {
                     src="/Full Logo (2).png"
                     alt="HybridX Logo"
                     width={110}
-                    height={40}
-                    className="dark:filter dark:invert"
-                    style={{ objectFit: 'contain' }}
+                    height={62}
+                    className="h-12 w-auto dark:filter dark:invert"
                   />
                 </Link>
               </div>

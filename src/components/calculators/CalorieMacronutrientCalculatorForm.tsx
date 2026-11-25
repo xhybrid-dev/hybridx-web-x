@@ -222,7 +222,7 @@ export default function CalorieMacronutrientCalculatorForm() {
           <Label htmlFor="activityLevel" className="text-sm font-medium flex items-center">
             Activity Level <span className="text-destructive">*</span>
             <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button></TooltipTrigger>
+                <TooltipTrigger asChild><Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button></TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg p-3 space-y-1" side="top">
                     {activityLevelOptions.map(opt => <p key={opt.value}><span className="font-semibold">{opt.label.split(' (')[0]}:</span> {opt.description}</p>)}
                 </TooltipContent>
