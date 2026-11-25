@@ -14,6 +14,7 @@ import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guid
 import { parseInline } from '@/lib/guides/inline';
 import { SEASON } from '@/lib/facts';
 import { REVIEW_INTERVAL_DAYS, describeDue, reviewsDue } from '@/lib/guides/freshness';
+import { COACH_NOTE_NUDGE, hasCoachNote } from '@/lib/guides/email';
 import { HARVEST_EVERY_MS, getHarvest, getHarvestState, listMetrics } from '@/lib/guides/harvest/run';
 import { asQuestion } from '@/lib/guides/harvest/analyse';
 import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
@@ -350,6 +351,16 @@ async function Review({ slug, search }: { slug: string; search: Search }) {
       {error && (
         <p role="alert" className="rounded-md border-2 border-foreground p-3 text-sm font-semibold">
           {error}
+        </p>
+      )}
+
+      {reviewable && !hasCoachNote(guide) && (
+        <p role="note" className="rounded-md border border-dashed p-3 text-sm">
+          {COACH_NOTE_NUDGE}{' '}
+          <Link href={`${BASE}/${slug}/edit`} className="font-semibold underline underline-offset-4">
+            Open the editor
+          </Link>
+          .
         </p>
       )}
 

@@ -5,6 +5,7 @@ import { prefillFromSearch, CORRECTION_TOPIC, CONTACT_TOPICS } from '@/component
 import { createPersonSchema, PERSON_ID } from '@/lib/seo';
 import { guideJsonLd } from '@/lib/guides/schema';
 import { SAMPLE_GUIDES } from '@/lib/guides/fixtures';
+import { buildReviewEmail, COACH_NOTE_NUDGE, hasCoachNote } from '@/lib/guides/email';
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
@@ -58,5 +59,23 @@ describe('the person behind the guides', () => {
     for (const word of [/\bcertified\b/i, /\bqualified\b/i, /\byears of\b/i, /\bexperienced\b/i, /\bformer\b/i, /\bcoached\b/i, /\bhundreds of\b/i, /\bchampion/i, /\bworld[- ]class\b/i]) {
       expect(page, String(word)).not.toMatch(word);
     }
+  });
+});
+
+describe("Jon's coach's note, the part no model may write", () => {
+  const withoutNote = { ...SAMPLE_GUIDES[0], blocks: SAMPLE_GUIDES[0].blocks.filter((b) => !(b.type === 'callout' && b.kind === 'coach-note')) };
+  const withNote = { ...withoutNote, blocks: [...withoutNote.blocks, { type: 'callout' as const, kind: 'coach-note' as const, text: 'In my experience athletes rush the first sled.' }] };
+
+  it('is asked for in the review email when a draft has none, and not when it has one', () => {
+    expect(hasCoachNote(withoutNote)).toBe(false);
+    expect(hasCoachNote(withNote)).toBe(true);
+    expect(buildReviewEmail({ kind: 'ready', to: 'jon@example.com', guide: withoutNote }).text).toContain(COACH_NOTE_NUDGE);
+    expect(buildReviewEmail({ kind: 'ready', to: 'jon@example.com', guide: withNote }).text).not.toContain(COACH_NOTE_NUDGE);
+  });
+
+  it('is still refused to the engine: a model cannot write one', () => {
+    const checks = read('src/lib/guides/checks.ts');
+    expect(checks).toContain('invented-coach-note');
+    expect(read('src/lib/guides/engine/prompts.ts')).toContain('never "coach-note", which is Jon');
   });
 });
