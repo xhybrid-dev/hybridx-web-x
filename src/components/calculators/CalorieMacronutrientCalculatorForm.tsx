@@ -147,7 +147,6 @@ export default function CalorieMacronutrientCalculatorForm() {
     setResults(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300));
 
     const result = calculateMetrics();
     if (typeof result === 'string') {

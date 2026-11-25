@@ -69,7 +69,6 @@ export default function RaceTimePredictorForm() {
     setPredictions(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate calculation time
 
     const distNum = parseFloat(distance);
     if (isNaN(distNum) || distNum <= 0) {

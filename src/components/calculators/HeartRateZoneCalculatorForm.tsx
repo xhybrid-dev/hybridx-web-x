@@ -82,7 +82,6 @@ export default function HeartRateZoneCalculatorForm() {
     setCalculatedMhr(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate calculation
 
     const ageNum = parseInt(age, 10);
     const rhrNum = parseInt(restingHR, 10);

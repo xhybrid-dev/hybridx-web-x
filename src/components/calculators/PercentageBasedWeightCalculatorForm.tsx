@@ -40,7 +40,6 @@ export default function PercentageBasedWeightCalculatorForm() {
     setCalculatedWeight(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
 
     const oneRepMaxNum = parseFloat(oneRepMax);
     const percentageNum = parseFloat(percentage);

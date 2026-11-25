@@ -64,7 +64,6 @@ export default function OneRepMaxCalculatorForm() {
     setEstimated1RM(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
 
     const weightNum = parseFloat(weight);
     const repsNum = parseInt(reps, 10);
