@@ -13,6 +13,7 @@ import { formatPence, getShopEvent, SHOP_CONSENT, SHOP_SUPPORT_EMAIL, type ShopE
 import { salesState } from '@/lib/shop/env';
 import { createBreadcrumbSchema, createFAQSchema } from '@/lib/seo';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * HYROX Glasgow 2027: the shop's first event.
  *
@@ -206,7 +207,7 @@ export default function HyroxGlasgow2027Page() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {schemas.map((s, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+        <JsonLd key={i} data={s} />
       ))}
       <ShopViewEvent event={EVENT.slug} />
       <Header />

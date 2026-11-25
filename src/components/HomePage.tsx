@@ -11,16 +11,16 @@ import Footer from '@/components/Footer';
 import ApparelPromotion from '@/components/ApparelPromotion';
 import TrainingPlanShowcase from '@/components/TrainingPlanShowcase';
 import FreeToolsSection from '@/components/FreeToolsSection';
-import Script from 'next/script';
-import { createCourseSchema, createSpeakableSchema } from '@/lib/seo';
+import { createCourseSchema, createSpeakableSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import EntrySection from '@/components/plan-finder/EntrySection';
 import PlanFinderRoot from '@/components/plan-finder/PlanFinderRoot';
 import type { Variant } from '@/lib/plan-finder/tracker';
 
+import JsonLd from '@/components/JsonLd';
 export const homeMetadata: Metadata = {
   alternates: { canonical: '/' },
-  title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-  description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app. Free calculators and resources.',
+  title: { absolute: 'HybridX Hub | HYROX Training Plans & Coaching App' },
+  description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
   keywords: [
     'hyrox',
     'hyrox training',
@@ -37,8 +37,9 @@ export const homeMetadata: Metadata = {
     'hybrid training app',
   ],
   openGraph: {
-    title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-    description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app.',
+    ...OG_DEFAULTS,
+    title: 'HybridX Hub | HYROX Training Plans & Coaching App',
+    description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
     type: 'website',
     images: [
       {
@@ -50,9 +51,10 @@ export const homeMetadata: Metadata = {
     ],
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
-    title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-    description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app.',
+    title: 'HybridX Hub | HYROX Training Plans & Coaching App',
+    description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
     images: ['/og-default.png'],
   },
 };
@@ -96,19 +98,10 @@ export default function HomePage({ planFinder, variant = null }: { planFinder: '
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Course schemas — each plan is a Course entity for AI search citations */}
       {courseSchemas.map((schema, i) => (
-        <Script
-          key={`course-schema-${i}`}
-          id={`course-schema-${i}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <JsonLd key={i} data={schema} />
       ))}
       {/* Speakable schema — marks key sections for AI voice and read-aloud responses */}
-      <Script
-        id="speakable-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
-      />
+      <JsonLd data={speakableSchema} />
       <Header />
       {/* The plan finder sits in front of the homepage and can be skipped
           (handover/entry-funnel/docs/03). Everything inside #hx-home is the

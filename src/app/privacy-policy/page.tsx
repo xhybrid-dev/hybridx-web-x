@@ -7,7 +7,7 @@ import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/privacy-policy' },
-  title: 'Privacy Policy | HybridX Hub',
+  title: 'Privacy Policy',
   description: 'Learn how HybridX Hub collects, uses, and protects your personal information and activity data.',
 };
 
@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto">
           <Card className="shadow-lg border-border/60">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Last Updated: November 25, 2026
               </CardDescription>

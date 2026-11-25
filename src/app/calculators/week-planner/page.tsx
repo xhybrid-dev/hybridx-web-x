@@ -10,7 +10,7 @@ import { createMetadata } from '@/lib/seo';
 // src/lib/calculators/week-planner.ts and tested for every combination.
 
 export const metadata: Metadata = createMetadata({
-  title: 'Hybrid Training Week Planner: Running and Lifting',
+  title: 'Hybrid Week Planner: Running and Lifting',
   description:
     'Plan a 3, 4 or 5-day week of running and strength for HYROX, ATHX or a faster 10k. Free, built on HybridX coaching rules, with a calendar file.',
   path: '/calculators/week-planner',

@@ -5,18 +5,18 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
 import PillarQuestions from '@/components/guides/PillarQuestions';
-import Script from 'next/script';
 import type { Metadata } from 'next';
-import { createHowToSchema, createFAQSchema } from '@/lib/seo';
+import { createHowToSchema, createFAQSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import {
   CheckCircle, AlertTriangle, Zap,
   ChevronRight, ArrowRight, Target,
 } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata: Metadata = {
-  title: 'How to Train for a Hyrox Event — The Complete Guide | HybridX Hub',
+  title: 'How to Train for HYROX: The Complete Guide',
   description:
-    'The definitive guide to training for Hyrox. Learn the race format, weekly structure, compromised running, common mistakes, and how to build a 12-week plan. Free training plan included.',
+    'How to train for HYROX: the race format, a weekly structure, compromised running, common mistakes and how to build a 12-week plan. Free plan included.',
   keywords: [
     'how to train for hyrox',
     'hyrox training guide',
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://hybridx.club/how-to-train-for-hyrox' },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'How to Train for a Hyrox Event — The Complete Guide',
     description:
       'Everything you need to prepare for your first or fastest Hyrox race. Race format, training phases, compromised running, mistakes, nutrition, and a free 12-week plan.',
@@ -103,8 +104,8 @@ export const revalidate = 3600;
 export default function HowToTrainForHyrox() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Script id="howto-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <Script id="faq-schema-guide" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <JsonLd data={howToSchema} />
+      <JsonLd data={faqSchema} />
       <Header />
       <main>
 

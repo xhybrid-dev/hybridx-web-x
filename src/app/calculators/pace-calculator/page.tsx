@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/pace-calculator' },
-  title: 'Free Pace Calculator for Running | HybridX Hub',
+  title: 'Free Running Pace Calculator',
   description: 'Easily calculate your running pace, finish time, or distance with our free Pace Calculator. Perfect for marathon, 10k, and 5k training.',
 };
 
@@ -20,7 +20,7 @@ export default function PaceCalculatorPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-border/60">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Pace Calculator</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Pace Calculator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Easily calculate your running pace, finish time, or distance.
               </CardDescription>

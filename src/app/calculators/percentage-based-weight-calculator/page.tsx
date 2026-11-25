@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/percentage-based-weight-calculator' },
-  title: 'Free Percentage-Based Weight Calculator | HybridX Hub',
+  title: 'Free Percentage-Based Weight Calculator',
   description: 'Calculate specific training weights with our free Percentage-Based Weight Calculator. Perfect for programming based on your 1RM.',
 };
 
@@ -20,7 +20,7 @@ export default function PercentageBasedWeightCalculatorPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-border/60">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Percentage-Based Weight Calculator</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Percentage-Based Weight Calculator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Determine the exact weight to lift for any given percentage of your One-Rep Max (1RM).
               </CardDescription>

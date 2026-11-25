@@ -34,6 +34,13 @@ const nextConfig = {
         destination: '/free-hyrox-plan',
         permanent: true,
       },
+      // The logo's file name had a space in it, which structured data cannot carry
+      // as a plain URL. It was renamed; the old address still works.
+      {
+        source: '/Icon Logo.png',
+        destination: '/icon-logo.png',
+        permanent: true,
+      },
       // The plan finder experiment's control arm. The experiment is over (the
       // plan finder is on for everyone), and the page must not be a second,
       // indexable copy of the homepage.

@@ -7,7 +7,7 @@ import { APP_LOGIN_URL } from '@/lib/app-links';
 import { Mail, LifeBuoy, LogIn, HelpCircle } from 'lucide-react';
 
 export const metadata = createMetadata({
-  title: 'Contact HybridX',
+  title: 'Contact & Support',
   description:
     'Ask HybridX a question about training plans, the app, an order or a download, or the UNA Watch apps. We reply by email.',
   path: '/contact',

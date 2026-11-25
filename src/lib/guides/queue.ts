@@ -18,6 +18,8 @@
 
 import { adminFirestore } from '@/lib/firebase-admin';
 import { CANDIDATES, UNBUILT_TOOLS, type FutureTool, type Proof } from './candidates';
+import { describeDuplicate, findDuplicates, type Compared } from './duplicates';
+import { listAllGuides } from './store';
 import type { PillarId, ToolId } from './topics';
 
 export const TOPICS_COLLECTION = 'guideTopics';
@@ -139,6 +141,25 @@ export async function addTopic(question: string, pillar: PillarId, now = new Dat
     }),
   );
   return ref.id;
+}
+
+/**
+ * A sentence saying which queued topic or live article a new question repeats, or
+ * null. Adding the same question worded differently put a second article on one
+ * question onto the site; this is the check that stops it at the door.
+ */
+export async function duplicateOfQuestion(question: string): Promise<string | null> {
+  const [topics, guides] = await Promise.all([listTopics(), listAllGuides()]);
+  const existing: Compared[] = [
+    ...topics
+      .filter((t) => t.status === 'queued' || t.status === 'drafting')
+      .map((t) => ({ label: 'a topic already in the queue', title: t.question })),
+    ...guides
+      .filter((g) => g.status !== 'retired' && g.status !== 'rejected')
+      .map((g) => ({ label: `/guides/${g.slug}`, title: g.title })),
+  ];
+  const [found] = findDuplicates(question, existing);
+  return found ? `That repeats a question already covered: ${describeDuplicate(found)}` : null;
 }
 
 /** Whether a question is already waiting or being drafted, so a double click adds it once. */

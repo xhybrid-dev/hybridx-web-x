@@ -20,6 +20,7 @@ import RouteRail from '@/components/trail/RouteRail';
 import { GpxStream, RealScreen, UsbTree } from '@/components/trail/Steps';
 import styles from './trail.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/trail: the page for HybridX Trail, breadcrumb navigation for
  * UNA Watch. Canonical is https://hybridx.club/trail; it once named
@@ -58,8 +59,7 @@ import styles from './trail.module.css';
 const URL_CANONICAL = 'https://hybridx.club/trail';
 
 const TITLE = 'HybridX Trail — follow the line on UNA Watch';
-const DESCRIPTION =
-  'Breadcrumb navigation for UNA Watch. Plan a route anywhere that exports a GPX, put it on your watch, and follow the line: a buzz before each turn, and another if you leave it. Try it with your own route.';
+const DESCRIPTION = 'Breadcrumb navigation for UNA Watch. Load any GPX route onto your watch and follow the line: a buzz before each turn, and another if you leave it.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -173,11 +173,7 @@ const LATER = ['Follow a route in reverse', 'Guidance back to the start', 'A bre
 export default function TrailPage() {
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${poppins.variable} ${mono.variable}`}>
-      <script
-        id="trail-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
       <RouteRail />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}

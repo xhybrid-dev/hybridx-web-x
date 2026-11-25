@@ -22,11 +22,37 @@ export const SITE_CONFIG = {
   description: 'Expert Hyrox training plans and hybrid workout programs. Master Hyrox competitions with scientifically-backed training plans, books, and coaching app. Free fitness calculators.',
   url: getBaseUrl(),
   ogImage: '/og-default.png',
+  // There is no X (Twitter) account to link: the handle used here was a placeholder
+  // and sat in sameAs and in twitter:creator. Add one here once it exists.
   links: {
-    twitter: 'https://twitter.com/hybridxhub', // Update with your Twitter
-    instagram: 'https://instagram.com/hybridx.club', // Update with your Instagram
+    instagram: 'https://instagram.com/hybridx.club',
   },
+  /**
+   * What the site is, in structured data. It names no sport: the organisation and
+   * site entities are on every page, including the ATHX page, which is built never to
+   * say HYROX.
+   */
+  entityDescription:
+    'Training plans, calculators, books and a coaching app for hybrid athletes: people who train for running, strength and fitness races.',
+  contactEmail: 'training@hybridx.club',
+  logo: '/icon-logo.png',
 };
+
+/**
+ * Spread into a page's own `openGraph` and `twitter` metadata. A page that declares
+ * either replaces the root layout's whole object (the merge is shallow), which is
+ * how 13 pages lost their social image and locale. Pages that call createMetadata()
+ * do not need this.
+ */
+export const OG_DEFAULTS: { locale: string; images: { url: string; width: number; height: number; alt: string }[] } = {
+  locale: 'en_GB',
+  images: [{ url: SITE_CONFIG.ogImage, width: 1200, height: 630, alt: 'HybridX Hub: hybrid training plans, calculators and a coaching app' }],
+};
+export const TWITTER_DEFAULTS: { images: string[] } = { images: [SITE_CONFIG.ogImage] };
+
+/** The organisation every page's structured data points back to. */
+export const ORGANIZATION_ID = `${SITE_CONFIG.url}/#organization`;
+export const WEBSITE_ID = `${SITE_CONFIG.url}/#website`;
 
 export function createMetadata({
   title,
@@ -37,16 +63,28 @@ export function createMetadata({
   path = '',
   keywords = [],
 }: {
-  title: string;
+  /**
+   * A string is the page's own title and gets " | HybridX Hub" added by the root
+   * layout, so keep it to 46 characters or fewer. { absolute } is used as written,
+   * for a title that already carries the brand or is too long for the template.
+   */
+  title: string | { absolute: string };
   description: string;
-  image?: string;
+  /**
+   * A path or URL for the social card. null leaves the card out of this
+   * metadata so the page's own opengraph-image file (or the root default) is used:
+   * naming /og-default.png here once hid every article's own card.
+   */
+  image?: string | null;
   type?: 'website' | 'article';
   noIndex?: boolean;
   path?: string;
   keywords?: string[];
 }): Metadata {
   const url = `${SITE_CONFIG.url}${path}`;
-  const imageUrl = image.startsWith('http') ? image : `${SITE_CONFIG.url}${image}`;
+  const imageUrl = image === null ? null : image.startsWith('http') ? image : `${SITE_CONFIG.url}${image}`;
+  // The social title is the full title a reader would see, brand included.
+  const socialTitle = typeof title === 'string' ? `${title} | ${SITE_CONFIG.name}` : title.absolute;
 
   return {
     title,
@@ -74,24 +112,17 @@ export function createMetadata({
     openGraph: {
       type,
       url,
-      title,
+      title: socialTitle,
       description,
       siteName: SITE_CONFIG.name,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
+      locale: 'en_GB',
+      ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: socialTitle }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: socialTitle,
       description,
-      images: [imageUrl],
-      creator: '@hybridxhub', // Update with your Twitter handle
+      ...(imageUrl ? { images: [imageUrl] } : {}),
     },
   };
 }
@@ -112,18 +143,40 @@ export function createFAQSchema(faqs: { question: string; answer: string }[]) {
   };
 }
 
-// Helper function to create Organization schema
+// The organisation, as one entity other schemas can point at with its @id. The
+// site covers HYROX, ATHX, running and hybrid training, and ships watch apps, so
+// it is described by what it teaches, not by a single sport.
 export function createOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
-    logo: `${SITE_CONFIG.url}/Icon Logo.png`,
-    description: SITE_CONFIG.description,
-    sameAs: [
-      SITE_CONFIG.links.twitter,
-      SITE_CONFIG.links.instagram,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_CONFIG.url}${SITE_CONFIG.logo}`,
+      width: 593,
+      height: 593,
+    },
+    description: SITE_CONFIG.entityDescription,
+    sameAs: [SITE_CONFIG.links.instagram],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: SITE_CONFIG.contactEmail,
+      url: `${SITE_CONFIG.url}/contact`,
+      areaServed: 'GB',
+      availableLanguage: 'en-GB',
+    },
+    knowsAbout: [
+      'Hybrid athlete training',
+      'Concurrent strength and endurance training',
+      'Running training plans',
+      'Strength training',
+      'Functional fitness racing',
+      'Compromised running',
+      'Race pacing',
     ],
   };
 }
@@ -232,64 +285,19 @@ export function createBreadcrumbSchema(items: { name: string; url: string }[]) {
   };
 }
 
-// WebSite schema with SearchAction — signals site identity and enables sitelinks search
-// Improves AI engine entity recognition for "HybridX" and "HybridX Hub" queries
+// The WebSite entity, so "HybridX" and "HybridX Hub" resolve to this site. It has
+// no SearchAction: Google retired the sitelinks search box in November 2024, and
+// the target it named (/calculators?q=) did nothing.
 export function createWebSiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': WEBSITE_ID,
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
-    description: SITE_CONFIG.description,
+    description: SITE_CONFIG.entityDescription,
     inLanguage: 'en-GB',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_CONFIG.url}/calculators?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
-  };
-}
-
-// SportsOrganization schema — more specific than plain Organization for fitness/Hyrox niche
-// AI systems use this to understand domain authority and topic relevance
-export function createSportsOrganizationSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'SportsOrganization',
-    name: SITE_CONFIG.name,
-    url: SITE_CONFIG.url,
-    logo: `${SITE_CONFIG.url}/Icon Logo.png`,
-    description:
-      'HybridX Hub provides expert Hyrox training plans, hybrid athlete coaching, fitness books, and a coaching app for athletes preparing for Hyrox competitions and hybrid fitness goals.',
-    sport: 'Hyrox',
-    sameAs: [
-      SITE_CONFIG.links.twitter,
-      SITE_CONFIG.links.instagram,
-      'https://app.hybridx.club',
-    ],
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'GB',
-    },
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer support',
-      url: SITE_CONFIG.url,
-    },
-    knowsAbout: [
-      'Hyrox training',
-      'Hyrox race preparation',
-      'Hybrid athlete training',
-      'Concurrent strength and endurance training',
-      'Compromised running',
-      'Functional fitness',
-      'Running training plans',
-      'Strength training',
-      'Sports nutrition for endurance athletes',
-    ],
+    publisher: { '@id': ORGANIZATION_ID },
   };
 }
 
@@ -312,17 +320,14 @@ export function createCourseSchema({
     name,
     description,
     url: `${SITE_CONFIG.url}${url}`,
-    provider: {
-      '@type': 'Organization',
-      name: SITE_CONFIG.name,
-      url: SITE_CONFIG.url,
-    },
+    provider: { '@id': ORGANIZATION_ID },
     educationalLevel: level,
-    courseWorkload: 'PT4H/P1W', // ~4 hours/week over the programme
+    // About four hours a week for twelve weeks. Workload is an ISO 8601 duration:
+    // the "PT4H/P1W" that stood here was a rate, which is not one.
     hasCourseInstance: {
       '@type': 'CourseInstance',
       courseMode: 'online',
-      courseWorkload: 'PT4H/P1W',
+      courseWorkload: 'PT48H',
     },
     offers: {
       '@type': 'Offer',
@@ -337,7 +342,7 @@ export function createCourseSchema({
       'Functional fitness station technique',
       'Hybrid training periodisation',
     ],
-    sport: 'Hyrox',
+    about: [{ '@type': 'Thing', name: 'HYROX' }],
   };
 }
 
@@ -348,6 +353,7 @@ export function createArticleSchema({
   url,
   datePublished,
   dateModified,
+  image,
   // Defaults to the site's original topic set. A caller on a page about a
   // *different* competition — ATHX, say — must override this: the default
   // would inject "Hyrox" into that page's structured data, which is exactly
@@ -366,6 +372,8 @@ export function createArticleSchema({
   url: string;
   datePublished: string;
   dateModified?: string;
+  /** The page's own social card, as a path or URL; the site default when omitted. */
+  image?: string;
   about?: { '@type': string; name: string }[];
 }) {
   return {
@@ -387,10 +395,10 @@ export function createArticleSchema({
       url: SITE_CONFIG.url,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_CONFIG.url}/Icon Logo.png`,
+        url: `${SITE_CONFIG.url}${SITE_CONFIG.logo}`,
       },
     },
-    image: `${SITE_CONFIG.url}/og-default.png`,
+    image: image ? (image.startsWith('http') ? image : `${SITE_CONFIG.url}${image}`) : `${SITE_CONFIG.url}/og-default.png`,
     inLanguage: 'en-GB',
     about,
   };
@@ -436,14 +444,17 @@ export function createWebApplicationSchema({
 
 // SpeakableSpecification — marks content sections suitable for voice and AI read-aloud
 // Used by Google Assistant, Gemini voice, and other AI answer engines
-export function createSpeakableSchema(cssSelectors: string[]) {
+export function createSpeakableSchema(cssSelectors: string[], path = '/') {
+  const url = `${SITE_CONFIG.url}${path === '/' ? '' : path}`;
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
+    '@id': `${url}#webpage`,
+    url,
+    isPartOf: { '@id': WEBSITE_ID },
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: cssSelectors,
     },
-    url: SITE_CONFIG.url,
   };
 }

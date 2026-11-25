@@ -5,18 +5,18 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
 import PillarQuestions from '@/components/guides/PillarQuestions';
-import Script from 'next/script';
 import type { Metadata } from 'next';
-import { createArticleSchema, createFAQSchema } from '@/lib/seo';
+import { createArticleSchema, createFAQSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import {
   Dumbbell, Activity, Brain, Shield, Zap,
   CheckCircle, ArrowRight, TrendingUp, Heart,
 } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata: Metadata = {
-  title: 'Hybrid Athlete Training Program — Strength & Endurance Combined | HybridX Hub',
+  title: 'Hybrid Training Program: Strength & Running',
   description:
-    'What is hybrid training? How to build strength and endurance simultaneously. The science, the programme structure, a sample week, and why it is the foundation of every great Hyrox athlete.',
+    'What is hybrid training? How to build strength and endurance together: the science, the programme structure, a sample week and why it suits HYROX athletes.',
   keywords: [
     'hybrid training program',
     'hybrid athlete training',
@@ -31,6 +31,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://hybridx.club/hybrid-training-program' },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'Hybrid Athlete Training Program — Strength & Endurance Combined',
     description:
       'The science and structure of hybrid training — building strength and endurance simultaneously without sacrificing either. Free training plans for all levels.',
@@ -171,8 +172,8 @@ export const revalidate = 3600;
 export default function HybridTrainingProgram() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Script id="article-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <Script id="faq-schema-hybrid" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
       <Header />
       <main>
 

@@ -13,6 +13,7 @@ import { guideJsonLd, guidePath, jsonLdString } from '@/lib/guides/schema';
 import { getPublicGuide, listPublishedGuides } from '@/lib/guides/store';
 import { pillar as pillarOf, SITE_PAGES } from '@/lib/guides/topics';
 
+import JsonLd from '@/components/JsonLd';
 // One article, read from Firestore at request time. Drafts are never served:
 // getPublicGuide only knows published and retired articles. A retired article
 // with somewhere to send its readers redirects there permanently; one without
@@ -31,6 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: guide.description,
     type: 'article',
     path: guidePath(guide.slug),
+    // null: leave the card to this article's own opengraph-image. Naming the site
+    // default here hid every article's own card behind /og-default.png.
+    image: null,
   });
 }
 
@@ -52,7 +56,7 @@ export default async function GuidePage({ params }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {guideJsonLd(guide).map((data, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
+        <JsonLd key={i} data={data} />
       ))}
       <Header />
       <main className="flex-1">

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ShopEventLink from '@/components/shop/ShopEventLink';
@@ -26,8 +25,7 @@ import {
   createFAQSchema,
   createArticleSchema,
   createBreadcrumbSchema,
-  createWebApplicationSchema,
-} from '@/lib/seo';
+  createWebApplicationSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import {
   RULE_FAQS,
   LAP_CONFIGS,
@@ -44,13 +42,14 @@ import StickySectionNav from '@/components/hyrox-rules/StickySectionNav';
 import ShareRow from '@/components/hyrox-rules/ShareRow';
 import RaceCardGate from '@/components/hyrox-rules/RaceCardGate';
 
+import JsonLd from '@/components/JsonLd';
 const PATH = '/hyrox-rule-changes-2026';
 const PUBLISHED = '2026-08-02';
 
 export const metadata: Metadata = {
-  title: 'HYROX Rule Changes 2026/27 — What Actually Matters (Interactive Guide)',
+  title: 'HYROX Rule Changes 2026/27: What Matters',
   description:
-    'Every 2026/27 HYROX rule change, sorted by what it costs you. An incomplete station is now a disqualification, missed run laps have a published penalty scale, and the doubles gap is down to 10 seconds. Includes a free penalty calculator.',
+    'Every 2026/27 HYROX rule change, sorted by what it costs you: station disqualifications, missed lap penalties and the 10 second doubles gap.',
   keywords: [
     'hyrox rule changes 2026',
     'hyrox rules 2026/27',
@@ -66,6 +65,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `https://hybridx.club${PATH}` },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'HYROX Rule Changes 2026/27 — What Actually Matters',
     description:
       'An incomplete station is now a disqualification. Every 2026/27 rule change, sorted by what it costs you, plus an interactive penalty calculator.',
@@ -73,6 +73,7 @@ export const metadata: Metadata = {
     publishedTime: PUBLISHED,
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'HYROX Rule Changes 2026/27 — What Actually Matters',
     description:
@@ -118,26 +119,10 @@ const toneStyles = {
 export default function HyroxRuleChanges2026() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Script
-        id="rules-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <Script
-        id="rules-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <Script
-        id="rules-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <Script
-        id="rules-tool-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
-      />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={toolSchema} />
 
       <Header />
 

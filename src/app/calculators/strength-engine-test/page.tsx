@@ -11,7 +11,7 @@ import { createMetadata } from '@/lib/seo';
 // src/lib/__tests__/strength-engine.test.ts.
 
 export const metadata: Metadata = createMetadata({
-  title: 'HYROX Strength and Engine Test: What Holds You Back?',
+  title: 'HYROX Strength and Engine Test',
   description:
     'Three lifts and a 5 km against your HYROX division: find out whether strength or your engine is the limiter, and get an eight-week focus. Free.',
   path: '/calculators/strength-engine-test',

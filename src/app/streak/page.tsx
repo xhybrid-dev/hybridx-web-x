@@ -19,6 +19,7 @@ import { Contours, Peak, Ridges, Stars } from '@/components/streak/Terrain';
 import { BADGES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
 import styles from './streak.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/streak: the page for HybridX Streak, the weekly training
  * streak for UNA Watch.
@@ -59,8 +60,7 @@ import styles from './streak.module.css';
 const URL_CANONICAL = 'https://hybridx.club/streak';
 
 const TITLE = 'HybridX Streak — the weekly training streak for UNA Watch';
-const DESCRIPTION =
-  'Set your weekly target and climb from Arthur’s Seat to Everest. Sessions saved in all six HybridX activity apps for UNA Watch count automatically into your weekly streak and 42-day/7-day Training Load — plus quick manual logging for anything else.';
+const DESCRIPTION = "Set a weekly target and climb from Arthur's Seat to Everest. Sessions from all six HybridX activity apps for UNA Watch count automatically, plus manual logging.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -218,11 +218,7 @@ function GlanceCard() {
 export default function StreakPage() {
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${fraunces.variable} ${plexMono.variable}`}>
-      <script
-        id="streak-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
       <div className={base.grain} aria-hidden="true" />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}

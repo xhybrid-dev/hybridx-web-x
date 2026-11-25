@@ -8,17 +8,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import TrackedLink from '@/components/TrackedLink';
 import { APP_SIGNUP_URL } from '@/lib/app-links';
-import Script from 'next/script';
 import {
   Smartphone, Calendar, LineChart, Sparkles, ArrowRight, CheckCircle,
 } from 'lucide-react';
 import { createMetadata, createFAQSchema } from '@/lib/seo';
 
+import JsonLd from '@/components/JsonLd';
 // Every "Start your free trial" here goes straight to the app's sign-up form.
 const APP_URL = APP_SIGNUP_URL;
 
 export const metadata = createMetadata({
-  title: 'HybridX App — Hyrox & Hybrid Training, £5/month',
+  title: { absolute: 'HybridX App: HYROX & Hybrid Training, £5/month' },
   description:
     'Daily workouts, program library, and an AI training coach — built for Hyrox and hybrid athletes. 14-day free trial, cancel anytime in two clicks.',
   path: '/app',
@@ -72,7 +72,7 @@ const faqSchema = createFAQSchema(faqs);
 export default function AppLandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Script id="app-faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <JsonLd data={faqSchema} />
       <Header />
       <main>
         {/* Hero */}

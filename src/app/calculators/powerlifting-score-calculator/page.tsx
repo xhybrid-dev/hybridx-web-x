@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/powerlifting-score-calculator' },
-  title: 'Free Powerlifting Score Calculator (Wilks, DOTS) | HybridX Hub',
+  title: 'Free Wilks & DOTS Powerlifting Calculator',
   description: 'Use our free Powerlifting Score Calculator to find your Wilks or DOTS score. Benchmark your strength against other lifters.',
 };
 
@@ -20,7 +20,7 @@ export default function PowerliftingScoreCalculatorPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-border/60">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Powerlifting Score Calculator</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Powerlifting Score Calculator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Calculate your Wilks or DOTS score to benchmark your powerlifting total.
               </CardDescription>

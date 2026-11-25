@@ -13,6 +13,7 @@
 import { APP, ATHLETES, DIVISIONS, UNCOVERED_FORMATS } from '@/lib/facts';
 import { BANNED_DASHES, BANNED_PHRASES, MEDICAL_PHRASES, UNITS_AFTER_A_NUMBER, US_SPELLINGS, findWordViolations } from './bible';
 import { plainText } from './inline';
+import { describeDuplicate, findDuplicates } from './duplicates';
 import { linkCandidates, linkedArticles, linksIn, type Subject } from './related';
 import { RESERVED_GUIDE_SLUGS, pillar as pillarOf } from './topics';
 import type { Block, Guide } from './types';
@@ -195,7 +196,11 @@ const normalTitle = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').t
 export function checkDraft(
   guide: Pick<Guide, 'slug' | 'title' | 'pillar' | 'blocks'> & Partial<Pick<Guide, 'point' | 'description'>>,
   published: (Subject & Pick<Guide, 'slug' | 'blocks'>)[] = [],
-  opts: { fromModel?: boolean } = {},
+  opts: {
+    fromModel?: boolean;
+    /** Articles in the pipeline but not yet public (awaiting review, being revised, scheduled): a second article on the same question must not be drafted beside them. */
+    inProgress?: (Subject & Pick<Guide, 'slug' | 'blocks'>)[];
+  } = {},
 ): CheckResult {
   const errors: Issue[] = [];
   const warnings: Issue[] = [];
@@ -267,6 +272,29 @@ export function checkDraft(
   const wording = checkWording(units);
   errors.push(...wording.errors);
   warnings.push(...wording.warnings);
+
+  // Not the same distance twice: the wall balls are Station 8, after eight 1 km runs.
+  // A live guide said "after 7 km of running".
+  for (const u of units) {
+    if (/wall ?balls?/i.test(u.text) && /\b7\s?km\b/i.test(u.text)) {
+      errors.push({ code: 'run-distance', block: u.block, message: 'Wall balls are Station 8, after 8 km of running (8 x 1 km), not 7 km.' });
+    }
+  }
+
+  // The page title is shown with " | HybridX Hub" after it, and search shows about 60 characters.
+  if (guide.title.length > 46) {
+    warnings.push({ code: 'title-long', message: `The title is ${guide.title.length} characters. With the site name added it passes about 60, and search cuts it off. Aim for 46 or fewer.` });
+  }
+
+  // Not a second article on a question already covered, published or on its way.
+  const compared = [...published, ...(opts.inProgress ?? [])].filter((o) => o.slug !== guide.slug);
+  const dupes = findDuplicates(
+    guide.title,
+    compared.map((o) => ({ label: `/guides/${o.slug}`, title: o.title })),
+  );
+  for (const d of dupes) {
+    errors.push({ code: 'duplicate-topic', message: `Asks the same question as an article that already exists: ${describeDuplicate(d)} Retire one, or make this one about something different.` });
+  }
 
   // Not a second copy of an article that already exists.
   const body = units.map((u) => u.text).join(' ');

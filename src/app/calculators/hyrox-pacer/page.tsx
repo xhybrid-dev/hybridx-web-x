@@ -16,7 +16,7 @@ import { salesState } from '@/lib/shop/env';
 export const revalidate = 3600;
 
 export const metadata: Metadata = createMetadata({
-  title: 'HYROX Pace Calculator: Every Run and Station Split',
+  title: 'HYROX Pace Calculator: Run & Station Splits',
   description:
     'Free HYROX pacer: pick your division and target finish, and get every run and station split, the Roxzone budget and the clock at halfway.',
   path: '/calculators/hyrox-pacer',

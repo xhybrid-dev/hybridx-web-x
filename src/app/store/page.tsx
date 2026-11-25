@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 export const metadata: Metadata = {
   alternates: { canonical: '/store' },
-  title: 'HybridX Store | Training Gear and Apparel',
+  title: 'HybridX Training Gear & Apparel Store',
   description: 'Shop official HybridX training gear, apparel, and accessories. Get equipped to dominate your training and races.',
   keywords: [
     'hybrid training gear',
@@ -18,12 +19,14 @@ export const metadata: Metadata = {
     'hyrox gear',
   ],
   openGraph: {
-    title: 'HybridX Store | Training Gear and Apparel',
+    ...OG_DEFAULTS,
+    title: 'HybridX Training Gear & Apparel Store',
     description: 'Shop official HybridX training gear, apparel, and accessories. Get equipped to dominate your training.',
     url: 'https://hybridx.club/store',
     type: 'website',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'HybridX Store | Training Gear',
     description: 'Shop official HybridX training gear, apparel, and accessories.',

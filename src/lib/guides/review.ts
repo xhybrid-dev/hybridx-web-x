@@ -12,9 +12,10 @@
 // Editing content is allowed in any state but retired and rejected; it never
 // changes the state.
 
+import { APPROVE_BLOCK_OVERLAP, describeDuplicate, findDuplicates } from './duplicates';
 import { isAllowedHref } from './inline';
 import { nextFreeSlot } from './slots';
-import { getEngineSettings, getGuide, takenSlots, updateGuideState } from './store';
+import { getEngineSettings, getGuide, listAllGuides, takenSlots, updateGuideState } from './store';
 import type { Guide, GuideStatus } from './types';
 import type { PillarId } from './topics';
 
@@ -47,6 +48,19 @@ export async function approve(slug: string, when: 'slot' | 'now', now = new Date
   const guide = await load(slug);
   if (!REVIEWABLE.includes(guide.status)) throw new ReviewError(`Only an article waiting for review can be approved; this one is ${guide.status.replace('_', ' ')}.`);
   if (stillHasPlaceholders(guide)) throw new ReviewError('This article still has placeholder text. Edit it before approving.');
+  // Two live articles on one question compete with each other, and two of the first three did.
+  const twin = findDuplicates(
+    guide.title,
+    (await listAllGuides())
+      .filter((g) => g.slug !== guide.slug && (g.status === 'published' || g.status === 'scheduled'))
+      .map((g) => ({ label: `/guides/${g.slug}`, title: g.title })),
+    APPROVE_BLOCK_OVERLAP,
+  )[0];
+  if (twin) {
+    throw new ReviewError(
+      `This asks the same question as ${twin.other.label}: ${describeDuplicate(twin)} Retire that one first, or turn this one down.`,
+    );
+  }
   if (when === 'now') {
     return updateGuideState(slug, { status: 'published', publishedAt: now.toISOString(), publishAt: undefined, rejectionReason: undefined });
   }

@@ -32,6 +32,9 @@ export function guidePath(slug: string): string {
 export function guideJsonLd(guide: Guide): object[] {
   const url = guidePath(guide.slug);
   const published = guide.publishedAt ?? guide.updatedAt;
+  // An article scheduled after its last edit is published later than it was changed,
+  // so "modified" is never before "published" (all three early guides said it was).
+  const modified = guide.updatedAt > published ? guide.updatedAt : published;
   const pillar = pillarOf(guide.pillar);
   return [
     createArticleSchema({
@@ -39,7 +42,7 @@ export function guideJsonLd(guide: Guide): object[] {
       description: guide.description,
       url,
       datePublished: published,
-      dateModified: guide.updatedAt,
+      dateModified: modified,
       about: ABOUT[guide.pillar].map((name) => ({ '@type': 'Thing', name })),
     }),
     createBreadcrumbSchema([
@@ -53,7 +56,7 @@ export function guideJsonLd(guide: Guide): object[] {
       '@type': 'WebPage',
       url: `${SITE_CONFIG.url}${url}`,
       name: guide.title,
-      lastReviewed: guide.updatedAt.slice(0, 10),
+      lastReviewed: modified.slice(0, 10),
       reviewedBy: {
         '@type': ARTICLE_REVIEWER.type,
         name: ARTICLE_REVIEWER.name,
@@ -64,10 +67,4 @@ export function guideJsonLd(guide: Guide): object[] {
   ];
 }
 
-/**
- * JSON for a <script type="application/ld+json">, with "<" escaped so text in
- * an article can never close the script element.
- */
-export function jsonLdString(data: object): string {
-  return JSON.stringify(data).replace(/</g, '\\u003c');
-}
+export { jsonLdString } from '@/lib/json-ld';

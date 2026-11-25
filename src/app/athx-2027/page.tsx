@@ -19,9 +19,9 @@ import {
   createBreadcrumbSchema,
   createFAQSchema,
   createSpeakableSchema,
-  createWebApplicationSchema,
-} from '@/lib/seo';
+  createWebApplicationSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * The ATHX 2027 pre-launch funnel.
  *
@@ -109,12 +109,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `https://hybridx.club${PATH}` },
   openGraph: {
+    ...OG_DEFAULTS,
     title: TITLE,
     description: DESCRIPTION,
     type: 'website',
     url: `https://hybridx.club${PATH}`,
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
@@ -160,7 +162,7 @@ const toolSchema = createWebApplicationSchema({
 // Marks the sections worth reading aloud or extracting whole — the direct
 // "what is ATHX" answer and the FAQ — for voice assistants and AI answer
 // engines that support SpeakableSpecification.
-const speakableSchema = createSpeakableSchema(['h1', '#how-athx-works', '#faq']);
+const speakableSchema = createSpeakableSchema(['h1', '#how-athx-works', '#faq'], '/athx-2027');
 
 const INSIGHT_CARDS = [
   {
@@ -234,31 +236,11 @@ export default function AthxFunnelPage() {
         first byte, so this is the shape Next's own docs recommend for JSON-LD
         specifically — data to parse, not code that needs a loading strategy.
       */}
-      <script
-        id="athx-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <script
-        id="athx-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        id="athx-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        id="athx-tool-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
-      />
-      <script
-        id="athx-speakable-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
-      />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={toolSchema} />
+      <JsonLd data={speakableSchema} />
 
       <a className={styles.skipLink} href="#main">
         Skip to content

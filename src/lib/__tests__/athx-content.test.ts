@@ -70,9 +70,10 @@ describe('the ATHX page renders its JSON-LD as static HTML', () => {
     expect(PAGE_SOURCE).not.toMatch(/import\s+Script\s+from\s+['"]next\/script['"]/);
   });
 
-  it('emits five plain <script type="application/ld+json"> elements', () => {
-    const matches = [...PAGE_SOURCE.matchAll(/<script\s+id="athx-[a-z-]+-schema"/g)];
+  it('emits its five schemas through <JsonLd>, which renders plain <script> elements on the server', () => {
+    const matches = [...PAGE_SOURCE.matchAll(/<JsonLd\s+data=\{[a-zA-Z]+\}/g)];
     expect(matches.map((m) => m[0])).toHaveLength(5);
+    expect(PAGE_SOURCE).toContain("from '@/components/JsonLd'");
   });
 });
 

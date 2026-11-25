@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import CalculatorCTA from '@/components/calculators/CalculatorCTA';
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/body-fat-calculator' },
-  title: 'Free Body Fat Percentage Calculator | HybridX Hub',
+  title: 'Free Body Fat Percentage Calculator',
   description: 'Estimate your body fat percentage with our free Body Fat Calculator. Uses the U.S. Navy method to help you track body composition.',
   keywords: [
     'body fat calculator',
@@ -18,12 +19,14 @@ export const metadata: Metadata = {
     'fitness calculator',
   ],
   openGraph: {
-    title: 'Free Body Fat Percentage Calculator | HybridX Hub',
+    ...OG_DEFAULTS,
+    title: 'Free Body Fat Percentage Calculator',
     description: 'Estimate your body fat percentage with our free Body Fat Calculator. Uses the U.S. Navy method to help you track body composition.',
     url: 'https://hybridx.club/calculators/body-fat-calculator',
     type: 'website',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free Body Fat Percentage Calculator',
     description: 'Estimate your body fat percentage with our free Body Fat Calculator. Uses the U.S. Navy method.',
@@ -38,7 +41,7 @@ export default function BodyFatCalculatorPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-border/60">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Body Fat Percentage Calculator</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Body Fat Percentage Calculator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Estimate your body fat percentage using the U.S. Navy formula. All measurements should be taken in a relaxed state.
               </CardDescription>

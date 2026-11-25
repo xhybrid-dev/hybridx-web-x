@@ -29,19 +29,30 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = "CardHeader"
 
-const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
+type CardTitleProps = React.HTMLAttributes<HTMLElement> & {
+  /**
+   * The element to render. A title is a div unless the page says otherwise: a
+   * card that is the page's heading passes as="h1". Twelve public pages had no
+   * h1 because their only heading was a div.
+   */
+  as?: 'div' | 'h1' | 'h2' | 'h3' | 'h4'
+}
+
+const CardTitle = React.forwardRef<HTMLElement, CardTitleProps>(
+  ({ className, as: Tag = 'div', ...props }, ref) => {
+    const Component = Tag as React.ElementType
+    return (
+      <Component
+        ref={ref}
+        className={cn(
+          "text-2xl font-semibold leading-none tracking-tight",
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<

@@ -14,10 +14,11 @@ import {
 } from '@/lib/una-family';
 import styles from './training.module.css';
 
+import JsonLd from '@/components/JsonLd';
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 const URL_CANONICAL = `${HYBRIDX_URL}/training`;
-const TITLE = 'X Training — 10K, Half Marathon & VO2max training plans for UNA Watch';
-const DESCRIPTION =
-  'Adaptive 10K (10w), Half Marathon (12w) and 8-week VO2max training plans on UNA Watch: Daniels–Gilbert paces from your 5K, treadmill belt-speed mode, plan memory, Session Review, X Training Glance and full X Streak + X Run integration.';
+const TITLE = 'X Training: 10K, Half and VO2max Plans for UNA Watch';
+const DESCRIPTION = '10K, Half Marathon and 8-week VO2max training plans for UNA Watch: Daniels-Gilbert paces from your 5K, treadmill belt-speed mode and Session Review.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: URL_CANONICAL },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'X Training for UNA Watch',
     description: DESCRIPTION,
     type: 'website',
@@ -41,6 +43,7 @@ export const metadata: Metadata = {
     locale: 'en_GB',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'X Training for UNA Watch',
     description: DESCRIPTION,
@@ -63,16 +66,12 @@ const appSchema = {
 export default function TrainingPage() {
   return (
     <div id="top" className={`${styles.page} ${grotesk.variable} ${inter.variable} ${mono.variable}`}>
-      <script
-        id="training-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
 
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/una" className={styles.brand}>
-            <Image src="/Icon Logo.png" alt="HybridX" width={28} height={28} />
+            <Image src="/icon-logo.png" alt="HybridX" width={28} height={28} />
             <span>X Training</span>
             <span className={styles.brandFor}>for UNA Watch</span>
           </Link>

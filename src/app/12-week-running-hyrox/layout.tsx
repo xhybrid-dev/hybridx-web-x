@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 // The page itself is a client component, so its metadata lives here.
 export const metadata: Metadata = {
   alternates: { canonical: '/12-week-running-hyrox' },
-  title: 'Free 12-Week Running Plan for Hyrox | Interactive',
+  title: 'Free 12-Week Running Plan for HYROX',
   description:
-    'A free, interactive 12-week hybrid running plan built for Hyrox — threshold sessions, intervals, long runs, and compromised running, week by week, with a built-in pace calculator.',
+    'A free interactive 12-week running plan for HYROX: threshold sessions, intervals, long runs and compromised running, week by week, with a pace calculator.',
   keywords: [
     'hyrox running plan',
     'running plan for hyrox',
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
     'faster running for hyrox',
   ],
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'Free 12-Week Running Plan for Hyrox',
     description:
       'Interactive week-by-week running plan for Hyrox athletes — threshold, intervals, long runs, and compromised running. Free, no sign-up.',
@@ -22,6 +24,7 @@ export const metadata: Metadata = {
     url: '/12-week-running-hyrox',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free 12-Week Running Plan for Hyrox',
     description:

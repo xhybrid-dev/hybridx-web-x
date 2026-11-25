@@ -20,7 +20,7 @@ import {
 import { EngineSettingsSchema } from '@/lib/guides/slots';
 import { LinkDecisionError, decideProposal } from '@/lib/guides/backlinks';
 import { engineOn } from '@/lib/guides/engine/run';
-import { addTopic, ensureQueueSeeded, isInQueue, moveTopic, requeueEngineSkipped, requeueTopic, skipTopic } from '@/lib/guides/queue';
+import { addTopic, duplicateOfQuestion, ensureQueueSeeded, isInQueue, moveTopic, requeueEngineSkipped, requeueTopic, skipTopic } from '@/lib/guides/queue';
 import {
   addComment,
   getGuide,
@@ -151,6 +151,8 @@ export async function createGuide(form: FormData) {
     if (await isInQueue(title)) {
       redirect(`${BASE}/new?error=${encodeURIComponent('That question is already in the queue. It will be drafted from there.')}`);
     }
+    const repeats = await duplicateOfQuestion(title);
+    if (repeats) redirect(`${BASE}/new?error=${encodeURIComponent(repeats)}`);
     await addTopic(title, pillar, new Date(), String(form.get('brief') ?? ''));
     redirect(`${BASE}/topics?done=added`);
   }
@@ -249,6 +251,8 @@ export async function addTopicAction(form: FormData) {
   if (await isInQueue(question)) {
     redirect(`${BASE}/topics?error=${encodeURIComponent('That question is already in the queue.')}`);
   }
+  const repeats = await duplicateOfQuestion(question);
+  if (repeats) redirect(`${BASE}/topics?error=${encodeURIComponent(repeats)}`);
   await addTopic(question, pillar, new Date(), String(form.get('brief') ?? ''));
   redirect(`${BASE}/topics?done=added`);
 }

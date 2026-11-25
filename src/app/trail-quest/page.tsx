@@ -19,6 +19,7 @@ import Screen from '@/components/trailquest/Screen';
 import Sprite from '@/components/trailquest/Sprite';
 import styles from './trailquest.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/trail-quest: the page for Trail Quest, the turn-based
  * trail-running adventure for UNA Watch (trailquest/ in the watch repo).
@@ -50,8 +51,7 @@ import styles from './trailquest.module.css';
 const URL_CANONICAL = 'https://hybridx.club/trail-quest';
 
 const TITLE = 'Trail Quest — a trail-running adventure for UNA Watch';
-const DESCRIPTION =
-  'A turn-based trail-running game for UNA Watch. Cross five stages from the valley to the summit, choose your way at every fork, and beat the Trail Spirits with a well-timed press. By HybridX.';
+const DESCRIPTION = 'A turn-based trail-running game for UNA Watch. Cross five stages from valley to summit, choose your way at every fork and beat the Trail Spirits. By HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -163,11 +163,7 @@ const GALLERY = [
 export default function TrailQuestPage() {
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${pixel.variable}`}>
-      <script
-        id="trailquest-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <header className={base.nav}>

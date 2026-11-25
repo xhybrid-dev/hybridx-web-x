@@ -4,15 +4,15 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
-import Script from 'next/script';
 import type { Metadata } from 'next';
-import { createCourseSchema, createFAQSchema } from '@/lib/seo';
+import { createCourseSchema, createFAQSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import { Download, CheckCircle, ArrowRight, Users, Calendar, Zap } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata: Metadata = {
-  title: '12 Week Hyrox Training Plan — Free & Downloadable | HybridX Hub',
+  title: '12-Week HYROX Plan Structure & Phases',
   description:
-    'Get a free 12-week Hyrox training plan dated back from your race day. Beginner scaling and advanced challenges on every session, with running, station work and compromised running.',
+    'Explore the four phases of our free 12-week HYROX training plan, with RPE scaling from beginner to advanced and sample weeks to follow.',
   keywords: [
     '12 week hyrox training plan',
     'hyrox training plan free',
@@ -25,6 +25,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://hybridx.club/hyrox-training-plan' },
   openGraph: {
+    ...OG_DEFAULTS,
     title: '12 Week Hyrox Training Plan — Free & Downloadable',
     description: 'A free, personalised 12-week Hyrox training plan for all levels. Download your PDF and start training today.',
     type: 'article',
@@ -108,8 +109,8 @@ const planIncludes = [
 export default function HyroxTrainingPlan() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Script id="course-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
-      <Script id="faq-schema-plan" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <JsonLd data={courseSchema} />
+      <JsonLd data={faqSchema} />
       <Header />
       <main>
 

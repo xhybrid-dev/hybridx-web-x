@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrackedLink from '@/components/TrackedLink';
@@ -10,10 +9,11 @@ import AffiliateDisclosure from '@/components/AffiliateDisclosure';
 import { createMetadata, createBookSchema, SITE_CONFIG } from '@/lib/seo';
 import { books } from '@/lib/books';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata = createMetadata({
-  title: 'Hyrox Training Books | Paperback Plans by HybridX',
+  title: 'HYROX & ATHX Training Books on Amazon',
   description:
-    'HybridX training books on Amazon: 12-week Hyrox plans for beginners, elite athletes and home training, 45 advanced workouts, ATHX 2027 plans and a 16-week ultra plan.',
+    'HybridX training books on Amazon: 12-week HYROX plans, 45 advanced workouts, ATHX 2027 plans for men and women, and a 16-week ultra plan.',
   path: '/books',
   keywords: [
     'hyrox training book',
@@ -37,12 +37,7 @@ export default function BooksPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {bookSchemas.map((schema, i) => (
-        <Script
-          key={`book-schema-${i}`}
-          id={`book-schema-${i}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <JsonLd key={i} data={schema} />
       ))}
       <Header />
       <main>

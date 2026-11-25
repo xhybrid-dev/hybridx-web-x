@@ -30,7 +30,7 @@ import ConfirmButton from '@/components/ConfirmButton';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Confirm your email | HYBRIDX',
+  title: 'Confirm your email',
   description: 'Confirm your email address to start receiving HYBRIDX training email.',
   robots: { index: false, follow: false },
 };

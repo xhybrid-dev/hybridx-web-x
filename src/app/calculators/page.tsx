@@ -10,10 +10,11 @@ import Link from 'next/link';
 import PillarQuestions from '@/components/guides/PillarQuestions';
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators' },
-  title: 'Free Fitness & Health Calculators | HybridX Hub',
-  description: 'A comprehensive suite of free calculators for running, strength training, and general health. Calculate your pace, 1RM, body fat, and more to optimize your fitness journey.',
+  title: 'Free HYROX, Running & Strength Calculators',
+  description: 'Free calculators for HYROX pacing, running, strength and health: pace, race times, 1RM, DOTS, body fat, macros and more, all in your browser.',
   keywords: [
     'fitness calculators',
     'running calculators',
@@ -26,12 +27,14 @@ export const metadata: Metadata = {
     'heart rate zones',
   ],
   openGraph: {
-    title: 'Free Fitness & Health Calculators | HybridX Hub',
+    ...OG_DEFAULTS,
+    title: 'Free HYROX, Running & Strength Calculators',
     description: 'A comprehensive suite of free calculators for running, strength training, and general health. Calculate your pace, 1RM, body fat, and more.',
     url: 'https://hybridx.club/calculators',
     type: 'website',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free Fitness & Health Calculators',
     description: 'A comprehensive suite of free calculators for running, strength training, and general health.',

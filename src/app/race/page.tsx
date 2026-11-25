@@ -14,6 +14,7 @@ import FilmPlayer from '@/components/una-app/FilmPlayer';
 import LiveWatch from '@/components/race/LiveWatch';
 import RaceBuilder from '@/components/race/RaceBuilder';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/race: the page for HybridX Race, the HYROX-format race timer
  * for UNA Watch.
@@ -58,8 +59,7 @@ import RaceBuilder from '@/components/race/RaceBuilder';
 const URL_CANONICAL = 'https://hybridx.club/race';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
-const DESCRIPTION =
-  'One button per split. Every run and every station timed as its own lap, with heart rate, and exported to Strava. Race it in full, or train it as a sim with shorter runs. The HYROX-format race timer for UNA Watch, by HybridX.';
+const DESCRIPTION = 'One button per split. Every run and station timed as its own lap with heart rate, exported to Strava. The HYROX-format race timer for UNA Watch, by HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -157,11 +157,7 @@ const ROADMAP = [
 export default function RacePage() {
   return (
     <div id="top" className={styles.page}>
-      <script
-        id="race-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
 
       <div className={styles.aurora} aria-hidden="true" />
       <div className={styles.grain} aria-hidden="true" />

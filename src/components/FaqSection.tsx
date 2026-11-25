@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import Script from 'next/script';
 import { createFAQSchema } from '@/lib/seo';
 import {
   Trophy, Clock, Calendar, Zap, Footprints, Dumbbell,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 interface FaqItem {
   id: string;
   question: string;
@@ -140,11 +140,7 @@ export default function FaqSection() {
 
   return (
     <>
-      <Script
-        id="faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      <JsonLd data={faqSchema} />
       <section id="faq" className="relative py-20 md:py-28 bg-secondary/30 overflow-hidden">
         <div aria-hidden="true" className="absolute inset-0 bg-subtle-x-light dark:bg-subtle-x-dark opacity-40 dark:opacity-25 mix-blend-multiply dark:mix-blend-screen" />
         <div className="container mx-auto px-6 relative z-10">

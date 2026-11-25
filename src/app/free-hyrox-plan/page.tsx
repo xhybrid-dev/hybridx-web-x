@@ -1,6 +1,5 @@
 
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Link from 'next/link';
 import { Trophy, Calendar, TrendingUp, Dumbbell, CheckCircle, Smartphone } from 'lucide-react';
 import Header from '@/components/Header';
@@ -12,16 +11,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import HyroxDominationForm from '@/components/hyrox/HyroxDominationForm';
 import TrackedLink from '@/components/TrackedLink';
 import PillarQuestions from '@/components/guides/PillarQuestions';
-import { createFAQSchema } from '@/lib/seo';
+import { createFAQSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import { fetchHyroxEvents, type HyroxEvent } from '@/lib/hyrox-events';
 
+import JsonLd from '@/components/JsonLd';
 // Events change infrequently — revalidate hourly instead of blocking every
 // request on the Google Sheet fetch.
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   alternates: { canonical: '/free-hyrox-plan' },
-  title: 'Free Hyrox Training Plan (12-Week) | PDF Download',
+  title: 'Free 12-Week HYROX Training Plan (PDF)',
   description: "Get a free, scientifically-backed 12-week Hyrox training plan. Achieve your best race time with our expert program. Download your personalized PDF now.",
   keywords: [
     'free hyrox training plan',
@@ -33,12 +33,14 @@ export const metadata: Metadata = {
     'hyrox training',
   ],
   openGraph: {
-    title: 'Free Hyrox Training Plan (12-Week) | PDF Download',
+    ...OG_DEFAULTS,
+    title: 'Free 12-Week HYROX Training Plan (PDF)',
     description: "Get a free, scientifically-backed 12-week Hyrox training plan. Achieve your best race time with our expert program. Download your personalized PDF now.",
     type: 'website',
     url: '/free-hyrox-plan',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free 12-Week Hyrox Training Plan | HybridX',
     description: "Your ultimate guide to Hyrox success. Download a free, personalized 12-week training plan in PDF format and get ready for race day.",
@@ -201,11 +203,7 @@ const FaqSection = () => {
 
   return (
     <>
-      <Script
-        id="hyrox-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(hyroxFaqSchema) }}
-      />
+      <JsonLd data={hyroxFaqSchema} />
       <section className="py-16 md:py-20 bg-secondary/30">
         <div className="container mx-auto px-6 max-w-3xl">
           <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary text-center mb-8">FAQ</h2>

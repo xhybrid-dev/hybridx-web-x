@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -14,6 +13,7 @@ import {
   createArticleSchema,
   createBreadcrumbSchema,
   SITE_CONFIG,
+  ORGANIZATION_ID,
 } from '@/lib/seo';
 import EngineLeadForm from '@/components/engine/EngineLeadForm';
 import EngineLogo, { EngineX } from '@/components/engine/EngineLogo';
@@ -21,12 +21,13 @@ import Heartbeat from '@/components/engine/Heartbeat';
 import Rise from '@/components/engine/Rise';
 import StickyCta from '@/components/engine/StickyCta';
 
+import JsonLd from '@/components/JsonLd';
 const PAGE_PATH = '/build-a-bigger-engine';
 
 export const metadata: Metadata = {
-  title: 'How to Improve Your VO2max — Free Science-Backed Guide | HybridX',
+  title: 'How to Improve VO2max: Free Science Guide',
   description:
-    'How to improve your VO2max: the science-backed methods that actually work, in plain language. VO2max intervals, the Norwegian method, the 80/20 rule, and a sample week you can start now. Free guide for runners and hybrid athletes.',
+    'How to improve VO2max in plain language: intervals, the Norwegian 4x4, the 80/20 rule and a sample week. A free guide for runners and hybrid athletes.',
   keywords: [
     'how to improve vo2max',
     'how to increase vo2max',
@@ -669,11 +670,12 @@ export default function BuildABiggerEnginePage() {
   });
 
   const articleSchema = createArticleSchema({
-    title: 'How to Improve Your VO2max — A Science-Backed Guide',
+    title: 'How to Improve Your VO2max: A Science-Backed Guide',
     description:
       'How to raise your VO2max for running and hybrid performance using interval training, the Norwegian method, the 80/20 rule, and strength work.',
     url: PAGE_PATH,
     datePublished: '2026-06-24',
+    image: '/build-a-bigger-engine/og-image.png',
   });
 
   const breadcrumbSchema = createBreadcrumbSchema([
@@ -681,46 +683,35 @@ export default function BuildABiggerEnginePage() {
     { name: 'Build a Bigger Engine: VO2max Guide', url: PAGE_PATH },
   ]);
 
+  // A free download: the offer belongs to the document, in pounds. (A top-level
+  // Offer with no item, priced in dollars, described nothing.)
   const offerSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Offer',
+    '@type': 'DigitalDocument',
     name: 'Build a Bigger Engine: Free VO2max Guide',
     description:
       'A free, science-backed guide to raising your VO2max for running and hybrid performance.',
-    price: '0',
-    priceCurrency: 'USD',
-    availability: 'https://schema.org/InStock',
     url: `${SITE_CONFIG.url}${PAGE_PATH}`,
-    seller: { '@type': 'Organization', name: 'HybridX' },
+    encodingFormat: 'application/pdf',
+    inLanguage: 'en-GB',
+    publisher: { '@id': ORGANIZATION_ID },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'GBP',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_CONFIG.url}${PAGE_PATH}`,
+      seller: { '@id': ORGANIZATION_ID },
+    },
   };
 
   return (
     <>
-      <Script
-        id="engine-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <Script
-        id="engine-howto-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
-      />
-      <Script
-        id="engine-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <Script
-        id="engine-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <Script
-        id="engine-offer-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }}
-      />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={howToSchema} />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={offerSchema} />
 
       <main className="bg-engine-oxdeep">
         <HeroSection />

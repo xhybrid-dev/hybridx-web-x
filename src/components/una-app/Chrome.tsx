@@ -47,7 +47,7 @@ export function Arrow() {
 export function Wordmark({ app, large = false }: { app: string; large?: boolean }) {
   return (
     <span className={`${styles.wordmark} ${large ? styles.wordmarkLarge : ''}`}>
-      <Image src="/Icon Logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
+      <Image src="/icon-logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
       <span className={styles.wordRace}>{app}</span>
       <span className={styles.wordFor}>for UNA Watch</span>
     </span>

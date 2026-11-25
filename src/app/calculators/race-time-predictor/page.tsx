@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/race-time-predictor' },
-  title: 'Free Race Time Predictor (5k, 10k, Marathon) | HybridX Hub',
+  title: 'Free Race Time Predictor (5K to Marathon)',
   description: 'Free Race Time Predictor. Estimate your finish times for a 5k, 10k, half marathon, or full marathon based on a recent performance.',
 };
 
@@ -20,7 +20,7 @@ export default function RaceTimePredictorPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-border/60">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Race Time Predictor</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Race Time Predictor</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
                 Estimate your potential finish times for different race distances based on a recent performance.
               </CardDescription>
