@@ -27,7 +27,7 @@ const plans: Plan[] = [
   {
     id: 'hyrox-specific',
     title: 'Hyrox 12 Week Training Plan',
-    description: 'Our most-chosen plan for Hyrox race preparation. Tailored programs for beginner, intermediate, and advanced athletes to conquer every station and run.',
+    description: 'Our most-chosen plan for Hyrox race preparation. Beginner scaling and advanced challenges on every session to conquer every station and run.',
     icon: HeartPulse,
     ctaText: 'View The Blueprint',
     href: '/free-hyrox-plan',

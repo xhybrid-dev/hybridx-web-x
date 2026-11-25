@@ -12,7 +12,7 @@ import { Download, CheckCircle, ArrowRight, Users, Calendar, Zap } from 'lucide-
 export const metadata: Metadata = {
   title: '12 Week Hyrox Training Plan — Free & Downloadable | HybridX Hub',
   description:
-    'Get a free 12-week Hyrox training plan personalised to your race date. Covers beginner, intermediate, and advanced athletes. Includes running, station work, and compromised running sessions.',
+    'Get a free 12-week Hyrox training plan dated back from your race day. Beginner scaling and advanced challenges on every session, with running, station work and compromised running.',
   keywords: [
     '12 week hyrox training plan',
     'hyrox training plan free',
@@ -34,14 +34,14 @@ export const metadata: Metadata = {
 const courseSchema = createCourseSchema({
   name: '12-Week Hyrox Training Plan',
   description:
-    'A free, personalised 12-week Hyrox training plan covering beginner, intermediate, and advanced levels. Includes running sessions, station-specific training, and compromised running workouts.',
+    'A free 12-week Hyrox training plan dated back from your race day, with beginner scaling and advanced challenges. Includes running sessions, station-specific training, and compromised running workouts.',
   url: '/hyrox-training-plan',
   level: 'All levels',
 });
 
 const faqSchema = createFAQSchema([
-  { question: 'Is the 12-week Hyrox training plan really free?', answer: 'Yes — the full 12-week PDF plan is completely free. You personalise it to your race date and ability level, then download it instantly. No account required.' },
-  { question: 'What level is the 12-week Hyrox plan for?', answer: 'The plan has beginner, intermediate, and advanced tracks. Beginners train 3–4 days per week with lower volume; advanced athletes train 5–6 days with race simulations and higher intensity.' },
+  { question: 'Is the 12-week Hyrox training plan really free?', answer: 'Yes — the full 12-week PDF plan is completely free. You enter your race date and it downloads straight away as a dated PDF and calendar file. No account required.' },
+  { question: 'What level is the 12-week Hyrox plan for?', answer: 'It is one 12-week plan with three to four main sessions a week, set by RPE. Every session has a scaling option for beginners and an advanced challenge, so the same plan works from first-timer to experienced racer.' },
   { question: 'What does the 12-week Hyrox plan include?', answer: 'Every week includes: 2–3 running sessions (easy, tempo, and long runs), 2 station-specific sessions targeting all 8 Hyrox movements, and 1 compromised running session (station efforts immediately followed by race-pace running).' },
   { question: 'Can I start the plan if I am not very fit?', answer: 'Yes. The beginner track starts conservatively and builds gradually over 12 weeks. If you have very little current fitness, consider starting 14–16 weeks out from your race to give yourself more time in the base phase.' },
 ]);
@@ -102,7 +102,7 @@ const planIncludes = [
   'Race-week taper protocol',
   'Nutrition timing guidelines for training and race day',
   'Personalised to your exact race date',
-  'Beginner, intermediate, and advanced tracks',
+  'Beginner scaling and advanced challenges on every session',
 ];
 
 export default function HyroxTrainingPlan() {
@@ -125,7 +125,7 @@ export default function HyroxTrainingPlan() {
               12 Week Hyrox <span className="text-accent">Training Plan</span>
             </h1>
             <p className="text-lg md:text-xl text-white/75 font-body max-w-3xl mb-8">
-              A free, personalised 12-week Hyrox training plan for beginner, intermediate, and advanced athletes — structured around your race date, your level, and the race demands.
+              A free 12-week Hyrox training plan, dated back from your race day and built around the race demands, with beginner scaling and advanced challenges on every session.
             </p>
             <div className="flex flex-wrap gap-3 mb-10">
               {['100% Free PDF', 'Personalised to your race date', 'Beginner → Advanced tracks', 'Includes compromised running'].map((b) => (
@@ -144,7 +144,7 @@ export default function HyroxTrainingPlan() {
         <section className="bg-accent/10 border-y border-accent/30 py-8">
           <div className="container mx-auto px-6 max-w-4xl">
             <p className="font-body text-foreground text-lg leading-relaxed mb-4">
-              <strong className="font-headline">What this plan is:</strong> A free, structured 12-week Hyrox training programme with three ability levels (beginner, intermediate, advanced). It is built around four training phases — base building, station introduction, race simulation, and taper — and includes running sessions, station-specific training, and weekly compromised running workouts. It is personalised to your race date so every session counts down to your competition. For a full explanation of the training methodology behind this plan, read <Link href="/how-to-train-for-hyrox" className="text-accent hover:underline font-semibold">How to Train for a Hyrox Event</Link>.
+              <strong className="font-headline">What this plan is:</strong> A free, structured 12-week Hyrox training programme with a scaling option for beginners and an advanced challenge on every session. It is built around four training phases — base building, station introduction, race simulation, and taper — and includes running sessions, station-specific training, and weekly compromised running workouts. It is dated back from your race day so every session counts down to your competition. For a full explanation of the training methodology behind this plan, read <Link href="/how-to-train-for-hyrox" className="text-accent hover:underline font-semibold">How to Train for a Hyrox Event</Link>.
             </p>
             <p className="font-body text-foreground/80 text-base leading-relaxed border-l-2 border-accent/50 pl-4">
               HybridX's 12-week Hyrox training plan is structured across four phases: aerobic base (weeks 1–3), station-specific training (weeks 4–7), race simulation (weeks 8–10), and peak and taper (weeks 11–12). The plan is available free, personalised to your exact race date, and provides beginner, intermediate, and advanced tracks — each including running sessions, all 8 station movements, and weekly compromised running workouts.
@@ -164,7 +164,7 @@ export default function HyroxTrainingPlan() {
                   Can I get a Hyrox training plan for free?
                 </h3>
                 <p className="text-muted-foreground font-body leading-relaxed mb-4 pl-7">
-                  Yes. HybridX offers a free personalised Hyrox training plan generator — you enter your race date and ability level, and a complete 12-week PDF is built and emailed to you instantly. It covers all 4 training phases, running sessions, station-specific work, and compromised running. No account or payment required.
+                  Yes. HybridX offers a free personalised Hyrox training plan generator — you enter your race date, and a complete 12-week PDF and calendar file are built in your browser and download straight away. It covers all 4 training phases, running sessions, station-specific work, and compromised running. No account or payment required.
                 </p>
                 <div className="pl-7">
                   <Link href="/free-hyrox-plan" className="inline-flex items-center gap-2 bg-accent text-black font-headline font-bold text-sm px-4 py-2 rounded-lg hover:bg-accent/90 transition-colors">
@@ -244,8 +244,8 @@ export default function HyroxTrainingPlan() {
         {/* ── Level Comparison ─────────────────────────────────────────────── */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-6 max-w-4xl">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary mb-4">Beginner, Intermediate &amp; Advanced — Key Differences</h2>
-            <p className="text-muted-foreground font-body text-lg mb-8">The plan adjusts volume, intensity, and complexity based on your current level.</p>
+            <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary mb-4">Scaling the Plan: Beginner, Intermediate &amp; Advanced</h2>
+            <p className="text-muted-foreground font-body text-lg mb-8">The downloadable plan is one 12-week plan. Use each session's scaling option and advanced challenge to match the level that fits you.</p>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm font-body">
                 <thead className="bg-secondary/60">
@@ -346,7 +346,7 @@ export default function HyroxTrainingPlan() {
               </Link>
             </div>
             <p className="text-sm text-muted-foreground font-body mt-5">
-              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_training_plan' }} className="text-accent hover:underline font-semibold">use the HybridX app</TrackedLink> — every session tracked, adaptive training, and coaching for £5/month.
+              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_training_plan' }} className="text-accent hover:underline font-semibold">use the HybridX app</TrackedLink> — structured programmes, session logging and Edge Coach for £5/month.
             </p>
           </div>
         </section>

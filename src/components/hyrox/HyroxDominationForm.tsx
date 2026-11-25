@@ -7,7 +7,7 @@ import { signUpForTrainingPlan, type SignUpFormState } from '@/app/free-hyrox-pl
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle2, ArrowRight, Download, CalendarPlus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Form,
@@ -19,9 +19,9 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { parseTrainingPlanCSV, groupWorkoutsByDay } from '@/lib/training-plan-utils';
-import { downloadTrainingPlanPDF } from '@/lib/pdf-generator';
-import { downloadTrainingPlanICS } from '@/lib/ical-generator';
+import { parseTrainingPlanCSV, groupWorkoutsByDay, parseLocalDate, formatDateShort } from '@/lib/training-plan-utils';
+import { trainingPlanPdfBlob, trainingPlanPdfFileName } from '@/lib/pdf-generator';
+import { trainingCalendarBlob, trainingCalendarFileName } from '@/lib/ical-generator';
 import { trackEvent } from '@/lib/analytics';
 import TrackedLink from '@/components/TrackedLink';
 import { appSignupHref, seedFromFreePlan } from '@/lib/app-seed';
@@ -45,12 +45,11 @@ interface HyroxDominationFormProps {
 // Helper function to generate dates between start and end date
 function generateDateRange(startDate: string, endDate: string): string[] {
   const dates: string[] = [];
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const end = parseLocalDate(endDate);
 
-  const currentDate = new Date(start);
+  const currentDate = parseLocalDate(startDate);
   while (currentDate <= end) {
-    dates.push(new Date(currentDate).toISOString().split('T')[0]);
+    dates.push(formatDateShort(currentDate));
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
@@ -82,6 +81,33 @@ function SubmitButton() {
   );
 }
 
+interface GeneratedFiles {
+  pdfUrl: string;
+  pdfName: string;
+  icsUrl: string;
+  icsName: string;
+}
+
+function revokeFiles(files: GeneratedFiles | null) {
+  if (!files) return;
+  URL.revokeObjectURL(files.pdfUrl);
+  URL.revokeObjectURL(files.icsUrl);
+}
+
+/** Start a download from a blob link, once. A blocked download is not an error: the buttons are the fallback. */
+function triggerDownload(url: string, name: string) {
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Automatic download blocked:', error);
+  }
+}
+
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Please enter your name." }),
   email: z.string().email(),
@@ -109,7 +135,15 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
   // The race date they chose, kept past the form's reset so the app link on
   // the success screen can carry it into sign-up.
   const [raceDate, setRaceDate] = useState('');
+  // The generated files, kept so the success screen can offer a button for
+  // each: phones often block a second automatic download.
+  const [files, setFiles] = useState<GeneratedFiles | null>(null);
+  const filesRef = useRef<GeneratedFiles | null>(null);
   const leadFiredRef = useRef(false);
+
+  useEffect(() => {
+    return () => revokeFiles(filesRef.current);
+  }, []);
 
   // zod validation for client side
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -198,8 +232,9 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
           // Parse the training plan CSV
           const trainingPlanRows = await parseTrainingPlanCSV('/training-plans/hyrox-fusion-86.csv');
 
-          // Group workouts by day and calculate dates
-          const workouts = groupWorkoutsByDay(trainingPlanRows, new Date(eventDate));
+          // Group workouts by day and calculate dates. The race date is a
+          // calendar day, parsed in the reader's own time zone.
+          const workouts = groupWorkoutsByDay(trainingPlanRows, parseLocalDate(eventDate));
 
           const pdfAndIcsOptions = {
             userName: name,
@@ -211,11 +246,20 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
             workouts: workouts
           };
 
-          // Generate and download PDF
-          downloadTrainingPlanPDF(pdfAndIcsOptions);
-          // Generate and download ICS
-          downloadTrainingPlanICS(pdfAndIcsOptions);
+          const generated: GeneratedFiles = {
+            pdfUrl: URL.createObjectURL(trainingPlanPdfBlob(pdfAndIcsOptions)),
+            pdfName: trainingPlanPdfFileName(pdfAndIcsOptions),
+            icsUrl: URL.createObjectURL(trainingCalendarBlob(pdfAndIcsOptions)),
+            icsName: trainingCalendarFileName(pdfAndIcsOptions),
+          };
+          revokeFiles(filesRef.current);
+          filesRef.current = generated;
+          setFiles(generated);
 
+          // Try both downloads now; the success screen has a button for each
+          // in case the browser blocks one.
+          triggerDownload(generated.pdfUrl, generated.pdfName);
+          setTimeout(() => triggerDownload(generated.icsUrl, generated.icsName), 400);
 
           // Reset form after PDF generation
           formRef.current?.reset();
@@ -249,17 +293,33 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-500/15">
           <CheckCircle2 className="h-8 w-8 text-green-500" />
         </div>
-        <h3 className="font-headline text-2xl font-bold text-primary mb-2">Your plan is downloading</h3>
-        <p className="font-body text-muted-foreground mb-1">
-          Check your downloads for the PDF and the <span className="font-semibold">.ics</span> calendar file —
-          open the .ics to add all 12 weeks to your phone or computer&apos;s calendar.
+        <h3 className="font-headline text-2xl font-bold text-primary mb-2">Your plan is ready</h3>
+        <p className="font-body text-muted-foreground mb-4">
+          Your plan is built in your browser and saved to this device, dated back from your race day.
+          Open the <span className="font-semibold">.ics</span> file to add every session to your phone or computer&apos;s calendar.
         </p>
-        <p className="font-body text-sm text-muted-foreground/80 mb-6">A copy is also on its way to your inbox.</p>
+        {files && (
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90 font-headline">
+              <a href={files.pdfUrl} download={files.pdfName}>
+                <Download className="mr-2 h-4 w-4" /> Download PDF
+              </a>
+            </Button>
+            <Button asChild variant="outline" className="font-headline">
+              <a href={files.icsUrl} download={files.icsName}>
+                <CalendarPlus className="mr-2 h-4 w-4" /> Download calendar (.ics)
+              </a>
+            </Button>
+          </div>
+        )}
+        <p className="font-body text-sm text-muted-foreground/80 mb-6">
+          Nothing downloaded? Use the buttons above. We do not email the plan, so save it before you leave this page.
+        </p>
 
         <div className="rounded-xl border border-accent/40 bg-accent/10 p-5 text-left">
           <p className="font-headline font-bold text-primary mb-1">Want it guided, day by day?</p>
           <p className="font-body text-sm text-muted-foreground mb-4">
-            The app delivers this plan one session at a time, tracks every rep and run, and adapts as you go.
+            The app delivers this plan one session at a time, tracks every rep and run, and keeps your race date in view.
             Your race date comes with you, so the plan you start finishes on race day.
             14-day free trial — cancel anytime.
           </p>
@@ -407,10 +467,10 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
                         </FormControl>
                         <SelectContent>
                         {availableDates.map((date) => {
-                            const dateObj = new Date(date);
+                            const dateObj = parseLocalDate(date);
                             return (
                                 <SelectItem key={date} value={date}>
-                                    {dateObj.toLocaleDateString('en-US', {
+                                    {dateObj.toLocaleDateString('en-GB', {
                                         weekday: 'short',
                                         year: 'numeric',
                                         month: 'long',

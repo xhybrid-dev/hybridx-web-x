@@ -112,7 +112,7 @@ const faqItems: FaqItem[] = [
     icon: ClipboardList,
     question: 'Do you offer Hyrox training plans for all ability levels?',
     answer:
-      'Yes — our 12-week Hyrox training plans are built with beginner, intermediate, and advanced tracks. Each plan is personalised to your specific race date and uses RPE (Rate of Perceived Exertion) rather than fixed paces, so the intensity automatically scales to your fitness level. Every week includes running sessions, station-specific strength work, and dedicated compromised running workouts. You can follow the plan as a free downloadable PDF, work through it in our books, or track every session inside the HybridX app for a fully guided experience.',
+      'Yes — our free 12-week Hyrox training plan is dated back from your specific race day and uses RPE (Rate of Perceived Exertion) rather than fixed paces. Every session has a scaling option for beginners and an advanced challenge, so you set the intensity to your fitness level. Every week includes running sessions, station-specific strength work, and dedicated compromised running workouts. You can follow the plan as a free downloadable PDF, work through it in our books, or track every session inside the HybridX app for a fully guided experience.',
   },
   {
     id: 'faq11',

@@ -398,11 +398,11 @@ export default function HybridTrainingProgram() {
               <Link href="/hyrox-training-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
                 <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Plan</p>
                 <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">12-Week Hyrox Training Plan</h3>
-                <p className="text-muted-foreground font-body text-sm leading-snug">Hybrid training applied — a complete 12-week plan with beginner, intermediate, and advanced tracks.</p>
+                <p className="text-muted-foreground font-body text-sm leading-snug">Hybrid training applied — a complete 12-week plan with beginner scaling and advanced challenges.</p>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground font-body mt-5">
-              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent hover:underline font-semibold">train with the HybridX app</TrackedLink> — every session tracked, adaptive plans, and coaching for £5/month.
+              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent hover:underline font-semibold">train with the HybridX app</TrackedLink> — structured programmes, session logging and Edge Coach for £5/month.
             </p>
           </div>
         </section>

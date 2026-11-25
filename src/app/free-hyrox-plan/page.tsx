@@ -55,7 +55,7 @@ const HeroSection = () => (
         Your Free 12-Week <span className="text-accent">Hyrox Training Plan</span>
       </h1>
       <p className="text-lg md:text-xl text-muted-foreground font-body max-w-2xl mx-auto mb-8">
-        Enter your race date and ability level. Get a personalised, phase-by-phase plan — covering every station and every compromised running session — emailed to you instantly. No cost, no account.
+        Enter your race date. Get a phase-by-phase plan dated back from race day — covering every station and every compromised running session — as a PDF and a calendar file that download straight away. No cost, no account.
       </p>
       <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg transform hover:scale-105 transition-transform duration-200">
         <Link href="#get-the-plan">Get My Free Plan</Link>
@@ -94,10 +94,10 @@ const GetThePlanSection = ({ events }: { events: HyroxEvent[] }) => (
         <div className="container mx-auto px-6">
             <div className="text-center mb-10">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary">Get Your Personalised Plan</h2>
-                <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Enter your race date and ability level — we build your 12-week plan and send it to your inbox instantly.</p>
+                <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Enter your race date — we build your 12-week plan in your browser and it downloads as a dated PDF and calendar file.</p>
                 <ul className="mt-6 inline-flex flex-col items-start gap-2 text-left text-base text-muted-foreground font-body">
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Adapts to your exact race date</li>
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Adjusts to your ability level — beginner, intermediate, or advanced</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Beginner scaling and advanced challenges on every session</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Structured progressively over 12 weeks across 4 phases</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Emailed instantly as a downloadable PDF — 100% free</li>
                 </ul>
@@ -167,7 +167,7 @@ const AppUpsellSection = () => (
           <Smartphone className="h-12 w-12 text-accent mx-auto mb-4"/>
           <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary">Want it guided, day by day?</h2>
           <p className="text-lg text-muted-foreground mt-3 font-body max-w-xl mx-auto">
-            The HybridX app delivers this plan one session at a time, tracks every rep and run, and adapts as you progress. Try it free for 14 days — cancel anytime in two clicks.
+            The HybridX app delivers this plan one session at a time, tracks every rep and run, and keeps your race date in view. Try it free for 14 days — cancel anytime in two clicks.
           </p>
           <Button size="lg" asChild className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
             <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'free_plan_upsell' }}>See the app</TrackedLink>
@@ -181,11 +181,11 @@ const FaqSection = () => {
   const hyroxFaqItems = [
     {
       question: "What if I'm a complete beginner?",
-      answer: "This plan is designed to take you from wherever you are to Hyrox-ready in 12 weeks. It uses RPE (Rate of Perceived Exertion), so intensity automatically scales to your current fitness level.",
+      answer: "This plan is designed to take you from wherever you are to Hyrox-ready in 12 weeks. It uses RPE (Rate of Perceived Exertion), and every session has a scaling option for beginners and an advanced challenge, so you set the intensity to your current fitness.",
     },
     {
       question: "How much time do I need to train per week?",
-      answer: "Sessions run 45-90 minutes, most under 75, across 4-5 days a week.",
+      answer: "Sessions run 45-90 minutes, most under 75, across 3–4 main training days a week.",
     },
     {
       question: "Why is this free? What's the catch?",

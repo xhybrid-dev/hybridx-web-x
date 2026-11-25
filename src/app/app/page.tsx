@@ -59,7 +59,7 @@ const faqs = [
   },
   {
     question: 'What\'s the difference between the free plan and the app?',
-    answer: 'The free 12-week PDF plan is a fixed, personalised training block you download once. The app gives you a full library of programs, day-by-day tracking, benchmark logging, and the Edge Coach for ongoing guidance — it adapts as you go rather than staying static.',
+    answer: 'The free 12-week PDF plan is a fixed training block you download once. The app gives you a full library of programmes, day-by-day tracking, benchmark logging, and the Edge Coach for ongoing guidance, with the plan lined up to your race date.',
   },
   {
     question: 'What devices does it work on?',

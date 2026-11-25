@@ -19,7 +19,7 @@ export default function CalculatorCTA({ calculator, heading = 'Now turn that num
           {heading}
         </h2>
         <p className="text-muted-foreground font-body max-w-md mx-auto mb-5">
-          Get a free, personalised 12-week Hyrox training plan built around your race date and ability level.
+          Get a free 12-week Hyrox training plan dated back from your race day, with scaling for every level.
         </p>
         <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
           <TrackedLink

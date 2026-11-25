@@ -56,13 +56,27 @@ export async function parseTrainingPlanCSV(csvPath: string): Promise<TrainingPla
   });
 }
 
+/** The plan's race day is Day 77 in the CSV: Days 78-84 are the recovery week after it. */
+export const RACE_DAY_NUMBER = 77;
+
 /**
- * Calculate the start date given the event (race) date
- * Day 84 = race day, so Day 1 = race day - 83 days
+ * Parse a YYYY-MM-DD string as that calendar day in the reader's own time zone.
+ * `new Date('2027-03-13')` is midnight UTC, which is still the 12th west of
+ * Greenwich, so every date in the plan would land a day early there.
+ */
+export function parseLocalDate(isoDate: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate);
+  if (!match) return new Date(isoDate);
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+/**
+ * Calculate the start date given the event (race) date.
+ * Race day is Day 77, so Day 1 = race day - 76 days.
  */
 export function calculateStartDate(raceDate: Date): Date {
   const startDate = new Date(raceDate);
-  startDate.setDate(startDate.getDate() - 83); // 84 days total, so subtract 83
+  startDate.setDate(startDate.getDate() - (RACE_DAY_NUMBER - 1));
   return startDate;
 }
 
@@ -76,12 +90,15 @@ export function calculateWorkoutDate(raceDate: Date, workoutDay: number): Date {
     return new Date(); // Return current date as fallback
   }
 
-  if (isNaN(workoutDay) || workoutDay < 1) {
+  if (isNaN(workoutDay) || workoutDay < 0) {
     console.error('Invalid workout day:', workoutDay);
     return new Date(); // Return current date as fallback
   }
 
   const startDate = calculateStartDate(raceDate);
+  // Day 0 is the "how to use this plan" page: it is dated with Day 1, the
+  // first day of training, not with today.
+  if (workoutDay === 0) return startDate;
   const workoutDate = new Date(startDate);
   workoutDate.setDate(workoutDate.getDate() + (workoutDay - 1)); // Day 1 is startDate + 0
   return workoutDate;
@@ -121,7 +138,7 @@ export function groupWorkoutsByDay(
  * Format date for display
  */
 export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? parseLocalDate(date) : date;
 
   // Check if date is valid
   if (isNaN(dateObj.getTime())) {
@@ -129,7 +146,7 @@ export function formatDate(date: Date | string): string {
     return 'Invalid Date';
   }
 
-  return dateObj.toLocaleDateString('en-US', {
+  return dateObj.toLocaleDateString('en-GB', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -141,7 +158,7 @@ export function formatDate(date: Date | string): string {
  * Format date as YYYY-MM-DD
  */
 export function formatDateShort(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? parseLocalDate(date) : date;
 
   // Check if date is valid
   if (isNaN(dateObj.getTime())) {
@@ -149,7 +166,12 @@ export function formatDateShort(date: Date | string): string {
     return 'Invalid Date';
   }
 
-  return dateObj.toISOString().split('T')[0];
+  // Local calendar day, not toISOString(): a local midnight in UK summer time
+  // is the evening before in UTC.
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 /**

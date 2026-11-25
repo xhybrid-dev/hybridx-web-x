@@ -61,7 +61,7 @@ const courseSchemas = [
   createCourseSchema({
     name: 'HybridX 12-Week Hyrox Training Plan',
     description:
-      'A free, personalised 12-week Hyrox training plan for beginner, intermediate, and advanced athletes. Covers compromised running, all 8 race stations, and race-day strategy. RPE-based so it scales to your fitness level.',
+      'A free 12-week Hyrox training plan dated back from your race day, with beginner scaling and advanced challenges. Covers compromised running, all 8 race stations, and race-day strategy. RPE-based so it scales to your fitness level.',
     url: '/free-hyrox-plan',
     level: 'All levels',
   }),

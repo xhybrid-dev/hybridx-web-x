@@ -173,7 +173,7 @@ export default function HowToTrainForHyrox() {
                   Can I get a Hyrox training plan for free?
                 </h3>
                 <p className="text-muted-foreground font-body leading-relaxed pl-7 mb-4">
-                  Yes — HybridX offers a free personalised Hyrox training plan that adapts to your race date and ability level. You enter your details, and a complete 12-week PDF plan is generated and emailed to you instantly. It covers all 4 training phases, every station, and compromised running sessions. No account required.
+                  Yes — HybridX offers a free 12-week Hyrox training plan dated back from your race day, with a scaling option for beginners and an advanced challenge on every session. You enter your details, and a complete 12-week PDF and calendar file are built in your browser and download straight away. It covers all 4 training phases, every station, and compromised running sessions. No account required.
                 </p>
                 <div className="pl-7">
                   <Link href="/free-hyrox-plan" className="inline-flex items-center gap-2 bg-accent text-black font-headline font-bold text-sm px-4 py-2 rounded-lg hover:bg-accent/90 transition-colors">
@@ -375,7 +375,7 @@ export default function HowToTrainForHyrox() {
               <Link href="/free-hyrox-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
                 <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Free Tool</p>
                 <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Free Personalised Hyrox Plan Generator</h3>
-                <p className="text-muted-foreground font-body text-sm leading-snug">Enter your race date — get a complete 12-week PDF plan sent to your inbox instantly.</p>
+                <p className="text-muted-foreground font-body text-sm leading-snug">Enter your race date — get a complete 12-week PDF plan and calendar file, downloaded straight away.</p>
               </Link>
               <Link href="/hyrox-training-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
                 <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Plan</p>
