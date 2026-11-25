@@ -52,7 +52,7 @@ const HeroSection = () => (
     <div className="absolute inset-0 bg-subtle-x-light dark:bg-subtle-x-dark opacity-30 dark:opacity-20 mix-blend-multiply dark:mix-blend-screen"></div>
     <div className="container mx-auto px-6 relative z-10">
       <h1 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4 leading-tight">
-        Your Free 12-Week <span className="text-accent">Hyrox Training Plan</span>
+        Your Free 12-Week <span className="text-accent-ink">Hyrox Training Plan</span>
       </h1>
       <p className="text-lg md:text-xl text-muted-foreground font-body max-w-2xl mx-auto mb-8">
         Enter your race date. Get a phase-by-phase plan dated back from race day — covering every station and every compromised running session — as a PDF and a calendar file that download straight away. No cost, no account.
@@ -96,10 +96,10 @@ const GetThePlanSection = ({ events }: { events: HyroxEvent[] }) => (
                 <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary">Get Your Personalised Plan</h2>
                 <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Enter your race date — we build your 12-week plan in your browser and it downloads as a dated PDF and calendar file.</p>
                 <ul className="mt-6 inline-flex flex-col items-start gap-2 text-left text-base text-muted-foreground font-body">
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Adapts to your exact race date</li>
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Beginner scaling and advanced challenges on every session</li>
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Structured progressively over 12 weeks across 4 phases</li>
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Emailed instantly as a downloadable PDF — 100% free</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Adapts to your exact race date</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Beginner scaling and advanced challenges on every session</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Structured progressively over 12 weeks across 4 phases</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Emailed instantly as a downloadable PDF — 100% free</li>
                 </ul>
             </div>
             <div className="flex justify-center">
@@ -119,11 +119,11 @@ const GetThePlanSection = ({ events }: { events: HyroxEvent[] }) => (
             </div>
             <p className="text-center text-sm text-muted-foreground font-body mt-10">
               Want to understand the methodology first? Read{' '}
-              <Link href="/how-to-train-for-hyrox" className="text-accent hover:underline font-semibold">How to Train for a Hyrox Event</Link>
+              <Link href="/how-to-train-for-hyrox" className="text-accent-ink hover:underline font-semibold">How to Train for a Hyrox Event</Link>
               {', '}the{' '}
-              <Link href="/hyrox-training-plan" className="text-accent hover:underline font-semibold">12-week plan structure</Link>
+              <Link href="/hyrox-training-plan" className="text-accent-ink hover:underline font-semibold">12-week plan structure</Link>
               {', or the '}
-              <Link href="/hybrid-training-program" className="text-accent hover:underline font-semibold">hybrid training methodology</Link>.
+              <Link href="/hybrid-training-program" className="text-accent-ink hover:underline font-semibold">hybrid training methodology</Link>.
             </p>
         </div>
     </section>
@@ -146,7 +146,7 @@ const WhatsIncludedSection = () => {
             {includedItems.map((item, index) => (
               <Card key={index} className="shadow-sm border-primary/20">
                 <CardHeader>
-                  <item.icon className="h-7 w-7 text-accent mb-2"/>
+                  <item.icon className="h-7 w-7 text-accent-ink mb-2"/>
                   <CardTitle className="text-lg">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -164,7 +164,7 @@ const AppUpsellSection = () => (
     <section className="py-16 md:py-20 bg-background">
       <div className="container mx-auto px-6 max-w-3xl">
         <Card className="bg-primary/5 border-primary/20 p-8 text-center">
-          <Smartphone className="h-12 w-12 text-accent mx-auto mb-4"/>
+          <Smartphone className="h-12 w-12 text-accent-ink mx-auto mb-4"/>
           <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary">Want it guided, day by day?</h2>
           <p className="text-lg text-muted-foreground mt-3 font-body max-w-xl mx-auto">
             The HybridX app delivers this plan one session at a time, tracks every rep and run, and keeps your race date in view. Try it free for 14 days — cancel anytime in two clicks.

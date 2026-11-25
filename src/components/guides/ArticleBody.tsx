@@ -53,7 +53,7 @@ function BlockView({ slug, block, articles }: { slug: string; block: Block; arti
       return block.ordered ? (
         <ol className={`list-decimal ${className}`}>{items}</ol>
       ) : (
-        <ul className={`list-disc marker:text-accent ${className}`}>{items}</ul>
+        <ul className={`list-disc marker:text-accent-ink ${className}`}>{items}</ul>
       );
     }
 

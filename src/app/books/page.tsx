@@ -49,7 +49,7 @@ export default function BooksPage() {
         <section className="relative bg-background text-center py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-subtle-x-light dark:bg-subtle-x-dark opacity-30 dark:opacity-20 mix-blend-multiply dark:mix-blend-screen"></div>
           <div className="container mx-auto px-6 relative z-10">
-            <BookOpenCheck className="h-14 w-14 text-accent mx-auto mb-4" />
+            <BookOpenCheck className="h-14 w-14 text-accent-ink mx-auto mb-4" />
             <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4 leading-tight">
               Hyrox Training Books
             </h1>
@@ -102,7 +102,7 @@ export default function BooksPage() {
                     <div className="flex flex-col flex-grow p-6">
                       <CardHeader className="p-0 mb-2">
                         {book.level && (
-                          <span className="inline-block w-fit text-xs font-headline font-bold uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-1 rounded-full mb-2">
+                          <span className="inline-block w-fit text-xs font-headline font-bold uppercase tracking-wider text-accent-ink bg-accent/10 px-2.5 py-1 rounded-full mb-2">
                             {book.level}
                           </span>
                         )}
@@ -134,11 +134,11 @@ export default function BooksPage() {
             <AffiliateDisclosure className="mt-10 text-center" />
             <p className="text-center text-sm text-muted-foreground font-body mt-6">
               Prefer training day-by-day with tracking built in? Try{' '}
-              <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'books_page' }} className="text-accent hover:underline font-semibold">
+              <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'books_page' }} className="text-accent-ink hover:underline font-semibold">
                 the HybridX app
               </TrackedLink>
               , or get the{' '}
-              <TrackedLink href="/free-hyrox-plan" event="cta_free_plan_click" eventParams={{ location: 'books_page' }} className="text-accent hover:underline font-semibold">
+              <TrackedLink href="/free-hyrox-plan" event="cta_free_plan_click" eventParams={{ location: 'books_page' }} className="text-accent-ink hover:underline font-semibold">
                 free 12-week PDF plan
               </TrackedLink>{' '}
               instead.

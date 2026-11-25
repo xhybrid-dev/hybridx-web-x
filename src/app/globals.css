@@ -34,12 +34,15 @@
        goes back to the bright yellow. Fills stay on --accent. */
     --accent-ink: 43 96% 26%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* #BA1C1C: 6.4:1 on white (the old red was 3.8:1, under the 4.5:1 text needs) */
+    --destructive: 0 74% 42%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 85%; /* Lighter Gray */
     --input: 0 0% 85%; /* Lighter Gray */
-    --ring: 47 95% 67%; /* Yellow #fadb5c */
+    /* Focus ring: deep amber, 5.9:1 on white and 3.5:1 on black, so it clears the 3:1 a
+       focus indicator needs on both. Bright yellow on white was 1.4:1. */
+    --ring: 43 96% 26%;
 
     --chart-1: 47 95% 67%; /* Yellow */
     --chart-2: 0 0% 20%;   /* Dark Gray */

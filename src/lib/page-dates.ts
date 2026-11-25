@@ -13,10 +13,10 @@
 
 export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/': '2026-11-25',
-  '/calculators': '2026-11-11',
-  '/calculators/running': '2026-07-07',
-  '/calculators/strength': '2026-07-07',
-  '/calculators/general-health': '2026-07-07',
+  '/calculators': '2026-11-25',
+  '/calculators/running': '2026-11-25',
+  '/calculators/strength': '2026-11-25',
+  '/calculators/general-health': '2026-11-25',
   '/calculators/body-fat-calculator': '2026-11-25',
   '/calculators/calorie-macronutrient-calculator': '2026-07-07',
   '/calculators/heart-rate-zone-calculator': '2026-07-07',
@@ -51,6 +51,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/streak': '2026-11-25',
   '/trail': '2026-11-25',
   '/training': '2026-11-20',
+  '/contact': '2026-11-25',
   '/shop-terms': '2026-10-02',
   '/terms': '2026-11-25',
   '/guides': '2026-11-10',

@@ -122,10 +122,10 @@ export default function CalculatorsHubPage() {
               <Card key={cat.id} className="shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col bg-card/80 backdrop-blur-sm border-border/60 group border-t-2 border-accent/40">
                 <CardHeader className="flex-row items-center space-x-4 pb-4 pt-6">
                   <div className="p-3 bg-accent/15 rounded-lg ring-1 ring-accent/30">
-                    <cat.icon className="h-8 w-8 text-accent" />
+                    <cat.icon className="h-8 w-8 text-accent-ink" />
                   </div>
                   <div>
-                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent transition-colors duration-300">{cat.title}</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent-ink transition-colors duration-300">{cat.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">

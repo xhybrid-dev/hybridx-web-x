@@ -339,7 +339,7 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
         <button
           type="button"
           onClick={() => setCompleted(false)}
-          className="mt-4 text-sm text-muted-foreground hover:text-accent underline underline-offset-2 font-body"
+          className="mt-4 text-sm text-muted-foreground hover:text-accent-ink underline underline-offset-2 font-body"
         >
           Generate another plan
         </button>

@@ -76,7 +76,7 @@ export default function TrainingPlanShowcase() {
                       ? 'bg-accent/30 ring-2 ring-accent/60'
                       : 'bg-accent/20 ring-2 ring-accent/30'
                   }`}>
-                    <plan.icon className="h-10 w-10 text-accent" />
+                    <plan.icon className="h-10 w-10 text-accent-ink" />
                   </div>
                   <CardTitle className="font-headline text-2xl text-primary">{plan.title}</CardTitle>
                 </CardHeader>

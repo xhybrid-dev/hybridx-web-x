@@ -221,7 +221,7 @@ export default function RaceTimePredictorForm() {
             {predictions.map((pred) => (
               <Card key={pred.name} className="bg-card/80 backdrop-blur-sm shadow-md border-border/50">
                 <CardHeader className="pb-2 pt-4">
-                  <CardTitle className="text-lg font-headline text-accent flex items-center">
+                  <CardTitle className="text-lg font-headline text-accent-ink flex items-center">
                     <CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />
                     {pred.name}
                   </CardTitle>

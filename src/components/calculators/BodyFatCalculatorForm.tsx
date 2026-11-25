@@ -183,11 +183,11 @@ export default function BodyFatCalculatorForm() {
         <Card className="mt-6 shadow-md border-primary/30 bg-primary/5">
           <CardHeader className="pb-2 pt-4 text-center">
             <CardTitle className="text-xl md:text-2xl font-semibold text-primary flex items-center justify-center">
-              <Percent className="mr-2 h-6 w-6 text-accent" /> Estimated Body Fat Percentage
+              <Percent className="mr-2 h-6 w-6 text-accent-ink" /> Estimated Body Fat Percentage
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center pb-4">
-            <p className="text-3xl md:text-4xl font-bold text-accent">{estimatedBFP}</p>
+            <p className="text-3xl md:text-4xl font-bold text-accent-ink">{estimatedBFP}</p>
             <p className="text-xs text-muted-foreground mt-2">
               Disclaimer: This is an estimate based on the U.S. Navy formula. For precise body fat measurement, consult a healthcare professional or use methods like DEXA scans or hydrostatic weighing.
             </p>

@@ -84,7 +84,7 @@ export default function AppLandingPage() {
                   14-day free trial
                 </div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-primary mb-4 leading-tight">
-                  Your Hyrox Coach, <span className="text-accent">In Your Pocket.</span>
+                  Your Hyrox Coach, <span className="text-accent-ink">In Your Pocket.</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground font-body max-w-xl mx-auto lg:mx-0 mb-8">
                   Structured programs, daily workouts, and an AI coach for the questions a PDF can&apos;t answer. £5/month. 14-day free trial. Cancel anytime.
@@ -124,7 +124,7 @@ export default function AppLandingPage() {
               {features.map((f) => (
                 <Card key={f.title} className="p-6">
                   <CardContent className="p-0">
-                    <f.icon className="h-8 w-8 text-accent mb-3" />
+                    <f.icon className="h-8 w-8 text-accent-ink mb-3" />
                     <h3 className="font-headline text-lg font-bold text-primary mb-1">{f.title}</h3>
                     <p className="text-muted-foreground text-sm">{f.description}</p>
                   </CardContent>
@@ -165,13 +165,13 @@ export default function AppLandingPage() {
             <div className="max-w-md mx-auto">
               <Card className="border-2 border-accent shadow-2xl text-center p-8">
                 <CardContent className="p-0">
-                  <p className="font-headline text-sm uppercase tracking-widest text-accent mb-2">HybridX App</p>
+                  <p className="font-headline text-sm uppercase tracking-widest text-accent-ink mb-2">HybridX App</p>
                   <p className="text-5xl font-headline font-extrabold text-primary mb-1">£5<span className="text-lg text-muted-foreground font-body">/month</span></p>
                   <p className="text-muted-foreground font-body mb-6">14-day free trial. Cancel anytime in two clicks — no calls, no emails.</p>
                   <ul className="text-left space-y-2 mb-6 font-body">
-                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Full program library</li>
-                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Daily workout tracking</li>
-                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> Edge Coach, built in</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Full program library</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Daily workout tracking</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Edge Coach, built in</li>
                   </ul>
                   <Button size="lg" asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
                     <TrackedLink href={APP_URL} target="_blank" rel="noopener noreferrer" event="cta_app_click" eventParams={{ location: 'app_page_pricing' }}>

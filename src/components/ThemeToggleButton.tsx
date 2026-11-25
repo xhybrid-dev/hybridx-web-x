@@ -25,7 +25,7 @@ export function ThemeToggleButton() {
       size="icon"
       onClick={toggleTheme}
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="text-primary hover:text-accent"
+      className="text-primary hover:text-accent-foreground"
     >
       {theme === 'dark' ? (
         <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />

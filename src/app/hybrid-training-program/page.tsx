@@ -223,7 +223,7 @@ export default function HybridTrainingProgram() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {sciencePoints.map((s) => (
                 <div key={s.label} className="bg-card border border-border rounded-xl p-5 text-center">
-                  <p className="text-3xl font-headline font-extrabold text-accent mb-1">{s.stat}</p>
+                  <p className="text-3xl font-headline font-extrabold text-accent-ink mb-1">{s.stat}</p>
                   <p className="text-xs font-headline font-semibold text-primary mb-2">{s.label}</p>
                   <p className="text-xs text-muted-foreground font-body leading-snug">{s.detail}</p>
                 </div>
@@ -250,7 +250,7 @@ export default function HybridTrainingProgram() {
                 <div key={pillar.title} className="bg-card border border-border rounded-xl p-6">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center">
-                      <pillar.icon className="h-6 w-6 text-accent" />
+                      <pillar.icon className="h-6 w-6 text-accent-ink" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
@@ -261,7 +261,7 @@ export default function HybridTrainingProgram() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {pillar.examples.map((ex) => (
                           <div key={ex} className="flex items-center gap-2 text-sm font-body text-muted-foreground">
-                            <span className="text-accent font-bold">›</span> {ex}
+                            <span className="text-accent-ink font-bold">›</span> {ex}
                           </div>
                         ))}
                       </div>
@@ -286,7 +286,7 @@ export default function HybridTrainingProgram() {
                     {d.type}
                   </span>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1">
-                    <span className="text-accent font-headline font-semibold text-sm flex-shrink-0">{d.session}</span>
+                    <span className="text-accent-ink font-headline font-semibold text-sm flex-shrink-0">{d.session}</span>
                     <span className="text-muted-foreground font-body text-sm leading-snug">{d.detail}</span>
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export default function HybridTrainingProgram() {
               ].map((item) => (
                 <div key={item.q} className="bg-card border border-border rounded-xl p-6">
                   <h3 className="font-headline font-bold text-primary mb-2 flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                     {item.q}
                   </h3>
                   <p className="text-muted-foreground font-body leading-relaxed pl-7">{item.a}</p>
@@ -386,23 +386,23 @@ export default function HybridTrainingProgram() {
             <h2 className="text-xl font-headline font-bold text-primary mb-6">Read Next</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link href="/free-hyrox-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Free Tool</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Free Personalised Hyrox Plan Generator</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Free Tool</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">Free Personalised Hyrox Plan Generator</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">For a fully personalised hybrid training plan built around your race date, use our free generator.</p>
               </Link>
               <Link href="/how-to-train-for-hyrox" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Guide</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">How to Train for a Hyrox Event</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Training Guide</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">How to Train for a Hyrox Event</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">Apply hybrid training principles specifically to Hyrox — phases, compromised running, and race strategy.</p>
               </Link>
               <Link href="/hyrox-training-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Plan</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">12-Week Hyrox Training Plan</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Training Plan</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">12-Week Hyrox Training Plan</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">Hybrid training applied — a complete 12-week plan with beginner scaling and advanced challenges.</p>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground font-body mt-5">
-              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent hover:underline font-semibold">train with the HybridX app</TrackedLink> — structured programmes, session logging and Edge Coach for £5/month.
+              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent-ink hover:underline font-semibold">train with the HybridX app</TrackedLink> — structured programmes, session logging and Edge Coach for £5/month.
             </p>
           </div>
         </section>

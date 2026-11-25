@@ -18,7 +18,7 @@ export default function AppPromotion() {
         <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-6">
-              For the Digital Athlete: <span className="text-accent">Your Coach In Your Pocket.</span>
+              For the Digital Athlete: <span className="text-accent-ink">Your Coach In Your Pocket.</span>
             </h2>
             <p className="text-lg text-muted-foreground font-body mb-8">
               Get exactly what you need to know, with nothing you don't. Our app delivers your daily plan with zero fluff, so you can focus on the work.

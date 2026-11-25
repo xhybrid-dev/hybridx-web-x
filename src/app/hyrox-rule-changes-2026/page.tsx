@@ -583,7 +583,7 @@ export default function HyroxRuleChanges2026() {
               {RULE_FAQS.map((faq) => (
                 <div key={faq.question} className="rounded-2xl border border-border bg-card p-5">
                   <h3 className="mb-2 flex items-start gap-2 font-headline text-base font-bold text-foreground">
-                    <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                    <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-ink" aria-hidden="true" />
                     {faq.question}
                   </h3>
                   <p className="pl-6 font-body text-sm leading-relaxed text-muted-foreground">

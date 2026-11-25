@@ -153,23 +153,23 @@ export default function HowToTrainForHyrox() {
 
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="font-headline font-bold text-primary text-lg mb-3 flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                   How do I train for a Hyrox event?
                 </h3>
                 <p className="text-muted-foreground font-body leading-relaxed mb-3 pl-7">
                   A complete Hyrox training programme combines running, functional strength, and compromised running — the ability to run immediately after a hard station effort. A solid week looks like:
                 </p>
                 <ul className="pl-7 space-y-1.5 text-muted-foreground font-body text-sm">
-                  <li className="flex items-start gap-2"><span className="text-accent font-bold mt-0.5">→</span> 2–3 running sessions per week (easy, tempo, and long run)</li>
-                  <li className="flex items-start gap-2"><span className="text-accent font-bold mt-0.5">→</span> 2 strength and station-specific sessions (SkiErg, sleds, sandbag, wall balls)</li>
-                  <li className="flex items-start gap-2"><span className="text-accent font-bold mt-0.5">→</span> 1 compromised running session (station effort → 1km run, repeated 3–4 times)</li>
-                  <li className="flex items-start gap-2"><span className="text-accent font-bold mt-0.5">→</span> Progressive overload across 12 weeks through 4 structured phases</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-ink font-bold mt-0.5">→</span> 2–3 running sessions per week (easy, tempo, and long run)</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-ink font-bold mt-0.5">→</span> 2 strength and station-specific sessions (SkiErg, sleds, sandbag, wall balls)</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-ink font-bold mt-0.5">→</span> 1 compromised running session (station effort → 1km run, repeated 3–4 times)</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-ink font-bold mt-0.5">→</span> Progressive overload across 12 weeks through 4 structured phases</li>
                 </ul>
               </div>
 
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="font-headline font-bold text-primary text-lg mb-3 flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                   Can I get a Hyrox training plan for free?
                 </h3>
                 <p className="text-muted-foreground font-body leading-relaxed pl-7 mb-4">
@@ -184,7 +184,7 @@ export default function HowToTrainForHyrox() {
 
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="font-headline font-bold text-primary text-lg mb-3 flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                   How many weeks do I need to train for Hyrox?
                 </h3>
                 <p className="text-muted-foreground font-body leading-relaxed pl-7">
@@ -242,7 +242,7 @@ export default function HowToTrainForHyrox() {
               ].map((t) => (
                 <div key={t.level} className="bg-card border border-border rounded-xl p-6">
                   <div className="inline-flex items-center gap-1.5 bg-accent/15 border border-accent/30 rounded-full px-3 py-1 text-xs font-headline font-bold text-foreground mb-3">{t.level}</div>
-                  <p className="text-3xl font-headline font-extrabold text-accent mb-2">{t.time}</p>
+                  <p className="text-3xl font-headline font-extrabold text-accent-ink mb-2">{t.time}</p>
                   <p className="text-muted-foreground font-body text-sm leading-relaxed">{t.desc}</p>
                 </div>
               ))}
@@ -255,7 +255,7 @@ export default function HowToTrainForHyrox() {
           <div className="container mx-auto px-6 max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary mb-4">The 4-Phase Hyrox Training Structure</h2>
             <p className="text-muted-foreground font-body mb-10 text-lg leading-relaxed">
-              A well-structured Hyrox programme follows four distinct phases. Each builds on the previous, ensuring you peak on race day rather than in week 6. For the complete week-by-week session breakdown, see the <Link href="/hyrox-training-plan" className="text-accent hover:underline font-semibold">12-week Hyrox training plan</Link>.
+              A well-structured Hyrox programme follows four distinct phases. Each builds on the previous, ensuring you peak on race day rather than in week 6. For the complete week-by-week session breakdown, see the <Link href="/hyrox-training-plan" className="text-accent-ink hover:underline font-semibold">12-week Hyrox training plan</Link>.
             </p>
             <div className="space-y-4">
               {phases.map((phase, i) => (
@@ -311,7 +311,7 @@ export default function HowToTrainForHyrox() {
               {exampleWeek.map((day) => (
                 <div key={day.day} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 bg-card border border-border rounded-xl px-5 py-4">
                   <span className="font-headline font-bold text-primary w-28 flex-shrink-0">{day.day}</span>
-                  <span className="text-accent font-headline font-semibold text-sm w-44 flex-shrink-0">{day.session}</span>
+                  <span className="text-accent-ink font-headline font-semibold text-sm w-44 flex-shrink-0">{day.session}</span>
                   <span className="text-muted-foreground font-body text-sm leading-snug">{day.detail}</span>
                 </div>
               ))}
@@ -373,28 +373,28 @@ export default function HowToTrainForHyrox() {
             <h2 className="text-xl font-headline font-bold text-primary mb-6">Read Next</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/free-hyrox-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Free Tool</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Free Personalised Hyrox Plan Generator</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Free Tool</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">Free Personalised Hyrox Plan Generator</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">Enter your race date — get a complete 12-week PDF plan and calendar file, downloaded straight away.</p>
               </Link>
               <Link href="/hyrox-training-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Plan</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">12-Week Hyrox Training Plan</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Training Plan</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">12-Week Hyrox Training Plan</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">The full week-by-week breakdown — phases, sample weeks, and level comparison.</p>
               </Link>
               <Link href="/hybrid-training-program" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Methodology</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Hybrid Athlete Training Program</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Methodology</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">Hybrid Athlete Training Program</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">The science behind combining strength and endurance — and why it is the foundation of Hyrox performance.</p>
               </Link>
               <Link href="/build-a-bigger-engine" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Free Guide</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Build a Bigger Engine: VO2max</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Free Guide</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">Build a Bigger Engine: VO2max</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">The science of raising your VO2max — the aerobic ceiling behind every Hyrox run.</p>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground font-body mt-5">
-              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_how_to_train' }} className="text-accent hover:underline font-semibold">access every session through the HybridX app</TrackedLink> — structured training, tracked progress, and coaching for £5/month.
+              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_how_to_train' }} className="text-accent-ink hover:underline font-semibold">access every session through the HybridX app</TrackedLink> — structured training, tracked progress, and coaching for £5/month.
             </p>
           </div>
         </section>
@@ -432,7 +432,7 @@ export default function HowToTrainForHyrox() {
               ].map((item) => (
                 <div key={item.q} className="bg-card border border-border rounded-xl p-6">
                   <h3 className="font-headline font-bold text-primary mb-2 flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                     {item.q}
                   </h3>
                   <p className="text-muted-foreground font-body leading-relaxed pl-7">{item.a}</p>

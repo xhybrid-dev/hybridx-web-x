@@ -52,7 +52,7 @@ export default function ConfirmButton({ email, token, action }: ConfirmButtonPro
 
   return (
     <>
-      <MailCheck className="h-12 w-12 text-accent" aria-hidden="true" />
+      <MailCheck className="h-12 w-12 text-accent-ink" aria-hidden="true" />
       <h1 className="mt-6 font-headline text-3xl font-bold">One tap to confirm</h1>
       <p className="mt-3 max-w-md text-muted-foreground">
         {email ? (

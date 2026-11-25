@@ -75,6 +75,8 @@ export function withSrc(href: string, src: string): string {
 
 /** Where a trial starts. The app's own landing page repeats /app, so a sign-up link skips it. */
 export const APP_SIGNUP_URL = `${APP.url}/signup`;
+/** Where a member signs in. Not a sign-up: it carries no src, since it credits nothing. */
+export const APP_LOGIN_URL = `${APP.url}/login`;
 
 const KEPT = [SRC_PARAM, 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 

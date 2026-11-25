@@ -188,7 +188,7 @@ export default function FaqSection() {
                   <AccordionTrigger className="px-5 py-4 text-left font-headline text-base md:text-lg text-primary hover:no-underline hover:bg-secondary/30 transition-colors duration-150 [&>svg]:flex-shrink-0">
                     <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                       <div className="flex-shrink-0 p-1.5 bg-accent/15 rounded-lg">
-                        <item.icon className="h-4 w-4 text-accent" />
+                        <item.icon className="h-4 w-4 text-accent-ink" />
                       </div>
                       <span className="flex-1 text-left leading-snug">{item.question}</span>
                       <span className={`hidden sm:inline-flex flex-shrink-0 items-center text-xs px-2.5 py-0.5 rounded-full font-body font-medium border whitespace-nowrap ${item.categoryStyle}`}>

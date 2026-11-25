@@ -475,7 +475,7 @@ export default function SplitTimeCalculatorForm() {
       {calculatedSplits && calculatedSplits.length > 0 && (
         <Card className="mt-8 shadow-lg border-border/50">
           <CardHeader>
-            <CardTitle className="text-2xl text-accent flex items-center">
+            <CardTitle className="text-2xl text-accent-ink flex items-center">
               <BarChart3 className="mr-3 h-7 w-7" /> {gpxFile && parsedGpxData ? 'AI-Powered Race Splits' : 'Calculated Race Splits'}
             </CardTitle>
             <CardDescription className="font-body">
@@ -534,7 +534,7 @@ export default function SplitTimeCalculatorForm() {
        {calculatedSplits && calculatedSplits.length === 0 && !error && (
           <Card className="mt-8 shadow-lg border-border/50">
              <CardHeader>
-                <CardTitle className="text-2xl text-accent flex items-center">
+                <CardTitle className="text-2xl text-accent-ink flex items-center">
                     <Info className="mr-3 h-7 w-7" /> No Splits to Display
                 </CardTitle>
             </CardHeader>
