@@ -31,7 +31,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({ dayPlan }) => {
             {getIcon()}
           </div>
           <div>
-            <h3 className="font-heading font-bold text-slate-900 text-xl uppercase tracking-tight">{dayPlan.day}</h3>
+            <h3 className="font-headline font-bold text-slate-900 text-xl uppercase tracking-tight">{dayPlan.day}</h3>
             <p className="text-sm text-slate-500 font-medium">{dayPlan.title}</p>
           </div>
         </div>
@@ -44,7 +44,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({ dayPlan }) => {
           <div className="flex items-start gap-4 p-4 bg-slate-50 rounded border-l-4 border-slate-900">
             <Info className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
             <div>
-              <span className="font-heading font-bold text-slate-900 text-sm uppercase block mb-1">Focus</span>
+              <span className="font-headline font-bold text-slate-900 text-sm uppercase block mb-1">Focus</span>
               <p className="text-slate-700 text-sm leading-relaxed">{dayPlan.focus}</p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const WorkoutCard: React.FC<WorkoutCardProps> = ({ dayPlan }) => {
                 <ul className="space-y-4">
                   {dayPlan.mainWorkout.map((item, idx) => (
                     <li key={idx} className="flex items-start gap-4 text-slate-900 text-sm font-semibold">
-                      <div className="w-6 h-6 rounded bg-slate-900 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5 font-heading">
+                      <div className="w-6 h-6 rounded bg-slate-900 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5 font-headline">
                         {idx + 1}
                       </div>
                       <span className="leading-relaxed">{item}</span>

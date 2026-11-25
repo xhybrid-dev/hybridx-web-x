@@ -52,9 +52,9 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/trail': '2026-11-25',
   '/training': '2026-11-25',
   '/contact': '2026-11-25',
-  '/shop-terms': '2026-10-02',
+  '/shop-terms': '2026-11-25',
   '/terms': '2026-11-25',
-  '/guides': '2026-11-10',
-  '/guides/how-we-write': '2026-11-10',
+  '/guides': '2026-11-25',
+  '/guides/how-we-write': '2026-11-25',
   '/hyrox-glasgow-2027': '2026-11-25',
 };
