@@ -21,9 +21,9 @@ import { GpxStream, RealScreen, UsbTree } from '@/components/trail/Steps';
 import styles from './trail.module.css';
 
 /*
- * trail.hybridx.club: the page for HybridX Trail, breadcrumb navigation for
- * UNA Watch. Served at /trail on hybridx.club and at the root of
- * trail.hybridx.club (the middleware's rewrite, as for Race and Streak).
+ * hybridx.club/trail: the page for HybridX Trail, breadcrumb navigation for
+ * UNA Watch. Canonical is https://hybridx.club/trail; it once named
+ * trail.hybridx.club, which has no DNS record.
  *
  * The third sibling. It shares the HybridX mark, UNA's teal, the watch render,
  * the UNA section and the footer (components/una-app/), and takes its own look
@@ -55,7 +55,7 @@ import styles from './trail.module.css';
  *     as for the other two pages.
  */
 
-const URL_CANONICAL = 'https://trail.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/trail';
 
 const TITLE = 'HybridX Trail — follow the line on UNA Watch';
 const DESCRIPTION =

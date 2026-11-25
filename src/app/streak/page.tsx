@@ -20,12 +20,11 @@ import { BADGES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
 import styles from './streak.module.css';
 
 /*
- * streak.hybridx.club: the page for HybridX Streak, the weekly training
+ * hybridx.club/streak: the page for HybridX Streak, the weekly training
  * streak for UNA Watch.
  *
- * Served at /streak on hybridx.club and at the root of streak.hybridx.club;
- * the middleware rewrites the subdomain's "/" here. Canonical is the
- * subdomain.
+ * Canonical is https://hybridx.club/streak. It once named streak.hybridx.club, which
+ * has no DNS record.
  *
  * The Race page's sibling, deliberately not its twin. They share the
  * HybridX mark, UNA's teal, the watch render, the UNA section and the footer
@@ -57,7 +56,7 @@ import styles from './streak.module.css';
  *     (see the Race page).
  */
 
-const URL_CANONICAL = 'https://streak.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/streak';
 
 const TITLE = 'HybridX Streak — the weekly training streak for UNA Watch';
 const DESCRIPTION =

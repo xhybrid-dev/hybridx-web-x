@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-// The social card for streak.hybridx.club, in the page's own palette: a night
+// The social card for hybridx.club/streak, in the page's own palette: a night
 // sky warming to dawn, the headline in plain type, and five peaks
 // rising left to right like the climb, lime flags on the ones summited.
 // Rendered once at build time.

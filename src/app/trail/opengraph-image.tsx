@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { bounds, RIDGE_LOOP } from '@/lib/trail-terrain';
 
-// The social card for trail.hybridx.club, in the film's palette: black, the
+// The social card for hybridx.club/trail, in the film's palette: black, the
 // Ridge loop as one orchid line, and the headline. Rendered once at build time.
 
 export const alt = 'HybridX Trail for UNA Watch: follow the line with UNA.';

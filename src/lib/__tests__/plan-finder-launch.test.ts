@@ -1,54 +1,43 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NextRequest } from 'next/server';
-import { middleware } from '../../../middleware';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
 import { planFinderMode } from '@/lib/plan-finder/launch';
 
-// The launch switch and the experiment split (docs/03, P6).
-
-afterEach(() => {
-  vi.unstubAllEnvs();
-  vi.restoreAllMocks();
-});
-
-const get = (url: string) => middleware(new NextRequest(url, { headers: { host: new URL(url).host } }));
+// The launch switch. The experiment split it once described is over: see launch.ts.
 
 describe('PLAN_FINDER_MODE', () => {
-  it('is off unless it says on or experiment', () => {
+  it('is off unless it says on', () => {
     expect(planFinderMode(undefined)).toBe('off');
     expect(planFinderMode('')).toBe('off');
     expect(planFinderMode('On')).toBe('off');
     expect(planFinderMode('true')).toBe('off');
     expect(planFinderMode('on')).toBe('on');
-    expect(planFinderMode('experiment')).toBe('experiment');
   });
 
-  it('leaves the homepage alone and cacheable when not experimenting', () => {
-    vi.stubEnv('PLAN_FINDER_MODE', 'on');
-    const res = get('https://hybridx.club/');
-    expect(res.headers.get('x-middleware-rewrite')).toBeNull();
-    expect(res.headers.get('cache-control')).toBeNull();
+  it('reads the old "experiment" value as on, so no stale setting turns the finder off', () => {
+    expect(planFinderMode('experiment')).toBe('on');
   });
 
-  it('splits "/" between the two arms, uncached, keeping the query string', () => {
-    vi.stubEnv('PLAN_FINDER_MODE', 'experiment');
-    vi.spyOn(Math, 'random').mockReturnValueOnce(0.1).mockReturnValueOnce(0.9);
-    const control = get('https://hybridx.club/?utm_source=ig');
-    const armA = get('https://hybridx.club/?utm_source=ig');
-    expect(control.headers.get('x-middleware-rewrite')).toBe('https://hybridx.club/home-control?utm_source=ig');
-    expect(armA.headers.get('x-middleware-rewrite')).toBeNull();
-    for (const res of [control, armA]) expect(res.headers.get('cache-control')).toBe('private, no-store');
+  it('is on in apphosting.yaml', () => {
+    const yaml = readFileSync(join(process.cwd(), 'apphosting.yaml'), 'utf8');
+    expect(yaml).toMatch(/variable: PLAN_FINDER_MODE\s+value: "on"/);
   });
+});
 
-  it('only splits the homepage of the main site', () => {
-    vi.stubEnv('PLAN_FINDER_MODE', 'experiment');
-    expect(get('https://hybridx.club/books').headers.get('x-middleware-rewrite')).toBeNull();
-    // The race subdomain's root is its own page, as before.
-    expect(get('https://race.hybridx.club/').headers.get('x-middleware-rewrite')).toBe('https://race.hybridx.club/race');
+describe('the homepage control arm', () => {
+  it('has no page, and its old address redirects to the homepage', () => {
+    expect(existsSync(join(process.cwd(), 'src/app/home-control/page.tsx'))).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const config = require('../../../next.config.js') as { redirects: () => Promise<{ source: string; destination: string; permanent: boolean }[]> };
+    return config.redirects().then((redirects) => {
+      expect(redirects).toContainEqual({ source: '/home-control', destination: '/', permanent: true });
+    });
   });
+});
 
-  it('sends a direct visit to the control page back to the homepage', () => {
-    const res = get('https://hybridx.club/home-control?x=1');
-    expect(res.status).toBe(307);
-    expect(res.headers.get('location')).toBe('https://hybridx.club/?x=1');
+describe('middleware', () => {
+  it('is not at the repository root, where Next ignores it while the app is under src/', () => {
+    expect(existsSync(join(process.cwd(), 'middleware.ts'))).toBe(false);
+    expect(existsSync(join(process.cwd(), 'src/app/page.tsx'))).toBe(true);
   });
 });

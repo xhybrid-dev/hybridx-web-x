@@ -81,6 +81,22 @@
   family name is the variable's name, and CSS family names are case-insensitive,
   so `inter` would merge with the site's Google `Inter`.
 
+- **Security headers live in `security-headers.js`, applied from `next.config.js`;
+  there is no `middleware.ts`.** A middleware file at the repository root is
+  ignored by Next when the app is under `src/app`, so the old one never ran: the
+  live site sent none of its headers, the 50/50 plan finder split never split
+  (every visit was the plan finder), and the subdomain rewrites for
+  race./streak./trail. were dead (those hosts have no DNS). All of that is gone;
+  `/home-control` redirects to `/` and `PLAN_FINDER_MODE` is `"on"`. If one is
+  ever needed again it goes in `src/` (`src/middleware.ts`, or `src/proxy.ts` on
+  Next 16), `plan-finder-launch.test.ts` fails on a root file, and it must not
+  make `/` uncacheable or serve crawlers a different homepage. The full CSP is
+  report-only (`/api/csp-report` logs what browsers would have blocked); move it
+  to enforcing only after the log has been quiet for a week. A page whose URL is
+  a secret (`/d/<token>`, a shop `/thanks`) gets `no-referrer`, `no-store` and
+  `noindex` from the same file, and `security-headers.test.ts` checks every
+  `SHOP_EVENTS` path is covered.
+
 - **`LEAD_BRIDGE_SECRET` is not interchangeable with `CRON_SECRET`.** The bridge
   credential authorises pushing leads into the mailing system; the cron credential
   only authorises running maintenance. A scheduler job should not be able to do the

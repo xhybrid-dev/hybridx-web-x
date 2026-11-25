@@ -48,16 +48,6 @@ const NOINDEX = [
   '/hyrox-glasgow-2027/sample',
 ];
 
-/** Pages whose canonical address is a subdomain, so their hybridx.club copy is not listed. */
-const SUBDOMAIN_CANONICAL: Record<string, string> = {
-  '/race': 'https://race.hybridx.club',
-  '/streak': 'https://streak.hybridx.club',
-  '/trail': 'https://trail.hybridx.club',
-};
-
-/** Reached only by a rewrite and redirected to "/" on a direct visit. */
-const REDIRECTED = ['/home-control'];
-
 /**
  * Pages that are noindex only some of the time. The shop page is noindex while
  * sales are not open and is listed only while they are; 'lists the shop page
@@ -80,7 +70,7 @@ beforeEach(() => {
 describe('the main sitemap', () => {
   it('lists every page that is not deliberately left out', async () => {
     const listed = new Set((await sitemap()).map((e) => e.url.replace(BASE, '') || '/'));
-    const left = new Set([...NOINDEX, ...Object.keys(SUBDOMAIN_CANONICAL), ...REDIRECTED]);
+    const left = new Set([...NOINDEX]);
 
     const missing = pageRoutes()
       .map((p) => p.route)
@@ -102,7 +92,7 @@ describe('the main sitemap', () => {
     const routes = new Set(pageRoutes().map((p) => p.route));
     const page = (u: string) => (/^\/guides\/[a-z0-9-]+$/.test(u) && !routes.has(u) ? '/guides/[slug]' : u);
     for (const u of urls) expect(routes.has(page(u)), `${u} has no page`).toBe(true);
-    for (const r of [...NOINDEX, ...Object.keys(SUBDOMAIN_CANONICAL), ...REDIRECTED]) {
+    for (const r of [...NOINDEX]) {
       expect(urls, r).not.toContain(r);
     }
     expect(urls.some((u) => u.startsWith('/admin') || u.startsWith('/d/'))).toBe(false);
@@ -114,8 +104,12 @@ describe('the main sitemap', () => {
       const src = readFileSync(byRoute.get(r)!, 'utf8');
       expect(NOINDEX_MARKER.test(src), `${r} is listed as noindex but is not`).toBe(true);
     }
-    for (const [r, canonical] of Object.entries(SUBDOMAIN_CANONICAL)) {
-      expect(readFileSync(byRoute.get(r)!, 'utf8'), `${r} canonical`).toContain(`'${canonical}'`);
+    // A page on the main site names the main site as its canonical: the three
+    // single-app pages once named subdomains that have no DNS record.
+    for (const r of ['/race', '/streak', '/trail']) {
+      const src = readFileSync(byRoute.get(r)!, 'utf8');
+      expect(src, `${r} canonical`).toContain(`'https://hybridx.club${r}'`);
+      expect(src, `${r} canonical`).not.toMatch(/https:\/\/(race|streak|trail)\.hybridx\.club/);
     }
   });
 
@@ -170,31 +164,17 @@ describe('the main sitemap', () => {
   });
 });
 
-describe('the subdomain sitemaps', () => {
-  it.each([
-    ['race.hybridx.club', 'https://race.hybridx.club'],
-    ['streak.hybridx.club', 'https://streak.hybridx.club'],
-    ['trail.hybridx.club', 'https://trail.hybridx.club'],
-  ])('%s lists only its own address', async (host, root) => {
-    requestHeaders = { 'x-forwarded-host': host };
-    expect((await sitemap()).map((e) => e.url)).toEqual([root]);
-  });
-
-  it('reads the forwarded host before the plain one, and the first of several', async () => {
-    requestHeaders = { host: 'internal.run.app', 'x-forwarded-host': 'trail.hybridx.club, proxy.example' };
-    expect((await sitemap()).map((e) => e.url)).toEqual(['https://trail.hybridx.club']);
-  });
-
-  it('works for a local subdomain host', async () => {
-    requestHeaders = { host: 'race.localhost:9002' };
-    expect((await sitemap()).map((e) => e.url)).toEqual(['https://race.hybridx.club']);
-  });
-
-  it('gives the full sitemap on the main host and on the backend address', async () => {
-    for (const host of ['hybridx.club', 'www.hybridx.club', 'hybridx-web-x--hybridx-hub.europe-west4.hosted.app', '']) {
+describe('any host', () => {
+  it('gets the full sitemap, whatever host asked', async () => {
+    for (const host of ['hybridx.club', 'www.hybridx.club', 'race.hybridx.club', 'hybridx-web-x--hybridx-hub.europe-west4.hosted.app', '']) {
       requestHeaders = host ? { 'x-forwarded-host': host } : {};
       expect((await sitemap()).length, host || '(no host)').toBeGreaterThan(20);
     }
+  });
+
+  it('lists the three single-app pages on the main host', async () => {
+    const urls = (await sitemap()).map((e) => e.url);
+    for (const r of ['/race', '/streak', '/trail']) expect(urls).toContain(`${BASE}${r}`);
   });
 });
 

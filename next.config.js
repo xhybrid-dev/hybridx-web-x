@@ -1,3 +1,5 @@
+const { buildHeaders } = require('./security-headers');
+
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -18,16 +20,10 @@ const nextConfig = {
   outputFileTracingExcludes: {
     '*': ['./private/shop-source/**'],
   },
+  // Every response gets the security headers; see security-headers.js.
+  poweredByHeader: false,
   async headers() {
-    return [
-      {
-        // Gated lead magnets: keep the PDFs out of search results so visitors
-        // arrive via the page (and the email capture) rather than landing on a
-        // bare file. Direct links still work for anyone we send one to.
-        source: '/:path*.pdf',
-        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
-      },
-    ];
+    return buildHeaders();
   },
   async redirects() {
     return [
@@ -36,6 +32,14 @@ const nextConfig = {
       {
         source: '/hyrox-domination',
         destination: '/free-hyrox-plan',
+        permanent: true,
+      },
+      // The plan finder experiment's control arm. The experiment is over (the
+      // plan finder is on for everyone), and the page must not be a second,
+      // indexable copy of the homepage.
+      {
+        source: '/home-control',
+        destination: '/',
         permanent: true,
       },
       // Legacy "early access" waitlist page — the app is live; /app is the

@@ -1,5 +1,7 @@
 # Entry funnel: findings, status and launch steps
 
+> **25 November 2026.** The `middleware.ts` described below sat at the repository root while the app is under `src/app/`, so Next ignored it: the experiment never split visits (every visit was the plan finder), and the subdomain rewrites and security headers never ran. It is deleted. `PLAN_FINDER_MODE` is `on`, `/home-control` redirects to `/`, headers are in `security-headers.js`, and the three UNA pages are canonical on hybridx.club. The sections below are the history of the build, not the current setup.
+
 The plan finder in front of the homepage, built from the handover package in
 `handover/entry-funnel/` (start with its `CLAUDE_CODE_BRIEF.md`). This file
 has three parts: [status and launch steps](#status), the owner's

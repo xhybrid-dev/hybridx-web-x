@@ -15,11 +15,11 @@ import LiveWatch from '@/components/race/LiveWatch';
 import RaceBuilder from '@/components/race/RaceBuilder';
 
 /*
- * race.hybridx.club: the page for HybridX Race, the HYROX-format race timer
+ * hybridx.club/race: the page for HybridX Race, the HYROX-format race timer
  * for UNA Watch.
  *
- * Served at /race on hybridx.club and at the root of race.hybridx.club; the
- * middleware rewrites the subdomain's "/" here. Canonical is the subdomain.
+ * Canonical is https://hybridx.club/race. It once named race.hybridx.club, which has no
+ * DNS record, so Google was told to prefer a host that does not exist.
  *
  * Standalone like the ATHX funnel: no site header or footer, dark whatever
  * the site theme is. Styles and the shared parts (wordmark, UNA section,
@@ -55,7 +55,7 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  *   - Anything on the roadmap is labelled as the roadmap.
  */
 
-const URL_CANONICAL = 'https://race.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/race';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
 const DESCRIPTION =
