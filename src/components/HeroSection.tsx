@@ -38,7 +38,7 @@ const trainingOptions = [
 const stats = [
   { icon: Users,      value: "2,000+", label: "Athletes Trained"  },
   { icon: BookMarked, value: "1800",   label: "Books Sold"        },
-  { icon: TrendingUp, value: "200+",   label: "App Members"       },
+  { icon: TrendingUp, value: "£5/mo",  label: "14-Day Free Trial" },
 ];
 
 export default function HeroSection() {

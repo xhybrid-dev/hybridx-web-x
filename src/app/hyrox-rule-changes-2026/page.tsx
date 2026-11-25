@@ -624,8 +624,8 @@ export default function HyroxRuleChanges2026() {
               Training for a race this season?
             </h2>
             <p className="mx-auto mb-8 max-w-2xl font-body text-lg text-white/75">
-              The HybridX app builds running and strength into one plan around your race date, and
-              pushes your sessions straight to your Garmin.
+              The HybridX app builds running and strength into one plan lined up to your race date,
+              with session logging and Edge Coach to answer your technique and pacing questions.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button size="lg" className="bg-accent font-headline text-black hover:bg-accent/90" asChild>
@@ -634,7 +634,7 @@ export default function HyroxRuleChanges2026() {
                   event="cta_app_click"
                   eventParams={{ location: 'rules_2026_footer_cta' }}
                 >
-                  Start free at hybridx.club <ArrowRight className="ml-2 h-4 w-4" />
+                  Start your 14-day free app trial <ArrowRight className="ml-2 h-4 w-4" />
                 </TrackedLink>
               </Button>
               <Button
@@ -653,8 +653,8 @@ export default function HyroxRuleChanges2026() {
               <Link href="/free-hyrox-plan" className="hover:text-accent">
                 Free 12-week Hyrox plan
               </Link>
-              <Link href="/calculators/split-time-calculator" className="hover:text-accent">
-                Hyrox split time calculator
+              <Link href="/calculators/hyrox-pacer" className="hover:text-accent">
+                HYROX pace calculator
               </Link>
               <Link href="/hyrox-training-plan" className="hover:text-accent">
                 12-week training plan

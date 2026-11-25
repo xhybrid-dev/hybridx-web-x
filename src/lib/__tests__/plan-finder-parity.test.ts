@@ -75,11 +75,17 @@ describe('collect-core port', () => {
 });
 
 describe('analytics port', () => {
-  // This repo's catalog changed two rows after hand-over (the owner's ATHX and ULTRA links),
-  // which shows up in generated events as the catalog label and a destination type. Neither is
-  // counted by the rollup; both are normalised before comparing the generators themselves.
+  // This repo's catalog changed two rows after hand-over (the owner's ATHX and ULTRA links, which
+  // are Amazon affiliate links, so also now marked affiliate), which shows up in generated events
+  // as the catalog label, a destination type and the affiliate flag on those products' clicks. The
+  // rollup does not count any of the three; all are normalised before comparing the generators
+  // themselves.
   const normalise = (events: Record<string, unknown>[]) =>
-    events.map((e) => ({ ...e, ctx: { ...(e.ctx as object), catalog: '-' }, ...(e.n === 'result_click' ? { dest: '-' } : {}) }));
+    events.map((e) => ({
+      ...e,
+      ctx: { ...(e.ctx as object), catalog: '-' },
+      ...(e.n === 'result_click' ? { dest: '-', affiliate: '-' } : {}),
+    }));
 
   const CASES = [
     { days: 7, sessionsPerDay: 150, seed: 1, startDate: '2026-09-01' },

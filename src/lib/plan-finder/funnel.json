@@ -248,21 +248,21 @@
     "athx": {
       "id": "athx",
       "status": "live",
-      "destinationType": "amazon",
+      "destinationType": "amazon-affiliate",
       "kind": "PAPERBACK",
       "badge": "PAPERBACK",
       "head": "the ATHX 2027 training book",
       "title": "ATHX 2027 training book",
-      "meta": "Men's and women's editions",
+      "meta": "Men's edition. The women's edition is linked on the ATHX 2027 page.",
       "price": "On Amazon",
       "cta": "View on Amazon",
-      "href": "https://link.amazon/B073SX15W",
-      "affiliate": false
+      "href": "https://link.amazon/B0g5sdBgd",
+      "affiliate": true
     },
     "ultra": {
       "id": "ultra",
       "status": "live",
-      "destinationType": "amazon",
+      "destinationType": "amazon-affiliate",
       "kind": "PAPERBACK",
       "badge": "PAPERBACK",
       "head": "ULTRA STRENGTH",
@@ -270,8 +270,8 @@
       "meta": "16-week hilly 50K plan",
       "price": "On Amazon",
       "cta": "View on Amazon",
-      "href": "https://link.amazon/B0bvDfu46",
-      "affiliate": false
+      "href": "https://link.amazon/B0dzb9lZh",
+      "affiliate": true
     },
     "vdot": {
       "id": "vdot",
@@ -464,8 +464,8 @@
       "label": "paperback books sold"
     },
     {
-      "value": "200+",
-      "label": "members using the app"
+      "value": "£5/month",
+      "label": "app with a 14-day free trial"
     }
   ],
   "prompts": [
@@ -552,7 +552,7 @@
     },
     {
       "q": "What is compromised running and why does it matter for Hyrox?",
-      "a": "Compromised running is running while your legs and breathing are already loaded from the station before, such as a sled push or wall balls. Every kilometre of a Hyrox race is run this way, so you will be slower than on a fresh run. Practising it in training, as the free 12-week running plan does, is how you keep the pace from falling apart halfway through."
+      "a": "Compromised running is running while your legs and breathing are already loaded from the station before, such as a sled push or wall balls. Seven of the eight 1km runs come straight after a station, so you will be slower than on a fresh run. Practising it in training, as the free 12-week running plan does, is how you keep the pace from falling apart halfway through."
     },
     {
       "q": "How do I access the HybridX app and what does it include?",
@@ -651,5 +651,5 @@
       ]
     }
   },
-  "productMapNotes": "ATHX 2027 and ULTRA STRENGTH links were supplied by the owner on 29 September 2026 (catalogVersion 2026-09-29.2). They are Amazon links, not amzn.to affiliate short links, so destinationType is 'amazon' and affiliate is false; change both if they are re-issued as affiliate links. Titles not yet published (XENOM book, HYROX Youngstars book) have no entry: route those goals to the nearest live product and record the demand (see docs/04)."
+  "productMapNotes": "ATHX 2027 (men's, B0HH8QQF9N; women's, B0HH8RGVN1) and ULTRA STRENGTH (B0H5CCCYNH) link.amazon affiliate links were supplied by the owner on 25 November 2026, replacing the links of 29 September 2026, which redirected through a third-party shortener and were wrongly marked as not affiliate. Titles not yet published (XENOM book, HYROX Youngstars book) have no entry: route those goals to the nearest live product and record the demand (see docs/04)."
 }

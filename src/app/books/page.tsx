@@ -5,14 +5,15 @@ import Footer from '@/components/Footer';
 import TrackedLink from '@/components/TrackedLink';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpenCheck, ShoppingCart, ArrowUpRight } from 'lucide-react';
+import { BookOpen, BookOpenCheck, ShoppingCart, ArrowUpRight } from 'lucide-react';
+import AffiliateDisclosure from '@/components/AffiliateDisclosure';
 import { createMetadata, createBookSchema, SITE_CONFIG } from '@/lib/seo';
 import { books } from '@/lib/books';
 
 export const metadata = createMetadata({
   title: 'Hyrox Training Books | Paperback Plans by HybridX',
   description:
-    'HybridX Hyrox training books on Amazon — 12-week paperback plans for beginners, elite competitors, home training, and 45 advanced Hyrox workouts. For the athlete who wants a plan on paper.',
+    'HybridX training books on Amazon: 12-week Hyrox plans for beginners, elite athletes and home training, 45 advanced workouts, ATHX 2027 plans and a 16-week ultra plan.',
   path: '/books',
   keywords: [
     'hyrox training book',
@@ -53,10 +54,12 @@ export default function BooksPage() {
               Hyrox Training Books
             </h1>
             <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
-              For the athlete who wants to unplug and train from a printed page. Four 12-week paperback
-              programmes covering every level, from your first Hyrox to advanced competition prep — available
-              on Amazon.
+              For the athlete who wants to unplug and train from a printed page. Three 12-week Hyrox
+              programmes from your first race to advanced competition prep, a library of 45 advanced
+              workouts, ATHX 2027 plans for men and women, and a 16-week plan for a hilly 50K, all on
+              Amazon.
             </p>
+            <AffiliateDisclosure className="mx-auto mt-4 max-w-2xl" />
           </div>
         </section>
 
@@ -72,13 +75,28 @@ export default function BooksPage() {
                   <div className="flex flex-col sm:flex-row">
                     <div className="w-full sm:w-2/5 flex-shrink-0 p-6 flex items-center justify-center bg-muted/10">
                       <div className="relative w-full max-w-[180px] aspect-[2/3]">
-                        <Image
-                          src={book.imageUrl}
-                          alt={book.title}
-                          fill
-                          style={{ objectFit: 'contain' }}
-                          sizes="180px"
-                        />
+                        {book.imageUrl ? (
+                          <Image
+                            src={book.imageUrl}
+                            alt={book.title}
+                            fill
+                            style={{ objectFit: 'contain' }}
+                            sizes="180px"
+                          />
+                        ) : (
+                          // No cover chosen yet: a plain one, so the card still reads as a book.
+                          <div
+                            role="img"
+                            aria-label={book.title}
+                            className="flex h-full w-full flex-col items-center justify-between rounded-md bg-black p-4 text-center text-white shadow-md"
+                          >
+                            <BookOpen className="h-6 w-6 text-accent" aria-hidden="true" />
+                            <span className="font-headline text-sm font-bold uppercase leading-tight tracking-wide">
+                              {book.title.split(':')[0]}
+                            </span>
+                            <span className="font-headline text-[10px] uppercase tracking-widest text-accent">HybridX</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col flex-grow p-6">
@@ -100,7 +118,7 @@ export default function BooksPage() {
                           <TrackedLink
                             href={book.amazonUrl}
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="sponsored noopener noreferrer"
                             event="cta_book_click"
                             eventParams={{ book_id: book.id, location: 'books_page' }}
                           >
@@ -113,7 +131,8 @@ export default function BooksPage() {
                 </Card>
               ))}
             </div>
-            <p className="text-center text-sm text-muted-foreground font-body mt-12">
+            <AffiliateDisclosure className="mt-10 text-center" />
+            <p className="text-center text-sm text-muted-foreground font-body mt-6">
               Prefer training day-by-day with tracking built in? Try{' '}
               <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'books_page' }} className="text-accent hover:underline font-semibold">
                 the HybridX app

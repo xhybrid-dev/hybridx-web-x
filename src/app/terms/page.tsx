@@ -169,6 +169,11 @@ export default function TermsPage() {
             We link to other websites, such as event organisers, Amazon and the UNA app store. We do not control
             them and are not responsible for their content or how they use your information.
           </p>
+          <p>
+            Some links to Amazon are affiliate links. As an Amazon Associate, HybridX earns from qualifying
+            purchases, at no extra cost to you. We say so beside the links, and they do not change which books we
+            recommend or what we write about them.
+          </p>
 
           <h2 id="independence" className={h2}>
             Independence

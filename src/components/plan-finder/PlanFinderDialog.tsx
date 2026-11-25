@@ -679,6 +679,11 @@ export default function PlanFinderDialog(props: PlanFinderDialogProps) {
               </div>
             </div>
           </div>
+          {(p.affiliate || r.secondary.some((x) => x.affiliate)) && (
+            <p className="mt-4 text-xs leading-relaxed text-hx-mute max-lg:order-3" data-affiliate-disclosure>
+              Affiliate disclosure: links to Amazon are affiliate links. As an Amazon Associate, HybridX earns from qualifying purchases, at no extra cost to you.
+            </p>
+          )}
           {r.secondary.length > 0 && <div className="hx-label mt-7 text-hx-mute max-lg:order-4">{COPY.result.alsoUseful}</div>}
           {r.secondary.map((x, i) => {
             const link = productLink(x);

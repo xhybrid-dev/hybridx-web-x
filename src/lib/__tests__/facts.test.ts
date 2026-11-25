@@ -200,6 +200,25 @@ describe('the site copy agrees with the product facts', () => {
     expect(asUsers, 'the 2,000 are athletes who trained with HybridX plans, mostly book buyers').toEqual([]);
   });
 
+  it('never states a number of app members, users or subscribers (NOT_CLAIMED)', () => {
+    // Whole-file, so a stat split over two lines (a JSON "value" then "label", or a
+    // { value, label } pair) is caught as well as a sentence. "200+ App Members"
+    // sat on the homepage and in the plan finder's proof strip for months, and
+    // the athlete-count test above only looked for the figure 2,000.
+    const people = '(?:app\\s+)?(?:members|users|subscribers)';
+    const sentence = new RegExp(`\\b\\d[\\d,]*\\+?\\s+(?:active\\s+|paying\\s+)?${people}\\b`, 'gi');
+    const pair = new RegExp(`["']?value["']?\\s*:\\s*["']\\d[\\d,]*\\+?["']\\s*,\\s*["']?label["']?\\s*:\\s*["'][^"']*\\b${people}\\b`, 'gi');
+    const wrong: string[] = [];
+    for (const { file, lines } of COPY) {
+      const text = lines.join('\n');
+      for (const re of [sentence, pair]) {
+        re.lastIndex = 0;
+        for (const m of text.matchAll(re)) wrong.push(`${file}: "${m[0].replace(/\s+/g, ' ')}"`);
+      }
+    }
+    expect(wrong, 'there is no published app user count (src/lib/facts/product.ts, NOT_CLAIMED)').toEqual([]);
+  });
+
   it('calls the price very affordable, never the most affordable or the cheapest', () => {
     const wrong = [
       ...findInCopy(/\bmost affordable\b/gi),

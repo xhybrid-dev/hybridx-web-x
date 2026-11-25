@@ -56,7 +56,7 @@ const faqSchema = createFAQSchema([
   { question: 'Can a beginner do Hyrox?', answer: 'Yes. Hyrox is designed to be inclusive — every station uses accessible movements. With a structured 12-week plan, complete beginners can finish a Hyrox race comfortably.' },
   { question: 'How many days per week should I train for Hyrox?', answer: 'Beginners: 3–4 days per week. Intermediate and advanced athletes: 4–6 days. The split typically includes 2–3 running sessions and 2 strength/station sessions per week.' },
   { question: 'What is compromised running in Hyrox?', answer: 'Compromised running means running immediately after a fatiguing station effort — exactly what Hyrox requires. Only your first 1km is on fresh legs. Training this specifically is the single biggest performance lever.' },
-  { question: 'What shoes should I wear for Hyrox?', answer: 'You need a hybrid or cross-training shoe — stable enough for sled work (152kg) but cushioned enough for 8km of running. Pure running shoes are too soft for the sleds; lifting shoes are too rigid for running.' },
+  { question: 'What shoes should I wear for Hyrox?', answer: 'You need a hybrid or cross-training shoe — stable enough for sled work (the sled push is 102kg to 202kg depending on your division) but cushioned enough for 8km of running. Pure running shoes are too soft for the sleds; lifting shoes are too rigid for running.' },
 ]);
 
 const phases = [
@@ -201,7 +201,7 @@ export default function HowToTrainForHyrox() {
           <div className="container mx-auto px-6 max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary mb-4">What Hyrox Actually Demands</h2>
             <p className="text-muted-foreground font-body mb-8 text-lg leading-relaxed">
-              Hyrox is a global fitness race with a fixed format: <strong>8 × 1km runs, each immediately followed by one functional workout station</strong>. The stations are always in the same order, at every event worldwide. Total distance is approximately 10km of running plus a full-body functional challenge.
+              Hyrox is a global fitness race with a fixed format: <strong>8 × 1km runs, each immediately followed by one functional workout station</strong>. The stations are always in the same order, at every event worldwide. Total running distance is 8km (8 × 1km) plus a full-body functional challenge.
             </p>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm font-body">

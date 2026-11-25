@@ -198,7 +198,7 @@ export function createBookSchema({
 }: {
   name: string;
   description: string;
-  image: string;
+  image?: string;
   url: string;
 }) {
   return {
@@ -206,7 +206,7 @@ export function createBookSchema({
     '@type': 'Book',
     name,
     description,
-    image,
+    ...(image ? { image } : {}),
     url,
     author: {
       '@type': 'Organization',

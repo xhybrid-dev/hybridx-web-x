@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { BookOpenCheck, ShoppingCart, ArrowUpRight, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
-import { books } from '@/lib/books';
+import { homepageBooks as books } from '@/lib/books';
+import AffiliateDisclosure from '@/components/AffiliateDisclosure';
 
 export default function AmazonBookPromotion() {
   return (
@@ -27,7 +28,7 @@ export default function AmazonBookPromotion() {
                 <div className="w-full md:w-1/3 flex-shrink-0 p-4 flex items-center justify-center bg-muted/10 md:rounded-l-lg md:rounded-tr-none rounded-t-lg">
                   <div className="relative w-full max-w-[200px] md:max-w-full aspect-[2/3]">
                     <Image
-                      src={book.imageUrl}
+                      src={book.imageUrl as string}
                       alt={book.title}
                       width={200} 
                       height={300}
@@ -51,7 +52,7 @@ export default function AmazonBookPromotion() {
                       <TrackedLink
                         href={book.amazonUrl}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="sponsored noopener noreferrer"
                         event="cta_book_click"
                         eventParams={{ book_id: book.id, location: 'book_promotion' }}
                       >
@@ -65,6 +66,7 @@ export default function AmazonBookPromotion() {
           ))}
         </div>
         <div className="mt-10 text-center">
+          <AffiliateDisclosure className="mb-4" />
           <Link
             href="/books"
             className="inline-flex items-center text-sm font-headline font-semibold text-foreground/80 hover:text-accent transition-colors"

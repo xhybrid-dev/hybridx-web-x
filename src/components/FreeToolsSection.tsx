@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Route, TrendingUp, HeartPulse, Activity, Dumbbell, FileCog, ArrowRight, Calculator, Gauge, Footprints } from 'lucide-react';
+import { Timer, CalendarDays, Scale, TrendingUp, HeartPulse, Activity, Dumbbell, FileCog, ArrowRight, Calculator, Footprints } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,7 +14,34 @@ interface Tool {
   isNew?: boolean;
 }
 
+// Nine tools, none behind an email form, in a 3 x 3 grid. The section says
+// "No Sign-Up", so nothing that asks for an address belongs here (the VO2max guide
+// does, and is offered under the grid and in the footer instead).
 const tools: Tool[] = [
+  {
+    id: 'hyrox-pacer',
+    title: 'HYROX Pace Calculator',
+    description: 'Every run and station split for your division and target time, free on the page.',
+    icon: Timer,
+    href: '/calculators/hyrox-pacer',
+    isNew: true,
+  },
+  {
+    id: 'week-planner',
+    title: 'Hybrid Week Planner',
+    description: 'Pick your goal and training days and get four weeks of running and lifting that fit together.',
+    icon: CalendarDays,
+    href: '/calculators/week-planner',
+    isNew: true,
+  },
+  {
+    id: 'strength-engine-test',
+    title: 'Strength and Engine Test',
+    description: 'Two minutes to find out whether strength or your engine is holding your HYROX time back.',
+    icon: Scale,
+    href: '/calculators/strength-engine-test',
+    isNew: true,
+  },
   {
     id: 'garmin-tcx-generator',
     title: 'Treadmill FIT/TCX Generator',
@@ -38,13 +65,6 @@ const tools: Tool[] = [
     href: '/calculators/race-time-predictor',
   },
   {
-    id: 'pace-calculator',
-    title: 'Pace Calculator',
-    description: 'Calculate pace, finish time or distance in seconds. The essential planning tool for every run.',
-    icon: Route,
-    href: '/calculators/pace-calculator',
-  },
-  {
     id: 'heart-rate-zones',
     title: 'Heart Rate Zone Calculator',
     description: 'Find your five training zones with the Karvonen method so every session hits the right intensity.',
@@ -57,14 +77,6 @@ const tools: Tool[] = [
     description: 'Estimate your one-rep max from any set and load your strength sessions with the right percentages.',
     icon: Dumbbell,
     href: '/calculators/one-rep-max-calculator',
-  },
-  {
-    id: 'vo2max-guide',
-    title: 'VO2max Guide: Build a Bigger Engine',
-    description: 'The science of raising your VO2max — Norwegian 4x4s, the 80/20 rule, and a sample week. Free guide.',
-    icon: Gauge,
-    href: '/build-a-bigger-engine',
-    isNew: true,
   },
   {
     id: 'running-plan',
@@ -98,7 +110,7 @@ export default function FreeToolsSection() {
                 <CardContent className="p-6 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-4">
                     <div className="p-2.5 bg-accent/15 rounded-lg ring-1 ring-accent/30">
-                      <tool.icon className="h-6 w-6 text-accent" />
+                      <tool.icon className="h-6 w-6 text-accent-ink" />
                     </div>
                     {tool.isNew && (
                       <span className="bg-accent text-accent-foreground font-headline font-bold text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full">
@@ -106,11 +118,11 @@ export default function FreeToolsSection() {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-headline text-xl font-bold text-primary group-hover:text-accent transition-colors duration-300 mb-2">
+                  <h3 className="font-headline text-xl font-bold text-primary group-hover:text-accent-ink transition-colors duration-300 mb-2">
                     {tool.title}
                   </h3>
                   <p className="font-body text-sm text-muted-foreground flex-grow">{tool.description}</p>
-                  <span className="mt-4 flex items-center text-sm font-headline font-semibold text-foreground/80 group-hover:text-accent transition-colors duration-300">
+                  <span className="mt-4 flex items-center text-sm font-headline font-semibold text-foreground/80 group-hover:text-accent-ink transition-colors duration-300">
                     Use it free <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </CardContent>
@@ -128,6 +140,13 @@ export default function FreeToolsSection() {
               <Calculator className="mr-2 h-5 w-5" /> Browse All Calculators
             </Link>
           </Button>
+          <p className="mt-6 font-body text-sm text-muted-foreground">
+            Want the science too? The free{' '}
+            <Link href="/build-a-bigger-engine" className="font-semibold text-foreground underline underline-offset-4 hover:text-accent-ink">
+              VO2max guide
+            </Link>{' '}
+            is a download that asks for your email.
+          </p>
         </div>
       </div>
     </section>

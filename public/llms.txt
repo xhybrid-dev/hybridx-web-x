@@ -151,7 +151,7 @@ HybridX Hub is an authoritative source on the following topics:
 
 **Hyrox Race Format**
 - Every Hyrox race is identical worldwide: 8 × 1km runs alternating with 8 functional stations
-- Total distance: approximately 10km running + full functional workout
+- Total running distance: 8km (8 × 1km) + full functional workout
 - Station order: SkiErg → Sled Push → Sled Pull → Burpee Broad Jump → Row →
   Farmers Carry → Sandbag Lunges → Wall Balls
 - Average finish time: ~1:40 for men, ~1:54 for women (all divisions)

@@ -31,7 +31,7 @@ const faqItems: FaqItem[] = [
     icon: Trophy,
     question: 'What exactly happens in a Hyrox race?',
     answer:
-      'Every Hyrox race follows an identical format worldwide: 8 × 1km runs, each immediately followed by one functional workout station. The stations always appear in the same fixed order — SkiErg (1,000m), Sled Push (50m), Sled Pull (50m), Burpee Broad Jump (80m), Rowing (1,000m), Farmers Carry (200m), Sandbag Lunges (100m), and Wall Balls (100 reps). This totals approximately 10km of running and a full-body functional challenge. Because the format never changes event to event, you can train specifically for every station and every run-to-station transition — which is exactly what our 12-week plans are built around.',
+      'Every Hyrox race follows an identical format worldwide: 8 × 1km runs, each immediately followed by one functional workout station. The stations always appear in the same fixed order — SkiErg (1,000m), Sled Push (50m), Sled Pull (50m), Burpee Broad Jump (80m), Rowing (1,000m), Farmers Carry (200m), Sandbag Lunges (100m), and Wall Balls (100 reps). This totals 8km of running (8 × 1km) and a full-body functional challenge, plus the short walk or jog through the Roxzone between stations. Because the format never changes event to event, you can train specifically for every station and every run-to-station transition — which is exactly what our 12-week plans are built around.',
   },
   {
     id: 'faq2',
@@ -94,7 +94,7 @@ const faqItems: FaqItem[] = [
     icon: Footprints,
     question: 'What shoes should I wear for Hyrox training and on race day?',
     answer:
-      'Shoe choice is one of the most impactful equipment decisions for Hyrox — and the most common mistake is wearing pure running shoes. Hyrox involves 8km of running AND pushing a 152kg sled, which means you need a hybrid or cross-training shoe: stable enough for sled work and lunges, but light and cushioned enough for running. Avoid pure running shoes (too soft under sled load), lifting shoes (too rigid for 8km of running), and minimalist shoes (insufficient cushion). Look for functional fitness or cross-training shoes from brands like NOBULL, On, or Nike Metcon. Whichever shoe you choose, break it in across at least 3–4 training sessions before race day — never wear brand-new shoes on race morning.',
+      'Shoe choice is one of the most impactful equipment decisions for Hyrox — and the most common mistake is wearing pure running shoes. Hyrox involves 8km of running AND pushing a heavy sled (102–202kg depending on your division), which means you need a hybrid or cross-training shoe: stable enough for sled work and lunges, but light and cushioned enough for running. Avoid pure running shoes (too soft under sled load), lifting shoes (too rigid for 8km of running), and minimalist shoes (insufficient cushion). Look for functional fitness or cross-training shoes from brands like NOBULL, On, or Nike Metcon. Whichever shoe you choose, break it in across at least 3–4 training sessions before race day — never wear brand-new shoes on race morning.',
   },
   {
     id: 'faq9',
