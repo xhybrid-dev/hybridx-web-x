@@ -49,7 +49,8 @@ function copyFiles(dir: string): string[] {
   return out;
 }
 
-const COPY = [...copyFiles(path.join(ROOT, 'src')), path.join(ROOT, 'public/llms.txt')].map((file) => ({
+// /llms.txt is generated from src/lib/llms.ts, which is part of src.
+const COPY = [...copyFiles(path.join(ROOT, 'src'))].map((file) => ({
   file: path.relative(ROOT, file),
   lines: readFileSync(file, 'utf8').split('\n'),
 }));

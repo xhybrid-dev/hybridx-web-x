@@ -54,6 +54,7 @@ import { liveDeps } from '@/lib/guides/engine/live';
 import { runSearchHarvest } from '@/lib/guides/harvest/run';
 import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
+import { bearerMatches } from '@/lib/bearer';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
     return new NextResponse('Not configured', { status: 503 });
   }
 
-  if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!bearerMatches(request.headers.get('authorization'), secret)) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 

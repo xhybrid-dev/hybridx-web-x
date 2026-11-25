@@ -23,7 +23,21 @@ const nextConfig = {
   // Every response gets the security headers; see security-headers.js.
   poweredByHeader: false,
   async headers() {
-    return buildHeaders();
+    return [
+      ...buildHeaders(),
+      // The guides are read from Firestore on request. Without this each view waited for
+      // Firestore (430 to 1,040 ms, against 13 to 26 ms for a built page) on a single
+      // instance. Five minutes at the CDN keeps that to one read in five minutes per page,
+      // and is how late a scheduled article, an edit or a retirement can show.
+      {
+        source: '/guides',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
+      },
+      {
+        source: '/guides/:slug',
+        headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
+      },
+    ];
   },
   async redirects() {
     return [
@@ -31,6 +45,13 @@ const nextConfig = {
       // ranking signals for "hyrox training plan" across three URLs.
       {
         source: '/hyrox-domination',
+        destination: '/free-hyrox-plan',
+        permanent: true,
+      },
+      // The abandoned Google Apps Script embed of the 12-week plan. It was noindex and
+      // unlinked; the plan generator is the page for it.
+      {
+        source: '/12-week-hyrox',
         destination: '/free-hyrox-plan',
         permanent: true,
       },

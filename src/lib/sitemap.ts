@@ -12,7 +12,7 @@ import { PAGE_UPDATED } from '@/lib/page-dates';
  * What belongs here: every page meant to appear in search, once, on the host it
  * canonicalises to. What does not: noindex pages (/start, the confirm pages, the
  * shop's thanks, sample and resend pages, /d/<token>, /admin), per-order pages,
- * and /12-week-hyrox (a gated embed, noindex).
+ * and /12-week-hyrox (retired: it redirects to /free-hyrox-plan).
  *
  * /race, /streak and /trail are listed like any other page: their canonical is
  * the hybridx.club address. They once named race., streak. and trail.hybridx.club,

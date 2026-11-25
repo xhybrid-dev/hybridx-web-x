@@ -11,6 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { guardAiCall } from '@/lib/ai-guard';
 
 // Define the schema for individual points in the GPX route profile
 const GpxPointSchema = z.object({
@@ -20,7 +21,8 @@ const GpxPointSchema = z.object({
 
 // Define the input schema for the Genkit flow
 const SuggestSplitsInputSchema = z.object({
-  gpxRouteProfile: z.array(GpxPointSchema).min(2).describe('An array of points representing the route profile, with cumulative distance and elevation. Must have at least 2 points.'),
+  // The calculator sends at most 500 points (src/components/calculators/SplitTimeCalculatorForm.tsx).
+  gpxRouteProfile: z.array(GpxPointSchema).min(2).max(600).describe('An array of points representing the route profile, with cumulative distance and elevation. Must have at least 2 points.'),
   totalTargetTimeSeconds: z.number().positive().describe('The runner\'s total target time for the race in seconds.'),
   splitIntervalKm: z.number().positive().describe('The desired interval for each split in kilometers (e.g., 1 for 1km splits).'),
 });
@@ -43,9 +45,13 @@ export type SuggestSplitsOutput = z.infer<typeof SuggestSplitsOutputSchema>;
 
 // Exported wrapper function to call the flow
 export async function suggestElevationAdjustedSplits(input: SuggestSplitsInput): Promise<SuggestSplitsOutput> {
-  if (input.gpxRouteProfile.length < 2) {
+  if (!Array.isArray(input?.gpxRouteProfile) || input.gpxRouteProfile.length < 2) {
     throw new Error("GPX route profile must contain at least two points.");
   }
+  if (input.gpxRouteProfile.length > 600) {
+    throw new Error('That route has too many points. Use a simpler GPX file.');
+  }
+  await guardAiCall('elevation-splits');
   // Potentially add more validation or pre-processing here if needed
   return suggestSplitsFlow(input);
 }

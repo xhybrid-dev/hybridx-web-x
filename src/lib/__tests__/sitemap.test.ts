@@ -39,7 +39,6 @@ function pageRoutes(dir = APP_DIR, prefix = ''): Array<{ route: string; file: st
 /** Pages that carry noindex, and so must stay out of the sitemap. */
 const NOINDEX = [
   '/start',
-  '/12-week-hyrox',
   '/confirm',
   '/resend',
   '/athx-2027/confirm',

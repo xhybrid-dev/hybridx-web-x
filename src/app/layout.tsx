@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import ConsentBanner from '@/components/consent/ConsentBanner';
@@ -25,6 +25,16 @@ const spaceGrotesk = Space_Grotesk({
   weight: ['300', '400', '500', '700'],
   adjustFontFallback: false,
 });
+
+export const viewport: Viewport = {
+  // The browser's address bar colour follows the theme the visitor is using.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -100,6 +110,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
+        {/* Feed discovery. Declared here rather than in metadata.alternates, which a page's own
+            alternates (its canonical) would replace. */}
+        <link rel="alternate" type="application/rss+xml" title="HybridX Guides" href="/guides/feed.xml" />
         {/* The organisation and the site, as entities other schemas point at by @id */}
         <JsonLd data={[organizationSchema, webSiteSchema]} />
       </head>

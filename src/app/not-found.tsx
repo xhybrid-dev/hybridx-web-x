@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import Image from 'next/image';
 import { ArrowRight, Calculator, FileDown, LifeBuoy, Mail, Newspaper } from 'lucide-react';
 
 // A page that is not found tells search engines so (Next sends the 404 status and
 // noindex), and tells a person where to go next. It used to be a bare black and
 // white message with nothing to click, even for someone whose download link had
 // expired, who most needs /resend.
+//
+// It deliberately does not render the site header and footer. Next puts the
+// root not-found element into the data of every page (so a notFound() thrown
+// anywhere can show it), and the header and footer are about 50 KB of links:
+// they added that to every page and put "HYROX" into the ATHX page, which is
+// built never to say it. This page is small and carries its own few links.
 export const metadata: Metadata = { title: 'Page not found' };
 
 const WAYS = [
@@ -21,7 +26,20 @@ const WAYS = [
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Header />
+      <header className="border-b border-border/40">
+        <div className="container mx-auto flex h-16 items-center px-6">
+          <Link href="/" aria-label="HybridX home">
+            <Image
+              src="/Full Logo (2).png"
+              alt="HybridX"
+              width={110}
+              height={40}
+              className="dark:filter dark:invert"
+              style={{ objectFit: 'contain' }}
+            />
+          </Link>
+        </div>
+      </header>
       <main id="main-content" className="flex-1">
         <section className="container mx-auto max-w-4xl px-6 py-16 md:py-24">
           <p className="font-headline text-sm font-semibold uppercase tracking-widest text-accent-ink">404</p>
@@ -52,7 +70,11 @@ export default function NotFound() {
           </p>
         </section>
       </main>
-      <Footer />
+      <footer className="border-t border-border/40 py-6 text-center font-body text-sm text-muted-foreground">
+        <Link href="/privacy-policy" className="underline underline-offset-4 hover:text-primary">Privacy</Link>
+        <span aria-hidden="true"> · </span>
+        <Link href="/terms" className="underline underline-offset-4 hover:text-primary">Terms</Link>
+      </footer>
     </div>
   );
 }
