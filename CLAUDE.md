@@ -227,6 +227,20 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **Pillar pages are ISR** (`revalidate = 3600`) and read articles through
     `listPublishedGuidesOutsideBuild`, which returns nothing during a build.
     Any other built-ahead page that lists articles must do the same.
+- **Freshness** (`src/lib/guides/freshness.ts`, `/admin/guides/freshness`): a published guide is
+  due a look when it was written for an earlier `SEASON` (facts/hyrox-standards.ts) than the
+  current one, or when nobody has looked at it for 180 days. Changing `SEASON` makes every guide
+  due at once, which is how "when the rulebook changes the guides are reviewed again" (said on
+  `/guides/how-we-write` and `/about`) stays true. "Still correct" records `checkedAt` and `season`
+  without a revision or a new `updatedAt`; the byline shows "Checked <date>" and `lastReviewed`
+  follows it, `dateModified` never does. New guides carry `season`; ones without it count as 2026/27.
+- **IndexNow** (`src/lib/indexnow.ts`): the hourly job tells Bing and the other IndexNow engines
+  about a guide that went live or changed, once per `updatedAt`, production only. The key is
+  public by design and lives in `public/<key>.txt`; changing it means renaming that file.
+- **A candidate added to `candidates.ts` reaches the live queue** (`ensureQueueSeeded` tops up
+  with any question the queue does not hold, at the back). A topic Jon skipped counts as held and
+  never returns. Anything that needs facts the registry lacks (XENOM, products) is added by Jon
+  from `/admin/guides/new` with a brief that supplies them; the engine must not be left to invent them.
 - **Search Console** (plan step 6) is read by `src/lib/google/search-console.ts`
   with the runtime's own identity and a read-only scope: no key, no secret.
   The property is `sc-domain:hybridx.club` unless `SEARCH_CONSOLE_SITE` says

@@ -12,6 +12,8 @@ import { loginUrlFor } from '@/lib/admin-return';
 import { canEdit, stillHasPlaceholders } from '@/lib/guides/review';
 import { listBacklinkStates, listProposals, type LinkProposal } from '@/lib/guides/backlinks';
 import { parseInline } from '@/lib/guides/inline';
+import { SEASON } from '@/lib/facts';
+import { REVIEW_INTERVAL_DAYS, describeDue, reviewsDue } from '@/lib/guides/freshness';
 import { HARVEST_EVERY_MS, getHarvest, getHarvestState, listMetrics } from '@/lib/guides/harvest/run';
 import { asQuestion } from '@/lib/guides/harvest/analyse';
 import { appSourceRows, FLAG_WORDS, leadsByGuide, listClicks, performanceRows } from '@/lib/guides/performance';
@@ -38,6 +40,7 @@ import {
   commentOnGuide,
   decideLinkAction,
   createGuide,
+  markGuideCheckedAction,
   moveTopicAction,
   requeueEngineSkippedAction,
   requeueTopicAction,
@@ -60,7 +63,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Guides', robots: { index: false, follow: false } };
 
 const BASE = '/admin/guides';
-const RESERVED = new Set(['new', 'settings', 'topics', 'search', 'performance']);
+const RESERVED = new Set(['new', 'settings', 'topics', 'search', 'performance', 'freshness']);
 
 const STATUS_WORDS: Record<GuideStatus, string> = {
   drafting: 'Being drafted',
@@ -105,6 +108,7 @@ export default async function GuidesAdmin({
   else if (view.length === 1 && view[0] === 'topics') body = <Topics done={one(search.done)} error={one(search.error)} count={one(search.n)} />;
   else if (view.length === 1 && view[0] === 'search') body = <SearchView />;
   else if (view.length === 1 && view[0] === 'performance') body = <Performance />;
+  else if (view.length === 1 && view[0] === 'freshness') body = <Freshness done={one(search.done)} error={one(search.error)} />;
   else if (view.length === 1 && !RESERVED.has(view[0])) body = await Review({ slug: view[0], search });
   else if (view.length === 2 && view[1] === 'edit') body = await Edit({ slug: view[0] });
   else notFound();
@@ -133,6 +137,9 @@ export default async function GuidesAdmin({
             </Link>
             <Link href={`${BASE}/performance`} className="underline underline-offset-4">
               Performance
+            </Link>
+            <Link href={`${BASE}/freshness`} className="underline underline-offset-4">
+              Freshness
             </Link>
             <Link href={`${BASE}/new`} className="underline underline-offset-4">
               New article
@@ -164,6 +171,7 @@ async function Queue() {
   ]);
   const linkTargets = [...new Set(waitingLinks.map((p) => p.target))];
   const next = nextFreeSlot(new Date(), taken, settings);
+  const dueCount = reviewsDue(guides, new Date()).length;
   const groups: { title: string; statuses: GuideStatus[]; empty: string }[] = [
     { title: 'Waiting for you', statuses: ['awaiting_review', 'revising', 'drafting'], empty: 'Nothing to review.' },
     { title: 'Scheduled', statuses: ['scheduled', 'approved'], empty: 'Nothing scheduled.' },
@@ -173,6 +181,17 @@ async function Queue() {
 
   return (
     <div className="space-y-8">
+      {dueCount > 0 && (
+        <p role="status" className="rounded-md border border-amber-500/60 p-3 text-sm">
+          <strong>
+            {dueCount} published {dueCount === 1 ? 'guide is' : 'guides are'} due a look.
+          </strong>{' '}
+          <Link href={`${BASE}/freshness`} className="underline underline-offset-4">
+            See which and why
+          </Link>
+          .
+        </p>
+      )}
       <p className="text-sm">
         Next free slot: <strong>{describeSlot(next)}</strong>
         {settings.paused && <> · <strong>Paused</strong>: no new drafts until you resume it in settings.</>}
@@ -1101,6 +1120,57 @@ async function SearchView() {
           <p className="text-sm text-muted-foreground">Nothing published yet.</p>
         )}
       </section>
+    </div>
+  );
+}
+
+/* ── Freshness ───────────────────────────────────────────────────────────── */
+
+async function Freshness({ done, error }: { done?: string; error?: string }) {
+  const guides = await listAllGuides();
+  const now = new Date();
+  const due = reviewsDue(guides, now);
+  const published = guides.filter((g) => g.status === 'published');
+  const withCoachNote = published.filter((g) => g.blocks.some((b) => b.type === 'callout' && b.kind === 'coach-note')).length;
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        A published guide is listed here when it was written for an earlier season than {SEASON}, or when nobody has looked at it for{' '}
+        {REVIEW_INTERVAL_DAYS} days. Open it to check it against the rulebook and the facts; if it is still right, press &ldquo;Still correct&rdquo;.
+        That puts a &ldquo;Checked&rdquo; date on the guide and leaves its content alone. To change it, open it and edit.
+      </p>
+      {done === 'checked' && <p role="status" className="rounded-md border p-3 text-sm">Recorded. The guide shows today as its checked date.</p>}
+      {error && <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">{error}</p>}
+      <p className="text-sm">
+        {published.length} published · <strong>{due.length}</strong> due a look · <strong>{withCoachNote}</strong> of {published.length} carry a coach&apos;s note from Jon.
+      </p>
+      {due.length === 0 ? (
+        <p className="rounded-md border p-4 text-sm">Nothing is due. Every published guide stands against {SEASON} and has been looked at within {REVIEW_INTERVAL_DAYS} days.</p>
+      ) : (
+        <ul className="divide-y rounded-lg border">
+          {due.map((d) => (
+            <li key={d.slug} className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <Link href={`${BASE}/${d.slug}`} className="font-semibold underline underline-offset-4">
+                  {d.title}
+                </Link>
+                <p className="text-sm text-muted-foreground">{describeDue(d)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`${BASE}/${d.slug}/edit`}>Edit</Link>
+                </Button>
+                <form action={markGuideCheckedAction}>
+                  <input type="hidden" name="slug" value={d.slug} />
+                  <Button type="submit" size="sm">
+                    Still correct
+                  </Button>
+                </form>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

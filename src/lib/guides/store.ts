@@ -178,8 +178,17 @@ export async function saveGuide(
 }
 
 export type StatePatch = Partial<
-  Record<'status' | 'publishAt' | 'publishedAt' | 'redirectTo' | 'rejectionReason', string | undefined>
+  Record<'status' | 'publishAt' | 'publishedAt' | 'redirectTo' | 'rejectionReason' | 'season' | 'checkedAt', string | undefined>
 >;
+
+/**
+ * Records that a person has looked at a published article and it is still right: the date, and
+ * the season it was checked against. Not a revision, and `updatedAt` does not move, because
+ * nothing in the article changed.
+ */
+export async function markGuideChecked(slug: string, season: string, now = new Date()): Promise<Guide> {
+  return updateGuideState(slug, { checkedAt: now.toISOString(), season });
+}
 
 /**
  * Changes where an article is in its life (status, slot, redirect, reason)

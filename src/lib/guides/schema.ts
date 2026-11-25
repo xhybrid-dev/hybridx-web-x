@@ -10,6 +10,7 @@
 
 import { ARTICLE_REVIEWER } from '@/lib/facts';
 import { createArticleSchema, createBreadcrumbSchema, PERSON_ID, SITE_CONFIG } from '@/lib/seo';
+import { lastLookedAt } from './freshness';
 import { pillar as pillarOf, type PillarId } from './topics';
 import type { Guide } from './types';
 
@@ -56,7 +57,8 @@ export function guideJsonLd(guide: Guide): object[] {
       '@type': 'WebPage',
       url: `${SITE_CONFIG.url}${url}`,
       name: guide.title,
-      lastReviewed: modified.slice(0, 10),
+      // When a person last looked at it, which a "still correct" check moves and dateModified does not.
+      lastReviewed: lastLookedAt(guide) > modified ? lastLookedAt(guide).slice(0, 10) : modified.slice(0, 10),
       // The same Person the About page defines, so a search engine can join the two.
       reviewedBy: {
         '@type': ARTICLE_REVIEWER.type,

@@ -7,6 +7,7 @@ vi.mock('@/lib/firebase-admin', () => ({ adminFirestore: db, adminApp: {}, admin
 const { SAMPLE_GUIDES } = await import('../guides/fixtures');
 const store = await import('../guides/store');
 const queue = await import('../guides/queue');
+const { CANDIDATES } = await import('../guides/candidates');
 const { runEngineStep, pipelineHasRoom, pipelineStatus, changedBlocks, getRun, getEngineStatus } = await import('../guides/engine/run');
 const { toContent, toLoose } = await import('../guides/engine/shape');
 const { buildEngineEmail, buildReviewEmail, inEmailHours } = await import('../guides/email');
@@ -167,7 +168,7 @@ describe('from topic to review email', () => {
   it('seeds the queue, drafts the first topic, reviews it on the next tick, then emails Jon', async () => {
     const h = harness();
     await h.tick();
-    expect((await queue.listTopics()).length).toBe(32);
+    expect((await queue.listTopics()).length).toBe(CANDIDATES.length);
     const [g] = await store.listAllGuides();
     expect([g.title, g.status]).toEqual(['How do I train the sled push without a sled?', 'drafting']);
     expect((await getRun(g.slug))?.stage).toBe('review');

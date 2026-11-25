@@ -23,6 +23,9 @@
 //      passed as published (src/lib/guides/store.ts). Visitors see them from
 //      the slot itself either way; this keeps Firestore saying so too.
 //
+//   4b. **Announce guides.** Tells Bing and the other IndexNow engines about a guide that has gone
+//   live or changed (src/lib/indexnow.ts). Production only.
+//
 //   5. **Draft guides.** One step of the drafting engine
 //      (src/lib/guides/engine/run.ts): checks, a review, a revision or a new
 //      draft, then any review email that is due. Off unless
@@ -51,6 +54,7 @@ import { publishDueGuides } from '@/lib/guides/store';
 import { applyAcceptedLinks } from '@/lib/guides/backlinks';
 import { runEngineStep } from '@/lib/guides/engine/run';
 import { liveDeps } from '@/lib/guides/engine/live';
+import { liveIndexNow } from '@/lib/indexnow';
 import { runSearchHarvest } from '@/lib/guides/harvest/run';
 import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
@@ -80,7 +84,7 @@ export async function GET(request: Request) {
   // Guides go live at their slot whether or not this runs (the public pages
   // decide that when they are read); this records them as published, and puts
   // in the links from older articles Jon accepted once their target is live.
-  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -91,6 +95,7 @@ export async function GET(request: Request) {
     applyAcceptedLinks(),
     runEngineStep(liveDeps),
     runSearchHarvest(liveHarvestDeps),
+    liveIndexNow(),
   ]);
 
   const result = {
@@ -134,9 +139,13 @@ export async function GET(request: Request) {
       search.status === 'fulfilled'
         ? search.value
         : { error: String((search.reason as Error)?.message ?? search.reason) },
+    indexNow:
+      indexNow.status === 'fulfilled'
+        ? indexNow.value
+        : { error: String((indexNow.reason as Error)?.message ?? indexNow.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

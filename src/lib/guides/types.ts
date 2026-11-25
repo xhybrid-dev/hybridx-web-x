@@ -129,6 +129,14 @@ export const GuideSchema = z
     redirectTo: z.string().regex(/^\/[a-z0-9\-/]*$/).optional(),
     /** Why it was turned down, in Jon's words. */
     rejectionReason: plain(500).optional(),
+    /**
+     * The HYROX season (the rules year, "2026/27") the article was written or last checked against.
+     * Absent on an article written before this was recorded: freshness.ts counts it as the season
+     * the engine launched in.
+     */
+    season: z.string().regex(/^\d{4}\/\d{2}$/).optional(),
+    /** The last time a person confirmed the article is still right without changing it. */
+    checkedAt: isoDate.optional(),
   })
   .refine((g) => g.status !== 'published' || g.publishedAt !== undefined, {
     message: 'A published article needs publishedAt',

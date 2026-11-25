@@ -12,6 +12,7 @@
 // Editing content is allowed in any state but retired and rejected; it never
 // changes the state.
 
+import { SEASON } from '@/lib/facts';
 import { APPROVE_BLOCK_OVERLAP, describeDuplicate, findDuplicates } from './duplicates';
 import { isAllowedHref } from './inline';
 import { nextFreeSlot } from './slots';
@@ -112,6 +113,7 @@ export function slugify(title: string): string {
 export function newArticle(title: string, pillar: PillarId, slug: string) {
   return {
     slug,
+    season: SEASON,
     status: 'awaiting_review' as const,
     title: title.trim().slice(0, 70),
     point: PLACEHOLDERS.point,

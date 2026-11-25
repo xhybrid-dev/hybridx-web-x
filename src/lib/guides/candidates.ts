@@ -63,4 +63,47 @@ export const CANDIDATES: readonly Candidate[] = [
   { question: 'How fast should my first 1km be in HYROX?', pillar: 'hyrox', proof: 'tool', needs: 'hyrox-pacer' },
   { question: 'How long should the Roxzone take me?', pillar: 'hyrox', proof: 'tool', needs: 'hyrox-pacer' },
   { question: 'How hard should I go on the SkiErg in HYROX?', pillar: 'hyrox', proof: 'tool', needs: 'hyrox-pacer' },
+
+  // Added 25 November 2026 (phase 3 of the site plan), after the first list was seeded: the queue
+  // picks up a candidate it does not hold yet (queue.ts, ensureQueueSeeded). Each rests on what the
+  // facts registry can back, so a draft cannot state what it cannot cite; anything needing facts the
+  // registry lacks (XENOM, products) is added by Jon from /admin/guides/new with a brief that supplies them.
+  {
+    question: 'HYROX or ATHX: how are the two races different?',
+    pillar: 'starting-out',
+    proof: 'table',
+    note: 'Compare only what the facts registry gives for each: the HYROX format, stations and loads, and the three ATHX zones and how they are scored. Nothing about prize money, popularity, ownership or which is harder. HybridX is affiliated with neither.',
+  },
+  {
+    question: 'What do the 2026/27 HYROX penalties cost me, and how do I avoid them?',
+    pillar: 'hyrox',
+    proof: 'table',
+    note: 'Use the penalty list and its seconds from the facts registry only.',
+  },
+  {
+    question: 'Which 2026/27 HYROX rule changes matter most to a first-timer?',
+    pillar: 'hyrox',
+    proof: 'table',
+    note: 'Only changes in the facts registry. Link to the rule changes page for the full list.',
+  },
+  {
+    question: 'What should I look for in a watch for HYROX training?',
+    pillar: 'starting-out',
+    proof: 'table',
+    note: 'Criteria only: what a session needs a watch to do. No brands, models, prices, battery life or accuracy figures.',
+  },
+  {
+    question: 'How do I warm up before a HYROX race?',
+    pillar: 'hyrox',
+    proof: 'workout',
+    note: 'A warm-up that fits the time and space at a venue; no equipment a venue will not have.',
+  },
+  { question: 'How many days a week should I train for HYROX?', pillar: 'starting-out', proof: 'tool', tool: 'week-planner' },
+  {
+    question: 'What does the ATHX Endurance Zone reward, and how should I pace it?',
+    pillar: 'athx',
+    proof: 'tool',
+    tool: 'athx-endurance',
+    note: 'ATHX facts only from the facts given; never mention HYROX in this article.',
+  },
 ];

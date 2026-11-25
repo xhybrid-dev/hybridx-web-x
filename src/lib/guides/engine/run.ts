@@ -38,6 +38,7 @@
 // admin; /api/admin/engine-check turns that into a diagnosis (diagnose.ts).
 
 import { adminFirestore } from '@/lib/firebase-admin';
+import { SEASON } from '@/lib/facts';
 import {
   linkSources,
   listBacklinkStates,
@@ -477,7 +478,7 @@ async function draft(t: Tick): Promise<void> {
   }
   if (issues.length) return failTopic(topic, `the draft did not fit the article format: ${issues[0].message}`, t);
 
-  const guide = await saveGuide({ ...content, slug, status: 'drafting', pillar: topic.pillar }, t.now);
+  const guide = await saveGuide({ ...content, slug, status: 'drafting', pillar: topic.pillar, season: SEASON }, t.now);
   // The run is saved with the article, so a cut-off from here on resumes.
   const run: Run = { slug, topicId: topic.id, kind: 'draft', stage: 'check', round: 0, checkFixes: 0, reviewFixes: 0, attempts: 0, updatedAt: t.now.toISOString() };
   await saveRun(run, t.now);

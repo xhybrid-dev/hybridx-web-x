@@ -73,7 +73,7 @@ export default async function GuidePage({ params }: Props) {
             </nav>
             <h1 className="font-headline text-3xl font-extrabold leading-tight md:text-5xl">{guide.title}</h1>
             <div className="mt-6">
-              <GuideByline updatedAt={guide.updatedAt} />
+              <GuideByline updatedAt={guide.updatedAt} checkedAt={guide.checkedAt} />
             </div>
           </div>
         </section>

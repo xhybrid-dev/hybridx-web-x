@@ -7,6 +7,7 @@
 
 import { redirect } from 'next/navigation';
 import { getAdminSession } from '@/lib/admin-auth';
+import { SEASON } from '@/lib/facts';
 import {
   ReviewError,
   approve,
@@ -26,6 +27,7 @@ import {
   getGuide,
   resolveComment,
   saveEngineSettings,
+  markGuideChecked,
   saveGuide,
   updateGuideState,
 } from '@/lib/guides/store';
@@ -93,6 +95,16 @@ export async function rejectGuide(form: FormData) {
   await requireAdmin();
   const slug = slugOf(form);
   await step(slug, () => reject(slug, String(form.get('reason') ?? '')), 'rejected');
+}
+
+/** "Still correct": records that Jon has looked at a published guide and it needs no change. */
+export async function markGuideCheckedAction(form: FormData) {
+  await requireAdmin();
+  const slug = slugOf(form);
+  const guide = await getGuide(slug);
+  if (!guide || guide.status !== 'published') redirect(`${BASE}/freshness?error=${encodeURIComponent('Only a published guide can be checked.')}`);
+  await markGuideChecked(slug, SEASON);
+  redirect(`${BASE}/freshness?done=checked`);
 }
 
 export async function retireGuide(form: FormData) {
@@ -185,7 +197,8 @@ export async function saveGuideEdit(slug: string, payload: EditPayload): Promise
   if (!canEdit(current.status)) return { ok: false, errors: [`A ${current.status} article cannot be edited.`] };
 
   const { revision: _r, updatedAt: _u, ...rest } = current;
-  const next = { ...rest, title: payload.title, description: payload.description, point: payload.point, pillar: payload.pillar, blocks: payload.blocks };
+  // Jon has read it to edit it, so it now stands against this season's rules.
+  const next = { ...rest, title: payload.title, description: payload.description, point: payload.point, pillar: payload.pillar, blocks: payload.blocks, season: SEASON };
   const check = GuideSchema.safeParse({ ...next, revision: current.revision + 1, updatedAt: new Date().toISOString() });
   if (!check.success) {
     return {
