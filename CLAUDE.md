@@ -237,6 +237,15 @@ AI-drafted, reviewed and approved by Jon before publishing.
 - **IndexNow** (`src/lib/indexnow.ts`): the hourly job tells Bing and the other IndexNow engines
   about a guide that went live or changed, once per `updatedAt`, production only. The key is
   public by design and lives in `public/<key>.txt`; changing it means renaming that file.
+- **Site health** (`src/lib/site-health/`, `/admin/site-health`): a step of the hourly job reads the
+  live site the way a search engine does: the `PAGES_PER_RUN` sitemap pages checked longest ago,
+  plus the site-wide checks every tick (www redirects to the apex, robots.txt names the sitemap,
+  the sitemap lists the site, a missing page is a real 404 and noindex, the six security headers).
+  Errors (missing, noindex, no canonical, broken JSON-LD, a failed site-wide check) email the
+  review address once and again after three days; tidy-ups (long title, two h1s) are only listed.
+  Production only. It mirrors `scripts/seo-crawl.mjs`, which still gates a release from a developer's
+  machine: change a rule in one, change the other. It needs a review address (`ADMIN_EMAILS` or the
+  one saved in guide settings) to email anyone.
 - **A candidate added to `candidates.ts` reaches the live queue** (`ensureQueueSeeded` tops up
   with any question the queue does not hold, at the back). A topic Jon skipped counts as held and
   never returns. Anything that needs facts the registry lacks (XENOM, products) is added by Jon

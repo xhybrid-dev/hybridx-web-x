@@ -141,6 +141,9 @@ export default async function GuidesAdmin({
             <Link href={`${BASE}/freshness`} className="underline underline-offset-4">
               Freshness
             </Link>
+            <Link href="/admin/site-health" className="underline underline-offset-4">
+              Site health
+            </Link>
             <Link href={`${BASE}/new`} className="underline underline-offset-4">
               New article
             </Link>

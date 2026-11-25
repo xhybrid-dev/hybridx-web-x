@@ -26,6 +26,10 @@
 //   4b. **Announce guides.** Tells Bing and the other IndexNow engines about a guide that has gone
 //   live or changed (src/lib/indexnow.ts). Production only.
 //
+//   4c. **Check the live site.** A few pages a tick, plus the site-wide checks (the www redirect,
+//   robots.txt, the sitemap, the 404, the security headers), read the way a search engine reads
+//   them; one email when something breaks (src/lib/site-health/). Production only.
+//
 //   5. **Draft guides.** One step of the drafting engine
 //      (src/lib/guides/engine/run.ts): checks, a review, a revision or a new
 //      draft, then any review email that is due. Off unless
@@ -55,6 +59,7 @@ import { applyAcceptedLinks } from '@/lib/guides/backlinks';
 import { runEngineStep } from '@/lib/guides/engine/run';
 import { liveDeps } from '@/lib/guides/engine/live';
 import { liveIndexNow } from '@/lib/indexnow';
+import { liveSiteHealth } from '@/lib/site-health/live';
 import { runSearchHarvest } from '@/lib/guides/harvest/run';
 import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
@@ -84,7 +89,7 @@ export async function GET(request: Request) {
   // Guides go live at their slot whether or not this runs (the public pages
   // decide that when they are read); this records them as published, and puts
   // in the links from older articles Jon accepted once their target is live.
-  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow, health] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -96,6 +101,7 @@ export async function GET(request: Request) {
     runEngineStep(liveDeps),
     runSearchHarvest(liveHarvestDeps),
     liveIndexNow(),
+    liveSiteHealth(),
   ]);
 
   const result = {
@@ -143,9 +149,13 @@ export async function GET(request: Request) {
       indexNow.status === 'fulfilled'
         ? indexNow.value
         : { error: String((indexNow.reason as Error)?.message ?? indexNow.reason) },
+    siteHealth:
+      health.status === 'fulfilled'
+        ? health.value
+        : { error: String((health.reason as Error)?.message ?? health.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow, health].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 
