@@ -10,24 +10,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, RefreshCw, AlertTriangle, Trophy, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { KG_PER_LB, powerliftingScore, type ScoreResult } from '@/lib/calculators/powerlifting';
 
 type GenderOption = 'male' | 'female';
 type UnitOption = 'kg' | 'lbs';
 type FormulaOption = 'wilks' | 'dots';
-
-const KG_PER_LB = 0.45359237;
-
-// Wilks Coefficients
-const wilksCoefficients = {
-  male: { a: -216.0475144, b: 16.2606339, c: -0.002388645, d: -0.00113732, e: 7.01863e-6, f: -1.291e-8 },
-  female: { a: 594.31747775582, b: -27.23842536447, c: 0.82112226871, d: -0.00930733913, e: 4.731582e-5, f: -9.054e-8 },
-};
-
-// DOTS Coefficients
-const dotsCoefficients = {
-  male: { a: -0.0000010930, b: 0.0007391293, c: -0.1918259365, d: 24.0900756, e: -307.75076 },
-  female: { a: -0.0000010706, b: 0.0005251255, c: -0.1568867458, d: 17.5058300, e: -68.4804000 },
-};
 
 export default function PowerliftingScoreCalculatorForm() {
   const [gender, setGender] = useState<GenderOption>('male');
@@ -54,45 +41,23 @@ export default function PowerliftingScoreCalculatorForm() {
     return unit === 'lbs' ? value * KG_PER_LB : value;
   };
 
-  const calculateScore = () => {
+  const calculateScore = (): ScoreResult => {
     const bwNum = parseFloat(bodyweight);
     const squatNum = parseFloat(squat);
     const benchNum = parseFloat(bench);
     const deadliftNum = parseFloat(deadlift);
 
-    if (isNaN(bwNum) || bwNum <= 0) return "Invalid bodyweight.";
-    if (isNaN(squatNum) || squatNum < 0) return "Invalid squat value."; // Lifts can be 0
-    if (isNaN(benchNum) || benchNum < 0) return "Invalid bench press value.";
-    if (isNaN(deadliftNum) || deadliftNum < 0) return "Invalid deadlift value.";
+    if (isNaN(bwNum) || bwNum <= 0) return { ok: false, message: 'Invalid bodyweight.' };
+    if (isNaN(squatNum) || squatNum < 0) return { ok: false, message: 'Invalid squat value.' }; // Lifts can be 0
+    if (isNaN(benchNum) || benchNum < 0) return { ok: false, message: 'Invalid bench press value.' };
+    if (isNaN(deadliftNum) || deadliftNum < 0) return { ok: false, message: 'Invalid deadlift value.' };
 
-    const bwKg = convertToKg(bwNum, bodyweightUnit);
-    const totalLiftKg = convertToKg(squatNum + benchNum + deadliftNum, liftsUnit);
-
-    if (totalLiftKg === 0) return "Total lift cannot be zero for score calculation.";
-    
-    let score: number;
-
-    if (formula === 'wilks') {
-      const coeffs = wilksCoefficients[gender];
-      const denominator = coeffs.a + 
-                          coeffs.b * bwKg + 
-                          coeffs.c * Math.pow(bwKg, 2) + 
-                          coeffs.d * Math.pow(bwKg, 3) + 
-                          coeffs.e * Math.pow(bwKg, 4) + 
-                          coeffs.f * Math.pow(bwKg, 5);
-      if (denominator === 0) return "Calculation error (Wilks denominator is zero)."
-      score = totalLiftKg * (500 / denominator);
-    } else { // DOTS
-      const coeffs = dotsCoefficients[gender];
-      const denominator = coeffs.a * Math.pow(bwKg, 4) + 
-                          coeffs.b * Math.pow(bwKg, 3) + 
-                          coeffs.c * Math.pow(bwKg, 2) + 
-                          coeffs.d * bwKg + 
-                          coeffs.e;
-      if (denominator === 0) return "Calculation error (DOTS denominator is zero)."
-      score = totalLiftKg * (500 / denominator);
-    }
-    return score.toFixed(2);
+    return powerliftingScore({
+      sex: gender,
+      formula,
+      bodyweightKg: convertToKg(bwNum, bodyweightUnit),
+      totalKg: convertToKg(squatNum + benchNum + deadliftNum, liftsUnit),
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -101,13 +66,11 @@ export default function PowerliftingScoreCalculatorForm() {
     setCalculatedScore(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
-
     const result = calculateScore();
-    if (typeof result === 'string' && isNaN(parseFloat(result))) { // Error string
-      setError(result);
+    if (result.ok) {
+      setCalculatedScore(`${result.points.toFixed(2)} ${formula.toUpperCase()} Points`);
     } else {
-      setCalculatedScore(`${result} ${formula.toUpperCase()} Points`);
+      setError(result.message);
     }
     setIsCalculating(false);
   };
@@ -207,7 +170,7 @@ export default function PowerliftingScoreCalculatorForm() {
                 <Label htmlFor="wilks" className={`flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground ${formula === 'wilks' ? 'border-primary ring-2 ring-primary' : 'border-muted bg-popover'}`}>
                 Wilks
                 <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
+                    <TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
                     <TooltipContent className="max-w-xs text-xs" side="bottom"><p>The original Wilks formula, widely used for many years.</p></TooltipContent>
                 </Tooltip>
                 </Label>
@@ -217,8 +180,8 @@ export default function PowerliftingScoreCalculatorForm() {
                 <Label htmlFor="dots" className={`flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground ${formula === 'dots' ? 'border-primary ring-2 ring-primary' : 'border-muted bg-popover'}`}>
                 DOTS
                 <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-xs" side="bottom"><p>Daily Overall Total Score, a newer formula sometimes used as an alternative to Wilks.</p></TooltipContent>
+                    <TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-5 w-5 mt-1 text-muted-foreground hover:text-primary"><Info size={14}/></Button></TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-xs" side="bottom"><p>Dynamic Objective Team Scoring, a newer formula that has largely replaced Wilks in powerlifting meets.</p></TooltipContent>
                 </Tooltip>
                 </Label>
             </div>

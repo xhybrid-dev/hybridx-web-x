@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Calculator as CalcIcon, Activity, Timer, Heart, Info, ChevronDown, ChevronUp, BookOpen, ArrowRight } from 'lucide-react';
 import { chapterTwoContent } from '@/lib/12-week-running-hyrox/data';
+import { formatPaceSec } from '@/lib/format-pace';
 
 const Calculator: React.FC = () => {
   const [lthr, setLthr] = useState<string>('');
@@ -15,11 +16,7 @@ const Calculator: React.FC = () => {
   const toSeconds = (min: number, sec: number) => min * 60 + sec;
 
   // Helper: Convert total seconds back to MM:SS string
-  const toTimeStr = (totalSec: number) => {
-    const m = Math.floor(totalSec / 60);
-    const s = Math.round(totalSec % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
+  const toTimeStr = (totalSec: number) => formatPaceSec(totalSec);
 
   const calculateZones = () => {
     const hr = parseInt(lthr);

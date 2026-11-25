@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle } from 'lucide-react';
+import { formatPaceSec } from '@/lib/format-pace';
 
 // --- Daniels VDOT Mathematics ---
 
@@ -36,9 +37,7 @@ const METRES_PER_MILE = 1609.344;
 function velocityToPace(vMperMin: number, perMile = false): string {
   const unitMetres = perMile ? METRES_PER_MILE : 1000;
   const secsPerUnit = (unitMetres / vMperMin) * 60;
-  const mins = Math.floor(secsPerUnit / 60);
-  const secs = Math.round(secsPerUnit % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return formatPaceSec(secsPerUnit);
 }
 
 function paceRange(vdot: number, loFrac: number, hiFrac: number, perMile = false): string {

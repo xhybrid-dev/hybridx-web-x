@@ -23,6 +23,8 @@
 // the other is the limiter; otherwise the athlete is balanced. Doubles athletes
 // use their equivalent singles division (mixed doubles: Men Open).
 
+import { formatPaceSec } from '../format-pace';
+
 export const DIVISIONS = ['men-open', 'women-open', 'men-pro', 'women-pro'] as const;
 export type Division = (typeof DIVISIONS)[number];
 
@@ -211,7 +213,7 @@ export function parseTime(text: string): number | null {
 }
 
 export function formatTime(seconds: number): string {
-  return `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
+  return formatPaceSec(seconds);
 }
 
 /** Reads a test from query parameters or form fields. Null if anything is missing or out of range. */

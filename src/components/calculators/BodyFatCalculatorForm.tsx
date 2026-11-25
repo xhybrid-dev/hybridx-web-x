@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, RefreshCw, AlertTriangle, Percent, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { navyBodyFatPercent, type BodyFatResult } from '@/lib/calculators/body-fat';
 
 type GenderOption = 'male' | 'female';
 type UnitOption = 'cm' | 'inches';
@@ -46,42 +47,14 @@ export default function BodyFatCalculatorForm() {
     return unit === 'inches' ? value * INCH_TO_CM : value;
   };
 
-  const calculateBFP = (): number | string => {
-    const heightCm = convertToCm(parseFloat(height), heightUnit);
-    const neckCm = convertToCm(parseFloat(neck), neckUnit);
-    const waistCm = convertToCm(parseFloat(waist), waistUnit);
-    
-    if (heightCm <= 0 || neckCm <= 0 || waistCm <= 0) {
-      return "Height, Neck, and Waist measurements must be positive values.";
-    }
-
-    let bfp: number;
-
-    if (gender === 'male') {
-      if (waistCm <= neckCm) {
-        return "For males, waist circumference must be greater than neck circumference for this formula.";
-      }
-      // Men: BF% = 86.010 * log10(Waist - Neck) - 70.041 * log10(Height) + 36.76
-      bfp = 86.010 * Math.log10(waistCm - neckCm) - 70.041 * Math.log10(heightCm) + 36.76;
-    } else { // Female
-      const hipCm = convertToCm(parseFloat(hip), hipUnit);
-      if (hipCm <= 0) {
-        return "Hip measurement must be a positive value for females.";
-      }
-      if ((waistCm + hipCm) <= neckCm) {
-         return "For females, the sum of waist and hip circumferences must be greater than neck circumference for this formula.";
-      }
-      // Women: BF% = 163.205 * log10(Waist + Hip - Neck) - 97.684 * log10(Height) - 78.387
-      bfp = 163.205 * Math.log10(waistCm + hipCm - neckCm) - 97.684 * Math.log10(heightCm) - 78.387;
-    }
-    
-    if (isNaN(bfp) || !isFinite(bfp)) {
-        return "Calculation resulted in an invalid number. Please check your inputs.";
-    }
-    if (bfp < 0) bfp = 0; // Body fat cannot be negative
-    if (bfp > 70) bfp = 70; // Cap at a high, but plausible value
-
-    return parseFloat(bfp.toFixed(1));
+  const calculateBFP = (): BodyFatResult => {
+    return navyBodyFatPercent({
+      sex: gender,
+      heightCm: convertToCm(parseFloat(height), heightUnit),
+      neckCm: convertToCm(parseFloat(neck), neckUnit),
+      waistCm: convertToCm(parseFloat(waist), waistUnit),
+      hipCm: gender === 'female' ? convertToCm(parseFloat(hip), hipUnit) : undefined,
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -90,14 +63,12 @@ export default function BodyFatCalculatorForm() {
     setEstimatedBFP(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
-
     const result = calculateBFP();
 
-    if (typeof result === 'number') {
-      setEstimatedBFP(`${result}%`);
+    if (result.ok) {
+      setEstimatedBFP(`${result.percent}%`);
     } else {
-      setError(result); // result is an error message string
+      setError(result.message);
     }
     setIsCalculating(false);
   };
