@@ -18,6 +18,7 @@ import {
   WEEKDAYS,
   nextMonday,
   parsePlannerInput,
+  parsePlannerPreset,
   planWeek,
   planWeeks,
   plannerIcs,
@@ -47,7 +48,7 @@ export default function WeekPlanner() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const fromUrl = parsePlannerInput((k) => params.get(k));
+    const fromUrl = parsePlannerInput((k) => params.get(k)) ?? parsePlannerPreset((k) => params.get(k), DEFAULT);
     if (fromUrl) setInput(fromUrl);
     if (params.get('weeks') === '4') setAllWeeks(true);
   }, []);

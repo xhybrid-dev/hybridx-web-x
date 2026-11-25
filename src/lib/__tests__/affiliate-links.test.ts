@@ -68,6 +68,14 @@ describe('the pages that link to Amazon', () => {
     }
   });
 
+  it('shows the disclosure beside the ATHX book links, which are sponsored', () => {
+    const src = read('src/app/athx-2027/page.tsx');
+    expect(src).toContain('{AFFILIATE_DISCLOSURE}');
+    expect(src).toContain('rel="sponsored noopener noreferrer"');
+    expect(src).toContain('bookId="athx-2027-mens"');
+    expect(src).toContain('bookId="athx-2027-womens"');
+  });
+
   it('shows the disclosure in the plan finder result when a product is an affiliate link', () => {
     expect(read('src/components/plan-finder/PlanFinderDialog.tsx')).toContain('Affiliate disclosure: links to Amazon are affiliate links.');
   });
