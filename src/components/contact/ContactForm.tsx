@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,28 @@ export const CONTACT_TOPICS = [
   'An order or a download',
   'Books or the store',
   'The UNA Watch apps',
+  'A correction to something on the site',
   'Something else',
 ] as const;
+
+/** The topic a link such as /contact?topic=correction opens the form on. */
+export const CORRECTION_TOPIC: (typeof CONTACT_TOPICS)[number] = 'A correction to something on the site';
+
+/**
+ * What /contact?topic=correction&page=/guides/some-guide puts in the form. The page must be a
+ * path on this site, short and made of ordinary URL characters: it ends up in a message that a
+ * person reads, so it is never taken on trust.
+ */
+export function prefillFromSearch(search: string): { topic?: (typeof CONTACT_TOPICS)[number]; message?: string } {
+  const q = new URLSearchParams(search);
+  if (q.get('topic') !== 'correction') return {};
+  const page = q.get('page') ?? '';
+  const safePage = /^\/(?!\/)[A-Za-z0-9\-_/.]{0,150}$/.test(page) && !page.includes('..') ? page : '';
+  return {
+    topic: CORRECTION_TOPIC,
+    message: `${safePage ? `Page: https://hybridx.club${safePage}\n\n` : ''}What is wrong, and what it should say instead:\n`,
+  };
+}
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -29,6 +49,15 @@ const fieldClass = 'bg-background border-border focus:border-primary';
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
+  const [topic, setTopic] = useState<string>(CONTACT_TOPICS[0]);
+  const [message, setMessage] = useState('');
+
+  // A link from a guide or the About page opens the form on "a correction", with the page named.
+  useEffect(() => {
+    const pre = prefillFromSearch(window.location.search);
+    if (pre.topic) setTopic(pre.topic);
+    if (pre.message) setMessage(pre.message);
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -103,7 +132,8 @@ export default function ContactForm() {
           id="contact-topic"
           name="topic"
           required
-          defaultValue={CONTACT_TOPICS[0]}
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
           className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
         >
           {CONTACT_TOPICS.map((topic) => (
@@ -120,6 +150,8 @@ export default function ContactForm() {
         <Textarea
           id="contact-message"
           name="message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           required
           minLength={10}
           maxLength={3000}

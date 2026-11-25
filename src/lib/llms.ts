@@ -54,6 +54,7 @@ export const PAGE_INFO: Record<string, { title: string; about: string }> = {
   '/calculators/general-health': { title: 'Health Calculators', about: 'Body fat and calories and macros' },
   '/calculators/body-fat-calculator': { title: 'Body Fat Calculator', about: 'Body fat percentage by the US Navy method' },
   '/calculators/calorie-macronutrient-calculator': { title: 'Calorie and Macro Calculator', about: 'TDEE, calorie target and macronutrient split' },
+  '/about': { title: 'About HybridX', about: 'Who runs HybridX, how guides are made and checked, how we earn, our independence from HYROX and ATHX' },
   '/contact': { title: 'Contact', about: 'Questions, orders and downloads' },
   '/privacy-policy': { title: 'Privacy Policy', about: 'How data is collected and used' },
   '/terms': { title: 'Terms of Use', about: 'Terms for the site' },

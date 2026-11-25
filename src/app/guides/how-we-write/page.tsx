@@ -42,7 +42,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: 'Corrections',
     body: [
-      'Each guide shows the date it was last updated. If you spot something wrong, email training@hybridx.club and we will check it and correct it.',
+      'Each guide shows the date it was last updated, and the date it was last checked when that is later. If you spot something wrong, use the "Tell us" link at the end of the guide, or email training@hybridx.club, and we will check it and correct it.',
       'When a new guide is published, we may add a link to it from older guides on the same subject, so you can find it from where you are reading. Those links are approved like everything else, and count as an update.',
     ],
   },

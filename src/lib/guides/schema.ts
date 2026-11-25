@@ -9,7 +9,7 @@
 // the page for readers either way.
 
 import { ARTICLE_REVIEWER } from '@/lib/facts';
-import { createArticleSchema, createBreadcrumbSchema, SITE_CONFIG } from '@/lib/seo';
+import { createArticleSchema, createBreadcrumbSchema, PERSON_ID, SITE_CONFIG } from '@/lib/seo';
 import { pillar as pillarOf, type PillarId } from './topics';
 import type { Guide } from './types';
 
@@ -57,10 +57,13 @@ export function guideJsonLd(guide: Guide): object[] {
       url: `${SITE_CONFIG.url}${url}`,
       name: guide.title,
       lastReviewed: modified.slice(0, 10),
+      // The same Person the About page defines, so a search engine can join the two.
       reviewedBy: {
         '@type': ARTICLE_REVIEWER.type,
+        '@id': PERSON_ID,
         name: ARTICLE_REVIEWER.name,
-        jobTitle: 'Trainer',
+        jobTitle: ARTICLE_REVIEWER.role,
+        url: `${SITE_CONFIG.url}/about`,
         worksFor: { '@type': 'Organization', name: SITE_CONFIG.name, url: SITE_CONFIG.url },
       },
     },

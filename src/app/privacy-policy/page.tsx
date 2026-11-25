@@ -197,7 +197,8 @@ export default function PrivacyPolicyPage() {
                     the rest.
                   </li>
                   <li>
-                    <strong>Messages:</strong> as long as we need to answer you and deal with anything that follows.
+                    <strong>Messages:</strong> 12 months after the last change to the conversation, or 30 days once we have closed it,
+                    and then deleted.
                   </li>
                   <li>
                     <strong>Order records:</strong> six years after the end of the tax year of the purchase (section 7).

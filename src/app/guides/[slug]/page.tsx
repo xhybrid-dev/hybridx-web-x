@@ -113,6 +113,17 @@ export default async function GuidePage({ params }: Props) {
               </>
             )}
           </nav>
+
+          <p className="mt-10 border-t border-border pt-6 font-body text-sm text-muted-foreground">
+            Spotted a mistake in this guide?{' '}
+            <Link
+              href={`/contact?topic=correction&page=${guidePath(guide.slug)}`}
+              className="font-semibold text-foreground underline underline-offset-4"
+            >
+              Tell us and we will check it
+            </Link>
+            .
+          </p>
         </article>
         <GuideEngagement slug={guide.slug} targetId="guide-body" />
       </main>

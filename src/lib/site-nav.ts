@@ -131,6 +131,7 @@ export function footerColumns(now = new Date()): NavGroup[] {
     {
       label: 'HybridX',
       links: [
+        { label: 'About HybridX', href: '/about' },
         { label: 'How Our Guides Are Written', href: '/guides/how-we-write' },
         { label: 'Contact & Support', href: '/contact' },
         { label: 'FAQ', href: '/#faq' },

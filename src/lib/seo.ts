@@ -53,6 +53,8 @@ export const TWITTER_DEFAULTS: { images: string[] } = { images: [SITE_CONFIG.ogI
 /** The organisation every page's structured data points back to. */
 export const ORGANIZATION_ID = `${SITE_CONFIG.url}/#organization`;
 export const WEBSITE_ID = `${SITE_CONFIG.url}/#website`;
+/** Jon Lee, as one entity: the About page defines him, and every guide's `reviewedBy` points here. */
+export const PERSON_ID = `${SITE_CONFIG.url}/about#jon-lee`;
 
 export function createMetadata({
   title,
@@ -178,6 +180,35 @@ export function createOrganizationSchema() {
       'Compromised running',
       'Race pacing',
     ],
+  };
+}
+
+/**
+ * A person who stands behind the site's content. Only what is known is stated: a name, a role,
+ * and a description or profiles when the owner has supplied them (src/lib/about.ts). Nothing here
+ * is inferred, because an invented credential in structured data is worse than none.
+ */
+export function createPersonSchema({
+  name,
+  jobTitle,
+  description,
+  sameAs = [],
+}: {
+  name: string;
+  jobTitle: string;
+  description?: string | null;
+  sameAs?: readonly string[];
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': PERSON_ID,
+    name,
+    jobTitle,
+    url: `${SITE_CONFIG.url}/about`,
+    worksFor: { '@id': ORGANIZATION_ID },
+    ...(description ? { description } : {}),
+    ...(sameAs.length > 0 ? { sameAs: [...sameAs] } : {}),
   };
 }
 
