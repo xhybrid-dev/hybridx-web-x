@@ -1,6 +1,8 @@
 # Entry funnel: findings, status and launch steps
 
 > **25 November 2026.** The `middleware.ts` described below sat at the repository root while the app is under `src/app/`, so Next ignored it: the experiment never split visits (every visit was the plan finder), and the subdomain rewrites and security headers never ran. It is deleted. `PLAN_FINDER_MODE` is `on`, `/home-control` redirects to `/`, headers are in `security-headers.js`, and the three UNA pages are canonical on hybridx.club. The sections below are the history of the build, not the current setup.
+>
+> **Routing is version 2.0.0 (25 November 2026).** Version 1 sent ATHX to the free HYROX plan and a road-running predictor, a faster HYROX time to the same predictor, "calculators only" to an email-gated plan, ignored the injury answer, and its explanation could describe an extra the result did not contain. The rules, the new products (week planner, pacer, strength and engine test, rule changes, ATHX page, two guides) and the oracle tests are in `routing.ts`, `funnel.json` and `plan-finder-routing.test.ts`. The race date now goes on to the free plan and the app sign-up (`links.ts`), and the app link opens filled in. Version 1 is kept frozen in `analytics/legacy-routing.ts` for the demo-data generator and its comparison with the reference in `handover/`.
 
 The plan finder in front of the homepage, built from the handover package in
 `handover/entry-funnel/` (start with its `CLAUDE_CODE_BRIEF.md`). This file

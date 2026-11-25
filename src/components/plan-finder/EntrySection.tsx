@@ -124,7 +124,7 @@ export default function EntrySection({ mode }: { mode: 'entry' | 'page' }) {
                       {g.label}
                       <ArrowRight aria-hidden className="mt-0.5 h-[18px] w-[18px] shrink-0 stroke-[2.4] text-hx-yellow" />
                     </span>
-                    <span className="text-sm leading-snug text-hx-mute max-md:hidden">{g.sub}</span>
+                    <span className="text-[13px] leading-snug text-hx-mute md:text-sm">{g.sub}</span>
                   </button>
                 ))}
               </div>

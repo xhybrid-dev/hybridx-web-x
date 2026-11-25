@@ -15,7 +15,9 @@ export type LevelId = 'new' | 'regular' | 'raced' | 'compete';
 export type PlaceId = 'home' | 'gym' | 'both';
 export type ObstacleId = 'structure' | 'generic' | 'run' | 'plateau' | 'injury' | 'time' | 'options' | 'none';
 export type FormatId = 'free' | 'paper' | 'phone' | 'tools';
-export type ProductId = 'free' | 'app' | 'home' | 'twelve' | 'elite' | 'athx' | 'ultra' | 'vdot' | 'rtp' | 'run12' | 'vo2';
+export type ProductId =
+  | 'free' | 'app' | 'home' | 'twelve' | 'elite' | 'athx' | 'ultra' | 'vdot' | 'rtp' | 'run12' | 'vo2'
+  | 'weekplan' | 'pacer' | 'ste' | 'rules' | 'athxpage' | 'howto' | 'hybridprog';
 
 export interface Option<Id extends string = string> {
   id: Id;
@@ -40,6 +42,8 @@ export interface Product {
   price: string;
   cta: string;
   href: string;
+  /** A second button on the same product: the ATHX books are two editions, each with its own Amazon link. */
+  altCta?: { label: string; href: string };
   affiliate: boolean;
 }
 

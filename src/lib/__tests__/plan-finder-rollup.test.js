@@ -7,7 +7,8 @@ import { rollupDay, mergeDays, emptyDoc, report, insights, STEP_NAMES, BUCKETS, 
 import { bucketFor, mapKey, TIME_BUCKETS, TIME_EDGES_S, VISIBLE_BUCKETS, VISIBLE_EDGES_S } from '@/lib/plan-finder/analytics/model';
 import { generate, toBatches, splitByDay, mulberry32 } from '@/lib/plan-finder/analytics/seed';
 import { validateBatch, IDENTIFYING_KEYS, findIdentifyingKey } from '@/lib/plan-finder/collect-core';
-import { route } from '@/lib/plan-finder/routing';
+// The fixture is version 1 traffic, so it is checked against version 1 of the rules.
+import { route } from '@/lib/plan-finder/analytics/legacy-routing';
 import funnel from '@/lib/plan-finder/funnel.json';
 import schema from '@/lib/plan-finder/events.schema.json';
 

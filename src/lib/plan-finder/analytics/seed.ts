@@ -21,7 +21,7 @@
 // cross-check. truth.byDay[i] has the same shape for day i.
 
 import { funnel } from '../content';
-import { route, VERSION as ROUTE_VERSION } from '../routing';
+import { route, VERSION as ROUTE_VERSION } from './legacy-routing';
 import schemaJson from '../events.schema.json';
 import type { FlatEvent } from './rollup';
 

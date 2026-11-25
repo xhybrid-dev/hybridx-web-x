@@ -101,6 +101,50 @@ export function seedFromFreePlan(raceDate: string): AppSeed {
   return { tool: 'free-plan', event: 'hyrox', ...(/^\d{4}-\d{2}-\d{2}$/.test(raceDate) ? { race: raceDate } : {}) };
 }
 
+/**
+ * The plan finder's answers. Only values the app already knows are used, and no
+ * `tool`, so nothing new crosses between the two repos:
+ *   goal first      HYROX, beginner (a first race)
+ *   goal faster     HYROX, intermediate
+ *   goal athx       the ATHX 2027 plans
+ *   goal xenom, hybrid, ultra   no event of their own; the app's own goal is set
+ *                   (hybrid, or endurance for an ultra)
+ * The level answer sets the experience where the goal leaves it open, and a race
+ * date a week or more away is carried so the plan ends on race day.
+ */
+export function seedFromPlanFinder(
+  answers: { goal?: string | null; level?: string | null },
+  race: string,
+  raceIsAWeekAway: boolean,
+): AppSeed {
+  const experience: AppSeed['experience'] =
+    answers.level === 'compete' ? 'advanced' : answers.level === 'raced' || answers.level === 'regular' ? 'intermediate' : 'beginner';
+  const seed: AppSeed = {};
+  switch (answers.goal) {
+    case 'athx':
+      return { ...seedForAthx(), ...(raceIsAWeekAway && /^\d{4}-\d{2}-\d{2}$/.test(race) ? { race } : {}) };
+    case 'first':
+      seed.event = 'hyrox';
+      seed.experience = 'beginner';
+      seed.goal = 'hybrid';
+      break;
+    case 'faster':
+      seed.event = 'hyrox';
+      seed.experience = experience === 'beginner' ? 'intermediate' : experience;
+      seed.goal = 'hybrid';
+      break;
+    case 'ultra':
+      seed.goal = 'endurance';
+      seed.experience = experience;
+      break;
+    default: // xenom, hybrid
+      seed.goal = 'hybrid';
+      seed.experience = experience;
+  }
+  if (raceIsAWeekAway && /^\d{4}-\d{2}-\d{2}$/.test(race)) seed.race = race;
+  return seed;
+}
+
 /** The ATHX page: the ATHX 2027 plans, in the edition the athlete picks there. */
 export function seedForAthx(edition?: AthxEdition): AppSeed {
   return { tool: 'athx', event: 'athx', ...(edition ? { edition } : {}) };

@@ -3,11 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { funnel } from '@/lib/plan-finder/content';
 import type { Answers } from '@/lib/plan-finder/routing';
 import { explain, raceBucket, raceWeeks, route, VERSION } from '@/lib/plan-finder/routing';
+import { route as legacyRoute, VERSION as LEGACY_VERSION } from '@/lib/plan-finder/analytics/legacy-routing';
 
 // The routing table changes only with this file. The oracles below are written
 // as data on purpose, independently of routing.ts, so a mistake in the code and
-// a mistake in the test cannot agree by accident. They restate the tables in
-// handover/entry-funnel/docs/02-funnel-spec.md.
+// a mistake in the test cannot agree by accident. They restate version 2 of the
+// rules (see the note at the top of routing.ts for what version 1 got wrong).
 
 const ids = (list: { id: string }[]) => list.map((x) => x.id);
 const GOALS = ids(funnel.goals);
@@ -27,27 +28,30 @@ function* allAnswers(): Generator<Answers> {
           }
 }
 
-// docs/02, steps 1 to 3: the primary product.
-const PAPER: Record<string, string | Record<string, string>> = {
-  first: { gym: 'twelve', home: 'home', both: 'home' },
-  faster: 'elite',
-  athx: 'athx',
-  ultra: 'ultra',
-  xenom: { adv: 'elite', std: 'twelve' },
-  hybrid: { adv: 'elite', std: 'twelve' },
-};
-const FREE: Record<string, string> = { first: 'free', faster: 'rtp', athx: 'free', xenom: 'free', ultra: 'vdot', hybrid: 'free' };
-const TOOLS: Record<string, string> = { first: 'free', faster: 'rtp', athx: 'rtp', xenom: 'vo2', ultra: 'vdot', hybrid: 'vo2' };
-
 function isAdvanced(a: Answers) {
   return a.level === 'raced' || a.level === 'compete';
 }
+
+// Steps 1 to 3: the primary product.
 function oraclePaper(a: Answers): string {
-  if ((a.goal === 'first' || a.goal === 'hybrid') && isAdvanced(a)) return 'elite';
-  const p = PAPER[a.goal!];
-  if (typeof p === 'string') return p;
-  return a.goal === 'first' ? p[a.place!] : p[isAdvanced(a) ? 'adv' : 'std'];
+  const place = a.place!;
+  switch (a.goal) {
+    case 'first':
+      if (isAdvanced(a)) return 'elite';
+      return place === 'gym' ? 'twelve' : 'home';
+    case 'faster':
+      return place === 'home' ? 'home' : 'elite';
+    case 'athx':
+      return 'athx';
+    case 'ultra':
+      return 'ultra';
+    default: // xenom, hybrid: no book of their own
+      return isAdvanced(a) ? 'elite' : place === 'home' ? 'home' : 'twelve';
+  }
 }
+const FREE: Record<string, string> = { first: 'free', faster: 'ste', athx: 'athxpage', xenom: 'weekplan', ultra: 'vdot', hybrid: 'weekplan' };
+const TOOLS: Record<string, string> = { first: 'howto', faster: 'pacer', athx: 'athxpage', xenom: 'ste', ultra: 'vdot', hybrid: 'hybridprog' };
+
 function oraclePrimary(a: Answers): string {
   if (a.format === 'phone') return 'app';
   if (a.format === 'free') return FREE[a.goal!];
@@ -55,19 +59,23 @@ function oraclePrimary(a: Answers): string {
   return oraclePaper(a);
 }
 
-// docs/02, step 4: the extras, as an ordered list of [condition, products].
-const EXTRAS_ORDER: [(a: Answers) => boolean, (a: Answers) => string[]][] = [
-  [(a) => a.obst!.includes('run'), () => ['run12', 'vdot']],
-  [(a) => a.obst!.includes('structure') || a.obst!.includes('plateau'), () => ['app']],
-  [(a) => a.obst!.includes('time') || a.obst!.includes('generic'), () => ['free']],
-  [() => true, (a) => [FREE[a.goal!]]],
-  [() => true, (a) => [a.format === 'paper' ? 'app' : oraclePaper(a)]],
-  [() => true, () => ['free']],
-];
+// Step 4: the extras, an ordered list of products, then the first two that are not the primary.
 function oracleSecondary(a: Answers): string[] {
   if (a.obst!.includes('options')) return [];
+  const has = (o: string) => (a.obst as string[]).includes(o);
   const primary = oraclePrimary(a);
-  const list = EXTRAS_ORDER.filter(([when]) => when(a)).flatMap(([, give]) => give(a));
+  const freePlanFits = a.goal !== 'athx' && a.goal !== 'ultra';
+  const list: string[] = [];
+  if (has('run')) list.push('run12', 'vdot');
+  if (has('injury')) list.push('weekplan');
+  if (has('plateau')) list.push('ste', 'app');
+  else if (has('structure')) list.push('app');
+  if (has('time')) list.push('weekplan');
+  if (has('generic') && freePlanFits) list.push('free');
+  list.push(FREE[a.goal!]);
+  list.push(a.format === 'paper' ? 'app' : oraclePaper(a));
+  list.push(a.goal === 'faster' ? 'rules' : freePlanFits ? 'free' : 'weekplan');
+  list.push(freePlanFits ? 'free' : 'weekplan');
   return [...new Set(list.filter((id) => id !== primary))].slice(0, 2);
 }
 
@@ -116,6 +124,76 @@ describe('plan finder routing', () => {
     }
   });
 
+  // The failures the audit found in version 1, each held as a rule over every combination.
+  describe('what version 1 got wrong', () => {
+    const everything = () => [...allAnswers()];
+
+    it('sends an ATHX athlete to ATHX things, never to the free HYROX plan or a road-running tool', () => {
+      for (const a of everything().filter((x) => x.goal === 'athx')) {
+        const r = route(a);
+        const shown = [r.primary, ...r.secondary];
+        for (const id of shown) {
+          if (['free', 'rtp', 'run12'].includes(id) && !(id === 'run12' && a.obst!.includes('run'))) {
+            expect.fail(`${id} shown to an ATHX athlete: ${JSON.stringify(a)}`);
+          }
+        }
+        if (!a.obst!.includes('options') && a.format !== 'phone' && !shown.some((id) => ['athx', 'athxpage'].includes(id))) {
+          expect.fail(`no ATHX product for ${JSON.stringify(a)}`);
+        }
+      }
+    });
+
+    it('gives both ATHX editions on the one card when the book is the answer', () => {
+      const r = route({ goal: 'athx', level: 'new', place: 'gym', format: 'paper', obst: [] });
+      expect(r.primary).toBe('athx');
+      const card = funnel.catalog.athx;
+      expect(card.href).toBe('https://link.amazon/B0g5sdBgd');
+      expect(card.altCta).toEqual({ label: "Women's edition on Amazon", href: 'https://link.amazon/B09UkaF2U' });
+      expect(card.affiliate).toBe(true);
+    });
+
+    it('sends a faster-HYROX athlete to the HYROX tools, not the road-running predictor', () => {
+      for (const a of everything().filter((x) => x.goal === 'faster' && (x.format === 'free' || x.format === 'tools'))) {
+        const r = route(a);
+        expect(['ste', 'pacer']).toContain(r.primary);
+        expect(r.primary).not.toBe('rtp');
+        expect(r.secondary).not.toContain('rtp');
+      }
+    });
+
+    it('never sends "calculators and free guides only" to an email-gated plan', () => {
+      for (const a of everything().filter((x) => x.format === 'tools')) {
+        expect(funnel.catalog[route(a).primary].destinationType, JSON.stringify(a)).not.toBe('amazon-affiliate');
+        expect(route(a).primary).not.toBe('free');
+        expect(route(a).primary).not.toBe('app');
+      }
+    });
+
+    it('does not send "general hybrid fitness" to the plan that needs a booked race, as its tools or free answer', () => {
+      for (const a of everything().filter((x) => x.goal === 'hybrid' && (x.format === 'free' || x.format === 'tools'))) {
+        expect(route(a).primary).not.toBe('free');
+      }
+    });
+
+    it('gives a home-only athlete the home book rather than the gym one', () => {
+      for (const goal of ['faster', 'xenom', 'hybrid'] as const) {
+        const r = route({ goal, level: 'new', place: 'home', format: 'paper', obst: [] });
+        expect(r.primary).toBe('home');
+      }
+    });
+
+    it('does something with an injury answer: lists the week planner', () => {
+      const r = route({ goal: 'first', level: 'new', place: 'gym', format: 'paper', obst: ['injury'] });
+      expect(r.secondary[0]).toBe('weekplan');
+      expect(r.trace).toContain('extras:injury');
+    });
+
+    it('lists the strength and engine test for a plateau', () => {
+      const r = route({ goal: 'first', level: 'regular', place: 'gym', format: 'paper', obst: ['plateau'] });
+      expect(r.secondary).toEqual(['ste', 'app']);
+    });
+  });
+
   it('falls back to a valid result when answers are missing', () => {
     const r = route({});
     expect(r.primary).toBe('home');
@@ -127,48 +205,44 @@ describe('plan finder routing', () => {
       'paper:first-gym',
       'free-start:free',
       'primary:format-phone',
-      'extras:structure-or-plateau',
+      'extras:structure',
     ]);
   });
 
   const GOLDEN: [Answers, string, string[]][] = [
     [{ goal: 'first', level: 'new', place: 'home', obst: ['run'], format: 'paper' }, 'home', ['run12', 'vdot']],
     [{ goal: 'first', level: 'new', place: 'gym', obst: ['structure'], format: 'paper' }, 'twelve', ['app', 'free']],
-    [{ goal: 'faster', level: 'raced', place: 'gym', obst: ['plateau'], format: 'phone' }, 'app', ['rtp', 'elite']],
-    [{ goal: 'ultra', level: 'regular', place: 'both', obst: ['time'], format: 'free' }, 'vdot', ['free', 'ultra']],
-    [{ goal: 'xenom', level: 'compete', place: 'gym', obst: ['options'], format: 'tools' }, 'vo2', []],
-    [{ goal: 'athx', level: 'new', place: 'home', obst: [], format: 'paper' }, 'athx', ['free', 'app']],
-    [{ goal: 'hybrid', level: 'raced', place: 'both', obst: ['injury'], format: 'paper' }, 'elite', ['free', 'app']],
-    [{ goal: 'first', level: 'new', place: 'home', obst: ['generic', 'time'], format: 'free' }, 'free', ['home']],
-    [{ goal: 'faster', level: 'compete', place: 'gym', obst: ['run', 'plateau'], format: 'tools' }, 'rtp', ['run12', 'vdot']],
-    [{ goal: 'hybrid', level: 'new', place: 'both', obst: ['none'], format: 'phone' }, 'app', ['free', 'twelve']],
+    [{ goal: 'faster', level: 'raced', place: 'gym', obst: ['plateau'], format: 'phone' }, 'app', ['ste', 'elite']],
+    [{ goal: 'ultra', level: 'regular', place: 'both', obst: ['time'], format: 'free' }, 'vdot', ['weekplan', 'ultra']],
+    [{ goal: 'xenom', level: 'compete', place: 'gym', obst: ['options'], format: 'tools' }, 'ste', []],
+    [{ goal: 'athx', level: 'new', place: 'home', obst: [], format: 'paper' }, 'athx', ['athxpage', 'app']],
+    [{ goal: 'hybrid', level: 'raced', place: 'both', obst: ['injury'], format: 'paper' }, 'elite', ['weekplan', 'app']],
+    [{ goal: 'first', level: 'new', place: 'home', obst: ['generic', 'time'], format: 'free' }, 'free', ['weekplan', 'home']],
+    [{ goal: 'faster', level: 'compete', place: 'gym', obst: ['run', 'plateau'], format: 'tools' }, 'pacer', ['run12', 'vdot']],
+    [{ goal: 'hybrid', level: 'new', place: 'both', obst: ['none'], format: 'phone' }, 'app', ['weekplan', 'twelve']],
+    [{ goal: 'athx', level: 'regular', place: 'gym', obst: ['generic'], format: 'free' }, 'athxpage', ['athx', 'weekplan']],
   ];
   it.each(GOLDEN)('golden example %#', (a, primary, secondary) => {
     const r = route(a);
     expect(r.primary).toBe(primary);
     expect(r.secondary).toEqual(secondary);
   });
+});
 
-  // The port must behave exactly as the reference it came from. If
-  // handover/entry-funnel is ever removed, remove this test with it.
-  it('agrees with the reference implementation on every combination', () => {
+// Version 1 is kept, frozen, for the demo-data generator, whose output is held to the
+// reference implementation. This is the only place that comparison is made now.
+// If handover/entry-funnel is ever removed, remove this describe with it.
+describe('legacy routing (version 1)', () => {
+  it('still agrees with the reference implementation on every combination', () => {
     const require = createRequire(import.meta.url);
     const ref = require('../../../handover/entry-funnel/data/routing.js');
     for (const a of allAnswers()) {
-      const mine = route(a);
+      const mine = legacyRoute(a);
       const theirs = ref.route(a);
       if (JSON.stringify(mine) !== JSON.stringify(theirs)) expect.fail(`route differs for ${JSON.stringify(a)}`);
     }
-    for (const goal of GOALS)
-      for (const level of LEVELS)
-        for (const place of PLACES)
-          for (const format of FORMATS)
-            for (const obst of [[], ['run'], ['structure'], ['time'], ['generic'], ['options'], ['none'], ['injury', 'plateau']])
-              for (const weeks of [0, 1, 5, 12, 40]) {
-                const a = { goal, level, place, format, obst } as Answers;
-                expect(explain(a, funnel, { weeks })).toEqual(ref.explain(a, funnel, { weeks }));
-              }
-    expect(VERSION).toBe(ref.VERSION);
+    expect(LEGACY_VERSION).toBe(ref.VERSION);
+    expect(VERSION).not.toBe(LEGACY_VERSION);
   });
 });
 
@@ -182,6 +256,25 @@ describe('explain', () => {
             expect(e.why).toMatch(/^You are training for /);
             expect(e.chips.length).toBeGreaterThanOrEqual(5);
           }
+  });
+
+  it('only describes what the result contains', () => {
+    // "Too many options" removes the extras, so no extra is explained.
+    const e = explain({ goal: 'first', obst: ['run', 'options'], format: 'paper' }, funnel, {});
+    expect(e.why).toContain('too many options');
+    expect(e.why).not.toMatch(/running plan|VDOT/);
+    // The app is the primary here, so it is not "listed as an extra".
+    const app = explain({ goal: 'first', obst: ['structure'], format: 'phone' }, funnel, {});
+    expect(app.why).not.toMatch(/listed as an extra/);
+    // A running weak spot that does add the running plan says so.
+    expect(explain({ goal: 'first', place: 'gym', obst: ['run'], format: 'paper' }, funnel, {}).why).toMatch(/added a running plan and the VDOT Calculator/);
+  });
+
+  it('says there is no XENOM plan, and says the injury advice sensibly', () => {
+    expect(explain({ goal: 'xenom', obst: [] }, funnel, {}).why).toContain('There is no XENOM plan yet');
+    const injury = explain({ goal: 'first', place: 'gym', obst: ['injury'], format: 'paper' }, funnel, {});
+    expect(injury.why).toContain('heavy leg days and hard runs apart');
+    expect(injury.why).toMatch(/see a professional/);
   });
 
   it('describes the weeks to the race', () => {
