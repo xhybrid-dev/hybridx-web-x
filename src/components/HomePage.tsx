@@ -67,18 +67,13 @@ const courseSchemas = [
     url: '/free-hyrox-plan',
     level: 'All levels',
   }),
+  // Each Course is at the address that is that plan. They were three names for one
+  // address (/free-hyrox-plan), two of them plans that page does not offer.
   createCourseSchema({
-    name: 'HybridX Hybrid Running Training Plan',
+    name: 'HybridX 12-Week Running Plan for HYROX',
     description:
-      'A 12-week hybrid running plan combining elite running protocols with targeted strength work to improve race times and build functional endurance.',
-    url: '/free-hyrox-plan',
-    level: 'Intermediate',
-  }),
-  createCourseSchema({
-    name: 'HybridX Offseason Strength Plan',
-    description:
-      'A focused offseason strength and power programme for Hyrox and hybrid athletes, building the foundation for the next competitive season.',
-    url: '/free-hyrox-plan',
+      'A free interactive 12-week running plan for HYROX athletes: threshold sessions, intervals, long runs and compromised running, with a built-in pace calculator.',
+    url: '/12-week-running-hyrox',
     level: 'All levels',
   }),
 ];

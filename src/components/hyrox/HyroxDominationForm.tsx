@@ -400,7 +400,13 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
               className={`${fieldClass} h-auto`}
             >
               <option value="">
-                {eventsLoading ? 'Loading races…' : matching.length ? `Choose your race (${matching.length} shown)` : 'No race matches that search'}
+                {eventsLoading
+                  ? 'Loading races…'
+                  : events.length === 0
+                    ? 'The race list is not available just now'
+                    : matching.length
+                      ? `Choose your race (${matching.length} shown)`
+                      : 'No race matches that search'}
               </option>
               {matching.map((e) => (
                 <option key={e.name} value={e.name}>
@@ -409,7 +415,9 @@ export default function HyroxDominationForm({ initialEvents = [] }: HyroxDominat
               ))}
             </select>
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Not listed, or no date yet? Choose &ldquo;I know my race date&rdquo; above and enter it.
+              {!eventsLoading && events.length === 0
+                ? 'Choose “I know my race date” above and enter it.'
+                : 'Not listed, or no date yet? Choose “I know my race date” above and enter it.'}
             </p>
           </div>
 

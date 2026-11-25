@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import TrackedLink from '@/components/TrackedLink';
-import { APP_SIGNUP_URL } from '@/lib/app-links';
+import { APP_LOGIN_URL, APP_SIGNUP_URL } from '@/lib/app-links';
+import { APP, ATHLETES } from '@/lib/facts';
 import {
   Smartphone, Calendar, LineChart, Sparkles, ArrowRight, CheckCircle,
 } from 'lucide-react';
@@ -62,6 +63,10 @@ const faqs = [
     answer: 'The free 12-week PDF plan is a fixed training block you download once. The app gives you a full library of programmes, day-by-day tracking, benchmark logging, and the Edge Coach for ongoing guidance, with the plan lined up to your race date.',
   },
   {
+    question: 'Can I try it before I pay?',
+    answer: `Yes. There is a ${APP.trialDays}-day free trial, and you can cancel from your account settings at any time.`,
+  },
+  {
     question: 'What devices does it work on?',
     answer: 'Any device with a browser — phone, tablet, or desktop. It\'s a web app, so there\'s nothing to install or update.',
   },
@@ -91,7 +96,7 @@ export default function AppLandingPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                   <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg">
-                    <TrackedLink href={APP_URL} target="_blank" rel="noopener noreferrer" event="cta_app_click" eventParams={{ location: 'app_page_hero' }}>
+                    <TrackedLink href={APP_URL} event="cta_app_click" eventParams={{ location: 'app_page_hero' }}>
                       Start Your Free Trial <ArrowRight className="ml-2 h-5 w-5" />
                     </TrackedLink>
                   </Button>
@@ -99,6 +104,13 @@ export default function AppLandingPage() {
                     <Link href="#pricing">See Pricing</Link>
                   </Button>
                 </div>
+                <p className="mt-5 font-body text-sm text-muted-foreground">
+                  Already a member?{' '}
+                  <a href={APP_LOGIN_URL} className="font-semibold text-foreground underline underline-offset-4 hover:text-accent-ink">
+                    Log in
+                  </a>
+                  . {ATHLETES.wording}.
+                </p>
               </div>
               <div className="relative">
                 <Image
@@ -131,6 +143,25 @@ export default function AppLandingPage() {
                 </Card>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* What is in it: the product facts, not a wish list (src/lib/facts/product.ts) */}
+        <section className="py-16 md:py-20 bg-background">
+          <div className="container mx-auto px-6 max-w-3xl">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary text-center mb-8">What&apos;s inside</h2>
+            <ul className="space-y-3 font-body text-foreground">
+              {APP.includes.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-ink" aria-hidden="true" />
+                  <span>{item.charAt(0).toUpperCase() + item.slice(1)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-center font-body text-sm text-muted-foreground">
+              The programmes are fixed plans you follow day by day. It runs in your browser on any device, so there is nothing to
+              install.
+            </p>
           </div>
         </section>
 
@@ -172,15 +203,36 @@ export default function AppLandingPage() {
                     <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Full program library</li>
                     <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Daily workout tracking</li>
                     <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Edge Coach, built in</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> Race-date alignment</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent-ink flex-shrink-0" /> ATHX 2027 plan, men&apos;s and women&apos;s editions</li>
                   </ul>
                   <Button size="lg" asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                    <TrackedLink href={APP_URL} target="_blank" rel="noopener noreferrer" event="cta_app_click" eventParams={{ location: 'app_page_pricing' }}>
+                    <TrackedLink href={APP_URL} event="cta_app_click" eventParams={{ location: 'app_page_pricing' }}>
                       Start Your Free Trial
                     </TrackedLink>
                   </Button>
+                  <p className="mt-4 font-body text-sm text-muted-foreground">
+                    Already a member?{' '}
+                    <a href={APP_LOGIN_URL} className="font-semibold text-foreground underline underline-offset-4">Log in</a>
+                  </p>
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </section>
+
+        {/* Not ready yet: three free ways to carry on, so the page is not a dead end for someone who is not buying today */}
+        <section className="py-12 bg-background">
+          <div className="container mx-auto px-6 max-w-3xl text-center">
+            <h2 className="text-xl md:text-2xl font-headline font-bold text-primary mb-3">Not ready for the app yet?</h2>
+            <p className="font-body text-muted-foreground">
+              Start with a{' '}
+              <Link href="/free-hyrox-plan" className="font-semibold text-foreground underline underline-offset-4 hover:text-accent-ink">free 12-week plan</Link>,
+              build a week with the{' '}
+              <Link href="/calculators/week-planner" className="font-semibold text-foreground underline underline-offset-4 hover:text-accent-ink">hybrid week planner</Link>
+              , or read the{' '}
+              <Link href="/books" className="font-semibold text-foreground underline underline-offset-4 hover:text-accent-ink">paperback books</Link>.
+            </p>
           </div>
         </section>
 
