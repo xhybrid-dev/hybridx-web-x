@@ -3,6 +3,8 @@ import styles from './athx.module.css';
 import EnduranceCalculator from '@/components/athx/EnduranceCalculator';
 import AthxGuideForm from '@/components/athx/AthxGuideForm';
 import Link from 'next/link';
+import StandaloneBar from '@/components/StandaloneBar';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 import TrackedLink from '@/components/TrackedLink';
 import { appSignupHref, seedForAthx } from '@/lib/app-seed';
 import { books } from '@/lib/books';
@@ -264,6 +266,9 @@ export default function AthxFunnelPage() {
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={toolSchema} />
       <JsonLd data={speakableSchema} />
+
+      {/* The page looks nothing like the site on purpose; this is the way back to it. */}
+      <StandaloneBar />
 
       <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────── */}
@@ -631,6 +636,8 @@ export default function AthxFunnelPage() {
           <div className={styles.footerLinks}>
             <a href="/privacy-policy">Privacy notice</a>
             <a href="/terms">Terms</a>
+            <a href="/contact">Contact</a>
+            <ConsentSettingsButton className={styles.footerButton} />
             <a href="/">HybridX Club</a>
           </div>
 

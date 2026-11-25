@@ -7,6 +7,7 @@ import { LoadBench, Vo2Bench } from '@/components/una/Benches';
 import FormChart from '@/components/una/FormChart';
 import { LINE_FIELDS } from '@/lib/una-family';
 import styles from './nerdy.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 /*
@@ -693,6 +694,14 @@ export default function NerdyBitsPage() {
           are not made, endorsed or sponsored by UNA Watch Ltd. UNA and UNA Watch are trademarks of
           UNA Watch Ltd.
         </p>
+        <nav className={styles.footerNav} aria-label="Footer">
+          <a href="/una">The X family</a>
+          <a href={HYBRIDX_URL}>hybridx.club</a>
+          <a href="/privacy-policy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/contact">Contact</a>
+          <ConsentSettingsButton className={styles.footerButton} />
+        </nav>
       </footer>
     </div>
   );

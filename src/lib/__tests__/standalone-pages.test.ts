@@ -41,3 +41,51 @@ describe('the email form on the engine funnel', () => {
     expect(form).toContain('href="/privacy-policy"');
   });
 });
+
+describe('the ATHX page', () => {
+  const src = read('src/app/athx-2027/page.tsx');
+
+  it('has a bar back to the site and a way to change the cookie choice, like the other standalone pages', () => {
+    expect(src).toContain('<StandaloneBar />');
+    expect(src).toContain('<ConsentSettingsButton');
+    for (const href of ['/privacy-policy', '/terms', '/contact']) expect(src).toContain(`href="${href}"`);
+  });
+
+  it('leaves the skip link to the layout and gives <main> its id', () => {
+    expect(src).not.toContain('skipLink');
+    expect(src).toContain('<main id="main-content"');
+  });
+});
+
+describe('the running plan page', () => {
+  const sidebar = read('src/components/12-week-running-hyrox/WeekSelector.tsx');
+  const page = read('src/app/12-week-running-hyrox/page.tsx');
+
+  it('links its logo and a way back to the site, from the site\'s own file rather than a hotlink', () => {
+    expect(sidebar).toMatch(/<Link href="\/" aria-label="HybridX home"/);
+    expect(sidebar).toContain('Back to hybridx.club');
+    expect(sidebar + page).not.toContain('https://hybridx.club/Full');
+  });
+
+  it('takes the off-screen menu out of the tab order and names its button', () => {
+    expect(page).toContain("'-translate-x-full invisible'");
+    expect(page).toContain('aria-label="Open plan menu"');
+    expect(page).toContain('aria-controls="plan-sidebar"');
+  });
+
+  it('keeps every week in the page, hidden, so the plan is there to read and to search', () => {
+    expect(page).toMatch(/hidden=\{selected !== week\.weekNumber\}/);
+  });
+});
+
+describe('the X family pages', () => {
+  it.each(['src/app/una/page.tsx', 'src/app/training/page.tsx', 'src/app/una/nerdy-bits/page.tsx', 'src/components/una-app/Chrome.tsx'])(
+    '%s has terms, contact and a way to change the cookie choice in its footer',
+    (file) => {
+      const src = read(file);
+      expect(src).toMatch(/\/terms/);
+      expect(src).toMatch(/\/contact/);
+      expect(src).toContain('<ConsentSettingsButton');
+    },
+  );
+});

@@ -1018,13 +1018,15 @@ export default function PlanFinderDialog(props: PlanFinderDialogProps) {
     }
     return (
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-hx-line px-[var(--fpad)] py-3 md:min-h-24 md:flex-nowrap md:gap-4 md:py-4">
-        <span className="text-[17px] text-hx-mute max-md:basis-full">{COPY.result.noFit}</span>
-        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-4 gap-y-2 md:flex-none md:gap-5">
-          <button type="button" className="hx-btn hx-btn-ghost" onClick={() => go(7)}>
+        {/* On a phone the two buttons share one row and the question is smaller: this bar stays on
+            screen under the result, and stacked it took a quarter of a 800px screen. */}
+        <span className="text-[17px] text-hx-mute max-md:basis-full max-md:text-[15px]">{COPY.result.noFit}</span>
+        <div className="flex flex-1 items-center justify-end gap-x-4 gap-y-2 max-md:w-full max-md:gap-2 md:flex-none md:flex-wrap md:gap-5">
+          <button type="button" className="hx-btn hx-btn-ghost max-md:flex-1 max-md:gap-1.5 max-md:px-3 max-md:text-[15px]" onClick={() => go(7)}>
             {COPY.result.talkCta}
           </button>
           {entry && (
-            <button type="button" className="hx-btn" onClick={continueHome}>
+            <button type="button" className="hx-btn max-md:flex-1 max-md:gap-1.5 max-md:px-3 max-md:text-[15px]" onClick={continueHome}>
               {COPY.entry.continueLabel} <ArrowRight aria-hidden className="h-[18px] w-[18px] stroke-[2.4]" />
             </button>
           )}

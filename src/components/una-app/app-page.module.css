@@ -858,8 +858,23 @@
   gap: 8px 20px;
 }
 
-.footerLinks a {
+.footerLinks a,
+.footerButton {
   white-space: nowrap;
+}
+
+/* Cookie settings opens the consent banner, so it is a button, made to read as one of the links. */
+.footerButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.footerButton:hover {
+  color: var(--text);
 }
 
 /* ── Motion ─────────────────────────────────────────────────────────────── */

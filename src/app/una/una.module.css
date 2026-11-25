@@ -518,6 +518,16 @@
   text-decoration: none;
 }
 
+/* Cookie settings opens the consent banner, so it is a button, made to read as one of the links. */
+.footerButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .footerNav a:hover {
   text-decoration: underline;
   text-underline-offset: 4px;

@@ -924,6 +924,21 @@
   text-decoration: underline;
 }
 
+/* The cookie settings control is a button (it opens the banner), made to read as one of the links. */
+.footerButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--grey);
+  cursor: pointer;
+}
+
+.footerButton:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+
 /* The trademark disclaimer. The brief asks for --dim here and elsewhere states
    that every body text must clear 4.5:1; --dim is 3.1:1, so the two cannot both
    hold. Readability wins on the one line that exists to be read. */

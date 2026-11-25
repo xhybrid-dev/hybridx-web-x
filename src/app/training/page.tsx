@@ -13,6 +13,7 @@ import {
   WATCH_RENDERS,
 } from '@/lib/una-family';
 import styles from './training.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 import JsonLd from '@/components/JsonLd';
 import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
@@ -322,6 +323,9 @@ export default function TrainingPage() {
             <Link href="/weigh-in">X Weigh-in</Link>
             <a href={HYBRIDX_URL}>hybridx.club</a>
             <Link href="/privacy-policy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
+            <ConsentSettingsButton className={styles.footerButton} />
           </nav>
         </div>
       </footer>

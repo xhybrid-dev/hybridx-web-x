@@ -68,7 +68,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, onConfir
   );
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <form role="dialog" aria-modal="true" aria-labelledby={titleId} onSubmit={handleSubmit} className="bg-slate-950 border border-slate-800 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
           <div className="flex items-center gap-3">

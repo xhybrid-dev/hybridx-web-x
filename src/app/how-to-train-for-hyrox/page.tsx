@@ -206,18 +206,23 @@ export default function HowToTrainForHyrox() {
             </p>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm font-body">
+                <caption className="sr-only">The eight HYROX stations, in race order, with the distance or reps and a race tip for each</caption>
                 <thead className="bg-secondary/60">
                   <tr>
-                    <th className="text-left px-4 py-3 font-headline text-primary">Station</th>
-                    <th className="text-left px-4 py-3 font-headline text-primary">Distance / Reps</th>
-                    <th className="text-left px-4 py-3 font-headline text-primary hidden md:table-cell">Race Tip</th>
+                    <th scope="col" className="text-left px-4 py-3 font-headline text-primary">Station</th>
+                    <th scope="col" className="text-left px-4 py-3 font-headline text-primary">Distance / Reps</th>
+                    <th scope="col" className="text-left px-4 py-3 font-headline text-primary hidden md:table-cell">Race Tip</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stations.map((s, i) => (
                     <tr key={s.name} className={i % 2 === 0 ? 'bg-background' : 'bg-secondary/20'}>
-                      <td className="px-4 py-3 font-headline font-semibold text-primary">{s.name}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{s.dist}</td>
+                      <th scope="row" className="px-4 py-3 text-left align-top font-headline font-semibold text-primary">
+                        {s.name}
+                        {/* The tip column is hidden on a phone; the tip goes under the station instead of being lost. */}
+                        <span className="mt-1 block font-body text-xs font-normal leading-snug text-muted-foreground md:hidden">{s.tip}</span>
+                      </th>
+                      <td className="px-4 py-3 align-top text-muted-foreground">{s.dist}</td>
                       <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{s.tip}</td>
                     </tr>
                   ))}

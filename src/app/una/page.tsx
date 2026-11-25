@@ -16,6 +16,7 @@ import {
   VO2_ESTIMATE_NOTICE,
 } from '@/lib/una-family';
 import styles from './una.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 import JsonLd from '@/components/JsonLd';
 /*
@@ -289,6 +290,9 @@ export default function UnaFamilyPage() {
             <Link href="/trail-quest">Trail Quest</Link>
             <a href={HYBRIDX_URL}>hybridx.club</a>
             <Link href="/privacy-policy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
+            <ConsentSettingsButton className={styles.footerButton} />
           </nav>
         </div>
       </footer>
