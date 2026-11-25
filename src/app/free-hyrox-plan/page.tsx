@@ -57,7 +57,7 @@ const HeroSection = () => (
         Your Free 12-Week <span className="text-accent-ink">Hyrox Training Plan</span>
       </h1>
       <p className="text-lg md:text-xl text-muted-foreground font-body max-w-2xl mx-auto mb-8">
-        Enter your race date. Get a phase-by-phase plan dated back from race day — covering every station and every compromised running session — as a PDF and a calendar file that download straight away. No cost, no account.
+        Enter your race date, or start next Monday if you have not booked one yet. Get a phase-by-phase plan dated back from race day — covering every station and every compromised running session — as a PDF and a calendar file that download straight away. No cost, no account.
       </p>
       <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg transform hover:scale-105 transition-transform duration-200">
         <Link href="#get-the-plan">Get My Free Plan</Link>
@@ -181,6 +181,10 @@ const AppUpsellSection = () => (
 
 const FaqSection = () => {
   const hyroxFaqItems = [
+    {
+      question: "What if I haven't booked a race yet?",
+      answer: "Choose \"No race booked yet\" and the plan starts next Monday and builds to a race day eleven weeks later. Book a race for that weekend, or make a new plan once you have a date. If your race is not on the list, or has no date yet, choose \"I know my race date\" and type it in.",
+    },
     {
       question: "What if I'm a complete beginner?",
       answer: "This plan is designed to take you from wherever you are to Hyrox-ready in 12 weeks. It uses RPE (Rate of Perceived Exertion), and every session has a scaling option for beginners and an advanced challenge, so you set the intensity to your current fitness.",

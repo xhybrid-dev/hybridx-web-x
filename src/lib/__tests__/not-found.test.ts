@@ -17,8 +17,14 @@ describe('the root 404 page', () => {
     expect(src).not.toMatch(/components\/Header|components\/Footer|site-nav/);
   });
 
+  it('says no sport by name, since its text is in every page including the ATHX one', () => {
+    // Comments are not shipped, so only what the page renders is checked.
+    const code = src.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(code.toLowerCase()).not.toContain('hyrox');
+  });
+
   it('still gives a way back to the useful places, including a lost download', () => {
-    for (const href of ['/free-hyrox-plan', '/calculators', '/guides', '/resend', '/contact', '/']) {
+    for (const href of ['/start', '/calculators', '/guides', '/resend', '/contact', '/']) {
       expect(src, href).toContain(`'${href}'`.replace(/'/g, src.includes(`"${href}"`) ? '"' : "'"));
     }
   });

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { ArrowRight, Calculator, FileDown, LifeBuoy, Mail, Newspaper } from 'lucide-react';
+import { ArrowRight, Calculator, Compass, LifeBuoy, Mail, Newspaper } from 'lucide-react';
 
 // A page that is not found tells search engines so (Next sends the 404 status and
 // noindex), and tells a person where to go next. It used to be a bare black and
@@ -12,12 +12,13 @@ import { ArrowRight, Calculator, FileDown, LifeBuoy, Mail, Newspaper } from 'luc
 // root not-found element into the data of every page (so a notFound() thrown
 // anywhere can show it), and the header and footer are about 50 KB of links:
 // they added that to every page and put "HYROX" into the ATHX page, which is
-// built never to say it. This page is small and carries its own few links.
+// built never to say it (so the words here stay sport-neutral too). This page is
+// small and carries its own few links.
 export const metadata: Metadata = { title: 'Page not found' };
 
 const WAYS = [
-  { href: '/free-hyrox-plan', icon: FileDown, title: 'Free 12-week HYROX plan', body: 'A dated plan for your race, as a PDF and a calendar file.' },
-  { href: '/calculators', icon: Calculator, title: 'Calculators and tools', body: 'Pacing, paces, strength and the HYROX tools.' },
+  { href: '/start', icon: Compass, title: 'Find your training plan', body: 'Five quick questions, then a plan that fits.' },
+  { href: '/calculators', icon: Calculator, title: 'Calculators and tools', body: 'Pacing, paces, strength and race tools.' },
   { href: '/guides', icon: Newspaper, title: 'Guides', body: 'One clear answer to one training question.' },
   { href: '/resend', icon: LifeBuoy, title: 'Lost a download link?', body: 'Enter your email and we send it again.' },
   { href: '/contact', icon: Mail, title: 'Ask us', body: 'Tell us what you were looking for.' },
