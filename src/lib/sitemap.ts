@@ -189,7 +189,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.95,
     },
     {
-      // The ATHX 2027 pre-launch funnel. Its /confirm page is deliberately
+      // The ATHX 2027 page (guide, calculator and books). Its /confirm page is deliberately
       // absent: it is a per-address utility page and carries noindex.
       url: `${baseUrl}/athx-2027`,
       changeFrequency: 'weekly' as const,

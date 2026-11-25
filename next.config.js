@@ -41,6 +41,15 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // www.hybridx.club is bound to the same backend (25 November 2026). Without this the
+      // site answers on two hostnames and every page is a duplicate of itself: one
+      // permanent redirect keeps a single address for each page and for its links.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.hybridx.club' }],
+        destination: 'https://hybridx.club/:path*',
+        permanent: true,
+      },
       // Old long-form sales page — duplicated /free-hyrox-plan and split
       // ranking signals for "hyrox training plan" across three URLs.
       {

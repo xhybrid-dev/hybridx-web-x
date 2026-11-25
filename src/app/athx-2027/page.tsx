@@ -47,7 +47,7 @@ function BookLink({ bookId, label }: { bookId: string; label: string }) {
 }
 
 /*
- * The ATHX 2027 pre-launch funnel.
+ * The ATHX 2027 page: the guide, the pacing calculator and the books.
  *
  * A capture page for two training books (on sale on Amazon since November 2026, men's
  * and women's editions) and the plan in the app. Every section
@@ -618,7 +618,7 @@ export default function AthxFunnelPage() {
               <AthxGuideForm
                 placement="footer"
                 label="Get the one-page guide to ATHX"
-                support="One page, no fluff. We email you the download link, then one more email when the plans launch."
+                support="One page, no fluff. We email you the download link, then one more email about the ATHX training books."
               />
             </div>
           </div>

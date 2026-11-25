@@ -312,10 +312,12 @@ AI-drafted, reviewed and approved by Jon before publishing.
   no date, so a second import updates the events rather than adding a second set.
 - **Icon-only buttons inside a form need `type="button"` and a name**, or pressing one submits
   the form.
-- **The privacy policy was written from what the code does** and is a draft for Jon's review:
-  the controller's legal name and address (UK GDPR Art. 13(1)(a)) are not in the repository and
-  belong in its section 1. When a new processor, a new field in a form, or a new place a lead is
+- **The privacy policy was written from what the code does.** Its controller is "HybridX Hub, run by
+  Jon Lee", with an email address and deliberately no postal address (Jon's choice,
+  25 November 2026). When a new processor, a new field in a form, or a new place a lead is
   sent is added, change the policy in the same commit.
+- **Prices on the shop carry no VAT wording** (Jon, 25 November 2026: he handles VAT outside the
+  site). Do not add "inc. VAT" or similar to a price.
 
 ## The shop (paid PDFs)
 

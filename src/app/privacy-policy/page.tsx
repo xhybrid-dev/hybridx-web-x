@@ -26,15 +26,15 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Written from what the code does (the lead outbox, the rate limiter, the two Gemini tools,
-                  the order records). For Jon's review before it is relied on: the legal name and address of
-                  the controller (Art. 13(1)(a)) are not in this repository and still need adding to section 1,
-                  and the transfer and retention wording should be checked against the providers' current terms. */}
+                  the order records). The controller is named as HybridX Hub, run by Jon Lee, with an email address
+                  and no postal address, at Jon's choice (25 November 2026). The transfer and retention wording
+                  should be checked against the providers' current terms. */}
               <section>
                 <h2 className="text-2xl font-headline text-primary mb-3">1. Who we are</h2>
                 <p className="text-muted-foreground">
-                  HybridX Hub (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) runs hybridx.club: HYROX and hybrid training plans, books,
-                  free calculators and guides. We decide how and why the personal information described here is used, which makes us
-                  the &quot;controller&quot; under UK data protection law. You can reach us at{' '}
+                  HybridX Hub (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is run by Jon Lee and publishes hybridx.club: HYROX and hybrid
+                  training plans, books, free calculators and guides. We decide how and why the personal information described here is
+                  used, which makes us the &quot;controller&quot; under UK data protection law. You can reach us at{' '}
                   <a className="underline" href="mailto:training@hybridx.club">training@hybridx.club</a>. The HybridX app at
                   app.hybridx.club is our own separate service; this policy covers this website.
                 </p>

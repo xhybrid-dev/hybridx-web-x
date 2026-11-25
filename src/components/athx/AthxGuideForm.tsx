@@ -25,7 +25,7 @@ interface AthxGuideFormProps {
  * was ever specific to it.
  *
  * One field. Nothing else is asked for, because nothing else is needed to send
- * a guide, and every extra field costs conversions the launch email will miss.
+ * a guide, and every extra field costs conversions.
  */
 export default function AthxGuideForm({ placement, label, support }: AthxGuideFormProps) {
   const capture = useMagnetCapture(ATHX_MAGNET.slug, placement);
@@ -110,8 +110,8 @@ export default function AthxGuideForm({ placement, label, support }: AthxGuideFo
         </div>
 
         <p className={styles.micro}>
-          We will email you a link to the guide, then one more email when the training plans
-          launch, and then nothing. Unsubscribe any time. See our{' '}
+          We will email you a link to the guide, then one more email about the ATHX training
+          books, and then nothing. Unsubscribe any time. See our{' '}
           <a href="/privacy-policy">privacy notice</a>.
         </p>
       </form>
