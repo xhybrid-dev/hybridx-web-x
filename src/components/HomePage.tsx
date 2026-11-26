@@ -14,6 +14,7 @@ import FreeToolsSection from '@/components/FreeToolsSection';
 import { createCourseSchema, createSpeakableSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import EntrySection from '@/components/plan-finder/EntrySection';
 import PlanFinderRoot from '@/components/plan-finder/PlanFinderRoot';
+import AthxPrompt from '@/components/AthxPrompt';
 import type { Variant } from '@/lib/plan-finder/tracker';
 
 import JsonLd from '@/components/JsonLd';
@@ -98,6 +99,8 @@ export default function HomePage({ planFinder, variant = null }: { planFinder: '
       {/* Speakable schema — marks key sections for AI voice and read-aloud responses */}
       <JsonLd data={speakableSchema} />
       <Header />
+      {/* For the visitor who came for ATHX, not HYROX. In every plan finder mode, above it. */}
+      <AthxPrompt />
       {/* The plan finder sits in front of the homepage and can be skipped
           (handover/entry-funnel/docs/03). Everything inside #hx-home is the
           existing homepage, unchanged. */}
