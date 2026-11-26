@@ -12,7 +12,7 @@
 // Seeded on 10 November 2026 from each page file's last commit.
 
 export const PAGE_UPDATED: Readonly<Record<string, string>> = {
-  '/': '2026-11-25',
+  '/': '2026-11-26',
   '/calculators': '2026-11-25',
   '/calculators/running': '2026-11-25',
   '/calculators/strength': '2026-11-25',
@@ -38,7 +38,7 @@ export const PAGE_UPDATED: Readonly<Record<string, string>> = {
   '/vdot': '2026-11-25',
   '/12-week-running-hyrox': '2026-11-25',
   '/privacy-policy': '2026-11-25',
-  '/how-to-train-for-hyrox': '2026-11-25',
+  '/how-to-train-for-hyrox': '2026-11-26',
   '/hyrox-training-plan': '2026-11-25',
   '/hybrid-training-program': '2026-11-25',
   '/hyrox-rule-changes-2026': '2026-11-25',

@@ -339,6 +339,9 @@ AI-drafted, reviewed and approved by Jon before publishing.
   Jon Lee", with an email address and deliberately no postal address (Jon's choice,
   25 November 2026). When a new processor, a new field in a form, or a new place a lead is
   sent is added, change the policy in the same commit.
+- **The home page opens with an ATHX prompt** (`AthxPrompt`: "Are you interested in ATHX?" and a link to
+  `/athx-2027`, Jon, 26 November 2026), under the header and above the plan finder in every mode, because
+  the rest of the home page is about HYROX. `athx-prompt.test.ts` pins its place and its contrast.
 - **XENOM** (Jon, 26 November 2026) may be retired in favour of the ATHX work and is much less
   popular than ATHX: write no XENOM content and put it on no new page. The plan finder still has
   one XENOM goal tile (`funnel.json`, `routing.ts`, tests pin the 6 x 4 matrix) until he decides.
