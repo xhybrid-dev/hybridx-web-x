@@ -28,6 +28,8 @@ function pageRoutes(dir = APP_DIR, prefix = ''): Array<{ route: string; file: st
     const full = path.join(dir, name);
     if (statSync(full).isDirectory()) {
       if (name === 'api') continue;
+      // A folder starting with an underscore is private to Next: it is never a route (src/app/_drafts).
+      if (name.startsWith('_')) continue;
       out.push(...pageRoutes(full, `${prefix}/${name}`));
     } else if (name === 'page.tsx') {
       out.push({ route: prefix || '/', file: full });

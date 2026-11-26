@@ -3,6 +3,16 @@
 Things decided to leave alone for now, with what picking each up involves. Add to the top;
 delete an entry when it is done.
 
+## The About page (parked 26 November 2026, Jon: "keep that out of this update")
+
+Written and kept out of the site until a proper About article has been written. It is in
+`src/app/_drafts/about/` (a private folder, so not routed), its profile data in `src/lib/about.ts`
+(empty until Jon supplies a bio, credentials and profile links), and `about-draft.test.ts` keeps
+everything else from linking to it. To publish it: move the folder to `src/app/about`, put `/about`
+back in the footer (`site-nav.ts`), the sitemap, `llms.ts` and `page-dates.ts`, point the guides'
+`reviewedBy` at `PERSON_ID` in `guides/schema.ts`, replace the page's text with the real article, and
+delete `about-draft.test.ts`. Its claims about the guides rest on the freshness review, which is live.
+
 ## `ADMIN_EMAILS` is in `apphosting.yaml` (parked 25 November 2026, Jon: "ok for now")
 
 The repository is public, so the admin allow-list of email addresses in `apphosting.yaml` is

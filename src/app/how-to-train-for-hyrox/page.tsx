@@ -229,7 +229,7 @@ export default function HowToTrainForHyrox() {
                 </tbody>
               </table>
             </div>
-            <p className="text-sm text-muted-foreground font-body mt-3">Average finish time: ~1:40 for men, ~1:54 for women. Good beginner target: 1:45–2:10 (men), 2:00–2:20 (women).</p>
+            <p className="text-sm text-muted-foreground font-body mt-3">Average finish time: ~1:40 for men. Good beginner target: 1:45–2:10 (men), 2:00–2:20 (women). Ambitious women can realistically aim for 1:30–1:40.</p>
           </div>
         </section>
 

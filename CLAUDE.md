@@ -231,7 +231,7 @@ AI-drafted, reviewed and approved by Jon before publishing.
   due a look when it was written for an earlier `SEASON` (facts/hyrox-standards.ts) than the
   current one, or when nobody has looked at it for 180 days. Changing `SEASON` makes every guide
   due at once, which is how "when the rulebook changes the guides are reviewed again" (said on
-  `/guides/how-we-write` and `/about`) stays true. "Still correct" records `checkedAt` and `season`
+  `/guides/how-we-write`) stays true. "Still correct" records `checkedAt` and `season`
   without a revision or a new `updatedAt`; the byline shows "Checked <date>" and `lastReviewed`
   follows it, `dateModified` never does. New guides carry `season`; ones without it count as 2026/27.
 - **IndexNow** (`src/lib/indexnow.ts`): the hourly job tells Bing and the other IndexNow engines
@@ -339,6 +339,14 @@ AI-drafted, reviewed and approved by Jon before publishing.
   Jon Lee", with an email address and deliberately no postal address (Jon's choice,
   25 November 2026). When a new processor, a new field in a form, or a new place a lead is
   sent is added, change the policy in the same commit.
+- **XENOM** (Jon, 26 November 2026) may be retired in favour of the ATHX work and is much less
+  popular than ATHX: write no XENOM content and put it on no new page. The plan finder still has
+  one XENOM goal tile (`funnel.json`, `routing.ts`, tests pin the 6 x 4 matrix) until he decides.
+- **HYROX finish times** (Jon, 26 November 2026): men's average about 1:40, beginner targets as written,
+  and 1:30 to 1:40 as a realistic goal for ambitious women. No women's average is stated;
+  `finish-times.test.ts` pins it.
+- **The About page is a parked draft** in `src/app/_drafts/about` (Jon, 26 November 2026), linked from
+  nowhere; `docs/parked-for-later.md` says how to publish it and `about-draft.test.ts` holds it there.
 - **Prices on the shop carry no VAT wording** (Jon, 25 November 2026: he handles VAT outside the
   site). Do not add "inc. VAT" or similar to a price.
 
@@ -399,6 +407,12 @@ the wire format between this site and `hyroxedgeai`, it belongs in
   `src/lib/lead-tokens.ts` falls back to a per-process random secret, so a
   confirmation link minted by one instance fails on another — which presents as an
   intermittently broken email rather than as a missing secret.
+
+- **Contact messages (`hx_leads`) and the plan finder's raw visit batches (`hx_batches`) are deleted
+  by the hourly job too** (`src/lib/retention.ts`), 12 months after the last change (30 days once a
+  message is closed) and 400 days, so what the privacy policy says does not rest on a Firestore TTL
+  policy. A TTL policy on `expireAt` for each is still worth having and never conflicts. A document
+  with no `expireAt` Timestamp is never touched by either.
 
 - Expired rate-limit windows are swept by `/api/cron/marketing-maintenance` on its
   hourly run. Documents also carry `expiresAt`, so a Firestore TTL policy on the

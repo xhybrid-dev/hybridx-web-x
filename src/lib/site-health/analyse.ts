@@ -105,7 +105,7 @@ export interface SiteTarget {
   url: (origin: string) => string;
   /** Do not follow redirects: the redirect is the thing being checked. */
   manualRedirect?: boolean;
-  check: (r: { status: number; location: string | null; headers: Headers; body: string }, origin: string) => HealthIssue[];
+  check: (r: { status: number; location: string | null; headers: Headers; body: string }, origin: string, now?: Date) => HealthIssue[];
 }
 
 const SECURITY_HEADERS = ['strict-transport-security', 'content-security-policy', 'x-frame-options', 'x-content-type-options', 'referrer-policy', 'permissions-policy'];
@@ -150,6 +150,31 @@ export const SITE_TARGETS: readonly SiteTarget[] = [
     check: (r) => {
       if (r.status !== 404) return [issue('error', 'not-found', `A page that does not exist answers ${r.status}, not 404 (a "soft 404" wastes crawl budget and confuses indexing).`)];
       return /noindex/i.test(r.body) || /noindex/i.test(r.headers.get('x-robots-tag') ?? '') ? [] : [issue('warn', 'not-found', 'The 404 page is not marked noindex.')];
+    },
+  },
+  {
+    // The race list on the free plan page comes from a Google Sheet, and fetchHyroxEvents turns any failure
+    // (the sheet unshared, the tab renamed, an id changed) into an empty list with no error anyone sees: the
+    // form then quietly offers only a typed date. This is how that gets noticed.
+    id: 'events',
+    label: 'The events feed has races in it',
+    url: (o) => `${o}/api/hyrox-events`,
+    check: (r, _origin, now = new Date()) => {
+      if (r.status !== 200) return [issue('error', 'events', `/api/hyrox-events answers ${r.status}.`)];
+      let events: { startDate?: string | null; endDate?: string | null }[];
+      try {
+        const parsed = JSON.parse(r.body) as { events?: unknown };
+        if (!Array.isArray(parsed.events)) throw new Error('no events array');
+        events = parsed.events;
+      } catch {
+        return [issue('error', 'events', '/api/hyrox-events did not return a list of events.')];
+      }
+      if (events.length === 0) {
+        return [issue('error', 'events', 'The events feed is empty: the Google Sheet cannot be read (not shared with "anyone with the link", the Events tab renamed, or GOOGLE_SHEET_ID changed), so the free plan form offers only a typed date.')];
+      }
+      const today = now.toISOString().slice(0, 10);
+      const upcoming = events.some((e) => /^\d{4}-\d{2}-\d{2}/.test(e.endDate ?? e.startDate ?? '') && (e.endDate ?? e.startDate ?? '').slice(0, 10) >= today);
+      return upcoming ? [] : [issue('warn', 'events-stale', `The events feed has ${events.length} races but none on or after today, so the sheet may have stopped updating.`)];
     },
   },
   {

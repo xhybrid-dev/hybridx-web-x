@@ -32,16 +32,18 @@ describe('report a correction', () => {
 
   it('is offered at the end of every guide and on the About page', () => {
     expect(read('src/app/guides/[slug]/page.tsx')).toContain('/contact?topic=correction&page=');
-    expect(read('src/app/about/page.tsx')).toContain('/contact?topic=correction');
+    expect(read('src/app/_drafts/about/page.tsx')).toContain('/contact?topic=correction');
   });
 });
 
 describe('the person behind the guides', () => {
-  it('is one entity: the guides name the Person the About page defines', () => {
+  it('is named on every guide, and points at no About page while there is none', () => {
     expect(createPersonSchema({ name: 'Jon Lee', jobTitle: 'HybridX trainer' })['@id']).toBe(PERSON_ID);
     const page = guideJsonLd(SAMPLE_GUIDES[0]).find((o) => (o as { '@type'?: string })['@type'] === 'WebPage') as { reviewedBy: Record<string, string> };
-    expect(page.reviewedBy['@id']).toBe(PERSON_ID);
     expect(page.reviewedBy.name).toBe('Jon Lee');
+    // A reference to a page that does not exist is worse than none. When About is published, point it at PERSON_ID.
+    expect(page.reviewedBy).not.toHaveProperty('@id');
+    expect(page.reviewedBy).not.toHaveProperty('url');
   });
 
   it('states only what it is given: no description or profiles unless supplied', () => {
@@ -55,7 +57,7 @@ describe('the person behind the guides', () => {
   // The About page may only say what the code can back. A credential or a track record has to
   // come from the owner through src/lib/about.ts, never from the page's own copy.
   it('does not claim a qualification, a track record or a number of years in its own copy', () => {
-    const page = read('src/app/about/page.tsx').replace(/\/\/.*$/gm, '');
+    const page = read('src/app/_drafts/about/page.tsx').replace(/\/\/.*$/gm, '');
     for (const word of [/\bcertified\b/i, /\bqualified\b/i, /\byears of\b/i, /\bexperienced\b/i, /\bformer\b/i, /\bcoached\b/i, /\bhundreds of\b/i, /\bchampion/i, /\bworld[- ]class\b/i]) {
       expect(page, String(word)).not.toMatch(word);
     }

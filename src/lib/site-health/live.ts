@@ -16,7 +16,7 @@ import { runSiteHealth, type HealthDeps, type HealthRun, type HealthState } from
 export const HEALTH_COLLECTION = 'siteHealth';
 const PRODUCTION_ORIGIN = 'https://hybridx.club';
 const TIMEOUT_MS = 8_000;
-const AGENT = 'HybridXSiteCheck/1.0 (+https://hybridx.club/about)';
+const AGENT = 'HybridXSiteCheck/1.0 (+https://hybridx.club/contact)';
 
 const docId = (key: string) => createHash('sha1').update(key).digest('hex').slice(0, 24);
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

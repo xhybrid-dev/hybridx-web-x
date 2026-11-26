@@ -82,6 +82,19 @@ describe('the site-wide checks', () => {
     expect(codes(errorsOf(target('not-found').check(res({ status: 200 }), ORIGIN)))).toEqual(['not-found']);
   });
 
+  it('the events feed must list races, at least one still to come; an empty one is an error, a stale one only a warning', () => {
+    const now = new Date('2026-11-25T10:00:00Z');
+    const feed = (events: unknown) => res({ body: JSON.stringify({ events }) });
+    expect(target('events').check(feed([{ startDate: '2027-03-13', endDate: '2027-03-15' }]), ORIGIN, now)).toEqual([]);
+    expect(target('events').check(feed([{ startDate: '2026-11-25', endDate: null }]), ORIGIN, now)).toEqual([]);
+    expect(codes(errorsOf(target('events').check(feed([]), ORIGIN, now)))).toEqual(['events']);
+    expect(codes(errorsOf(target('events').check(res({ status: 500 }), ORIGIN, now)))).toEqual(['events']);
+    expect(codes(errorsOf(target('events').check(res({ body: 'not json' }), ORIGIN, now)))).toEqual(['events']);
+    const stale = target('events').check(feed([{ startDate: '2025-03-13', endDate: '2025-03-15' }]), ORIGIN, now);
+    expect(codes(stale)).toEqual(['events-stale']);
+    expect(errorsOf(stale)).toEqual([]);
+  });
+
   it('the homepage must carry all six security headers and not announce its stack', () => {
     const all = Object.fromEntries(SECURITY.map((h) => [h, 'x']));
     expect(target('headers').check(res({ headers: all }), ORIGIN)).toEqual([]);
@@ -112,6 +125,7 @@ function harness(opts: { paths?: string[]; states?: HealthState[]; broken?: Reco
       const base = { status: 200, location: null as string | null, headers: hdrs(Object.fromEntries(SECURITY.map((h) => [h, 'x']))), body: '<loc>x</loc>'.repeat(30) + '\nSitemap: x\n' + 'x'.repeat(300) };
       if (t.id === 'www') return { ...base, status: 308, location: 'https://hybridx.club/' };
       if (t.id === 'not-found') return { ...base, status: 404, body: '<meta name="robots" content="noindex">' };
+      if (t.id === 'events') return { ...base, body: JSON.stringify({ events: [{ name: 'HYROX London', startDate: '2027-03-13', endDate: '2027-03-15' }] }) };
       return base;
     },
     loadStates: async () => opts.states ?? [],

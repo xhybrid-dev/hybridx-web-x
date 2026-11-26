@@ -9,7 +9,7 @@
 // the page for readers either way.
 
 import { ARTICLE_REVIEWER } from '@/lib/facts';
-import { createArticleSchema, createBreadcrumbSchema, PERSON_ID, SITE_CONFIG } from '@/lib/seo';
+import { createArticleSchema, createBreadcrumbSchema, SITE_CONFIG } from '@/lib/seo';
 import { lastLookedAt } from './freshness';
 import { pillar as pillarOf, type PillarId } from './topics';
 import type { Guide } from './types';
@@ -59,13 +59,11 @@ export function guideJsonLd(guide: Guide): object[] {
       name: guide.title,
       // When a person last looked at it, which a "still correct" check moves and dateModified does not.
       lastReviewed: lastLookedAt(guide) > modified ? lastLookedAt(guide).slice(0, 10) : modified.slice(0, 10),
-      // The same Person the About page defines, so a search engine can join the two.
+      // No @id or url until an About page exists for them to point at (src/app/_drafts/about).
       reviewedBy: {
         '@type': ARTICLE_REVIEWER.type,
-        '@id': PERSON_ID,
         name: ARTICLE_REVIEWER.name,
         jobTitle: ARTICLE_REVIEWER.role,
-        url: `${SITE_CONFIG.url}/about`,
         worksFor: { '@type': 'Organization', name: SITE_CONFIG.name, url: SITE_CONFIG.url },
       },
     },

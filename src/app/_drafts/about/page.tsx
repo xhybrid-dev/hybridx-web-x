@@ -8,6 +8,12 @@ import { APP, ARTICLE_REVIEWER, ATHLETES, appPriceLabel } from '@/lib/facts';
 import { REVIEWER_PROFILE } from '@/lib/about';
 import { createBreadcrumbSchema, createMetadata, createPersonSchema, ORGANIZATION_ID, SITE_CONFIG } from '@/lib/seo';
 
+// DRAFT, NOT PUBLISHED (Jon, 26 November 2026: "keep that out of this update"; he will have a proper
+// About article written). `_drafts` is a private folder, so Next does not route it. To publish: move this
+// folder to src/app/about, then put /about back in the footer (site-nav.ts), the sitemap, llms.ts and
+// page-dates.ts, and point the guides' `reviewedBy` at PERSON_ID again (guides/schema.ts); about-draft.test.ts
+// fails until the links are in the right state.
+//
 // Everything here is either in the code already (the facts registry, the review process the
 // guides follow, the disclosures the site makes elsewhere) or in src/lib/about.ts, which only
 // its owner fills in. Nothing on this page is a claim that could not be checked: that is the

@@ -108,7 +108,7 @@ export async function runSiteHealth(deps: HealthDeps): Promise<HealthRun> {
       key: siteKey(t.id),
       kind: 'site',
       label: t.label,
-      run: async () => t.check(await deps.fetchTarget(t), deps.origin),
+      run: async () => t.check(await deps.fetchTarget(t), deps.origin, deps.now()),
     })),
     ...pagesDue(paths, states).map<Job>((path) => ({
       key: pageKey(path),
