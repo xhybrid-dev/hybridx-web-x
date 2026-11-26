@@ -10,8 +10,8 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/strength' },
-  title: 'Free Strength Calculators (1RM, Percentage, Wilks) | HybridX Hub',
-  description: 'A suite of free strength calculators for athletes. Estimate your one-rep max, calculate percentage-based training weights, and determine your powerlifting score.',
+  title: 'Free Strength Calculators: 1RM, % & Wilks',
+  description: 'Free strength calculators: estimate your one-rep max, work out percentage-based training loads and score your powerlifting total with Wilks and DOTS.',
 };
 
 interface CalculatorInfo {
@@ -54,7 +54,7 @@ export default function StrengthCalculatorsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <section id="strength-calculators-overview" className="py-12 md:py-16">
           <div className="text-center mb-12 md:mb-16">
             <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">
@@ -69,10 +69,10 @@ export default function StrengthCalculatorsPage() {
               <Card key={calc.id} className="shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col bg-card/80 backdrop-blur-sm border-border/60 group border-t-2 border-accent/40">
                 <CardHeader className="flex-row items-center space-x-4 pb-4 pt-6">
                   <div className="p-3 bg-accent/15 rounded-lg ring-1 ring-accent/30">
-                    <calc.icon className="h-8 w-8 text-accent" />
+                    <calc.icon className="h-8 w-8 text-accent-ink" />
                   </div>
                   <div>
-                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent transition-colors duration-300">{calc.title}</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent-ink transition-colors duration-300">{calc.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import styles from './app-page.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 /*
  * The parts every HybridX-app-for-UNA page shares: the wordmark, the arrow on
@@ -47,7 +48,7 @@ export function Arrow() {
 export function Wordmark({ app, large = false }: { app: string; large?: boolean }) {
   return (
     <span className={`${styles.wordmark} ${large ? styles.wordmarkLarge : ''}`}>
-      <Image src="/Icon Logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
+      <Image src="/icon-logo.png" alt="HybridX" width={40} height={40} className={styles.xMark} />
       <span className={styles.wordRace}>{app}</span>
       <span className={styles.wordFor}>for UNA Watch</span>
     </span>
@@ -135,6 +136,9 @@ export function AppFooter({ appName, mentionsHyrox = false }: { appName: string;
             unawatch.com
           </a>
           <a href={`${HYBRIDX_URL}/privacy-policy`}>Privacy</a>
+          <a href={`${HYBRIDX_URL}/terms`}>Terms</a>
+          <a href={`${HYBRIDX_URL}/contact`}>Contact</a>
+          <ConsentSettingsButton className={styles.footerButton} />
         </nav>
       </div>
     </footer>

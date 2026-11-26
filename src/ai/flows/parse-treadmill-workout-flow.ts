@@ -11,16 +11,20 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { guardAiCall } from '@/lib/ai-guard';
 
 const ParseTreadmillWorkoutInputSchema = z.object({
-  description: z.string().min(3).describe('The athlete\'s free-text description of the treadmill workout.'),
+  // Bounded: the text goes to a paid model, and a describing sentence is never this long.
+  description: z.string().min(3).max(1500).describe('The athlete\'s free-text description of the treadmill workout.'),
   unit: z.enum(['km', 'mi']).describe('The distance unit the athlete works in.'),
   referencePace: z
     .string()
+    .max(20)
     .optional()
     .describe("The athlete's known pace, as mm:ss per the given unit, to anchor effort language (RPE, 'steady', 'easy', 'hard') to a real number."),
   referencePaceLabel: z
     .string()
+    .max(60)
     .optional()
     .describe("What the reference pace represents, e.g. 'easy pace' or '5K race pace'."),
 });
@@ -48,6 +52,13 @@ export type ParseTreadmillWorkoutOutput = z.infer<typeof ParseTreadmillWorkoutOu
 export async function parseTreadmillWorkout(
   input: ParseTreadmillWorkoutInput,
 ): Promise<ParseTreadmillWorkoutOutput> {
+  // A server action is a public endpoint: check the size here (the schema does too,
+  // inside the flow, but only after the model call has been paid for if it failed
+  // late) and limit how often one person can call it.
+  if (typeof input?.description !== 'string' || input.description.length > 1500) {
+    throw new Error('Describe the workout in 1,500 characters or fewer.');
+  }
+  await guardAiCall('treadmill-workout');
   return parseTreadmillWorkoutFlow(input);
 }
 

@@ -50,7 +50,8 @@ export default function StickyCta({ targetId }: StickyCtaProps) {
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 z-50 border-t border-[#7A2530] bg-engine-oxdeep/95 p-3 backdrop-blur transition-transform duration-300 md:hidden ${
+      // Not while the consent banner is up: it is fixed to the same edge and would sit on top of this bar.
+      className={`fixed inset-x-0 bottom-0 z-50 border-t border-[#7A2530] bg-engine-oxdeep/95 p-3 backdrop-blur transition-transform duration-300 md:hidden [body:has([data-consent-banner])_&]:hidden ${
         show ? 'translate-y-0' : 'translate-y-full'
       }`}
       aria-hidden={!show}

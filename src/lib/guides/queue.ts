@@ -17,7 +17,9 @@
 // So search data decides the order only where Jon has not.
 
 import { adminFirestore } from '@/lib/firebase-admin';
-import { CANDIDATES, UNBUILT_TOOLS, type FutureTool, type Proof } from './candidates';
+import { CANDIDATES, UNBUILT_TOOLS, type Candidate, type FutureTool, type Proof } from './candidates';
+import { describeDuplicate, findDuplicates, type Compared } from './duplicates';
+import { listAllGuides } from './store';
 import type { PillarId, ToolId } from './topics';
 
 export const TOPICS_COLLECTION = 'guideTopics';
@@ -84,19 +86,37 @@ export async function listTopics(): Promise<Topic[]> {
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Topic, 'id'>) })).sort((a, b) => a.rank - b.rank);
 }
 
-/** Writes the starting list, once: only when the queue has never held anything. */
+/** A question as a key: case, punctuation and spacing do not make a different question. */
+export const questionKey = (q: string): string => q.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/**
+ * The candidates the queue does not hold, whatever has become of them: a topic already drafted,
+ * skipped or turned down still counts as held, so a topic Jon skipped never comes back.
+ */
+export function missingCandidates(topics: readonly Pick<Topic, 'question'>[], candidates: readonly Candidate[] = CANDIDATES): Candidate[] {
+  const held = new Set(topics.map((t) => questionKey(t.question)));
+  return candidates.filter((c) => !held.has(questionKey(c.question)));
+}
+
+/**
+ * Writes the starting list when the queue has never held anything, and from then on adds any
+ * candidate in candidates.ts the queue does not hold, at the back (reorderQueue places it by
+ * demand). So a topic added to the list in code reaches a queue that was seeded long ago.
+ */
 export async function ensureQueueSeeded(now = new Date()): Promise<number> {
-  const existing = await adminFirestore.collection(TOPICS_COLLECTION).limit(1).get();
-  if (!existing.empty) return 0;
+  const topics = await listTopics();
+  const missing = missingCandidates(topics);
+  if (missing.length === 0) return 0;
   const at = now.toISOString();
+  const last = topics.at(-1)?.rank ?? 0;
   await Promise.all(
-    CANDIDATES.map((c, i) =>
+    missing.map((c, i) =>
       adminFirestore.collection(TOPICS_COLLECTION).add(
-        clean({ ...c, rank: (i + 1) * 10, status: 'queued', source: 'list', createdAt: at, updatedAt: at }),
+        clean({ ...c, rank: last + (i + 1) * 10, status: 'queued', source: 'list', createdAt: at, updatedAt: at }),
       ),
     ),
   );
-  return CANDIDATES.length;
+  return missing.length;
 }
 
 /** Whether a topic can be drafted now: queued, and any tool it needs exists. */
@@ -139,6 +159,25 @@ export async function addTopic(question: string, pillar: PillarId, now = new Dat
     }),
   );
   return ref.id;
+}
+
+/**
+ * A sentence saying which queued topic or live article a new question repeats, or
+ * null. Adding the same question worded differently put a second article on one
+ * question onto the site; this is the check that stops it at the door.
+ */
+export async function duplicateOfQuestion(question: string): Promise<string | null> {
+  const [topics, guides] = await Promise.all([listTopics(), listAllGuides()]);
+  const existing: Compared[] = [
+    ...topics
+      .filter((t) => t.status === 'queued' || t.status === 'drafting')
+      .map((t) => ({ label: 'a topic already in the queue', title: t.question })),
+    ...guides
+      .filter((g) => g.status !== 'retired' && g.status !== 'rejected')
+      .map((g) => ({ label: `/guides/${g.slug}`, title: g.title })),
+  ];
+  const [found] = findDuplicates(question, existing);
+  return found ? `That repeats a question already covered: ${describeDuplicate(found)}` : null;
 }
 
 /** Whether a question is already waiting or being drafted, so a double click adds it once. */

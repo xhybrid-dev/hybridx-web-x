@@ -10,10 +10,11 @@ import Link from 'next/link';
 import PillarQuestions from '@/components/guides/PillarQuestions';
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators' },
-  title: 'Free Fitness & Health Calculators | HybridX Hub',
-  description: 'A comprehensive suite of free calculators for running, strength training, and general health. Calculate your pace, 1RM, body fat, and more to optimize your fitness journey.',
+  title: 'Free HYROX, Running & Strength Calculators',
+  description: 'Free calculators for HYROX pacing, running, strength and health: pace, race times, 1RM, DOTS, body fat, macros and more, all in your browser.',
   keywords: [
     'fitness calculators',
     'running calculators',
@@ -26,12 +27,14 @@ export const metadata: Metadata = {
     'heart rate zones',
   ],
   openGraph: {
-    title: 'Free Fitness & Health Calculators | HybridX Hub',
+    ...OG_DEFAULTS,
+    title: 'Free HYROX, Running & Strength Calculators',
     description: 'A comprehensive suite of free calculators for running, strength training, and general health. Calculate your pace, 1RM, body fat, and more.',
     url: 'https://hybridx.club/calculators',
     type: 'website',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free Fitness & Health Calculators',
     description: 'A comprehensive suite of free calculators for running, strength training, and general health.',
@@ -107,7 +110,7 @@ export default function CalculatorsHubPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <section id="calculators-overview" className="py-12 md:py-16">
           <div className="text-center mb-12 md:mb-16">
             <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">
@@ -122,10 +125,10 @@ export default function CalculatorsHubPage() {
               <Card key={cat.id} className="shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col bg-card/80 backdrop-blur-sm border-border/60 group border-t-2 border-accent/40">
                 <CardHeader className="flex-row items-center space-x-4 pb-4 pt-6">
                   <div className="p-3 bg-accent/15 rounded-lg ring-1 ring-accent/30">
-                    <cat.icon className="h-8 w-8 text-accent" />
+                    <cat.icon className="h-8 w-8 text-accent-ink" />
                   </div>
                   <div>
-                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent transition-colors duration-300">{cat.title}</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-primary group-hover:text-accent-ink transition-colors duration-300">{cat.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">

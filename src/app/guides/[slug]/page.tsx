@@ -13,6 +13,7 @@ import { guideJsonLd, guidePath, jsonLdString } from '@/lib/guides/schema';
 import { getPublicGuide, listPublishedGuides } from '@/lib/guides/store';
 import { pillar as pillarOf, SITE_PAGES } from '@/lib/guides/topics';
 
+import JsonLd from '@/components/JsonLd';
 // One article, read from Firestore at request time. Drafts are never served:
 // getPublicGuide only knows published and retired articles. A retired article
 // with somewhere to send its readers redirects there permanently; one without
@@ -31,6 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: guide.description,
     type: 'article',
     path: guidePath(guide.slug),
+    // null: leave the card to this article's own opengraph-image. Naming the site
+    // default here hid every article's own card behind /og-default.png.
+    image: null,
   });
 }
 
@@ -52,10 +56,10 @@ export default async function GuidePage({ params }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {guideJsonLd(guide).map((data, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
+        <JsonLd key={i} data={data} />
       ))}
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="bg-gradient-to-b from-neutral-900 to-black py-14 text-white md:py-20">
           <div className="container mx-auto max-w-3xl px-6">
             <nav aria-label="Breadcrumb" className="mb-5 font-body text-sm text-white/70">
@@ -69,7 +73,7 @@ export default async function GuidePage({ params }: Props) {
             </nav>
             <h1 className="font-headline text-3xl font-extrabold leading-tight md:text-5xl">{guide.title}</h1>
             <div className="mt-6">
-              <GuideByline updatedAt={guide.updatedAt} />
+              <GuideByline updatedAt={guide.updatedAt} checkedAt={guide.checkedAt} />
             </div>
           </div>
         </section>
@@ -109,6 +113,17 @@ export default async function GuidePage({ params }: Props) {
               </>
             )}
           </nav>
+
+          <p className="mt-10 border-t border-border pt-6 font-body text-sm text-muted-foreground">
+            Spotted a mistake in this guide?{' '}
+            <Link
+              href={`/contact?topic=correction&page=${guidePath(guide.slug)}`}
+              className="font-semibold text-foreground underline underline-offset-4"
+            >
+              Tell us and we will check it
+            </Link>
+            .
+          </p>
         </article>
         <GuideEngagement slug={guide.slug} targetId="guide-body" />
       </main>

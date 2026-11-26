@@ -7,6 +7,7 @@ import {
   WEEKS,
   nextMonday,
   parsePlannerInput,
+  parsePlannerPreset,
   pick,
   planWeek,
   planWeeks,
@@ -122,6 +123,30 @@ describe('the wording', () => {
       expect(findWordViolations(t, BANNED_PHRASES), t).toEqual([]);
       expect(findWordViolations(t, BANNED_DASHES), t).toEqual([]);
     }
+  });
+});
+
+describe('a half-formed link', () => {
+  const DEFAULTS = { days: 4, goal: 'first-hyrox', kit: 'full-gym', longRunDay: 5 } as const;
+  const from = (qs: string) => {
+    const p = new URLSearchParams(qs);
+    return parsePlannerPreset((k) => p.get(k), DEFAULTS);
+  };
+
+  it('takes the goal it names and the rest from the defaults', () => {
+    expect(from('goal=athx')).toEqual({ days: 4, goal: 'athx', kit: 'full-gym', longRunDay: 5 });
+    expect(from('goal=10k-strength&days=3')).toEqual({ days: 3, goal: '10k-strength', kit: 'full-gym', longRunDay: 5 });
+  });
+
+  it('ignores a value that is not one of the choices, and returns nothing when nothing changes', () => {
+    expect(from('goal=marathon')).toBeNull();
+    expect(from('')).toBeNull();
+    expect(from('days=9&kit=moon')).toBeNull();
+  });
+
+  it('leaves the strict reader strict, since the emailed link must name all four', () => {
+    const p = new URLSearchParams('goal=athx');
+    expect(parsePlannerInput((k) => p.get(k))).toBeNull();
   });
 });
 

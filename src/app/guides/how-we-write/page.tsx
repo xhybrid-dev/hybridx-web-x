@@ -42,7 +42,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: 'Corrections',
     body: [
-      'Each guide shows the date it was last updated. If you spot something wrong, email training@hybridx.club and we will check it and correct it.',
+      'Each guide shows the date it was last updated, and the date it was last checked when that is later. If you spot something wrong, use the "Tell us" link at the end of the guide, or email training@hybridx.club, and we will check it and correct it.',
       'When a new guide is published, we may add a link to it from older guides on the same subject, so you can find it from where you are reading. Those links are approved like everything else, and count as an update.',
     ],
   },
@@ -52,7 +52,7 @@ export default function HowWeWrite() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="bg-gradient-to-b from-neutral-900 to-black py-14 text-white md:py-20">
           <div className="container mx-auto max-w-3xl px-6">
             <nav aria-label="Breadcrumb" className="mb-5 font-body text-sm text-white/70">

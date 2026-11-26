@@ -1,9 +1,12 @@
 # Self-hosted fonts
 
 Latin-subset `.woff2` files, all SIL Open Font License 1.1 (Inter, Space Grotesk,
-JetBrains Mono, Anton, Poppins, Manrope, Spline Sans Mono). Loaded with
-`next/font/local` by `src/components/una/fonts.ts`,
-`src/components/trail/fonts.ts` and `src/components/weighin/fonts.ts`.
+JetBrains Mono, Anton, Poppins, Manrope, Spline Sans Mono, Archivo, Fraunces, IBM Plex
+Mono, Press Start 2P). Loaded with `next/font/local` by `src/lib/fonts.ts` (the root
+layout, the engine funnel, /streak, the watch artwork and Trail Quest) and by
+`src/components/una/fonts.ts`, `src/components/trail/fonts.ts` and
+`src/components/weighin/fonts.ts`. No file in `src/` imports `next/font/google`, and a
+test fails if one does.
 
 ## Why not `next/font/google`
 
@@ -16,7 +19,8 @@ files. On 24 November it did the same to `weighin/fonts.ts`, which had built
 cleanly since October. A build must not depend on what Google happens to serve
 that minute.
 
-If another `next/font/google` file fails the same way, do the same for it.
+The rest followed on 25 November 2026, including the root layout, whose failure takes the
+whole site down with it. Do not add a `next/font/google` import: a test fails on one.
 
 ## Adding or refreshing a file
 

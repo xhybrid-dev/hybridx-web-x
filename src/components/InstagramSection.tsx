@@ -18,9 +18,9 @@ export default function InstagramSection() {
     <section id="instagram-section" className="py-20 md:py-28 bg-secondary/30">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12 md:mb-16">
-          <Instagram className="h-16 w-16 text-accent mx-auto mb-4" />
+          <Instagram className="h-16 w-16 text-accent-ink mx-auto mb-4" />
           <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">
-            Join the <span className="text-accent">HybridX</span> Community
+            Join the <span className="text-accent-ink">HybridX</span> Community
           </h2>
           <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
             Follow our journey on Instagram for daily motivation, training tips, and community highlights. See how athletes just like you are smashing their goals.

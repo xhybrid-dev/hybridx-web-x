@@ -15,7 +15,7 @@ export default function ResendPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-xl flex-grow px-4 py-12 sm:px-6 md:py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-xl flex-grow px-4 py-12 sm:px-6 md:py-16">
         <h1 className="mb-3 font-headline text-3xl font-bold">Get your download link again</h1>
         <p className="mb-8 text-muted-foreground">
           Enter the email address you used at checkout. If it has an order, we will email you the link to your

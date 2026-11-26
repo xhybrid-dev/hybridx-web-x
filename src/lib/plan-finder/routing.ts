@@ -5,7 +5,17 @@
 // truth for which product a set of answers leads to. Copy, labels and links
 // live in funnel.json.
 //
-// Ported from handover/entry-funnel/data/routing.js with the same behaviour.
+// Version 2.0.0 (25 November 2026). Version 1 (kept, frozen, in
+// analytics/legacy-routing.ts for the demo-data generator) was ported from the
+// hand-over and sent people to the wrong places:
+//   - ATHX never reached the ATHX page, and its free and tools answers went to the
+//     free HYROX plan and to a road-running race time predictor;
+//   - "a faster HYROX time" went to the road-running predictor, not the HYROX tools;
+//   - "general hybrid fitness, no race" went to a plan whose form needed a booked race;
+//   - "calculators and free guides only" went to an email-gated plan;
+//   - an injury answer did nothing;
+//   - the explanation could say something the result did not do ("running is your weak
+//     spot, so we added a running plan" with "too many options" also ticked).
 // The rules change only together with their tests
 // (src/lib/__tests__/plan-finder-routing.test.ts): update the oracle table
 // there independently, update the golden examples if a documented outcome
@@ -15,7 +25,7 @@
 import type { FormatId, Funnel, GoalId, LevelId, ObstacleId, PlaceId, ProductId } from './content';
 import { findOption } from './content';
 
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 
 export interface Answers {
   goal?: GoalId | null;
@@ -36,7 +46,26 @@ export interface Route {
 }
 
 const ADVANCED: LevelId[] = ['raced', 'compete'];
-const TOOL_BY_GOAL: Record<GoalId, ProductId> = { first: 'free', faster: 'rtp', athx: 'rtp', xenom: 'vo2', ultra: 'vdot', hybrid: 'vo2' };
+
+/** The free thing to start with, by goal: a tool or a page, never an email form unless the goal is a first race. */
+const FREE_START: Record<GoalId, ProductId> = {
+  first: 'free',
+  faster: 'ste',
+  athx: 'athxpage',
+  xenom: 'weekplan',
+  ultra: 'vdot',
+  hybrid: 'weekplan',
+};
+
+/** What "calculators and free guides only" leads to, by goal. Nothing here asks for an email address. */
+const TOOL_BY_GOAL: Record<GoalId, ProductId> = {
+  first: 'howto',
+  faster: 'pacer',
+  athx: 'athxpage',
+  xenom: 'ste',
+  ultra: 'vdot',
+  hybrid: 'hybridprog',
+};
 
 /** Missing answers fall back to first / new / home / paper, so a result always exists. */
 export function route(answers: Answers = {}): Route {
@@ -54,29 +83,27 @@ export function route(answers: Answers = {}): Route {
     paper = place === 'gym' ? 'twelve' : 'home';
     trace.push('paper:first-' + (place === 'gym' ? 'gym' : 'home-or-both'));
   } else if (goal === 'faster') {
-    paper = 'elite';
-    trace.push('paper:faster');
+    // Someone with only a home set-up cannot use the gym book, so the home book it is.
+    paper = place === 'home' ? 'home' : 'elite';
+    trace.push('paper:faster-' + (place === 'home' ? 'home' : 'gym-or-both'));
   } else if (goal === 'athx') {
     paper = 'athx';
     trace.push('paper:athx');
   } else if (goal === 'ultra') {
     paper = 'ultra';
     trace.push('paper:ultra');
-  } else if (goal === 'xenom') {
-    paper = advanced ? 'elite' : 'twelve';
-    trace.push('paper:xenom-' + (advanced ? 'advanced' : 'default'));
   } else {
-    trace.push('paper:hybrid-default');
+    // xenom and hybrid have no book of their own: the nearest is chosen by level and kit.
+    paper = advanced ? 'elite' : place === 'home' ? 'home' : 'twelve';
+    trace.push(`paper:${goal}-${advanced ? 'advanced' : place === 'home' ? 'home' : 'default'}`);
   }
-  if ((goal === 'first' || goal === 'hybrid') && advanced) {
+  if (goal === 'first' && advanced) {
     paper = 'elite';
     trace.push('paper:advanced-override');
   }
 
   // 2. Free starting point for the goal
-  let freeStart: ProductId = 'free';
-  if (goal === 'ultra') freeStart = 'vdot';
-  else if (goal === 'faster') freeStart = 'rtp';
+  const freeStart = FREE_START[goal];
   trace.push('free-start:' + freeStart);
 
   // 3. Primary recommendation: the format (question 4) picks the column
@@ -86,7 +113,8 @@ export function route(answers: Answers = {}): Route {
   else if (format === 'tools') primary = TOOL_BY_GOAL[goal];
   trace.push('primary:format-' + format);
 
-  // 4. Up to two extras, chosen from what got in the way (question 3)
+  // 4. Up to two extras, chosen from what got in the way (question 3). "Too many
+  //    options" is checked first and wins: it asks for one recommendation.
   const extras: ProductId[] = [];
   if (obst.includes('options')) {
     trace.push('extras:suppressed-too-many-options');
@@ -95,17 +123,32 @@ export function route(answers: Answers = {}): Route {
       extras.push('run12', 'vdot');
       trace.push('extras:run');
     }
-    if (obst.includes('structure') || obst.includes('plateau')) {
-      extras.push('app');
-      trace.push('extras:structure-or-plateau');
+    if (obst.includes('injury')) {
+      // The week planner keeps a full day between heavy legs and a hard run.
+      extras.push('weekplan');
+      trace.push('extras:injury');
     }
-    if (obst.includes('time') || obst.includes('generic')) {
+    if (obst.includes('plateau')) {
+      extras.push('ste', 'app');
+      trace.push('extras:plateau');
+    } else if (obst.includes('structure')) {
+      extras.push('app');
+      trace.push('extras:structure');
+    }
+    if (obst.includes('time')) {
+      extras.push('weekplan');
+      trace.push('extras:time');
+    }
+    // The free plan is a HYROX plan: it is not offered to someone training for ATHX or an ultra.
+    const freePlanFits = goal !== 'athx' && goal !== 'ultra';
+    if (obst.includes('generic') && freePlanFits) {
       extras.push('free');
-      trace.push('extras:time-or-generic');
+      trace.push('extras:generic');
     }
     extras.push(freeStart);
     extras.push(format === 'paper' ? 'app' : paper);
-    extras.push('free');
+    extras.push(goal === 'faster' ? 'rules' : freePlanFits ? 'free' : 'weekplan');
+    extras.push(freePlanFits ? 'free' : 'weekplan');
   }
   const secondary: ProductId[] = [];
   for (const id of extras) {
@@ -127,13 +170,36 @@ export function explain(answers: Answers, funnel: Funnel, opts: { weeks?: number
   const level = findOption(funnel.levels, answers.level || 'new')!;
   const place = findOption(funnel.places, answers.place || 'home')!;
   const format = findOption(funnel.formats, answers.format || 'paper')!;
+  // Said about what the result actually contains, never about what an answer would
+  // usually add: version 1 described a running plan that "too many options" had removed.
+  const shown = new Set<ProductId>(route(answers).secondary);
 
   let why = `You are training for ${goal.word}, you ${level.word} and ${place.word}. You asked to follow your plan ${format.word}.`;
-  if (obst.includes('run')) why += ' Running is your weak spot, so we added a running plan and the VDOT Calculator.';
-  else if (obst.includes('structure') || obst.includes('plateau')) why += ' You want more structure, so the app is listed as an extra.';
-  else if (obst.includes('time')) why += ' Your time is limited, so a free plan is listed as an extra.';
-  else if (obst.includes('generic')) why += ' Plans felt generic before, so the free plan is included because it is built from your race and dates.';
-  else if (obst.includes('options')) why += ' You said there are too many options, so we are showing one recommendation.';
+  // There is no XENOM plan. Say so, rather than hand over HYROX material as if it were one.
+  if (answers.goal === 'xenom') why += ' There is no XENOM plan yet, so this is the closest we have.';
+  if (obst.includes('options')) {
+    why += ' You said there are too many options, so we are showing one recommendation.';
+  } else {
+    if (obst.includes('run') && (shown.has('run12') || shown.has('vdot'))) {
+      const parts = [shown.has('run12') ? 'a running plan' : '', shown.has('vdot') ? 'the VDOT Calculator' : ''].filter(Boolean);
+      why += ` Running is your weak spot, so we added ${parts.join(' and ')}.`;
+    }
+    if (obst.includes('injury') && shown.has('weekplan')) {
+      why += ' You are working around an injury, so the week planner is listed: it keeps heavy leg days and hard runs apart. Pain is a reason to see a professional, not to train through it.';
+    }
+    if (obst.includes('plateau') && shown.has('ste')) {
+      why += ' You have plateaued, so the Strength and Engine Test is listed to find what is holding you back.';
+    }
+    if ((obst.includes('structure') || obst.includes('plateau')) && shown.has('app')) {
+      why += ' You want more structure, so the app is listed as an extra.';
+    }
+    if (obst.includes('time') && shown.has('weekplan')) {
+      why += ' Your time is limited, so the week planner is listed: it builds a week around the days you have.';
+    }
+    if (obst.includes('generic') && shown.has('free')) {
+      why += ' Plans felt generic before, so the free plan is included because it is built from your race and dates.';
+    }
+  }
   if (weeks) {
     why +=
       weeks >= 12

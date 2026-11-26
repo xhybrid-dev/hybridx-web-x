@@ -13,6 +13,8 @@ import { ArrowRight, Check, X } from 'lucide-react';
 import type { FormatId, GoalId, LevelId, ObstacleId, PlaceId, Product, ProductId } from '@/lib/plan-finder/content';
 import { findOption, funnel } from '@/lib/plan-finder/content';
 import { explain, raceBucket, raceWeeks, route } from '@/lib/plan-finder/routing';
+import { resultHref } from '@/lib/plan-finder/links';
+import { isAppHref, srcForPage, withSrc } from '@/lib/app-links';
 import type { Mode, Tracker } from '@/lib/plan-finder/tracker';
 import type { OpenRequest, FinderStatus } from './types';
 import { subscribeConsent } from '@/lib/consent';
@@ -92,12 +94,20 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** Links to this site open in place and work on any host; everything else opens a new tab. */
-function productLink(p: Product) {
-  const own = /^https:\/\/hybridx\.club(\/|$)/.exec(p.href);
-  if (own) return { href: p.href.replace(/^https:\/\/hybridx\.club/, '') || '/', newTab: false };
-  if (/^https:\/\/app\.hybridx\.club(\/|$)/.test(p.href)) return { href: p.href, newTab: false };
-  return { href: p.href, newTab: true, rel: 'noopener' + (p.affiliate ? ' sponsored' : '') };
+/**
+ * Links to this site open in place and work on any host; everything else opens a new tab.
+ * `to` is the address after the answers have shaped it (src/lib/plan-finder/links.ts);
+ * a link into the app also carries the src of the page it was clicked on, as TrackedLink
+ * does elsewhere, so a sign-up from the plan finder is credited.
+ */
+function productLink(p: Product, to: string = p.href) {
+  const own = /^https:\/\/hybridx\.club(\/|$)/.exec(to);
+  if (own) return { href: to.replace(/^https:\/\/hybridx\.club/, '') || '/', newTab: false };
+  if (isAppHref(to)) {
+    const src = typeof window === 'undefined' ? undefined : srcForPage(window.location.search, window.location.pathname);
+    return { href: src ? withSrc(to, src) : to, newTab: false };
+  }
+  return { href: to, newTab: true, rel: 'noopener' + (p.affiliate ? ' sponsored' : '') };
 }
 
 export default function PlanFinderDialog(props: PlanFinderDialogProps) {
@@ -626,7 +636,9 @@ export default function PlanFinderDialog(props: PlanFinderDialogProps) {
   const resultView = () => {
     const r = result();
     const p = r.primary;
-    const primaryLink = productLink(p);
+    const answersNow = answers();
+    const hrefFor = (prod: Product) => resultHref(prod, answersNow, sRef.current.race, r.weeks);
+    const primaryLink = productLink(p, hrefFor(p));
     // Below lg the two columns dissolve into one ordered column, so the
     // recommendation comes straight after the heading on a phone.
     return (
@@ -675,13 +687,31 @@ export default function PlanFinderDialog(props: PlanFinderDialogProps) {
                 >
                   {p.cta} <ArrowRight aria-hidden className="h-[18px] w-[18px] stroke-[2.4]" />
                 </a>
+                {p.altCta && (
+                  <a
+                    className="hx-btn max-md:w-full"
+                    data-product={r.primaryId}
+                    data-slot="primary-alt"
+                    href={p.altCta.href}
+                    target="_blank"
+                    rel={`noopener${p.affiliate ? ' sponsored' : ''}`}
+                    onClick={() => productClick(r.primaryId, 'primary')}
+                  >
+                    {p.altCta.label} <ArrowRight aria-hidden className="h-[18px] w-[18px] stroke-[2.4]" />
+                  </a>
+                )}
                 <span className="text-[15px] font-semibold">{p.price}</span>
               </div>
             </div>
           </div>
+          {(p.affiliate || r.secondary.some((x) => x.affiliate)) && (
+            <p className="mt-4 text-xs leading-relaxed text-hx-mute max-lg:order-3" data-affiliate-disclosure>
+              Affiliate disclosure: links to Amazon are affiliate links. As an Amazon Associate, HybridX earns from qualifying purchases, at no extra cost to you.
+            </p>
+          )}
           {r.secondary.length > 0 && <div className="hx-label mt-7 text-hx-mute max-lg:order-4">{COPY.result.alsoUseful}</div>}
           {r.secondary.map((x, i) => {
-            const link = productLink(x);
+            const link = productLink(x, hrefFor(x));
             return (
               <a
                 key={x.id}
@@ -988,13 +1018,15 @@ export default function PlanFinderDialog(props: PlanFinderDialogProps) {
     }
     return (
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-hx-line px-[var(--fpad)] py-3 md:min-h-24 md:flex-nowrap md:gap-4 md:py-4">
-        <span className="text-[17px] text-hx-mute max-md:basis-full">{COPY.result.noFit}</span>
-        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-4 gap-y-2 md:flex-none md:gap-5">
-          <button type="button" className="hx-btn hx-btn-ghost" onClick={() => go(7)}>
+        {/* On a phone the two buttons share one row and the question is smaller: this bar stays on
+            screen under the result, and stacked it took a quarter of a 800px screen. */}
+        <span className="text-[17px] text-hx-mute max-md:basis-full max-md:text-[15px]">{COPY.result.noFit}</span>
+        <div className="flex flex-1 items-center justify-end gap-x-4 gap-y-2 max-md:w-full max-md:gap-2 md:flex-none md:flex-wrap md:gap-5">
+          <button type="button" className="hx-btn hx-btn-ghost max-md:flex-1 max-md:gap-1.5 max-md:px-3 max-md:text-[15px]" onClick={() => go(7)}>
             {COPY.result.talkCta}
           </button>
           {entry && (
-            <button type="button" className="hx-btn" onClick={continueHome}>
+            <button type="button" className="hx-btn max-md:flex-1 max-md:gap-1.5 max-md:px-3 max-md:text-[15px]" onClick={continueHome}>
               {COPY.entry.continueLabel} <ArrowRight aria-hidden className="h-[18px] w-[18px] stroke-[2.4]" />
             </button>
           )}

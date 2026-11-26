@@ -11,16 +11,16 @@ import Footer from '@/components/Footer';
 import ApparelPromotion from '@/components/ApparelPromotion';
 import TrainingPlanShowcase from '@/components/TrainingPlanShowcase';
 import FreeToolsSection from '@/components/FreeToolsSection';
-import Script from 'next/script';
-import { createCourseSchema, createSpeakableSchema } from '@/lib/seo';
+import { createCourseSchema, createSpeakableSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import EntrySection from '@/components/plan-finder/EntrySection';
 import PlanFinderRoot from '@/components/plan-finder/PlanFinderRoot';
 import type { Variant } from '@/lib/plan-finder/tracker';
 
+import JsonLd from '@/components/JsonLd';
 export const homeMetadata: Metadata = {
   alternates: { canonical: '/' },
-  title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-  description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app. Free calculators and resources.',
+  title: { absolute: 'HybridX Hub | HYROX Training Plans & Coaching App' },
+  description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
   keywords: [
     'hyrox',
     'hyrox training',
@@ -37,8 +37,9 @@ export const homeMetadata: Metadata = {
     'hybrid training app',
   ],
   openGraph: {
-    title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-    description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app.',
+    ...OG_DEFAULTS,
+    title: 'HybridX Hub | HYROX Training Plans & Coaching App',
+    description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
     type: 'website',
     images: [
       {
@@ -50,9 +51,10 @@ export const homeMetadata: Metadata = {
     ],
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
-    title: 'HybridX Hub | Hyrox Training Plans, Workout Programs & Coaching App',
-    description: 'Expert Hyrox training plans and hybrid workout programs. Achieve your best performance in Hyrox competitions with our scientifically-backed training plans, books, and coaching app.',
+    title: 'HybridX Hub | HYROX Training Plans & Coaching App',
+    description: 'HYROX and hybrid training plans, books, free calculators and a coaching app, from £5/month with a 14-day free trial.',
     images: ['/og-default.png'],
   },
 };
@@ -61,22 +63,17 @@ const courseSchemas = [
   createCourseSchema({
     name: 'HybridX 12-Week Hyrox Training Plan',
     description:
-      'A free, personalised 12-week Hyrox training plan for beginner, intermediate, and advanced athletes. Covers compromised running, all 8 race stations, and race-day strategy. RPE-based so it scales to your fitness level.',
+      'A free 12-week Hyrox training plan dated back from your race day, with beginner scaling and advanced challenges. Covers compromised running, all 8 race stations, and race-day strategy. RPE-based so it scales to your fitness level.',
     url: '/free-hyrox-plan',
     level: 'All levels',
   }),
+  // Each Course is at the address that is that plan. They were three names for one
+  // address (/free-hyrox-plan), two of them plans that page does not offer.
   createCourseSchema({
-    name: 'HybridX Hybrid Running Training Plan',
+    name: 'HybridX 12-Week Running Plan for HYROX',
     description:
-      'A 12-week hybrid running plan combining elite running protocols with targeted strength work to improve race times and build functional endurance.',
-    url: '/free-hyrox-plan',
-    level: 'Intermediate',
-  }),
-  createCourseSchema({
-    name: 'HybridX Offseason Strength Plan',
-    description:
-      'A focused offseason strength and power programme for Hyrox and hybrid athletes, building the foundation for the next competitive season.',
-    url: '/free-hyrox-plan',
+      'A free interactive 12-week running plan for HYROX athletes: threshold sessions, intervals, long runs and compromised running, with a built-in pace calculator.',
+    url: '/12-week-running-hyrox',
     level: 'All levels',
   }),
 ];
@@ -96,26 +93,17 @@ export default function HomePage({ planFinder, variant = null }: { planFinder: '
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Course schemas — each plan is a Course entity for AI search citations */}
       {courseSchemas.map((schema, i) => (
-        <Script
-          key={`course-schema-${i}`}
-          id={`course-schema-${i}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <JsonLd key={i} data={schema} />
       ))}
       {/* Speakable schema — marks key sections for AI voice and read-aloud responses */}
-      <Script
-        id="speakable-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
-      />
+      <JsonLd data={speakableSchema} />
       <Header />
       {/* The plan finder sits in front of the homepage and can be skipped
           (handover/entry-funnel/docs/03). Everything inside #hx-home is the
           existing homepage, unchanged. */}
       {planFinder === 'entry' && <EntrySection mode="entry" />}
       <div id="hx-home" tabIndex={-1} className="flex flex-grow flex-col">
-      <main className="flex-grow space-y-20 md:space-y-28">
+      <main id="main-content" tabIndex={-1} className="flex-grow space-y-20 md:space-y-28">
         <HeroSection />
         <SocialProofSection />
         <TrainingPlanShowcase />

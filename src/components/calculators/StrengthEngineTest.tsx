@@ -36,12 +36,27 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
  */
 export default function StrengthEngineTest() {
   const [f, setF] = useState<Fields>(EMPTY);
+  // The 5 km time is typed as minutes and seconds in two boxes: a phone's number pad has no colon.
+  const [mm, setMm] = useState('');
+  const [ss, setSs] = useState('');
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const fromUrl = parseTestInput((k) => q.get(k));
-    if (fromUrl) setF(Object.fromEntries(new URLSearchParams(testQuery(fromUrl))) as Fields);
+    if (fromUrl) {
+      const next = Object.fromEntries(new URLSearchParams(testQuery(fromUrl))) as Fields;
+      setF(next);
+      const [a = '', b = ''] = (next['5k'] ?? '').split(':');
+      setMm(a);
+      setSs(b);
+    }
   }, []);
+
+  const setTime = (m: string, s: string) => {
+    setMm(m);
+    setSs(s);
+    setF((x) => ({ ...x, '5k': m !== '' && s !== '' ? `${m}:${s.padStart(2, '0')}` : '' }));
+  };
 
   const parsed = useMemo(() => parseTestInput((k) => f[k as keyof Fields]), [f]);
   const result = useMemo(() => (parsed ? scoreTest(parsed) : null), [parsed]);
@@ -109,10 +124,23 @@ export default function StrengthEngineTest() {
           })}
         </fieldset>
 
-        <label className="block space-y-2">
-          <span className="block font-headline text-sm font-bold">Your 5 km time (minutes:seconds)</span>
-          <input className={input} inputMode="numeric" value={f['5k']} onChange={set('5k')} placeholder="22:30" />
-        </label>
+        <fieldset className="space-y-2">
+          <legend className="font-headline text-sm font-bold">Your 5 km time</legend>
+          <div className="flex items-center gap-2">
+            <label className="flex-1">
+              <span className="sr-only">Minutes</span>
+              <input className={input} inputMode="numeric" pattern="[0-9]*" maxLength={2} value={mm} onChange={(e) => setTime(e.target.value.replace(/\D/g, ''), ss)} placeholder="22" />
+            </label>
+            <span aria-hidden="true" className="font-headline text-xl font-bold">
+              :
+            </span>
+            <label className="flex-1">
+              <span className="sr-only">Seconds</span>
+              <input className={input} inputMode="numeric" pattern="[0-9]*" maxLength={2} value={ss} onChange={(e) => setTime(mm, e.target.value.replace(/\D/g, ''))} placeholder="30" />
+            </label>
+          </div>
+          <p className="font-body text-xs text-muted-foreground">Minutes and seconds, for example 22 and 30.</p>
+        </fieldset>
       </form>
 
       {result && parsed ? <Result input={parsed} result={result} /> : (

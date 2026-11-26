@@ -25,9 +25,9 @@ export const COLLECTIONS = {
 } as const;
 
 const DAY_MS = 86_400_000;
-/** Raw batches are deleted after this, by a Firestore TTL policy on `expireAt`. */
+/** Raw batches are deleted after this: by the hourly sweep (retention.ts) and by a Firestore TTL policy on `expireAt`, if one is set. */
 export const BATCH_RETENTION_MS = 400 * DAY_MS;
 /** The step-5 note is blanked after this (the rest of the batch stays until the TTL). */
 export const NOTE_RETENTION_MS = 90 * DAY_MS;
-/** Talk-to-us messages are deleted after this, by a TTL policy on `expireAt`. */
+/** Talk-to-us messages are deleted after this: by the hourly sweep (retention.ts) and by a Firestore TTL policy on `expireAt`, if one is set. */
 export const LEAD_RETENTION_MS = 365 * DAY_MS;

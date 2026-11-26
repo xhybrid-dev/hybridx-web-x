@@ -3,9 +3,15 @@ export interface Book {
   title: string;
   description: string;
   longDescription?: string;
-  imageUrl: string;
+  /** Amazon's cover image. Missing until one is chosen; the pages draw a plain cover instead. */
+  imageUrl?: string;
+  /** The affiliate link (amzn.to or link.amazon) that pages send the visitor to. */
   amazonUrl: string;
+  /** The listing's ASIN, for the product page at amazon.co.uk/dp/<asin>. */
+  asin?: string;
   level?: string;
+  /** Shown in the homepage's book section. The homepage grid is for books with a cover. */
+  homepage?: boolean;
 }
 
 // Single source of truth for the book catalog — used by both the homepage
@@ -49,4 +55,37 @@ export const books: Book[] = [
     amazonUrl: 'https://amzn.to/4livuyq',
     level: 'Advanced',
   },
+  // Added 25 November 2026 from links the owner supplied. Titles and cover images
+  // here are to be checked against the Amazon listings: add `imageUrl` from the
+  // listing, and set `homepage: true` to show the book in the homepage section.
+  {
+    id: 'athx-2027-mens',
+    title: "ATHX 2027 Training Book: Men's Edition",
+    description: "A printed ATHX 2027 training plan, men's edition, for athletes entering ATHX in 2027.",
+    amazonUrl: 'https://link.amazon/B0g5sdBgd',
+    asin: 'B0HH8QQF9N',
+    level: 'ATHX 2027',
+    homepage: false,
+  },
+  {
+    id: 'athx-2027-womens',
+    title: "ATHX 2027 Training Book: Women's Edition",
+    description: "A printed ATHX 2027 training plan, women's edition, for athletes entering ATHX in 2027.",
+    amazonUrl: 'https://link.amazon/B09UkaF2U',
+    asin: 'B0HH8RGVN1',
+    level: 'ATHX 2027',
+    homepage: false,
+  },
+  {
+    id: 'ultra-strength',
+    title: 'ULTRA STRENGTH: 16-Week Hilly 50K Training Plan',
+    description: 'A 16-week plan for a hilly 50K trail ultra, with the strength work that goes alongside the running.',
+    amazonUrl: 'https://link.amazon/B0dzb9lZh',
+    asin: 'B0H5CCCYNH',
+    level: 'Trail ultra',
+    homepage: false,
+  },
 ];
+
+/** The books the homepage section shows: the ones with a cover. */
+export const homepageBooks: Book[] = books.filter((b) => b.homepage !== false && b.imageUrl);

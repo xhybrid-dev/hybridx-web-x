@@ -1,6 +1,5 @@
 
 import { MetadataRoute } from 'next';
-import { headers } from 'next/headers';
 import { SHOP_EVENTS } from '@/lib/shop/config';
 import { salesState } from '@/lib/shop/env';
 import { listPublishedGuides } from '@/lib/guides/store';
@@ -13,15 +12,13 @@ import { PAGE_UPDATED } from '@/lib/page-dates';
  * What belongs here: every page meant to appear in search, once, on the host it
  * canonicalises to. What does not: noindex pages (/start, the confirm pages, the
  * shop's thanks, sample and resend pages, /d/<token>, /admin), per-order pages,
- * /12-week-hyrox (a gated embed, noindex), and /home-control, which redirects to "/".
+ * and /12-week-hyrox (retired: it redirects to /free-hyrox-plan).
  *
- * /race, /streak and /trail are also absent, on purpose. Each declares its own
- * subdomain as its canonical (race., streak. and trail.hybridx.club), so listing
- * the hybridx.club copy would tell Google two things at once. The subdomains are
- * separate sites to Google, so they get their own sitemap below: the same
- * /sitemap.xml route, answered with that subdomain's address when it is the one
- * asked. src/lib/__tests__/sitemap.test.ts fails if a new page is neither listed
- * nor deliberately left out.
+ * /race, /streak and /trail are listed like any other page: their canonical is
+ * the hybridx.club address. They once named race., streak. and trail.hybridx.club,
+ * which have no DNS record, and were left out of this file because of it.
+ * src/lib/__tests__/sitemap.test.ts fails if a new page is neither listed nor
+ * deliberately left out.
  *
  * Articles (/guides/<slug>) come from Firestore, published ones only, each with
  * the date it last changed. The hand-built pages carry a fixed date each, from
@@ -32,36 +29,10 @@ import { PAGE_UPDATED } from '@/lib/page-dates';
  */
 
 // Served by src/app/sitemap.xml/route.ts, per request and never while the site
-// is built: the articles come from Firestore, which the build cannot read, and
-// the answer depends on the host asked. That route sets the CDN caching.
-
-/** Subdomain label to the address its page declares as canonical. */
-const APP_SUBDOMAINS: Record<string, string> = {
-  race: 'https://race.hybridx.club',
-  streak: 'https://streak.hybridx.club',
-  trail: 'https://trail.hybridx.club',
-};
-
-async function requestedHost(): Promise<string> {
-  try {
-    const h = await headers();
-    // App Hosting sits behind a proxy, so the host the visitor used is forwarded.
-    const raw = h.get('x-forwarded-host') ?? h.get('host') ?? '';
-    return raw.split(',')[0].trim().toLowerCase();
-  } catch {
-    return '';
-  }
-}
+// is built: the articles come from Firestore, which the build cannot read.
+// That route sets the CDN caching.
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const host = await requestedHost();
-  const label = host.split('.')[0];
-  if (host.includes('.') && Object.hasOwn(APP_SUBDOMAINS, label)) {
-    return [
-      { url: APP_SUBDOMAINS[label], changeFrequency: 'monthly', priority: 1.0 },
-    ];
-  }
-
   const baseUrl = 'https://hybridx.club';
 
   // Define all static routes
@@ -218,22 +189,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.95,
     },
     {
-      // The ATHX 2027 pre-launch funnel. Its /confirm page is deliberately
+      // The ATHX 2027 page (guide, calculator and books). Its /confirm page is deliberately
       // absent: it is a per-address utility page and carries noindex.
       url: `${baseUrl}/athx-2027`,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
-      // X Weigh-in for UNA Watch. Unlike /race, /streak and /trail it has no
-      // subdomain yet, so its canonical is this address.
+      // X Weigh-in for UNA Watch.
       url: `${baseUrl}/weigh-in`,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      // Trail Quest for UNA Watch. As /weigh-in, no subdomain yet, so its
-      // canonical is this address.
+      // Trail Quest for UNA Watch.
       url: `${baseUrl}/trail-quest`,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -246,6 +215,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
+      // The three single-app pages for UNA Watch.
+      url: `${baseUrl}/race`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/streak`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/trail`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    },
+    {
       url: `${baseUrl}/una/nerdy-bits`,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -255,6 +240,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/training`,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      changeFrequency: 'yearly' as const,
+      priority: 0.4,
     },
     {
       url: `${baseUrl}/shop-terms`,

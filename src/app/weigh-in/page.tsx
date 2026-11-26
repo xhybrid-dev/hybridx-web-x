@@ -19,6 +19,7 @@ import { SAMPLE, SAMPLE_DAYS_LIST, SAMPLE_PROFILE, SAMPLE_RANGE, SAMPLE_SUMMARY 
 import { bmiTenths, bmrKcal, formatEntry, LOG_HEADER } from '@/lib/weighin-core';
 import styles from './weighin.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/weigh-in: the page for X Weigh-in, the weight trend tracker for
  * UNA Watch (x-weighin/ in the watch repo).
@@ -67,8 +68,7 @@ import styles from './weighin.module.css';
 const URL_CANONICAL = 'https://hybridx.club/weigh-in';
 
 const TITLE = 'X Weigh-in — the weight trend tracker for UNA Watch';
-const DESCRIPTION =
-  'Weigh in on your watch in seconds — in kg, stones & pounds, or pounds — and see the smoothed trend beneath the day-to-day swings: the change over the week, a 30-day graph, BMI and resting kcal. Your weigh-ins stay on the watch. By HybridX.';
+const DESCRIPTION = 'Weigh in on your UNA Watch in seconds and see the smoothed trend under the daily swings: weekly change, a 30-day graph, BMI and resting kcal. By HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -217,11 +217,7 @@ export default function WeighInPage() {
   const tail = SAMPLE.slice(-7).map(formatEntry);
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${manrope.variable} ${splineMono.variable} ${watchPoppins.variable}`}>
-      <script
-        id="weighin-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <header className={base.nav}>
@@ -242,7 +238,7 @@ export default function WeighInPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <WeighHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />

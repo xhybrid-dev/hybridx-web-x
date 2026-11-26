@@ -5,18 +5,18 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
 import PillarQuestions from '@/components/guides/PillarQuestions';
-import Script from 'next/script';
 import type { Metadata } from 'next';
-import { createArticleSchema, createFAQSchema } from '@/lib/seo';
+import { createArticleSchema, createFAQSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import {
   Dumbbell, Activity, Brain, Shield, Zap,
   CheckCircle, ArrowRight, TrendingUp, Heart,
 } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata: Metadata = {
-  title: 'Hybrid Athlete Training Program — Strength & Endurance Combined | HybridX Hub',
+  title: 'Hybrid Training Program: Strength & Running',
   description:
-    'What is hybrid training? How to build strength and endurance simultaneously. The science, the programme structure, a sample week, and why it is the foundation of every great Hyrox athlete.',
+    'What is hybrid training? How to build strength and endurance together: the science, the programme structure, a sample week and why it suits HYROX athletes.',
   keywords: [
     'hybrid training program',
     'hybrid athlete training',
@@ -31,6 +31,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://hybridx.club/hybrid-training-program' },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'Hybrid Athlete Training Program — Strength & Endurance Combined',
     description:
       'The science and structure of hybrid training — building strength and endurance simultaneously without sacrificing either. Free training plans for all levels.',
@@ -56,7 +57,7 @@ const faqSchema = createFAQSchema([
   {
     question: 'Does cardio kill gains?',
     answer:
-      'No — this is the "interference effect" myth. A 2022 meta-analysis of concurrent training found that combining strength and endurance training produced strength gains with an effect size of 1.44, compared to 1.76 for strength-only training — a very small difference. The interference effect is real but is primarily caused by poor recovery and session timing, not the combination itself.',
+      'No — this is the "interference effect" myth. An earlier meta-analysis of concurrent training (2012) found that combining strength and endurance training produced strength gains with an effect size of 1.44, compared to 1.76 for strength-only training — a small difference, and a 2022 meta-analysis of 43 studies found no meaningful loss of muscle size or maximal strength. The interference effect is real but is primarily caused by poor recovery and session timing, not the combination itself.',
   },
   {
     question: 'How do you structure a hybrid training week?',
@@ -115,14 +116,14 @@ const pillars = [
 
 const sciencePoints = [
   {
-    stat: '+8–15%',
-    label: 'VO₂max improvement',
-    detail: 'Concurrent training consistently produces significant improvements in aerobic capacity, even in already-trained athletes.',
+    stat: '8 × 1 km',
+    label: 'Running in a HYROX race',
+    detail: 'A HYROX race is eight 1 km runs between eight stations, so your aerobic fitness and your strength both set your time.',
   },
   {
-    stat: '+10–20%',
-    label: 'Strength gains',
-    detail: 'Strength gains from concurrent training are only marginally lower than strength-only training (effect size 1.44 vs 1.76).',
+    stat: '1.44 vs 1.76',
+    label: 'Strength gains, combined vs strength only',
+    detail: 'A 2012 meta-analysis found strength gains from concurrent training only marginally lower than strength-only training (effect size 1.44 vs 1.76).',
   },
   {
     stat: '43 studies',
@@ -171,10 +172,10 @@ export const revalidate = 3600;
 export default function HybridTrainingProgram() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Script id="article-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <Script id="faq-schema-hybrid" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
       <Header />
-      <main>
+      <main id="main-content" tabIndex={-1}>
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative bg-gradient-to-b from-neutral-900 to-black text-white py-20 md:py-28 overflow-hidden">
@@ -223,7 +224,7 @@ export default function HybridTrainingProgram() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {sciencePoints.map((s) => (
                 <div key={s.label} className="bg-card border border-border rounded-xl p-5 text-center">
-                  <p className="text-3xl font-headline font-extrabold text-accent mb-1">{s.stat}</p>
+                  <p className="text-3xl font-headline font-extrabold text-accent-ink mb-1">{s.stat}</p>
                   <p className="text-xs font-headline font-semibold text-primary mb-2">{s.label}</p>
                   <p className="text-xs text-muted-foreground font-body leading-snug">{s.detail}</p>
                 </div>
@@ -250,7 +251,7 @@ export default function HybridTrainingProgram() {
                 <div key={pillar.title} className="bg-card border border-border rounded-xl p-6">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center">
-                      <pillar.icon className="h-6 w-6 text-accent" />
+                      <pillar.icon className="h-6 w-6 text-accent-ink" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
@@ -261,7 +262,7 @@ export default function HybridTrainingProgram() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {pillar.examples.map((ex) => (
                           <div key={ex} className="flex items-center gap-2 text-sm font-body text-muted-foreground">
-                            <span className="text-accent font-bold">›</span> {ex}
+                            <span className="text-accent-ink font-bold">›</span> {ex}
                           </div>
                         ))}
                       </div>
@@ -286,7 +287,7 @@ export default function HybridTrainingProgram() {
                     {d.type}
                   </span>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1">
-                    <span className="text-accent font-headline font-semibold text-sm flex-shrink-0">{d.session}</span>
+                    <span className="text-accent-ink font-headline font-semibold text-sm flex-shrink-0">{d.session}</span>
                     <span className="text-muted-foreground font-body text-sm leading-snug">{d.detail}</span>
                   </div>
                 </div>
@@ -368,7 +369,7 @@ export default function HybridTrainingProgram() {
               ].map((item) => (
                 <div key={item.q} className="bg-card border border-border rounded-xl p-6">
                   <h3 className="font-headline font-bold text-primary mb-2 flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-accent-ink flex-shrink-0 mt-0.5" />
                     {item.q}
                   </h3>
                   <p className="text-muted-foreground font-body leading-relaxed pl-7">{item.a}</p>
@@ -386,23 +387,23 @@ export default function HybridTrainingProgram() {
             <h2 className="text-xl font-headline font-bold text-primary mb-6">Read Next</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link href="/free-hyrox-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Free Tool</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">Free Personalised Hyrox Plan Generator</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Free Tool</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">Free Personalised Hyrox Plan Generator</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">For a fully personalised hybrid training plan built around your race date, use our free generator.</p>
               </Link>
               <Link href="/how-to-train-for-hyrox" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Guide</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">How to Train for a Hyrox Event</h3>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Training Guide</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">How to Train for a Hyrox Event</h3>
                 <p className="text-muted-foreground font-body text-sm leading-snug">Apply hybrid training principles specifically to Hyrox — phases, compromised running, and race strategy.</p>
               </Link>
               <Link href="/hyrox-training-plan" className="group bg-card border border-border hover:border-accent/50 rounded-xl p-5 transition-colors">
-                <p className="text-xs font-headline font-bold text-accent uppercase tracking-wider mb-2">Training Plan</p>
-                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent transition-colors">12-Week Hyrox Training Plan</h3>
-                <p className="text-muted-foreground font-body text-sm leading-snug">Hybrid training applied — a complete 12-week plan with beginner, intermediate, and advanced tracks.</p>
+                <p className="text-xs font-headline font-bold text-accent-ink uppercase tracking-wider mb-2">Training Plan</p>
+                <h3 className="font-headline font-bold text-primary text-base mb-1 group-hover:text-accent-ink transition-colors">12-Week Hyrox Training Plan</h3>
+                <p className="text-muted-foreground font-body text-sm leading-snug">Hybrid training applied — a complete 12-week plan with beginner scaling and advanced challenges.</p>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground font-body mt-5">
-              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent hover:underline font-semibold">train with the HybridX app</TrackedLink> — every session tracked, adaptive plans, and coaching for £5/month.
+              Or <TrackedLink href="/app" event="cta_app_click" eventParams={{ location: 'guide_hybrid_program' }} className="text-accent-ink hover:underline font-semibold">train with the HybridX app</TrackedLink> — structured programmes, session logging and Edge Coach for £5/month.
             </p>
           </div>
         </section>

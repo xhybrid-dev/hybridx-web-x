@@ -64,7 +64,6 @@ export default function OneRepMaxCalculatorForm() {
     setEstimated1RM(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
 
     const weightNum = parseFloat(weight);
     const repsNum = parseInt(reps, 10);
@@ -181,11 +180,11 @@ export default function OneRepMaxCalculatorForm() {
         <Card className="mt-6 shadow-md border-primary/30 bg-primary/5">
           <CardHeader className="pb-2 pt-4 text-center">
             <CardTitle className="text-xl md:text-2xl font-semibold text-primary flex items-center justify-center">
-              <Weight className="mr-2 h-6 w-6 text-accent" /> Estimated One-Rep Max (1RM)
+              <Weight className="mr-2 h-6 w-6 text-accent-ink" /> Estimated One-Rep Max (1RM)
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center pb-4">
-            <p className="text-3xl md:text-4xl font-bold text-accent">{estimated1RM}</p>
+            <p className="text-3xl md:text-4xl font-bold text-accent-ink">{estimated1RM}</p>
             <p className="text-xs text-muted-foreground mt-2">
               This is an estimate. Actual 1RM can vary based on factors like fatigue, technique, and daily readiness.
               The formulas are most accurate for repetitions between 2 and 10-12. If you entered 1 rep, the 1RM is the weight you lifted.

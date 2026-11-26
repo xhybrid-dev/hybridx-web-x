@@ -1,108 +1,62 @@
-'use client';
-
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shirt, ArrowUpRight } from 'lucide-react';
+import { Shirt, ArrowRight } from 'lucide-react';
 import TrackedLink from '@/components/TrackedLink';
-import Script from 'next/script';
-import { useEffect } from 'react';
 
-// To satisfy typescript for the Ecwid script
-declare global {
-  interface Window {
-    xProduct?: () => void;
-  }
-}
+// Two plain cards that link to the store. They were live Ecwid widgets, which
+// loaded Ecwid's script (and set its cookies) for every visitor to the homepage
+// before they had chosen anything, even after Reject on the consent banner, and
+// shifted the page by about 400 px when they arrived. Nothing here loads a
+// third party: the store page itself asks before it loads Ecwid.
+//
+// Keep these in step with the products in the store (Ecwid 743426001 and
+// 739862435); the store is the source of truth for price and stock.
+const PRODUCTS = [
+  { name: 'HybridX basketball jersey', price: '£25', blurb: 'Light, breathable and cut for training.' },
+  { name: 'HybridX Solo Hat', price: '£18', blurb: 'The everyday hat for the walk to the gym.' },
+] as const;
 
 export default function ApparelPromotion() {
-  // useEffect to re-initialize widgets on client-side navigation or re-render
-  useEffect(() => {
-    if (typeof window.xProduct === 'function') {
-      window.xProduct();
-    }
-  }); // Run on every render to ensure widgets are initialized if component re-renders.
-
   return (
-    <>
-      <section id="apparel-promotion" className="py-20 md:py-28 bg-secondary/30">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12 md:mb-16">
-            <Shirt className="h-16 w-16 text-accent mx-auto mb-4" />
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">
-              Gear Up. Look the Part.
-            </h2>
-            <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
-              Train in comfort and style with the official HybridX apparel collection. High-performance gear designed for the hybrid athlete.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* First Product */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden bg-card/80 backdrop-blur-sm group border-t-2 border-primary/30">
-              <CardContent className="p-4 flex-grow flex items-center justify-center">
-                <div 
-                  className="ecsp ecsp-SingleProduct-v2 ecsp-SingleProduct-v2-centered ecsp-Product ec-Product-743426001" 
-                  itemScope 
-                  itemType="http://schema.org/Product" 
-                  data-single-product-id="743426001">
-                  <div itemProp="image"></div>
-                  <div className="ecsp-title" itemProp="name" content="HybridX basketball jersey"></div>
-                  <div itemType="http://schema.org/Offer" itemScope itemProp="offers">
-                    <div className="ecsp-productBrowser-price ecsp-price" itemProp="price" content="25" data-spw-price-location="button">
-                      <div itemProp="priceCurrency" content="GBP"></div>
-                    </div>
-                  </div>
-                  <div data-prop="options"></div>
-                  <div data-prop="qty"></div>
-                  <div data-prop="addtobag"></div>
-                  <div data-prop="vatinprice"></div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Second Product */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden bg-card/80 backdrop-blur-sm group border-t-2 border-primary/30">
-              <CardContent className="p-4 flex-grow flex items-center justify-center">
-                <div 
-                  className="ecsp ecsp-SingleProduct-v2 ecsp-SingleProduct-v2-centered ecsp-Product ec-Product-739862435" 
-                  itemScope 
-                  itemType="http://schema.org/Product" 
-                  data-single-product-id="739862435">
-                  <div itemProp="image"></div>
-                  <div className="ecsp-title" itemProp="name" content="HybridX Solo Hat"></div>
-                  <div itemType="http://schema.org/Offer" itemScope itemProp="offers">
-                    <div className="ecsp-productBrowser-price ecsp-price" itemProp="price" content="18" data-spw-price-location="button">
-                      <div itemProp="priceCurrency" content="GBP"></div>
-                    </div>
-                  </div>
-                  <div data-prop="options"></div>
-                  <div data-prop="qty"></div>
-                  <div data-prop="addtobag"></div>
-                  <div data-prop="vatinprice"></div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="text-center mt-12">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-                  <TrackedLink href="/store" event="cta_store_click" eventParams={{ location: 'apparel_promotion' }}>
-                      Shop The Collection <ArrowUpRight className="ml-2 h-5 w-5" />
-                  </TrackedLink>
-              </Button>
-          </div>
+    <section id="apparel-promotion" className="py-20 md:py-28 bg-secondary/30">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-12 md:mb-16">
+          <Shirt className="h-16 w-16 text-accent-ink mx-auto mb-4" aria-hidden="true" />
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">
+            Gear Up. Look the Part.
+          </h2>
+          <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
+            Train in comfort and style with the official HybridX apparel collection. High-performance gear designed for the hybrid athlete.
+          </p>
         </div>
-      </section>
-      
-      {/* Script to load Ecwid functionality and initialize the widgets */}
-      <Script 
-        id="ecwid-single-product-script"
-        strategy="lazyOnload"
-        src="https://app.ecwid.com/script.js?112581013&data_platform=singleproduct_v2"
-        onLoad={() => {
-          if (typeof window.xProduct === 'function') {
-            window.xProduct();
-          }
-        }}
-      />
-    </>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {PRODUCTS.map((product) => (
+            <li key={product.name} className="flex">
+              <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden bg-card/80 backdrop-blur-sm border-t-2 border-primary/30">
+                <CardContent className="p-6 flex-grow flex flex-col items-center justify-center text-center">
+                  <h3 className="font-headline text-xl font-bold text-primary">{product.name}</h3>
+                  <p className="font-body text-muted-foreground mt-2">{product.blurb}</p>
+                  <p className="font-headline text-2xl font-bold text-foreground mt-4">{product.price}</p>
+                  <Link
+                    href="/store"
+                    className="mt-4 inline-flex items-center font-headline font-semibold text-primary underline underline-offset-4 hover:text-accent-foreground hover:bg-accent rounded px-1"
+                  >
+                    See it in the store <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+        <div className="text-center mt-12">
+          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+            <TrackedLink href="/store" event="cta_store_click" eventParams={{ location: 'apparel_promotion' }}>
+              Shop The Collection <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+            </TrackedLink>
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle } from 'lucide-react';
+import { formatPaceSec } from '@/lib/format-pace';
 
 // --- Daniels VDOT Mathematics ---
 
@@ -36,9 +37,7 @@ const METRES_PER_MILE = 1609.344;
 function velocityToPace(vMperMin: number, perMile = false): string {
   const unitMetres = perMile ? METRES_PER_MILE : 1000;
   const secsPerUnit = (unitMetres / vMperMin) * 60;
-  const mins = Math.floor(secsPerUnit / 60);
-  const secs = Math.round(secsPerUnit % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return formatPaceSec(secsPerUnit);
 }
 
 function paceRange(vdot: number, loFrac: number, hiFrac: number, perMile = false): string {
@@ -179,13 +178,15 @@ export default function VDOTCalculatorForm() {
     <div className="space-y-6 font-body">
       {/* Distance selector */}
       <div>
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+        <p id="vdot-distance" className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
           Race Distance
         </p>
-        <div className="grid grid-cols-3 gap-2">
+        <div role="group" aria-labelledby="vdot-distance" className="grid grid-cols-3 gap-2">
           {DISTANCES.map((d, i) => (
             <button
               key={d.label}
+              type="button"
+              aria-pressed={distIdx === i}
               onClick={() => setDistIdx(i)}
               className={`rounded-lg border px-2 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                 distIdx === i
@@ -201,13 +202,15 @@ export default function VDOTCalculatorForm() {
 
       {/* Time input */}
       <div>
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+        <p id="vdot-time" className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
           Finish Time
         </p>
         <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-0">
           <div>
             <Input
               type="number"
+              inputMode="numeric"
+              aria-label="Finish time, hours"
               min={0}
               max={23}
               placeholder="0"
@@ -217,10 +220,12 @@ export default function VDOTCalculatorForm() {
             />
             <p className="text-xs text-muted-foreground text-center mt-1 uppercase tracking-wider">HH</p>
           </div>
-          <span className="text-xl font-bold text-muted-foreground px-1 pb-5 text-center">:</span>
+          <span aria-hidden="true" className="text-xl font-bold text-muted-foreground px-1 pb-5 text-center">:</span>
           <div>
             <Input
               type="number"
+              inputMode="numeric"
+              aria-label="Finish time, minutes"
               min={0}
               max={59}
               placeholder="25"
@@ -230,10 +235,12 @@ export default function VDOTCalculatorForm() {
             />
             <p className="text-xs text-muted-foreground text-center mt-1 uppercase tracking-wider">MM</p>
           </div>
-          <span className="text-xl font-bold text-muted-foreground px-1 pb-5 text-center">:</span>
+          <span aria-hidden="true" className="text-xl font-bold text-muted-foreground px-1 pb-5 text-center">:</span>
           <div>
             <Input
               type="number"
+              inputMode="numeric"
+              aria-label="Finish time, seconds"
               min={0}
               max={59}
               placeholder="00"
@@ -248,7 +255,7 @@ export default function VDOTCalculatorForm() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div role="alert" className="flex items-center gap-2 rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </div>

@@ -10,6 +10,7 @@
 
 import { ARTICLE_REVIEWER } from '@/lib/facts';
 import { createArticleSchema, createBreadcrumbSchema, SITE_CONFIG } from '@/lib/seo';
+import { lastLookedAt } from './freshness';
 import { pillar as pillarOf, type PillarId } from './topics';
 import type { Guide } from './types';
 
@@ -32,6 +33,9 @@ export function guidePath(slug: string): string {
 export function guideJsonLd(guide: Guide): object[] {
   const url = guidePath(guide.slug);
   const published = guide.publishedAt ?? guide.updatedAt;
+  // An article scheduled after its last edit is published later than it was changed,
+  // so "modified" is never before "published" (all three early guides said it was).
+  const modified = guide.updatedAt > published ? guide.updatedAt : published;
   const pillar = pillarOf(guide.pillar);
   return [
     createArticleSchema({
@@ -39,7 +43,7 @@ export function guideJsonLd(guide: Guide): object[] {
       description: guide.description,
       url,
       datePublished: published,
-      dateModified: guide.updatedAt,
+      dateModified: modified,
       about: ABOUT[guide.pillar].map((name) => ({ '@type': 'Thing', name })),
     }),
     createBreadcrumbSchema([
@@ -53,21 +57,17 @@ export function guideJsonLd(guide: Guide): object[] {
       '@type': 'WebPage',
       url: `${SITE_CONFIG.url}${url}`,
       name: guide.title,
-      lastReviewed: guide.updatedAt.slice(0, 10),
+      // When a person last looked at it, which a "still correct" check moves and dateModified does not.
+      lastReviewed: lastLookedAt(guide) > modified ? lastLookedAt(guide).slice(0, 10) : modified.slice(0, 10),
+      // No @id or url until an About page exists for them to point at (src/app/_drafts/about).
       reviewedBy: {
         '@type': ARTICLE_REVIEWER.type,
         name: ARTICLE_REVIEWER.name,
-        jobTitle: 'Trainer',
+        jobTitle: ARTICLE_REVIEWER.role,
         worksFor: { '@type': 'Organization', name: SITE_CONFIG.name, url: SITE_CONFIG.url },
       },
     },
   ];
 }
 
-/**
- * JSON for a <script type="application/ld+json">, with "<" escaped so text in
- * an article can never close the script element.
- */
-export function jsonLdString(data: object): string {
-  return JSON.stringify(data).replace(/</g, '\\u003c');
-}
+export { jsonLdString } from '@/lib/json-ld';

@@ -35,7 +35,7 @@ export default function TermsPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="mx-auto w-full max-w-3xl flex-grow px-4 py-12 sm:px-6 md:py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-grow px-4 py-12 sm:px-6 md:py-16">
         <h1 className="font-headline text-3xl font-bold">Terms of use</h1>
         <p className="mt-2 text-sm text-muted-foreground">Last updated: 13 November 2026</p>
 
@@ -168,6 +168,11 @@ export default function TermsPage() {
           <p>
             We link to other websites, such as event organisers, Amazon and the UNA app store. We do not control
             them and are not responsible for their content or how they use your information.
+          </p>
+          <p>
+            Some links to Amazon are affiliate links. As an Amazon Associate, HybridX earns from qualifying
+            purchases, at no extra cost to you. We say so beside the links, and they do not change which books we
+            recommend or what we write about them.
           </p>
 
           <h2 id="independence" className={h2}>

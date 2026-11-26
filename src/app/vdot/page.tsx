@@ -1,5 +1,4 @@
 
-import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import VDOTCalculatorForm from '@/components/calculators/VDOTCalculatorForm';
@@ -9,16 +8,16 @@ import CalculatorCTA from '@/components/calculators/CalculatorCTA';
 import {
   createMetadata,
   createFAQSchema,
-  createHowToSchema,
   createBreadcrumbSchema,
   createWebApplicationSchema,
   SITE_CONFIG,
 } from '@/lib/seo';
 
+import JsonLd from '@/components/JsonLd';
 export const metadata = createMetadata({
-  title: 'Free VDOT Calculator — Jack Daniels Training Paces',
+  title: 'Free VDOT Calculator: Jack Daniels Paces',
   description:
-    'Calculate your Jack Daniels VDOT score from any race result and get personalised training zone paces — Easy, Marathon, Threshold, Interval, and Repetition. Free tool for runners and Hyrox athletes.',
+    'Work out your Jack Daniels VDOT from any race result and get your Easy, Marathon, Threshold, Interval and Repetition paces. Free for runners and HYROX athletes.',
   path: '/vdot',
   keywords: [
     'VDOT calculator',
@@ -86,13 +85,6 @@ export default function VDOTCalculatorPage() {
 
   const faqSchema = createFAQSchema(FAQS);
 
-  const howToSchema = createHowToSchema({
-    name: 'How to use the VDOT Calculator',
-    description:
-      'Calculate your Jack Daniels VDOT score and training zone paces from any race result in three steps.',
-    steps: HOW_TO_STEPS,
-  });
-
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Calculators', url: '/calculators' },
@@ -103,13 +95,12 @@ export default function VDOTCalculatorPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Structured data */}
-      <Script id="schema-web-app" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
-      <Script id="schema-faq" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <Script id="schema-how-to" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <Script id="schema-breadcrumb" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <JsonLd data={webAppSchema} />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={breadcrumbSchema} />
 
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-lg mx-auto space-y-8">
 
           {/* Calculator card */}
@@ -118,7 +109,7 @@ export default function VDOTCalculatorPage() {
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
                 HybridX Club · Training Tools
               </p>
-              <CardTitle className="text-3xl md:text-4xl font-headline text-foreground leading-tight">
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-foreground leading-tight">
                 Jack Daniels<br />
                 <span className="text-primary">VDOT Calculator</span>
               </CardTitle>

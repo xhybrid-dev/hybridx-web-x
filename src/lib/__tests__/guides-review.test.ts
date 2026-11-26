@@ -60,9 +60,19 @@ describe('approving', () => {
 
   it('schedules into the next free slot, one article per slot', async () => {
     await store.saveGuide(draft());
-    await store.saveGuide(draft({ slug: 'second' }));
+    await store.saveGuide(draft({ slug: 'second', title: 'Singles or doubles for a first HYROX?' }));
     expect((await review.approve(sample.slug, 'slot', tuesday)).publishAt).toBe('2026-11-11T07:00:00.000Z');
     expect((await review.approve('second', 'slot', tuesday)).publishAt).toBe('2026-11-13T07:00:00.000Z');
+  });
+
+  it('will not approve a second article on a question already answered by a live or scheduled one', async () => {
+    await store.saveGuide(draft());
+    await review.approve(sample.slug, 'slot', tuesday);
+    await store.saveGuide(draft({ slug: 'twin' }));
+    await expect(review.approve('twin', 'slot', tuesday)).rejects.toThrow(/same question as \/guides\//);
+    // A different question is fine.
+    await store.saveGuide(draft({ slug: 'other', title: 'Singles or doubles for a first HYROX?' }));
+    await expect(review.approve('other', 'slot', tuesday)).resolves.toMatchObject({ status: 'scheduled' });
   });
 
   it('publishes straight away when asked', async () => {

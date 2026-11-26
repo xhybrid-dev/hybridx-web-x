@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import Script from 'next/script';
 import { createFAQSchema } from '@/lib/seo';
 import {
   Trophy, Clock, Calendar, Zap, Footprints, Dumbbell,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+import JsonLd from '@/components/JsonLd';
 interface FaqItem {
   id: string;
   question: string;
@@ -31,7 +31,7 @@ const faqItems: FaqItem[] = [
     icon: Trophy,
     question: 'What exactly happens in a Hyrox race?',
     answer:
-      'Every Hyrox race follows an identical format worldwide: 8 × 1km runs, each immediately followed by one functional workout station. The stations always appear in the same fixed order — SkiErg (1,000m), Sled Push (50m), Sled Pull (50m), Burpee Broad Jump (80m), Rowing (1,000m), Farmers Carry (200m), Sandbag Lunges (100m), and Wall Balls (100 reps). This totals approximately 10km of running and a full-body functional challenge. Because the format never changes event to event, you can train specifically for every station and every run-to-station transition — which is exactly what our 12-week plans are built around.',
+      'Every Hyrox race follows an identical format worldwide: 8 × 1km runs, each immediately followed by one functional workout station. The stations always appear in the same fixed order — SkiErg (1,000m), Sled Push (50m), Sled Pull (50m), Burpee Broad Jump (80m), Rowing (1,000m), Farmers Carry (200m), Sandbag Lunges (100m), and Wall Balls (100 reps). This totals 8km of running (8 × 1km) and a full-body functional challenge, plus the short walk or jog through the Roxzone between stations. Because the format never changes event to event, you can train specifically for every station and every run-to-station transition — which is exactly what our 12-week plans are built around.',
   },
   {
     id: 'faq2',
@@ -40,7 +40,7 @@ const faqItems: FaqItem[] = [
     icon: Clock,
     question: 'What is a good Hyrox time for a beginner?',
     answer:
-      'For a first Hyrox race, a realistic and respectable target is 1:45–2:10 for men and 2:00–2:20 for women — this puts you comfortably in the top half of all finishers. The global average finish time is approximately 1:40 for men and 1:54 for women across all divisions. The encouraging news: most athletes improve their time by 15–25 minutes between their first and second race through experience and smarter pacing alone — no extra fitness required. Rather than chasing a specific time on your debut, focus on finishing strong and not blowing up on the early stations. Our training plans teach you exactly how to pace each run and each station to get the most from your first race.',
+      'For a first Hyrox race, a realistic and respectable target is 1:45–2:10 for men and 2:00–2:20 for women — a sensible range for a first race, a little slower than the global average finish time of approximately 1:40 for men. Ambitious women can realistically aim for 1:30–1:40. The encouraging news: most athletes improve their time by 15–25 minutes between their first and second race through experience and smarter pacing alone — no extra fitness required. Rather than chasing a specific time on your debut, focus on finishing strong and not blowing up on the early stations. Our training plans teach you exactly how to pace each run and each station to get the most from your first race.',
   },
   {
     id: 'faq3',
@@ -76,7 +76,7 @@ const faqItems: FaqItem[] = [
     icon: Dumbbell,
     question: 'What is Hybrid Training and how does it apply to Hyrox?',
     answer:
-      'Hybrid training is the practice of developing strength and cardiovascular endurance simultaneously within a single structured programme — rather than specialising in just one. For Hyrox, this means combining running (aerobic base and compromised running), strength work (sled push, carries, lunges), and functional endurance (SkiErg, rowing) into a concurrent training system. The science is clear: a 2022 meta-analysis found concurrent training produces strong gains in both disciplines, with VO₂max improvements of 8–15% and strength gains of 10–20% in key lifts. The long-held myth that "cardio kills your gains" has been largely debunked — the interference effect is primarily caused by poor recovery and poor session timing, not the combination itself. Our plans are built on these principles, with careful sequencing of strength and endurance sessions to maximise adaptations in both.',
+      'Hybrid training is the practice of developing strength and cardiovascular endurance simultaneously within a single structured programme — rather than specialising in just one. For Hyrox, this means combining running (aerobic base and compromised running), strength work (sled push, carries, lunges), and functional endurance (SkiErg, rowing) into a concurrent training system. The research is encouraging: a 2022 meta-analysis of 43 studies found that adding endurance training does not meaningfully reduce gains in muscle size or maximal strength. The long-held myth that "cardio kills your gains" has been largely debunked — the interference effect is primarily caused by poor recovery and poor session timing, not the combination itself. Our plans are built on these principles, with careful sequencing of strength and endurance sessions to maximise adaptations in both.',
   },
   {
     id: 'faq7',
@@ -94,7 +94,7 @@ const faqItems: FaqItem[] = [
     icon: Footprints,
     question: 'What shoes should I wear for Hyrox training and on race day?',
     answer:
-      'Shoe choice is one of the most impactful equipment decisions for Hyrox — and the most common mistake is wearing pure running shoes. Hyrox involves 8km of running AND pushing a 152kg sled, which means you need a hybrid or cross-training shoe: stable enough for sled work and lunges, but light and cushioned enough for running. Avoid pure running shoes (too soft under sled load), lifting shoes (too rigid for 8km of running), and minimalist shoes (insufficient cushion). Look for functional fitness or cross-training shoes from brands like NOBULL, On, or Nike Metcon. Whichever shoe you choose, break it in across at least 3–4 training sessions before race day — never wear brand-new shoes on race morning.',
+      'Shoe choice is one of the most impactful equipment decisions for Hyrox — and the most common mistake is wearing pure running shoes. Hyrox involves 8km of running AND pushing a heavy sled (102–202kg depending on your division), which means you need a hybrid or cross-training shoe: stable enough for sled work and lunges, but light and cushioned enough for running. Avoid pure running shoes (too soft under sled load), lifting shoes (too rigid for 8km of running), and minimalist shoes (insufficient cushion). Look for functional fitness or cross-training shoes from brands like NOBULL, On, or Nike Metcon. Whichever shoe you choose, break it in across at least 3–4 training sessions before race day — never wear brand-new shoes on race morning.',
   },
   {
     id: 'faq9',
@@ -112,7 +112,7 @@ const faqItems: FaqItem[] = [
     icon: ClipboardList,
     question: 'Do you offer Hyrox training plans for all ability levels?',
     answer:
-      'Yes — our 12-week Hyrox training plans are built with beginner, intermediate, and advanced tracks. Each plan is personalised to your specific race date and uses RPE (Rate of Perceived Exertion) rather than fixed paces, so the intensity automatically scales to your fitness level. Every week includes running sessions, station-specific strength work, and dedicated compromised running workouts. You can follow the plan as a free downloadable PDF, work through it in our books, or track every session inside the HybridX app for a fully guided experience.',
+      'Yes — our free 12-week Hyrox training plan is dated back from your specific race day and uses RPE (Rate of Perceived Exertion) rather than fixed paces. Every session has a scaling option for beginners and an advanced challenge, so you set the intensity to your fitness level. Every week includes running sessions, station-specific strength work, and dedicated compromised running workouts. You can follow the plan as a free downloadable PDF, work through it in our books, or track every session inside the HybridX app for a fully guided experience.',
   },
   {
     id: 'faq11',
@@ -140,11 +140,7 @@ export default function FaqSection() {
 
   return (
     <>
-      <Script
-        id="faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      <JsonLd data={faqSchema} />
       <section id="faq" className="relative py-20 md:py-28 bg-secondary/30 overflow-hidden">
         <div aria-hidden="true" className="absolute inset-0 bg-subtle-x-light dark:bg-subtle-x-dark opacity-40 dark:opacity-25 mix-blend-multiply dark:mix-blend-screen" />
         <div className="container mx-auto px-6 relative z-10">
@@ -188,7 +184,7 @@ export default function FaqSection() {
                   <AccordionTrigger className="px-5 py-4 text-left font-headline text-base md:text-lg text-primary hover:no-underline hover:bg-secondary/30 transition-colors duration-150 [&>svg]:flex-shrink-0">
                     <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                       <div className="flex-shrink-0 p-1.5 bg-accent/15 rounded-lg">
-                        <item.icon className="h-4 w-4 text-accent" />
+                        <item.icon className="h-4 w-4 text-accent-ink" />
                       </div>
                       <span className="flex-1 text-left leading-snug">{item.question}</span>
                       <span className={`hidden sm:inline-flex flex-shrink-0 items-center text-xs px-2.5 py-0.5 rounded-full font-body font-medium border whitespace-nowrap ${item.categoryStyle}`}>

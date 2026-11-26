@@ -186,7 +186,12 @@ export default function EngineLeadForm({
         </div>
 
         <p className={`mt-1 text-sm ${dark || band ? 'text-engine-paper/70' : 'text-engine-mutedrose'}`}>
-          Free. No spam. Unsubscribe anytime.
+          Free. No spam. Signing up means you will get training emails from HybridX; unsubscribe any time.
+          See our{' '}
+          <a href="/privacy-policy" className="underline underline-offset-2">
+            privacy policy
+          </a>
+          .
         </p>
       </form>
     </div>

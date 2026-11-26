@@ -3,8 +3,12 @@ import styles from './athx.module.css';
 import EnduranceCalculator from '@/components/athx/EnduranceCalculator';
 import AthxGuideForm from '@/components/athx/AthxGuideForm';
 import Link from 'next/link';
+import StandaloneBar from '@/components/StandaloneBar';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 import TrackedLink from '@/components/TrackedLink';
 import { appSignupHref, seedForAthx } from '@/lib/app-seed';
+import { books } from '@/lib/books';
+import { AFFILIATE_DISCLOSURE } from '@/components/AffiliateDisclosure';
 import { APP, appPriceLabel } from '@/lib/facts/product';
 import { pillarQuestions } from '@/components/guides/PillarQuestions';
 import {
@@ -12,6 +16,7 @@ import {
   ATHX_FAQS,
   ATHX_TOTAL_WORKING_MINUTES,
   ATHX_UK_DATES,
+  athxTimingNote,
   ATHX_ZONES,
 } from '@/lib/athx-content';
 import {
@@ -19,13 +24,33 @@ import {
   createBreadcrumbSchema,
   createFAQSchema,
   createSpeakableSchema,
-  createWebApplicationSchema,
-} from '@/lib/seo';
+  createWebApplicationSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
+
+import JsonLd from '@/components/JsonLd';
+
+/** A buy link for one of the ATHX books: an Amazon affiliate link, so it says so. */
+function BookLink({ bookId, label }: { bookId: string; label: string }) {
+  const book = books.find((b) => b.id === bookId);
+  if (!book) return null;
+  return (
+    <TrackedLink
+      href={book.amazonUrl}
+      target="_blank"
+      rel="sponsored noopener noreferrer"
+      className={styles.downloadButton}
+      event="cta_book_click"
+      eventParams={{ book_id: book.id, location: 'athx_page' }}
+    >
+      {label}
+    </TrackedLink>
+  );
+}
 
 /*
- * The ATHX 2027 pre-launch funnel.
+ * The ATHX 2027 page: the guide, the pacing calculator and the books.
  *
- * A capture page for two training books that are not on sale yet. Every section
+ * A capture page for two training books (on sale on Amazon since November 2026, men's
+ * and women's editions) and the plan in the app. Every section
  * either builds credibility or moves the visitor toward the form, and there are
  * exactly two things on offer:
  *
@@ -109,12 +134,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `https://hybridx.club${PATH}` },
   openGraph: {
+    ...OG_DEFAULTS,
     title: TITLE,
     description: DESCRIPTION,
     type: 'website',
     url: `https://hybridx.club${PATH}`,
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
@@ -160,7 +187,7 @@ const toolSchema = createWebApplicationSchema({
 // Marks the sections worth reading aloud or extracting whole — the direct
 // "what is ATHX" answer and the FAQ — for voice assistants and AI answer
 // engines that support SpeakableSpecification.
-const speakableSchema = createSpeakableSchema(['h1', '#how-athx-works', '#faq']);
+const speakableSchema = createSpeakableSchema(['h1', '#how-athx-works', '#faq'], '/athx-2027');
 
 const INSIGHT_CARDS = [
   {
@@ -234,37 +261,16 @@ export default function AthxFunnelPage() {
         first byte, so this is the shape Next's own docs recommend for JSON-LD
         specifically — data to parse, not code that needs a loading strategy.
       */}
-      <script
-        id="athx-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <script
-        id="athx-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        id="athx-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        id="athx-tool-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
-      />
-      <script
-        id="athx-speakable-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
-      />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={toolSchema} />
+      <JsonLd data={speakableSchema} />
 
-      <a className={styles.skipLink} href="#main">
-        Skip to content
-      </a>
+      {/* The page looks nothing like the site on purpose; this is the way back to it. */}
+      <StandaloneBar />
 
-      <main id="main">
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <header className={styles.hero}>
           <div className={styles.container}>
@@ -447,7 +453,7 @@ export default function AthxFunnelPage() {
         {/* ── What's coming ─────────────────────────────────────────── */}
         <section className={`${styles.section} ${styles.panelSection}`}>
           <div className={styles.container}>
-            <h2 className={styles.h2}>What’s coming</h2>
+            <h2 className={styles.h2}>The books</h2>
             <hr className={styles.rule} />
             <p className={styles.body}>
               Half the book explains the event. Half is the plan — every day carrying the session,
@@ -478,6 +484,7 @@ export default function AthxFunnelPage() {
                 <p className={styles.spec}>
                   7 × 10 in · 12-week plan · 84 daily pages · Lite, ATHX and Pro loadings
                 </p>
+                <BookLink bookId="athx-2027-mens" label="Get the Men’s Edition on Amazon" />
               </article>
 
               <article className={`${styles.edition} ${styles.editionWomens}`}>
@@ -502,8 +509,12 @@ export default function AthxFunnelPage() {
                 <p className={styles.spec}>
                   7 × 10 in · 12-week plan · 84 daily pages · Lite, ATHX and Pro loadings
                 </p>
+                <BookLink bookId="athx-2027-womens" label="Get the Women’s Edition on Amazon" />
               </article>
             </div>
+            <p className={styles.caption} style={{ marginTop: 20 }}>
+              {AFFILIATE_DISCLOSURE}
+            </p>
           </div>
         </section>
 
@@ -530,6 +541,14 @@ export default function AthxFunnelPage() {
                 </TrackedLink>
               ))}
             </div>
+            <div className={styles.linkList}>
+              <a className={styles.textLink} href="/calculators/week-planner?goal=athx">
+                Build a free ATHX training week first
+              </a>
+              <a className={styles.textLink} href="/app">
+                See what is in the app
+              </a>
+            </div>
           </div>
         </section>
 
@@ -540,8 +559,7 @@ export default function AthxFunnelPage() {
             <div className={styles.bigNumberRow}>
               <p className={styles.bigNumber}>12</p>
               <p className={styles.bigNumberNote}>
-                Weeks in the build. If you&rsquo;re targeting London — the earliest UK date,
-                23&ndash;24 January — a twelve-week block starts in early November.
+                {athxTimingNote(new Date())}
               </p>
             </div>
 
@@ -600,7 +618,7 @@ export default function AthxFunnelPage() {
               <AthxGuideForm
                 placement="footer"
                 label="Get the one-page guide to ATHX"
-                support="One page, no fluff. We email you the download link, then one more email when the plans launch."
+                support="One page, no fluff. We email you the download link, then one more email about the ATHX training books."
               />
             </div>
           </div>
@@ -617,6 +635,9 @@ export default function AthxFunnelPage() {
 
           <div className={styles.footerLinks}>
             <a href="/privacy-policy">Privacy notice</a>
+            <a href="/terms">Terms</a>
+            <a href="/contact">Contact</a>
+            <ConsentSettingsButton className={styles.footerButton} />
             <a href="/">HybridX Club</a>
           </div>
 

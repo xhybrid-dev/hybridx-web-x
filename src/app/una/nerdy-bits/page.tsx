@@ -7,7 +7,9 @@ import { LoadBench, Vo2Bench } from '@/components/una/Benches';
 import FormChart from '@/components/una/FormChart';
 import { LINE_FIELDS } from '@/lib/una-family';
 import styles from './nerdy.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 /*
  * hybridx.club/una/nerdy-bits: the method behind the X family's numbers, for
  * the reader who wants to check them.
@@ -17,15 +19,15 @@ import styles from './nerdy.module.css';
  */
 
 const URL_CANONICAL = `${HYBRIDX_URL}/una/nerdy-bits`;
-const TITLE = 'The nerdy bits — how the X family works out VO2max, training load, form and paces';
-const DESCRIPTION =
-  'The sports-science methods behind all seven HybridX apps for UNA Watch: shared-folder slots, Edwards zone-weighted load, Banister fitness/fatigue/form, ACSM/%HRR VO2max estimates, and Daniels–Gilbert training paces.';
+const TITLE = 'The X Family Sports Science: VO2max, Load and Form';
+const DESCRIPTION = 'The sports science behind the HybridX apps for UNA Watch: Edwards zone-weighted load, Banister fitness and fatigue, %HRR VO2max and Daniels-Gilbert paces.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: URL_CANONICAL },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'The nerdy bits: the X family’s maths',
     description: DESCRIPTION,
     type: 'article',
@@ -33,7 +35,7 @@ export const metadata: Metadata = {
     siteName: 'HybridX',
     locale: 'en_GB',
   },
-  twitter: { card: 'summary_large_image', title: 'The nerdy bits: the X family’s maths', description: DESCRIPTION },
+  twitter: { ...TWITTER_DEFAULTS, card: 'summary_large_image', title: 'The nerdy bits: the X family’s maths', description: DESCRIPTION },
 };
 
 type Ref = { id: number; text: React.ReactNode; href?: string; where?: string };
@@ -192,7 +194,7 @@ export default function NerdyBitsPage() {
     <div id="top" className={`${styles.page} ${grotesk.variable} ${inter.variable} ${mono.variable}`}>
       <header className={styles.bar}>
         <Link href="/una" className={styles.back}>
-          <Image src="/Icon Logo.png" alt="HybridX" width={28} height={28} />
+          <Image src="/icon-logo.png" alt="HybridX" width={28} height={28} />
           <span>← Back to the X family</span>
         </Link>
         <a href={UNA_URL} target="_blank" rel="noopener" className={styles.barUna}>
@@ -226,7 +228,7 @@ export default function NerdyBitsPage() {
           </ol>
         </nav>
 
-        <main className={styles.main}>
+        <main id="main-content" tabIndex={-1} className={styles.main}>
           {/* 0 ─ Ground rules */}
           <section id="rules">
             <h2>
@@ -692,6 +694,14 @@ export default function NerdyBitsPage() {
           are not made, endorsed or sponsored by UNA Watch Ltd. UNA and UNA Watch are trademarks of
           UNA Watch Ltd.
         </p>
+        <nav className={styles.footerNav} aria-label="Footer">
+          <a href="/una">The X family</a>
+          <a href={HYBRIDX_URL}>hybridx.club</a>
+          <a href="/privacy-policy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/contact">Contact</a>
+          <ConsentSettingsButton className={styles.footerButton} />
+        </nav>
       </footer>
     </div>
   );

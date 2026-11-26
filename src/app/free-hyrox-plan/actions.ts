@@ -9,7 +9,9 @@ const SignUpSchema = z.object({
   name: z.string().min(2, { message: 'Please enter your name.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   event: z.string().min(1, { message: 'Please select an event.' }),
-  eventDate: z.string().min(1, { message: 'Please select an event date.' }),
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Please choose your race date.' }),
+  // How the date was chosen: a booked race from the list, a typed date, or "no race booked yet".
+  mode: z.enum(['race', 'date', 'starter']).default('race'),
 });
 
 export type SignUpFormState = {
@@ -35,6 +37,7 @@ export async function signUpForTrainingPlan(
     email: formData.get('email'),
     event: formData.get('event'),
     eventDate: formData.get('eventDate'),
+    mode: formData.get('mode') || undefined,
   });
 
   if (!validatedFields.success) {
@@ -44,7 +47,7 @@ export async function signUpForTrainingPlan(
     };
   }
 
-  const { name, email, event, eventDate } = validatedFields.data;
+  const { name, email, event, eventDate, mode } = validatedFields.data;
 
   const hdrs = await headers();
   const ip = hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || hdrs.get('x-real-ip') || 'unknown';
@@ -58,7 +61,7 @@ export async function signUpForTrainingPlan(
       name,
       // Where they came from, when the link said (guide-<slug> from an article):
       // bounded and pattern-checked, since anyone can put anything in a URL.
-      extra: { event, eventDate, ...(srcOf(formData) ? { src: srcOf(formData) } : {}) },
+      extra: { event, eventDate, mode, ...(srcOf(formData) ? { src: srcOf(formData) } : {}) },
       page: '/free-hyrox-plan',
       ip,
       userAgent,
@@ -69,7 +72,7 @@ export async function signUpForTrainingPlan(
   }
 
   return {
-    message: "Success! Your PDF and Calendar files are downloading. Find the '.ics' file and open it to add the full 12-week plan to your phone or computer's calendar (Google, Apple, Outlook).",
+    message: "Success! Your PDF and calendar file are downloading. Open the '.ics' file to add the plan to your phone or computer's calendar (Google, Apple, Outlook).",
     type: 'success',
     leadSaved,
   };

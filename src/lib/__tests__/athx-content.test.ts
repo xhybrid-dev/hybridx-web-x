@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
-import { ATHX_FAQS, ATHX_UK_DATES, ATHX_ZONES, ATHX_TOTAL_WORKING_MINUTES } from '../athx-content';
+import { ATHX_FAQS, ATHX_UK_DATES, ATHX_ZONES, ATHX_TOTAL_WORKING_MINUTES, athxTimingNote } from '../athx-content';
 
 /**
  * The facts behind the ATHX 2027 page, and two things that must never regress
@@ -70,9 +70,10 @@ describe('the ATHX page renders its JSON-LD as static HTML', () => {
     expect(PAGE_SOURCE).not.toMatch(/import\s+Script\s+from\s+['"]next\/script['"]/);
   });
 
-  it('emits five plain <script type="application/ld+json"> elements', () => {
-    const matches = [...PAGE_SOURCE.matchAll(/<script\s+id="athx-[a-z-]+-schema"/g)];
+  it('emits its five schemas through <JsonLd>, which renders plain <script> elements on the server', () => {
+    const matches = [...PAGE_SOURCE.matchAll(/<JsonLd\s+data=\{[a-zA-Z]+\}/g)];
     expect(matches.map((m) => m[0])).toHaveLength(5);
+    expect(PAGE_SOURCE).toContain("from '@/components/JsonLd'");
   });
 });
 
@@ -138,5 +139,32 @@ describe('ATHX_TOTAL_WORKING_MINUTES', () => {
   it('is less than the ~2.5 hour venue window, which is the point being made', () => {
     expect(ATHX_TOTAL_WORKING_MINUTES).toBeGreaterThan(0);
     expect(ATHX_TOTAL_WORKING_MINUTES).toBeLessThan(150); // 2.5 hours in minutes
+  });
+});
+
+describe('athxTimingNote', () => {
+  // The block is 84 days with the event on the last day (the books have 84 daily pages), so
+  // London on 23 January 2027 has a block that starts on 2 November 2026.
+  const at = (iso: string) => new Date(`${iso}T12:00:00`);
+
+  it('names the start of the block while it is still ahead', () => {
+    expect(athxTimingNote(at('2026-08-30'))).toBe(
+      "Weeks in the build. If you're targeting London, 23–24 January, a twelve-week block starts on 1 November 2026.",
+    );
+  });
+
+  it('is honest once the first event is closer than twelve weeks, and points at the next one', () => {
+    const note = athxTimingNote(at('2026-11-25'));
+    expect(note).toContain('London, 23–24 January, is 8 weeks away, which is closer than a full twelve-week block.');
+    expect(note).toContain('For Glasgow, 5–6 June, a twelve-week block starts on 14 March 2027.');
+    expect(note).not.toMatch(/early November/i);
+  });
+
+  it('moves on once an event has passed', () => {
+    expect(athxTimingNote(at('2027-02-01'))).toContain('Glasgow, 5–6 June, a twelve-week block starts on 14 March 2027');
+  });
+
+  it('says so when every 2027 date has passed', () => {
+    expect(athxTimingNote(at('2027-12-01'))).toContain('have all passed');
   });
 });

@@ -38,6 +38,7 @@
 // admin; /api/admin/engine-check turns that into a diagnosis (diagnose.ts).
 
 import { adminFirestore } from '@/lib/firebase-admin';
+import { SEASON } from '@/lib/facts';
 import {
   linkSources,
   listBacklinkStates,
@@ -243,6 +244,8 @@ interface Tick {
   /** Wall-clock start, for the call window: real time, not the injected clock. */
   startedMs: number;
   published: Guide[];
+  /** Articles on their way to publishing: a draft is checked against these too, so it cannot duplicate one still waiting for review. */
+  pipeline: Guide[];
   log: string[];
   /** Set once the call window has closed, so the log says so once. */
   outOfTime?: boolean;
@@ -279,7 +282,7 @@ async function advance(run: Run, guide: Guide, t: Tick): Promise<void> {
 
   for (;;) {
     if (run.stage === 'check') {
-      const checks = checkDraft(guide, t.published, { fromModel: true });
+      const checks = checkDraft(guide, t.published, { fromModel: true, inProgress: t.pipeline });
       if (checks.errors.length && run.checkFixes < 1 && spend(t)) {
         run.checkFixes++;
         await saveRun(run, t.now); // counted first: a cut-off fix is not retried every hour
@@ -336,7 +339,7 @@ async function advance(run: Run, guide: Guide, t: Tick): Promise<void> {
           const fixed = toContent(await t.deps.models.write(fixPrompt(brief, contentOf(guide), problems)));
           if (!schemaIssues({ ...guide, ...fixed }, t.now).length) {
             guide = await saveContent(guide, fixed, t.now);
-            run.checks = checkDraft(guide, t.published, { fromModel: true });
+            run.checks = checkDraft(guide, t.published, { fromModel: true, inProgress: t.pipeline });
             t.log.push(`${run.slug}: fixed ${serious.length} serious review note(s)`);
           }
         } catch (e) {
@@ -475,7 +478,7 @@ async function draft(t: Tick): Promise<void> {
   }
   if (issues.length) return failTopic(topic, `the draft did not fit the article format: ${issues[0].message}`, t);
 
-  const guide = await saveGuide({ ...content, slug, status: 'drafting', pillar: topic.pillar }, t.now);
+  const guide = await saveGuide({ ...content, slug, status: 'drafting', pillar: topic.pillar, season: SEASON }, t.now);
   // The run is saved with the article, so a cut-off from here on resumes.
   const run: Run = { slug, topicId: topic.id, kind: 'draft', stage: 'check', round: 0, checkFixes: 0, reviewFixes: 0, attempts: 0, updatedAt: t.now.toISOString() };
   await saveRun(run, t.now);
@@ -605,7 +608,15 @@ export async function runEngineStep(deps: EngineDeps): Promise<{ skipped?: strin
       await saveStatus({ at: now.toISOString(), skipped: 'paused in settings', log: [] });
       return { skipped: 'paused in settings' };
     }
-    const t: Tick = { deps, now, calls: MODEL_CALLS_PER_TICK, startedMs: Date.now(), published: await listPublishedGuides(now.getTime()), log: [] };
+    const t: Tick = {
+      deps,
+      now,
+      calls: MODEL_CALLS_PER_TICK,
+      startedMs: Date.now(),
+      published: await listPublishedGuides(now.getTime()),
+      pipeline: (await listAllGuides()).filter((g) => ['awaiting_review', 'revising', 'scheduled'].includes(g.status)),
+      log: [],
+    };
     await recoverStalled(t);
 
     const inFlight = [...(await runsAt('check')), ...(await runsAt('review'))];

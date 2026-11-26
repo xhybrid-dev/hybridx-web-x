@@ -81,6 +81,22 @@
   family name is the variable's name, and CSS family names are case-insensitive,
   so `inter` would merge with the site's Google `Inter`.
 
+- **Security headers live in `security-headers.js`, applied from `next.config.js`;
+  there is no `middleware.ts`.** A middleware file at the repository root is
+  ignored by Next when the app is under `src/app`, so the old one never ran: the
+  live site sent none of its headers, the 50/50 plan finder split never split
+  (every visit was the plan finder), and the subdomain rewrites for
+  race./streak./trail. were dead (those hosts have no DNS). All of that is gone;
+  `/home-control` redirects to `/` and `PLAN_FINDER_MODE` is `"on"`. If one is
+  ever needed again it goes in `src/` (`src/middleware.ts`, or `src/proxy.ts` on
+  Next 16), `plan-finder-launch.test.ts` fails on a root file, and it must not
+  make `/` uncacheable or serve crawlers a different homepage. The full CSP is
+  report-only (`/api/csp-report` logs what browsers would have blocked); move it
+  to enforcing only after the log has been quiet for a week. A page whose URL is
+  a secret (`/d/<token>`, a shop `/thanks`) gets `no-referrer`, `no-store` and
+  `noindex` from the same file, and `security-headers.test.ts` checks every
+  `SHOP_EVENTS` path is covered.
+
 - **`LEAD_BRIDGE_SECRET` is not interchangeable with `CRON_SECRET`.** The bridge
   credential authorises pushing leads into the mailing system; the cron credential
   only authorises running maintenance. A scheduler job should not be able to do the
@@ -211,6 +227,29 @@ AI-drafted, reviewed and approved by Jon before publishing.
   - **Pillar pages are ISR** (`revalidate = 3600`) and read articles through
     `listPublishedGuidesOutsideBuild`, which returns nothing during a build.
     Any other built-ahead page that lists articles must do the same.
+- **Freshness** (`src/lib/guides/freshness.ts`, `/admin/guides/freshness`): a published guide is
+  due a look when it was written for an earlier `SEASON` (facts/hyrox-standards.ts) than the
+  current one, or when nobody has looked at it for 180 days. Changing `SEASON` makes every guide
+  due at once, which is how "when the rulebook changes the guides are reviewed again" (said on
+  `/guides/how-we-write`) stays true. "Still correct" records `checkedAt` and `season`
+  without a revision or a new `updatedAt`; the byline shows "Checked <date>" and `lastReviewed`
+  follows it, `dateModified` never does. New guides carry `season`; ones without it count as 2026/27.
+- **IndexNow** (`src/lib/indexnow.ts`): the hourly job tells Bing and the other IndexNow engines
+  about a guide that went live or changed, once per `updatedAt`, production only. The key is
+  public by design and lives in `public/<key>.txt`; changing it means renaming that file.
+- **Site health** (`src/lib/site-health/`, `/admin/site-health`): a step of the hourly job reads the
+  live site the way a search engine does: the `PAGES_PER_RUN` sitemap pages checked longest ago,
+  plus the site-wide checks every tick (www redirects to the apex, robots.txt names the sitemap,
+  the sitemap lists the site, a missing page is a real 404 and noindex, the six security headers).
+  Errors (missing, noindex, no canonical, broken JSON-LD, a failed site-wide check) email the
+  review address once and again after three days; tidy-ups (long title, two h1s) are only listed.
+  Production only. It mirrors `scripts/seo-crawl.mjs`, which still gates a release from a developer's
+  machine: change a rule in one, change the other. It needs a review address (`ADMIN_EMAILS` or the
+  one saved in guide settings) to email anyone.
+- **A candidate added to `candidates.ts` reaches the live queue** (`ensureQueueSeeded` tops up
+  with any question the queue does not hold, at the back). A topic Jon skipped counts as held and
+  never returns. Anything that needs facts the registry lacks (XENOM, products) is added by Jon
+  from `/admin/guides/new` with a brief that supplies them; the engine must not be left to invent them.
 - **Search Console** (plan step 6) is read by `src/lib/google/search-console.ts`
   with the runtime's own identity and a read-only scope: no key, no secret.
   The property is `sc-domain:hybridx.club` unless `SEARCH_CONSOLE_SITE` says
@@ -275,6 +314,42 @@ AI-drafted, reviewed and approved by Jon before publishing.
   to the one-hour ID token and logs why; the Guides admin header says which you
   have.
 
+## Page conventions
+
+- **Every page's `<main>` is `<main id="main-content" tabIndex={-1}>`.** The skip link in
+  the root layout (`SkipLink`) targets it, and `skip-link.test.ts` fails on a page that lacks
+  it. `globals.css` removes the focus ring from a programmatically focused `<main>`.
+- **A page that deliberately looks unlike the site** (the engine funnel, ATHX, the running
+  plan, the X family pages) still carries a way back: `StandaloneBar` or its own logo link,
+  and Terms, Contact and Cookie settings (`ConsentSettingsButton`) beside Privacy.
+  `standalone-pages.test.ts` pins it.
+- **The older calculator pages use `CalculatorShell`** (breadcrumb, FAQ and WebApplication
+  structured data, "How it works", related tools). What each page says about its formula is
+  in `src/lib/calculators/registry.ts`, and `calculators-registry.test.ts` checks every such
+  sentence against the constant in the form: change a formula, change its sentence.
+  A new calculator is a registry entry, a guide and a page.
+- **The running plan's calendar (`src/lib/12-week-running-hyrox/schedule.ts`) works on
+  `YYYY-MM-DD` strings, never `Date` instants.** A date typed into an `<input type="date">` is
+  a day, not a moment; the old code turned it into UTC midnight and put sessions on the wrong
+  day in some time zones. Race day lands on the chosen date whatever its weekday. Event ids carry
+  no date, so a second import updates the events rather than adding a second set.
+- **Icon-only buttons inside a form need `type="button"` and a name**, or pressing one submits
+  the form.
+- **The privacy policy was written from what the code does.** Its controller is "HybridX Hub, run by
+  Jon Lee", with an email address and deliberately no postal address (Jon's choice,
+  25 November 2026). When a new processor, a new field in a form, or a new place a lead is
+  sent is added, change the policy in the same commit.
+- **XENOM** (Jon, 26 November 2026) may be retired in favour of the ATHX work and is much less
+  popular than ATHX: write no XENOM content and put it on no new page. The plan finder still has
+  one XENOM goal tile (`funnel.json`, `routing.ts`, tests pin the 6 x 4 matrix) until he decides.
+- **HYROX finish times** (Jon, 26 November 2026): men's average about 1:40, beginner targets as written,
+  and 1:30 to 1:40 as a realistic goal for ambitious women. No women's average is stated;
+  `finish-times.test.ts` pins it.
+- **The About page is a parked draft** in `src/app/_drafts/about` (Jon, 26 November 2026), linked from
+  nowhere; `docs/parked-for-later.md` says how to publish it and `about-draft.test.ts` holds it there.
+- **Prices on the shop carry no VAT wording** (Jon, 25 November 2026: he handles VAT outside the
+  site). Do not add "inc. VAT" or similar to a price.
+
 ## The shop (paid PDFs)
 
 `/hyrox-glasgow-2027` sells PDFs through Stripe Checkout; everything is in
@@ -332,6 +407,12 @@ the wire format between this site and `hyroxedgeai`, it belongs in
   `src/lib/lead-tokens.ts` falls back to a per-process random secret, so a
   confirmation link minted by one instance fails on another — which presents as an
   intermittently broken email rather than as a missing secret.
+
+- **Contact messages (`hx_leads`) and the plan finder's raw visit batches (`hx_batches`) are deleted
+  by the hourly job too** (`src/lib/retention.ts`), 12 months after the last change (30 days once a
+  message is closed) and 400 days, so what the privacy policy says does not rest on a Firestore TTL
+  policy. A TTL policy on `expireAt` for each is still worth having and never conflicts. A document
+  with no `expireAt` Timestamp is never touched by either.
 
 - Expired rate-limit windows are swept by `/api/cron/marketing-maintenance` on its
   hourly run. Documents also carry `expiresAt`, so a Firestore TTL policy on the

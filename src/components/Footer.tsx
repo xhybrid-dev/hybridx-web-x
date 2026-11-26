@@ -1,68 +1,33 @@
 import Link from 'next/link';
 import { Instagram } from 'lucide-react';
 import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
-
-const footerColumns = [
-  {
-    heading: 'Training',
-    links: [
-      { label: 'Free 12-Week Hyrox Plan', href: '/free-hyrox-plan' },
-      { label: 'All Guides', href: '/guides' },
-      { label: 'How to Train for Hyrox', href: '/how-to-train-for-hyrox' },
-      { label: '12-Week Plan Structure', href: '/hyrox-training-plan' },
-      { label: 'Hybrid Training Program', href: '/hybrid-training-program' },
-      { label: 'Free VO2max Guide', href: '/build-a-bigger-engine' },
-    ],
-  },
-  {
-    heading: 'Free Tools',
-    links: [
-      { label: 'All Calculators', href: '/calculators' },
-      { label: 'VDOT Calculator', href: '/vdot' },
-      { label: 'Treadmill FIT/TCX Generator', href: '/calculators/garmin-tcx-generator' },
-      { label: 'Race Time Predictor', href: '/calculators/race-time-predictor' },
-      { label: '12-Week Running Plan', href: '/12-week-running-hyrox' },
-    ],
-  },
-  {
-    heading: 'HybridX',
-    links: [
-      { label: 'The App — £5/mo', href: '/app' },
-      { label: 'UNA Watch Apps (X Family)', href: '/una' },
-      { label: 'X Training for UNA Watch', href: '/training' },
-      { label: 'Books', href: '/books' },
-      { label: 'Store', href: '/store' },
-      { label: 'FAQ', href: '/#faq' },
-      { label: 'Privacy Policy', href: '/privacy-policy' },
-      { label: 'Terms of Use', href: '/terms' },
-    ],
-  },
-];
+import { footerColumns } from '@/lib/site-nav';
 
 export default function Footer() {
+  const columns = footerColumns();
   return (
     <footer className="border-t border-border/40 bg-background">
       <div className="container mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
-          {footerColumns.map((col) => (
-            <nav key={col.heading} aria-label={col.heading}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          {columns.map((col) => (
+            <nav key={col.label} aria-label={col.label}>
               <h2 className="font-headline font-bold text-sm uppercase tracking-widest text-primary mb-3">
-                {col.heading}
+                {col.label}
               </h2>
               <ul className="space-y-2">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-accent transition-colors font-body"
+                      className="text-sm text-muted-foreground hover:text-accent-ink transition-colors font-body"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
-                {col.heading === 'HybridX' && (
+                {col.label === 'HybridX' && (
                   <li>
-                    <ConsentSettingsButton className="text-sm text-muted-foreground hover:text-accent transition-colors font-body text-left" />
+                    <ConsentSettingsButton className="text-sm text-muted-foreground hover:text-accent-ink transition-colors font-body text-left" />
                   </li>
                 )}
               </ul>
@@ -74,7 +39,7 @@ export default function Footer() {
              <span>&copy; {new Date().getFullYear()} HybridX.Club. All rights reserved.</span>
           </div>
           <div className="mt-4 flex space-x-4 sm:mt-0">
-            <Link href="https://www.instagram.com/hybridx.club" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent transition-colors">
+            <Link href="https://www.instagram.com/hybridx.club" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent-ink transition-colors">
               <Instagram className="h-5 w-5" />
               <span className="sr-only">Instagram</span>
             </Link>

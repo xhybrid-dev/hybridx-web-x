@@ -18,28 +18,28 @@ interface Plan {
 const plans: Plan[] = [
   {
     id: 'hybrid-running',
-    title: 'Hybrid Running Plans',
-    description: 'Crush your PRs. Combine elite running protocols with targeted strength work for explosive speed and endurance.',
+    title: 'Hybrid Running Plan',
+    description: 'Run faster for HYROX. A free interactive 12-week plan: threshold sessions, intervals, long runs and compromised running, with a built-in pace calculator.',
     icon: Activity,
-    ctaText: 'View The Blueprint',
-    href: '/free-hyrox-plan',
+    ctaText: 'Open The Plan',
+    href: '/12-week-running-hyrox',
   },
   {
     id: 'hyrox-specific',
     title: 'Hyrox 12 Week Training Plan',
-    description: 'Our most-chosen plan for Hyrox race preparation. Tailored programs for beginner, intermediate, and advanced athletes to conquer every station and run.',
+    description: 'Our most-chosen plan for Hyrox race preparation. Beginner scaling and advanced challenges on every session to conquer every station and run.',
     icon: HeartPulse,
-    ctaText: 'View The Blueprint',
+    ctaText: 'Get The Free Plan',
     href: '/free-hyrox-plan',
     isPopular: true,
   },
   {
-    id: 'offseason-strength',
-    title: 'Offseason Strength Plans',
-    description: 'Build your foundation. Focused strength and power programs to prepare you for your next competitive season.',
+    id: 'week-planner',
+    title: 'Hybrid Week Planner',
+    description: 'Pick your goal and training days and get four weeks of running and lifting that fit together, with a calendar file.',
     icon: Dumbbell,
-    ctaText: 'View The Blueprint',
-    href: '/free-hyrox-plan',
+    ctaText: 'Build Your Week',
+    href: '/calculators/week-planner',
   },
 ];
 
@@ -76,7 +76,7 @@ export default function TrainingPlanShowcase() {
                       ? 'bg-accent/30 ring-2 ring-accent/60'
                       : 'bg-accent/20 ring-2 ring-accent/30'
                   }`}>
-                    <plan.icon className="h-10 w-10 text-accent" />
+                    <plan.icon className="h-10 w-10 text-accent-ink" />
                   </div>
                   <CardTitle className="font-headline text-2xl text-primary">{plan.title}</CardTitle>
                 </CardHeader>

@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-// The social card for race.hybridx.club: the headline over the sixteen laps in
+// The social card for hybridx.club/race: the headline over the sixteen laps in
 // the watch's run and station colours. Rendered once at build time.
 
 export const alt = 'HybridX Race for UNA Watch: track your Hyrox with UNA.';

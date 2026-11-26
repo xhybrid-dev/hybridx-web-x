@@ -1,5 +1,5 @@
 
-import { DailyWorkout, getWeekNumber } from './training-plan-utils';
+import { DailyWorkout, getWeekNumber, parseLocalDate } from './training-plan-utils';
 
 // HybridX app link for CTAs
 const APP_URL = 'https://app.hybridx.club/';
@@ -71,6 +71,11 @@ function formatICSDate(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}${m}${d}`;
+}
+
+/** DTSTAMP is a UTC instant, so it comes from the UTC fields, not the local date. */
+function icsTimestamp(now: Date = new Date()): string {
+  return now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 }
 
 /**
@@ -158,7 +163,7 @@ export function generateTrainingCalendar(options: CalendarGenerationOptions): st
 
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:${generateUID(workout.day, options.eventDate)}`);
-    lines.push(`DTSTAMP:${formatICSDate(new Date())}T000000Z`);
+    lines.push(`DTSTAMP:${icsTimestamp()}`);
 
     if (allDayEvents || isRestDay) {
       lines.push(`DTSTART;VALUE=DATE:${formatICSDate(workout.date)}`);
@@ -186,10 +191,10 @@ export function generateTrainingCalendar(options: CalendarGenerationOptions): st
   });
 
   // Add race day event with special formatting
-  const raceDate = new Date(options.eventDate);
+  const raceDate = parseLocalDate(options.eventDate);
   lines.push('BEGIN:VEVENT');
   lines.push(`UID:hybridx-raceday-${options.eventDate}@hybridx.club`);
-  lines.push(`DTSTAMP:${formatICSDate(new Date())}T000000Z`);
+  lines.push(`DTSTAMP:${icsTimestamp()}`);
   lines.push(`DTSTART;VALUE=DATE:${formatICSDate(raceDate)}`);
   const raceDayEnd = new Date(raceDate);
   raceDayEnd.setDate(raceDayEnd.getDate() + 1);
@@ -220,13 +225,21 @@ export function generateTrainingCalendar(options: CalendarGenerationOptions): st
 /**
  * Generate and trigger download of the ICS calendar file
  */
+export function trainingCalendarFileName(options: Pick<CalendarGenerationOptions, 'userName'>): string {
+  return `HybridX-Hyrox-Training-${options.userName.replace(/\s+/g, '-')}.ics`;
+}
+
+/** The calendar as a Blob, for a download link that still works when an automatic download is blocked. */
+export function trainingCalendarBlob(options: CalendarGenerationOptions): Blob {
+  return new Blob([generateTrainingCalendar(options)], { type: 'text/calendar;charset=utf-8' });
+}
+
 export function downloadTrainingCalendar(options: CalendarGenerationOptions): void {
-  const icsContent = generateTrainingCalendar(options);
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const blob = trainingCalendarBlob(options);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `HybridX-Hyrox-Training-${options.userName.replace(/\s+/g, '-')}.ics`;
+  link.download = trainingCalendarFileName(options);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

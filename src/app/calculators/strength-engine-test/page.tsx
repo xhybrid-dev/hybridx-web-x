@@ -11,7 +11,7 @@ import { createMetadata } from '@/lib/seo';
 // src/lib/__tests__/strength-engine.test.ts.
 
 export const metadata: Metadata = createMetadata({
-  title: 'HYROX Strength and Engine Test: What Holds You Back?',
+  title: 'HYROX Strength and Engine Test',
   description:
     'Three lifts and a 5 km against your HYROX division: find out whether strength or your engine is the limiter, and get an eight-week focus. Free.',
   path: '/calculators/strength-engine-test',
@@ -21,7 +21,7 @@ export default function StrengthEngineTestPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="bg-gradient-to-b from-neutral-900 to-black py-14 text-white md:py-20">
           <div className="container mx-auto max-w-4xl px-6">
             <nav aria-label="Breadcrumb" className="mb-5 font-body text-sm text-white/70">

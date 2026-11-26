@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { BookOpenCheck, ShoppingCart, ArrowUpRight, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import TrackedLink from '@/components/TrackedLink';
-import { books } from '@/lib/books';
+import { homepageBooks as books } from '@/lib/books';
+import AffiliateDisclosure from '@/components/AffiliateDisclosure';
 
 export default function AmazonBookPromotion() {
   return (
     <section id="book-promotion" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12 md:mb-16">
-          <BookOpenCheck className="h-16 w-16 text-accent mx-auto mb-4" />
+          <BookOpenCheck className="h-16 w-16 text-accent-ink mx-auto mb-4" />
           <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">
-            For the Analog Athlete: <span className="text-accent">Your Plan, On Paper.</span>
+            For the Analog Athlete: <span className="text-accent-ink">Your Plan, On Paper.</span>
           </h2>
           <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
             Tired of screen-time distractions? Our training books are for the athlete who wants to unplug and focus. Physically record your progress, avoid notifications, and own your plan.
@@ -27,7 +28,7 @@ export default function AmazonBookPromotion() {
                 <div className="w-full md:w-1/3 flex-shrink-0 p-4 flex items-center justify-center bg-muted/10 md:rounded-l-lg md:rounded-tr-none rounded-t-lg">
                   <div className="relative w-full max-w-[200px] md:max-w-full aspect-[2/3]">
                     <Image
-                      src={book.imageUrl}
+                      src={book.imageUrl as string}
                       alt={book.title}
                       width={200} 
                       height={300}
@@ -39,7 +40,7 @@ export default function AmazonBookPromotion() {
                 </div>
                 <div className="flex flex-col flex-grow p-6">
                   <CardHeader className="p-0 mb-2">
-                    <CardTitle className="font-headline text-xl md:text-2xl text-primary group-hover:text-accent transition-colors duration-300">{book.title}</CardTitle>
+                    <CardTitle className="font-headline text-xl md:text-2xl text-primary group-hover:text-accent-ink transition-colors duration-300">{book.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 flex-grow">
                     <CardDescription className="font-body text-sm md:text-base text-muted-foreground mb-4">
@@ -51,7 +52,7 @@ export default function AmazonBookPromotion() {
                       <TrackedLink
                         href={book.amazonUrl}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="sponsored noopener noreferrer"
                         event="cta_book_click"
                         eventParams={{ book_id: book.id, location: 'book_promotion' }}
                       >
@@ -65,9 +66,10 @@ export default function AmazonBookPromotion() {
           ))}
         </div>
         <div className="mt-10 text-center">
+          <AffiliateDisclosure className="mb-4" />
           <Link
             href="/books"
-            className="inline-flex items-center text-sm font-headline font-semibold text-foreground/80 hover:text-accent transition-colors"
+            className="inline-flex items-center text-sm font-headline font-semibold text-foreground/80 hover:text-accent-ink transition-colors"
           >
             See all books &amp; details <ArrowRight className="ml-1.5 h-4 w-4" />
           </Link>

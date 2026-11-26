@@ -21,7 +21,8 @@ beforeEach(() => db.reset());
 
 describe('the starting list', () => {
   it('has every proposal seed as a single question, each tool real or planned', () => {
-    expect(CANDIDATES).toHaveLength(32);
+    // The 32 the proposal started with, and any added since (candidates.ts says when).
+    expect(CANDIDATES.length).toBeGreaterThanOrEqual(32);
     for (const c of CANDIDATES) {
       if (c.tool) expect(Object.keys(TOOLS)).toContain(c.tool);
       // A topic waits for a tool until it is built; then that tool is its proof.
@@ -38,10 +39,29 @@ describe('the starting list', () => {
   });
 
   it('seeds the queue once, and never again', async () => {
-    expect(await queue.ensureQueueSeeded(at)).toBe(32);
+    expect(await queue.ensureQueueSeeded(at)).toBe(CANDIDATES.length);
     await queue.skipTopic((await queue.listTopics())[0].id, 'Not now');
     expect(await queue.ensureQueueSeeded(at)).toBe(0);
-    expect(db.all('guideTopics')).toHaveLength(32);
+    expect(db.all('guideTopics')).toHaveLength(CANDIDATES.length);
+  });
+
+  it('adds a candidate to a queue seeded before it existed, at the back, and leaves a skipped topic skipped', async () => {
+    // The queue as it was when the list was one candidate shorter.
+    const newest = CANDIDATES.at(-1)!;
+    const stamp = at.toISOString();
+    for (const [i, c] of CANDIDATES.slice(0, -1).entries()) {
+      await db.collection('guideTopics').add({ ...c, rank: (i + 1) * 10, status: 'queued', source: 'list', createdAt: stamp, updatedAt: stamp });
+    }
+    const first = (await queue.listTopics())[0];
+    await queue.skipTopic(first.id, 'Not now');
+
+    expect(await queue.ensureQueueSeeded(at)).toBe(1);
+    const after = await queue.listTopics();
+    const back = after.find((t) => t.question === newest.question)!;
+    expect(back.status).toBe('queued');
+    expect(back.rank).toBe(Math.max(...after.map((t) => t.rank)));
+    expect(after.find((t) => t.id === first.id)?.status).toBe('skipped');
+    expect(await queue.ensureQueueSeeded(at)).toBe(0);
   });
 });
 

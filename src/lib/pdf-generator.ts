@@ -1,7 +1,7 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { DailyWorkout, formatDate, formatDateShort, getWeekNumber } from './training-plan-utils';
+import { DailyWorkout, formatDate, formatDateShort, getWeekNumber, parseLocalDate } from './training-plan-utils';
 
 // Brand colors
 const BRAND_PRIMARY = '#FF6B35'; // Accent color
@@ -135,7 +135,7 @@ export function generateTrainingPlanPDF(options: PDFGenerationOptions): jsPDF {
   doc.setFontSize(12);
   doc.setTextColor(BRAND_DARK);
   doc.setFont('helvetica', 'normal');
-  doc.text(formatDate(new Date(options.eventDate)), pageWidth / 2, yPosition, { align: 'center' });
+  doc.text(formatDate(parseLocalDate(options.eventDate)), pageWidth / 2, yPosition, { align: 'center' });
 
   yPosition += 25;
   doc.setFontSize(10);
@@ -163,9 +163,10 @@ export function generateTrainingPlanPDF(options: PDFGenerationOptions): jsPDF {
   doc.setTextColor(BRAND_DARK);
   doc.text('Training Duration: 12 Weeks (84 Days)', 30, yPosition);
   yPosition += 8;
-  doc.text(`Start Date: ${formatDate(options.workouts[0].date)}`, 30, yPosition);
+  const dayOne = options.workouts.find((w) => w.day === 1) ?? options.workouts[0];
+  doc.text(`Start Date: ${formatDate(dayOne.date)}`, 30, yPosition);
   yPosition += 8;
-  doc.text(`Race Day: ${formatDate(new Date(options.eventDate))}`, 30, yPosition);
+  doc.text(`Race Day: ${formatDate(parseLocalDate(options.eventDate))}`, 30, yPosition);
   yPosition += 8;
   doc.text('Workouts: 3-4 sessions per week', 30, yPosition);
   yPosition += 8;
@@ -534,6 +535,14 @@ function addCTABlock(
  */
 export function downloadTrainingPlanPDF(options: PDFGenerationOptions): void {
   const pdf = generateTrainingPlanPDF(options);
-  const fileName = `HybridX-Hyrox-Training-Plan-${formatDateShort(new Date(options.eventDate))}.pdf`;
-  pdf.save(fileName);
+  pdf.save(trainingPlanPdfFileName(options));
+}
+
+export function trainingPlanPdfFileName(options: Pick<PDFGenerationOptions, 'eventDate'>): string {
+  return `HybridX-Hyrox-Training-Plan-${formatDateShort(parseLocalDate(options.eventDate))}.pdf`;
+}
+
+/** The PDF as a Blob, for a download link that still works when an automatic download is blocked. */
+export function trainingPlanPdfBlob(options: PDFGenerationOptions): Blob {
+  return generateTrainingPlanPDF(options).output('blob');
 }

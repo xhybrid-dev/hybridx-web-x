@@ -1,7 +1,7 @@
 {
   "_readme": "Canonical content and options for the HybridX plan finder. Routing logic lives in routing.js and reads the option ids and catalog ids in this file. Change copy, labels and links here; change rules in routing.js and update routing.test.js.",
   "version": "1.0.0",
-  "catalogVersion": "2026-09-29.2",
+  "catalogVersion": "2026-11-25",
   "currency": "GBP",
   "stations": [
     "Goal",
@@ -213,7 +213,7 @@
       "title": "Train for Hyrox at Home",
       "meta": "Beginner, 12 weeks, minimal equipment",
       "price": "On Amazon",
-      "cta": "View on Amazon",
+      "cta": "Men's edition on Amazon",
       "href": "https://amzn.to/445PMV1",
       "affiliate": true
     },
@@ -248,21 +248,22 @@
     "athx": {
       "id": "athx",
       "status": "live",
-      "destinationType": "amazon",
+      "destinationType": "amazon-affiliate",
       "kind": "PAPERBACK",
       "badge": "PAPERBACK",
-      "head": "the ATHX 2027 training book",
-      "title": "ATHX 2027 training book",
-      "meta": "Men's and women's editions",
+      "head": "the ATHX 2027 training books",
+      "title": "ATHX 2027 training books",
+      "meta": "Men's and women's editions: a 12-week plan with Lite, ATHX and Pro loadings",
       "price": "On Amazon",
       "cta": "View on Amazon",
-      "href": "https://link.amazon/B073SX15W",
-      "affiliate": false
+      "href": "https://link.amazon/B0g5sdBgd",
+      "altCta": { "label": "Women's edition on Amazon", "href": "https://link.amazon/B09UkaF2U" },
+      "affiliate": true
     },
     "ultra": {
       "id": "ultra",
       "status": "live",
-      "destinationType": "amazon",
+      "destinationType": "amazon-affiliate",
       "kind": "PAPERBACK",
       "badge": "PAPERBACK",
       "head": "ULTRA STRENGTH",
@@ -270,7 +271,105 @@
       "meta": "16-week hilly 50K plan",
       "price": "On Amazon",
       "cta": "View on Amazon",
-      "href": "https://link.amazon/B0bvDfu46",
+      "href": "https://link.amazon/B0dzb9lZh",
+      "affiliate": true
+    },
+    "weekplan": {
+      "id": "weekplan",
+      "status": "live",
+      "destinationType": "tool",
+      "kind": "FREE TOOL",
+      "badge": "TOOL",
+      "head": "the Hybrid Week Planner",
+      "title": "Hybrid Week Planner",
+      "meta": "Four weeks of running and lifting that fit together, with a calendar file",
+      "price": "Free",
+      "cta": "Plan my week",
+      "href": "https://hybridx.club/calculators/week-planner",
+      "affiliate": false
+    },
+    "pacer": {
+      "id": "pacer",
+      "status": "live",
+      "destinationType": "tool",
+      "kind": "FREE TOOL",
+      "badge": "TOOL",
+      "head": "the HYROX Pacer",
+      "title": "HYROX Pacer",
+      "meta": "Every run and station split for your target finish time",
+      "price": "Free",
+      "cta": "Work out my splits",
+      "href": "https://hybridx.club/calculators/hyrox-pacer",
+      "affiliate": false
+    },
+    "ste": {
+      "id": "ste",
+      "status": "live",
+      "destinationType": "tool",
+      "kind": "FREE TOOL",
+      "badge": "TOOL",
+      "head": "the Strength and Engine Test",
+      "title": "Strength and Engine Test",
+      "meta": "Is strength or your engine holding your HYROX time back?",
+      "price": "Free",
+      "cta": "Take the test",
+      "href": "https://hybridx.club/calculators/strength-engine-test",
+      "affiliate": false
+    },
+    "rules": {
+      "id": "rules",
+      "status": "live",
+      "destinationType": "page",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "the 2026/27 rule changes",
+      "title": "2026/27 HYROX rule changes",
+      "meta": "Every change by what it costs you, with a penalty calculator",
+      "price": "Free",
+      "cta": "Read the rule changes",
+      "href": "https://hybridx.club/hyrox-rule-changes-2026",
+      "affiliate": false
+    },
+    "athxpage": {
+      "id": "athxpage",
+      "status": "live",
+      "destinationType": "page",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "the ATHX 2027 guide",
+      "title": "ATHX 2027 guide and calculator",
+      "meta": "The format, the three zones, 2027 UK dates and an Endurance Zone calculator",
+      "price": "Free",
+      "cta": "Open the ATHX guide",
+      "href": "https://hybridx.club/athx-2027",
+      "affiliate": false
+    },
+    "howto": {
+      "id": "howto",
+      "status": "live",
+      "destinationType": "page",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "the HYROX training guide",
+      "title": "How to train for HYROX",
+      "meta": "The race format, a weekly structure and the mistakes to avoid",
+      "price": "Free",
+      "cta": "Read the guide",
+      "href": "https://hybridx.club/how-to-train-for-hyrox",
+      "affiliate": false
+    },
+    "hybridprog": {
+      "id": "hybridprog",
+      "status": "live",
+      "destinationType": "page",
+      "kind": "FREE GUIDE",
+      "badge": "GUIDE",
+      "head": "the hybrid training guide",
+      "title": "Hybrid training programme",
+      "meta": "How to train strength and endurance together",
+      "price": "Free",
+      "cta": "Read the guide",
+      "href": "https://hybridx.club/hybrid-training-program",
       "affiliate": false
     },
     "vdot": {
@@ -464,8 +563,8 @@
       "label": "paperback books sold"
     },
     {
-      "value": "200+",
-      "label": "members using the app"
+      "value": "£5/month",
+      "label": "app with a 14-day free trial"
     }
   ],
   "prompts": [
@@ -544,7 +643,7 @@
     },
     {
       "q": "What is a good Hyrox time for a beginner?",
-      "a": "Published benchmarks put typical first-timer finishes at roughly 1:40 to 1:55 for men and 1:55 to 2:10 for women, and averages across all finishers sit at about 1:35 for men and 1:50 for women. Your time depends on your division, your running and how well you pace the stations, so for a first race a finish is a better target than a number."
+      "a": "Most well-prepared first-timers finish in about 1:45 to 2:10 for men and 2:00 to 2:20 for women, against a global average of roughly 1:40 for men. Ambitious women can realistically aim for 1:30 to 1:40. Your time depends on your division, your running and how well you pace the stations, so for a first race a finish is a better target than a number."
     },
     {
       "q": "How many weeks do I need to train for Hyrox?",
@@ -552,7 +651,7 @@
     },
     {
       "q": "What is compromised running and why does it matter for Hyrox?",
-      "a": "Compromised running is running while your legs and breathing are already loaded from the station before, such as a sled push or wall balls. Every kilometre of a Hyrox race is run this way, so you will be slower than on a fresh run. Practising it in training, as the free 12-week running plan does, is how you keep the pace from falling apart halfway through."
+      "a": "Compromised running is running while your legs and breathing are already loaded from the station before, such as a sled push or wall balls. Seven of the eight 1km runs come straight after a station, so you will be slower than on a fresh run. Practising it in training, as the free 12-week running plan does, is how you keep the pace from falling apart halfway through."
     },
     {
       "q": "How do I access the HybridX app and what does it include?",
@@ -651,5 +750,5 @@
       ]
     }
   },
-  "productMapNotes": "ATHX 2027 and ULTRA STRENGTH links were supplied by the owner on 29 September 2026 (catalogVersion 2026-09-29.2). They are Amazon links, not amzn.to affiliate short links, so destinationType is 'amazon' and affiliate is false; change both if they are re-issued as affiliate links. Titles not yet published (XENOM book, HYROX Youngstars book) have no entry: route those goals to the nearest live product and record the demand (see docs/04)."
+  "productMapNotes": "ATHX 2027 (men's, B0HH8QQF9N; women's, B0HH8RGVN1) and ULTRA STRENGTH (B0H5CCCYNH) link.amazon affiliate links were supplied by the owner on 25 November 2026, replacing the links of 29 September 2026, which redirected through a third-party shortener and were wrongly marked as not affiliate. Titles not yet published (XENOM book, HYROX Youngstars book) have no entry: route those goals to the nearest live product and record the demand (see docs/04)."
 }

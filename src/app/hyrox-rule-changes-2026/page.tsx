@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ShopEventLink from '@/components/shop/ShopEventLink';
@@ -26,8 +25,7 @@ import {
   createFAQSchema,
   createArticleSchema,
   createBreadcrumbSchema,
-  createWebApplicationSchema,
-} from '@/lib/seo';
+  createWebApplicationSchema, OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 import {
   RULE_FAQS,
   LAP_CONFIGS,
@@ -44,13 +42,14 @@ import StickySectionNav from '@/components/hyrox-rules/StickySectionNav';
 import ShareRow from '@/components/hyrox-rules/ShareRow';
 import RaceCardGate from '@/components/hyrox-rules/RaceCardGate';
 
+import JsonLd from '@/components/JsonLd';
 const PATH = '/hyrox-rule-changes-2026';
 const PUBLISHED = '2026-08-02';
 
 export const metadata: Metadata = {
-  title: 'HYROX Rule Changes 2026/27 — What Actually Matters (Interactive Guide)',
+  title: 'HYROX Rule Changes 2026/27: What Matters',
   description:
-    'Every 2026/27 HYROX rule change, sorted by what it costs you. An incomplete station is now a disqualification, missed run laps have a published penalty scale, and the doubles gap is down to 10 seconds. Includes a free penalty calculator.',
+    'Every 2026/27 HYROX rule change, sorted by what it costs you: station disqualifications, missed lap penalties and the 10 second doubles gap.',
   keywords: [
     'hyrox rule changes 2026',
     'hyrox rules 2026/27',
@@ -66,6 +65,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `https://hybridx.club${PATH}` },
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'HYROX Rule Changes 2026/27 — What Actually Matters',
     description:
       'An incomplete station is now a disqualification. Every 2026/27 rule change, sorted by what it costs you, plus an interactive penalty calculator.',
@@ -73,6 +73,7 @@ export const metadata: Metadata = {
     publishedTime: PUBLISHED,
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'HYROX Rule Changes 2026/27 — What Actually Matters',
     description:
@@ -118,30 +119,14 @@ const toneStyles = {
 export default function HyroxRuleChanges2026() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Script
-        id="rules-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <Script
-        id="rules-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <Script
-        id="rules-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <Script
-        id="rules-tool-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolSchema) }}
-      />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={toolSchema} />
 
       <Header />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ───────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-black py-16 text-white md:py-24">
           <div
@@ -583,7 +568,7 @@ export default function HyroxRuleChanges2026() {
               {RULE_FAQS.map((faq) => (
                 <div key={faq.question} className="rounded-2xl border border-border bg-card p-5">
                   <h3 className="mb-2 flex items-start gap-2 font-headline text-base font-bold text-foreground">
-                    <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                    <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-ink" aria-hidden="true" />
                     {faq.question}
                   </h3>
                   <p className="pl-6 font-body text-sm leading-relaxed text-muted-foreground">
@@ -624,8 +609,8 @@ export default function HyroxRuleChanges2026() {
               Training for a race this season?
             </h2>
             <p className="mx-auto mb-8 max-w-2xl font-body text-lg text-white/75">
-              The HybridX app builds running and strength into one plan around your race date, and
-              pushes your sessions straight to your Garmin.
+              The HybridX app builds running and strength into one plan lined up to your race date,
+              with session logging and Edge Coach to answer your technique and pacing questions.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button size="lg" className="bg-accent font-headline text-black hover:bg-accent/90" asChild>
@@ -634,7 +619,7 @@ export default function HyroxRuleChanges2026() {
                   event="cta_app_click"
                   eventParams={{ location: 'rules_2026_footer_cta' }}
                 >
-                  Start free at hybridx.club <ArrowRight className="ml-2 h-4 w-4" />
+                  Start your 14-day free app trial <ArrowRight className="ml-2 h-4 w-4" />
                 </TrackedLink>
               </Button>
               <Button
@@ -653,8 +638,8 @@ export default function HyroxRuleChanges2026() {
               <Link href="/free-hyrox-plan" className="hover:text-accent">
                 Free 12-week Hyrox plan
               </Link>
-              <Link href="/calculators/split-time-calculator" className="hover:text-accent">
-                Hyrox split time calculator
+              <Link href="/calculators/hyrox-pacer" className="hover:text-accent">
+                HYROX pace calculator
               </Link>
               <Link href="/hyrox-training-plan" className="hover:text-accent">
                 12-week training plan

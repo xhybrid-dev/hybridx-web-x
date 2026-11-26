@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { Fraunces, IBM_Plex_Mono } from 'next/font/google';
+import { fraunces, plexMono } from '@/lib/fonts';
 import base from '@/components/una-app/app-page.module.css';
 import {
   AppFooter,
@@ -19,13 +19,13 @@ import { Contours, Peak, Ridges, Stars } from '@/components/streak/Terrain';
 import { BADGES, MAX_SHIELDS, SHIELD_EVERY } from '@/lib/streak-content';
 import styles from './streak.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
- * streak.hybridx.club: the page for HybridX Streak, the weekly training
+ * hybridx.club/streak: the page for HybridX Streak, the weekly training
  * streak for UNA Watch.
  *
- * Served at /streak on hybridx.club and at the root of streak.hybridx.club;
- * the middleware rewrites the subdomain's "/" here. Canonical is the
- * subdomain.
+ * Canonical is https://hybridx.club/streak. It once named streak.hybridx.club, which
+ * has no DNS record.
  *
  * The Race page's sibling, deliberately not its twin. They share the
  * HybridX mark, UNA's teal, the watch render, the UNA section and the footer
@@ -57,11 +57,10 @@ import styles from './streak.module.css';
  *     (see the Race page).
  */
 
-const URL_CANONICAL = 'https://streak.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/streak';
 
 const TITLE = 'HybridX Streak — the weekly training streak for UNA Watch';
-const DESCRIPTION =
-  'Set your weekly target and climb from Arthur’s Seat to Everest. Sessions saved in all six HybridX activity apps for UNA Watch count automatically into your weekly streak and 42-day/7-day Training Load — plus quick manual logging for anything else.';
+const DESCRIPTION = "Set a weekly target and climb from Arthur's Seat to Everest. Sessions from all six HybridX activity apps for UNA Watch count automatically, plus manual logging.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -106,14 +105,6 @@ const appSchema = {
 };
 
 // Streak's own type: an editorial serif for headlines, a mono for map labels.
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-plex-mono',
-  display: 'swap',
-});
-
 const STEPS = [
   {
     title: 'Set your week',
@@ -219,11 +210,7 @@ function GlanceCard() {
 export default function StreakPage() {
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${fraunces.variable} ${plexMono.variable}`}>
-      <script
-        id="streak-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
       <div className={base.grain} aria-hidden="true" />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
@@ -245,7 +232,7 @@ export default function StreakPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero: a night sky, and the watch rising over the ridges ──── */}
         <section className={styles.hero}>
           <Stars className={styles.stars} />

@@ -16,7 +16,9 @@ import {
   VO2_ESTIMATE_NOTICE,
 } from '@/lib/una-family';
 import styles from './una.module.css';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
+import JsonLd from '@/components/JsonLd';
 /*
  * hybridx.club/una: the X family — seven connected HybridX apps and three
  * live Glances for UNA Watch, united around X Streak as the central dashboard.
@@ -39,8 +41,7 @@ import styles from './una.module.css';
 
 const URL_CANONICAL = `${HYBRIDX_URL}/una`;
 const TITLE = 'The X family — seven connected apps for UNA Watch by HybridX';
-const DESCRIPTION =
-  'X Training (10K, Half Marathon & 8-week VO2max plans), HybridX Race, X Run, X Trail, X Ride, X Workout and X Streak: seven specialist HybridX apps for UNA Watch that flow automatically into one dashboard.';
+const DESCRIPTION = 'The X family: seven connected HybridX apps for UNA Watch, from X Training plans to Race, Run, Trail, Ride, Workout and Streak, all feeding one dashboard.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -101,16 +102,12 @@ const listSchema = {
 export default function UnaFamilyPage() {
   return (
     <div id="top" className={`${styles.page} ${grotesk.variable} ${inter.variable} ${mono.variable}`}>
-      <script
-        id="una-family-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }}
-      />
+      <JsonLd data={listSchema} />
 
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a href="#top" className={styles.brandMark} aria-label="HybridX X Apps for UNA Watch, back to top">
-            <Image src="/Icon Logo.png" alt="HybridX" width={28} height={28} className={styles.brandLogo} />
+            <Image src="/icon-logo.png" alt="HybridX" width={28} height={28} className={styles.brandLogo} />
             <span className={styles.brandName}>X Apps</span>
             <span className={styles.brandFor}>for UNA Watch</span>
           </a>
@@ -123,7 +120,7 @@ export default function UnaFamilyPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* Hero */}
         <section className={styles.heroSection} aria-labelledby="una-hero-heading">
           <div className={`${styles.container} ${styles.heroGrid}`}>
@@ -293,6 +290,9 @@ export default function UnaFamilyPage() {
             <Link href="/trail-quest">Trail Quest</Link>
             <a href={HYBRIDX_URL}>hybridx.club</a>
             <Link href="/privacy-policy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
+            <ConsentSettingsButton className={styles.footerButton} />
           </nav>
         </div>
       </footer>

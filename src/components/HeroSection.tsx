@@ -38,7 +38,7 @@ const trainingOptions = [
 const stats = [
   { icon: Users,      value: "2,000+", label: "Athletes Trained"  },
   { icon: BookMarked, value: "1800",   label: "Books Sold"        },
-  { icon: TrendingUp, value: "200+",   label: "App Members"       },
+  { icon: TrendingUp, value: "£5/mo",  label: "14-Day Free Trial" },
 ];
 
 export default function HeroSection() {
@@ -53,12 +53,12 @@ export default function HeroSection() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
           </span>
-          <ShieldCheck className="h-4 w-4 text-accent" />
+          <ShieldCheck className="h-4 w-4 text-accent-ink" />
           Over 2,000 athletes have trained with HybridX plans
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-primary mb-4 leading-tight">
-          Your Path to <span className="text-accent">Peak Hyrox Performance</span> Starts Here.
+          Your Path to <span className="text-accent-ink">Peak Hyrox Performance</span> Starts Here.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground font-body max-w-3xl mx-auto mb-10">
           Whatever your budget or training style, we have a scientifically-backed plan to help you achieve your best. Choose the option that's right for you.
@@ -68,7 +68,7 @@ export default function HeroSection() {
         <div className="inline-grid grid-cols-3 divide-x divide-border/60 border border-border/60 rounded-xl overflow-hidden bg-secondary/40">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col items-center px-6 py-4 gap-1">
-              <stat.icon className="h-5 w-5 text-accent" />
+              <stat.icon className="h-5 w-5 text-accent-ink" />
               <span className="text-2xl font-headline font-extrabold text-primary leading-none">{stat.value}</span>
               <span className="text-xs text-muted-foreground font-body">{stat.label}</span>
             </div>

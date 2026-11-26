@@ -458,6 +458,27 @@ export function parsePlannerInput(get: (key: string) => string | null | undefine
   return { days: days as DayCount, goal: goal as Goal, kit: kit as Kit, longRunDay: long };
 }
 
+/**
+ * A link that names only some of the inputs, such as /calculators/week-planner?goal=athx
+ * from the ATHX page: each input that is present and valid is used and the rest
+ * come from `defaults`. parsePlannerInput stays strict (it reads the emailed link,
+ * which must name all four), so a half-formed link cannot be mistaken for one.
+ */
+export function parsePlannerPreset(get: (key: string) => string | null | undefined, defaults: PlannerInput): PlannerInput | null {
+  const days = Number(get('days'));
+  const goal = get('goal');
+  const kit = get('kit');
+  const long = WEEKDAY_KEYS.indexOf((get('long') ?? '') as WeekdayKey);
+  const preset: PlannerInput = {
+    days: (DAY_COUNTS as readonly number[]).includes(days) ? (days as DayCount) : defaults.days,
+    goal: (GOALS as readonly string[]).includes(goal ?? '') ? (goal as Goal) : defaults.goal,
+    kit: (KITS as readonly string[]).includes(kit ?? '') ? (kit as Kit) : defaults.kit,
+    longRunDay: long >= 0 ? long : defaults.longRunDay,
+  };
+  const changed = preset.days !== defaults.days || preset.goal !== defaults.goal || preset.kit !== defaults.kit || preset.longRunDay !== defaults.longRunDay;
+  return changed ? preset : null;
+}
+
 /** The query string for a plan, as parsePlannerInput reads it. */
 export function plannerQuery(input: PlannerInput): string {
   return new URLSearchParams({ days: String(input.days), goal: input.goal, kit: input.kit, long: WEEKDAY_KEYS[input.longRunDay] }).toString();

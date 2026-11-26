@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -14,19 +13,23 @@ import {
   createArticleSchema,
   createBreadcrumbSchema,
   SITE_CONFIG,
+  ORGANIZATION_ID,
 } from '@/lib/seo';
 import EngineLeadForm from '@/components/engine/EngineLeadForm';
 import EngineLogo, { EngineX } from '@/components/engine/EngineLogo';
+import StandaloneBar from '@/components/StandaloneBar';
+import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 import Heartbeat from '@/components/engine/Heartbeat';
 import Rise from '@/components/engine/Rise';
 import StickyCta from '@/components/engine/StickyCta';
 
+import JsonLd from '@/components/JsonLd';
 const PAGE_PATH = '/build-a-bigger-engine';
 
 export const metadata: Metadata = {
-  title: 'How to Improve Your VO2max — Free Science-Backed Guide | HybridX',
+  title: 'How to Improve VO2max: Free Science Guide',
   description:
-    'How to improve your VO2max: the science-backed methods that actually work, in plain language. VO2max intervals, the Norwegian method, the 80/20 rule, and a sample week you can start now. Free guide for runners and hybrid athletes.',
+    'How to improve VO2max in plain language: intervals, the Norwegian 4x4, the 80/20 rule and a sample week. A free guide for runners and hybrid athletes.',
   keywords: [
     'how to improve vo2max',
     'how to increase vo2max',
@@ -117,7 +120,9 @@ function HeroSection() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           {/* Copy + form */}
           <div className="relative z-10">
-            <EngineLogo className="mb-7" />
+            <Link href="/" aria-label="HybridX home" className="mb-7 inline-block">
+              <EngineLogo />
+            </Link>
             <div className="mb-5">
               <FreePill />
             </div>
@@ -408,7 +413,11 @@ function AnswerSection() {
                 {sampleWeek.map((row, i) => (
                   <tr key={row.day} className={i % 2 === 0 ? 'bg-engine-paper' : 'bg-engine-blush/40'}>
                     <td className="px-4 py-3 font-archivo font-bold text-engine-ink whitespace-nowrap">{row.day}</td>
-                    <td className="px-4 py-3 text-engine-crimson font-semibold whitespace-nowrap">{row.session}</td>
+                    <td className="px-4 py-3 text-engine-crimson font-semibold sm:whitespace-nowrap">
+                      {row.session}
+                      {/* The detail column is hidden below 640 px; it moves under the session instead of being dropped. */}
+                      <span className="mt-1 block text-xs font-normal text-engine-inkSoft sm:hidden">{row.detail}</span>
+                    </td>
                     <td className="px-4 py-3 text-engine-inkSoft hidden sm:table-cell">{row.detail}</td>
                   </tr>
                 ))}
@@ -553,17 +562,23 @@ function EngineFooter() {
     <footer className="bg-engine-oxdeep">
       <div className="container mx-auto max-w-5xl px-6 py-10">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <EngineLogo />
+          <Link href="/" aria-label="HybridX home">
+            <EngineLogo />
+          </Link>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-body text-sm text-engine-paper/70">
+            <Link href="/" className="hover:text-engine-heart transition-colors">
+              HybridX home
+            </Link>
             <Link href="/privacy-policy" className="hover:text-engine-heart transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/privacy-policy#terms" className="hover:text-engine-heart transition-colors">
+            <Link href="/terms" className="hover:text-engine-heart transition-colors">
               Terms
             </Link>
-            <a href="mailto:hello@hybridx.club" className="hover:text-engine-heart transition-colors">
+            <Link href="/contact" className="hover:text-engine-heart transition-colors">
               Contact
-            </a>
+            </Link>
+            <ConsentSettingsButton className="hover:text-engine-heart transition-colors" />
           </div>
         </div>
         <p className="mt-6 border-t border-white/10 pt-6 text-center font-body text-xs text-engine-paper/50">
@@ -669,11 +684,12 @@ export default function BuildABiggerEnginePage() {
   });
 
   const articleSchema = createArticleSchema({
-    title: 'How to Improve Your VO2max — A Science-Backed Guide',
+    title: 'How to Improve Your VO2max: A Science-Backed Guide',
     description:
       'How to raise your VO2max for running and hybrid performance using interval training, the Norwegian method, the 80/20 rule, and strength work.',
     url: PAGE_PATH,
     datePublished: '2026-06-24',
+    image: '/build-a-bigger-engine/og-image.png',
   });
 
   const breadcrumbSchema = createBreadcrumbSchema([
@@ -681,48 +697,38 @@ export default function BuildABiggerEnginePage() {
     { name: 'Build a Bigger Engine: VO2max Guide', url: PAGE_PATH },
   ]);
 
+  // A free download: the offer belongs to the document, in pounds. (A top-level
+  // Offer with no item, priced in dollars, described nothing.)
   const offerSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Offer',
+    '@type': 'DigitalDocument',
     name: 'Build a Bigger Engine: Free VO2max Guide',
     description:
       'A free, science-backed guide to raising your VO2max for running and hybrid performance.',
-    price: '0',
-    priceCurrency: 'USD',
-    availability: 'https://schema.org/InStock',
     url: `${SITE_CONFIG.url}${PAGE_PATH}`,
-    seller: { '@type': 'Organization', name: 'HybridX' },
+    encodingFormat: 'application/pdf',
+    inLanguage: 'en-GB',
+    publisher: { '@id': ORGANIZATION_ID },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'GBP',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_CONFIG.url}${PAGE_PATH}`,
+      seller: { '@id': ORGANIZATION_ID },
+    },
   };
 
   return (
     <>
-      <Script
-        id="engine-faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <Script
-        id="engine-howto-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
-      />
-      <Script
-        id="engine-article-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <Script
-        id="engine-breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <Script
-        id="engine-offer-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }}
-      />
+      <JsonLd data={faqSchema} />
+      <JsonLd data={howToSchema} />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={offerSchema} />
 
-      <main className="bg-engine-oxdeep">
+      <StandaloneBar />
+      <main id="main-content" tabIndex={-1} className="bg-engine-oxdeep outline-none">
         <HeroSection />
         <ProofStrip />
         <ValueTiles />
@@ -732,8 +738,8 @@ export default function BuildABiggerEnginePage() {
         <PeopleAlsoAsk faqs={vo2maxFaqs} />
         <FaqSection faqs={faqs} />
         <FinalCta />
-        <EngineFooter />
       </main>
+      <EngineFooter />
 
       <StickyCta targetId="get-the-guide" />
     </>

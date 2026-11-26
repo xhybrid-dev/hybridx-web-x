@@ -147,7 +147,6 @@ export default function CalorieMacronutrientCalculatorForm() {
     setResults(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300));
 
     const result = calculateMetrics();
     if (typeof result === 'string') {
@@ -223,7 +222,7 @@ export default function CalorieMacronutrientCalculatorForm() {
           <Label htmlFor="activityLevel" className="text-sm font-medium flex items-center">
             Activity Level <span className="text-destructive">*</span>
             <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button></TooltipTrigger>
+                <TooltipTrigger asChild><Button type="button" aria-label="More information" variant="ghost" size="icon" className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"><Info size={16}/></Button></TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-popover text-popover-foreground border-border shadow-lg p-3 space-y-1" side="top">
                     {activityLevelOptions.map(opt => <p key={opt.value}><span className="font-semibold">{opt.label.split(' (')[0]}:</span> {opt.description}</p>)}
                 </TooltipContent>
@@ -272,18 +271,18 @@ export default function CalorieMacronutrientCalculatorForm() {
           <Card className="mt-8 shadow-lg border-border/50 bg-card/90">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl text-primary flex items-center justify-center font-headline">
-                <Utensils className="mr-3 h-7 w-7 text-accent" /> Your Estimated Daily Targets
+                <Utensils className="mr-3 h-7 w-7 text-accent-ink" /> Your Estimated Daily Targets
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
                 <Card className="p-4 bg-primary/5 border-primary/20">
                   <p className="text-sm text-muted-foreground font-medium">Basal Metabolic Rate (BMR)</p>
-                  <p className="text-2xl font-bold text-accent">{results.bmr} <span className="text-sm text-muted-foreground">kcal/day</span></p>
+                  <p className="text-2xl font-bold text-accent-ink">{results.bmr} <span className="text-sm text-muted-foreground">kcal/day</span></p>
                 </Card>
                 <Card className="p-4 bg-primary/5 border-primary/20">
                   <p className="text-sm text-muted-foreground font-medium">Total Daily Energy Expenditure (TDEE)</p>
-                  <p className="text-2xl font-bold text-accent">{results.tdee} <span className="text-sm text-muted-foreground">kcal/day</span></p>
+                  <p className="text-2xl font-bold text-accent-ink">{results.tdee} <span className="text-sm text-muted-foreground">kcal/day</span></p>
                 </Card>
               </div>
               
@@ -291,12 +290,12 @@ export default function CalorieMacronutrientCalculatorForm() {
                  <p className="text-lg text-primary font-semibold mb-1">Target Daily Calories for {
                     goal === 'loseWeight' ? 'Weight Loss' : goal === 'gainMuscle' ? 'Muscle Gain' : 'Maintenance'
                  }</p>
-                 <p className="text-4xl font-bold text-accent">{results.targetCalories} <span className="text-lg text-muted-foreground">kcal/day</span></p>
+                 <p className="text-4xl font-bold text-accent-ink">{results.targetCalories} <span className="text-lg text-muted-foreground">kcal/day</span></p>
               </Card>
 
               <div>
                 <h4 className="text-xl font-semibold text-primary mb-3 text-center flex items-center justify-center">
-                    <PieChart className="mr-2 h-6 w-6 text-accent" /> Estimated Macronutrient Split
+                    <PieChart className="mr-2 h-6 w-6 text-accent-ink" /> Estimated Macronutrient Split
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card className="p-4 text-center bg-blue-500/10 border-blue-500/30">

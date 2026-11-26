@@ -658,8 +658,8 @@ export default function TreadmillTcxGeneratorForm() {
       <Card className="border-accent/50 bg-accent/5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-4 w-4 text-accent" /> Describe it, let AI build it
-            <span className="ml-auto rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-body font-semibold normal-case tracking-normal text-accent">
+            <Sparkles className="h-4 w-4 text-accent-ink" /> Describe it, let AI build it
+            <span className="ml-auto rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-body font-semibold normal-case tracking-normal text-accent-ink">
               Powered by Gemini
             </span>
           </CardTitle>

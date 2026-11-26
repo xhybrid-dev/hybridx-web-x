@@ -36,7 +36,7 @@ export default async function GuidesHub() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="bg-gradient-to-b from-neutral-900 to-black py-16 text-white md:py-20">
           <div className="container mx-auto max-w-4xl px-6">
             <p className="mb-4 font-headline text-sm font-semibold uppercase tracking-widest text-accent">HybridX guides</p>

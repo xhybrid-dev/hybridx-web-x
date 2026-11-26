@@ -14,12 +14,13 @@ import FilmPlayer from '@/components/una-app/FilmPlayer';
 import LiveWatch from '@/components/race/LiveWatch';
 import RaceBuilder from '@/components/race/RaceBuilder';
 
+import JsonLd from '@/components/JsonLd';
 /*
- * race.hybridx.club: the page for HybridX Race, the HYROX-format race timer
+ * hybridx.club/race: the page for HybridX Race, the HYROX-format race timer
  * for UNA Watch.
  *
- * Served at /race on hybridx.club and at the root of race.hybridx.club; the
- * middleware rewrites the subdomain's "/" here. Canonical is the subdomain.
+ * Canonical is https://hybridx.club/race. It once named race.hybridx.club, which has no
+ * DNS record, so Google was told to prefer a host that does not exist.
  *
  * Standalone like the ATHX funnel: no site header or footer, dark whatever
  * the site theme is. Styles and the shared parts (wordmark, UNA section,
@@ -55,11 +56,10 @@ import RaceBuilder from '@/components/race/RaceBuilder';
  *   - Anything on the roadmap is labelled as the roadmap.
  */
 
-const URL_CANONICAL = 'https://race.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/race';
 
 const TITLE = 'HybridX Race — the HYROX-format race timer for UNA Watch';
-const DESCRIPTION =
-  'One button per split. Every run and every station timed as its own lap, with heart rate, and exported to Strava. Race it in full, or train it as a sim with shorter runs. The HYROX-format race timer for UNA Watch, by HybridX.';
+const DESCRIPTION = 'One button per split. Every run and station timed as its own lap with heart rate, exported to Strava. The HYROX-format race timer for UNA Watch, by HybridX.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -157,11 +157,7 @@ const ROADMAP = [
 export default function RacePage() {
   return (
     <div id="top" className={styles.page}>
-      <script
-        id="race-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
 
       <div className={styles.aurora} aria-hidden="true" />
       <div className={styles.grain} aria-hidden="true" />
@@ -185,7 +181,7 @@ export default function RacePage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className={styles.hero}>
           <div className={styles.container}>

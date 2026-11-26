@@ -1,30 +1,23 @@
-import type {Metadata} from 'next';
-import Script from 'next/script';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import ConsentBanner from '@/components/consent/ConsentBanner';
+import SkipLink from '@/components/SkipLink';
 import GoogleAnalytics from '@/components/consent/GoogleAnalytics';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { Inter, Space_Grotesk } from 'next/font/google';
-import { SITE_CONFIG, createOrganizationSchema, createWebSiteSchema, createSportsOrganizationSchema } from '@/lib/seo';
+import { inter, spaceGrotesk } from '@/lib/fonts';
+import { SITE_CONFIG, createOrganizationSchema, createWebSiteSchema } from '@/lib/seo';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-  // 600 is the semibold used for emphasis in body copy on the ATHX funnel,
-  // which sets its type from the printed books rather than from the site.
-  weight: ['400', '600', '700'],
-  adjustFontFallback: false,
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-space-grotesk',
-  weight: ['300', '400', '500', '700'],
-  adjustFontFallback: false,
-});
+import JsonLd from '@/components/JsonLd';
+export const viewport: Viewport = {
+  // The browser's address bar colour follows the theme the visitor is using.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -53,22 +46,15 @@ export const metadata: Metadata = {
   authors: [{ name: 'HybridX Hub', url: 'https://hybridx.club' }],
   creator: 'HybridX Hub',
   publisher: 'HybridX Hub',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  // No `robots` here. Next.js adds its own noindex to a 404 page, and a default
+  // "index, follow" from this layout sat beside it, so a 404 carried two
+  // conflicting robots tags. Crawling and indexing are the default; pages that
+  // want the max-snippet directives get them from createMetadata().
   // Icons come from the files in this folder (favicon.ico, icon.png, apple-icon.png):
   // Next.js links them itself, and a second declaration here would compete with them.
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'en_GB',
     siteName: SITE_CONFIG.name,
     title: 'HybridX: Hyrox Training Plans, Workouts & Coaching App',
     description: 'Expert Hyrox training plans and hybrid workout programs. Master Hyrox competitions with scientifically-backed training, books, and coaching.',
@@ -86,7 +72,6 @@ export const metadata: Metadata = {
     title: 'HybridX: Hyrox Training Plans, Workouts & Coaching App',
     description: 'Expert Hyrox training plans and hybrid workout programs. Master Hyrox competitions with scientifically-backed training, books, and coaching.',
     images: ['/og-default.png'],
-    creator: '@hybridxhub',
   },
   // NOTE: deliberately no `alternates.canonical` here — Next.js merges layout
   // metadata into every page, so a canonical set at this level tells crawlers
@@ -104,32 +89,19 @@ export default function RootLayout({
 }>) {
   const organizationSchema = createOrganizationSchema();
   const webSiteSchema = createWebSiteSchema();
-  const sportsOrgSchema = createSportsOrganizationSchema();
 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        {/* Organization Schema */}
-        <Script
-          id="organization-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        {/* WebSite Schema — entity recognition + sitelinks search for AI engines */}
-        <Script
-          id="website-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
-        />
-        {/* SportsOrganization Schema — domain authority signal for Hyrox/fitness niche */}
-        <Script
-          id="sports-org-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsOrgSchema) }}
-        />
+        {/* Feed discovery. Declared here rather than in metadata.alternates, which a page's own
+            alternates (its canonical) would replace. */}
+        <link rel="alternate" type="application/rss+xml" title="HybridX Guides" href="/guides/feed.xml" />
+        {/* The organisation and the site, as entities other schemas point at by @id */}
+        <JsonLd data={[organizationSchema, webSiteSchema]} />
       </head>
       <body className="font-body antialiased">
-        {/* First in the page so keyboard and screen reader users meet it first;
+        <SkipLink />
+        {/* Next in the page so keyboard and screen reader users meet it early;
             fixed to the bottom of the screen, so it never moves the layout. */}
         <ConsentBanner />
         <GoogleAnalytics />

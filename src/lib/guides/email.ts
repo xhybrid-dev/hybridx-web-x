@@ -164,9 +164,21 @@ function lead(e: ReviewEmail): string {
   }
 }
 
+/**
+ * The one thing in a guide that no model can supply: what Jon has seen coaching. The engine is
+ * forbidden to write a coach's note (checks.ts, invented-coach-note), so a draft arrives without
+ * one; this is the nudge to add his own, which is what makes the guide worth more than the same
+ * question answered anywhere else.
+ */
+export const COACH_NOTE_NUDGE =
+  "No coach's note yet. If you have something from your own coaching to add (what you see athletes get wrong here, or what you tell them), add a Coach's note block in the editor. It is the one part of a guide nobody else can write.";
+
+export const hasCoachNote = (g: { blocks: { type: string; kind?: string }[] }): boolean => g.blocks.some((b) => b.type === 'callout' && b.kind === 'coach-note');
+
 /** The lines summarising checks and review, shared by HTML and text. */
 function findings(e: ReviewEmail): string[] {
   const out: string[] = [];
+  if (!hasCoachNote(e.guide)) out.push(COACH_NOTE_NUDGE);
   if (e.error) out.push(`A step failed, so this is sent as it stands: ${e.error}`);
   if (e.checks) {
     const { errors, warnings, words } = e.checks;

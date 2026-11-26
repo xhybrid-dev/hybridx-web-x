@@ -95,8 +95,8 @@ export default function AthxConfirmDownload({ token }: { token: string }) {
       <p className={styles.eyebrow}>One more click</p>
       <h1 className={styles.h1}>Confirm and the guide is yours</h1>
       <p className={styles.standfirst}>
-        We confirm addresses so the guide only goes to people who asked for it, and so the launch
-        email reaches an inbox that wants it.
+        We confirm addresses so the guide only goes to people who asked for it, and so the one
+        email about the ATHX books reaches an inbox that wants it.
       </p>
 
       <form action={formAction}>

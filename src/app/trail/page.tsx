@@ -20,10 +20,11 @@ import RouteRail from '@/components/trail/RouteRail';
 import { GpxStream, RealScreen, UsbTree } from '@/components/trail/Steps';
 import styles from './trail.module.css';
 
+import JsonLd from '@/components/JsonLd';
 /*
- * trail.hybridx.club: the page for HybridX Trail, breadcrumb navigation for
- * UNA Watch. Served at /trail on hybridx.club and at the root of
- * trail.hybridx.club (the middleware's rewrite, as for Race and Streak).
+ * hybridx.club/trail: the page for HybridX Trail, breadcrumb navigation for
+ * UNA Watch. Canonical is https://hybridx.club/trail; it once named
+ * trail.hybridx.club, which has no DNS record.
  *
  * The third sibling. It shares the HybridX mark, UNA's teal, the watch render,
  * the UNA section and the footer (components/una-app/), and takes its own look
@@ -55,11 +56,10 @@ import styles from './trail.module.css';
  *     as for the other two pages.
  */
 
-const URL_CANONICAL = 'https://trail.hybridx.club';
+const URL_CANONICAL = 'https://hybridx.club/trail';
 
 const TITLE = 'HybridX Trail — follow the line on UNA Watch';
-const DESCRIPTION =
-  'Breadcrumb navigation for UNA Watch. Plan a route anywhere that exports a GPX, put it on your watch, and follow the line: a buzz before each turn, and another if you leave it. Try it with your own route.';
+const DESCRIPTION = 'Breadcrumb navigation for UNA Watch. Load any GPX route onto your watch and follow the line: a buzz before each turn, and another if you leave it.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -173,11 +173,7 @@ const LATER = ['Follow a route in reverse', 'Guidance back to the start', 'A bre
 export default function TrailPage() {
   return (
     <div id="top" className={`${base.page} ${styles.theme} ${poppins.variable} ${mono.variable}`}>
-      <script
-        id="trail-app-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-      />
+      <JsonLd data={appSchema} />
       <RouteRail />
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
@@ -198,7 +194,7 @@ export default function TrailPage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <TrailHero>
           <p className={styles.pill}>
             <span className={styles.pillDot} aria-hidden="true" />

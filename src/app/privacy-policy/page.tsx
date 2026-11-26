@@ -7,7 +7,7 @@ import ConsentSettingsButton from '@/components/consent/ConsentSettingsButton';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/privacy-policy' },
-  title: 'Privacy Policy | HybridX Hub',
+  title: 'Privacy Policy',
   description: 'Learn how HybridX Hub collects, uses, and protects your personal information and activity data.',
 };
 
@@ -15,65 +15,122 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-4xl mx-auto">
           <Card className="shadow-lg border-border/60">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
+              <CardTitle as="h1" className="text-3xl md:text-4xl font-headline text-primary">Privacy Policy</CardTitle>
               <CardDescription className="text-lg text-muted-foreground font-body mt-2">
-                Last Updated: October 2, 2026
+                Last updated: 25 November 2026
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
+              {/* Written from what the code does (the lead outbox, the rate limiter, the two Gemini tools,
+                  the order records). The controller is named as HybridX Hub, run by Jon Lee, with an email address
+                  and no postal address, at Jon's choice (25 November 2026). The transfer and retention wording
+                  should be checked against the providers' current terms. */}
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">1. Introduction</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">1. Who we are</h2>
                 <p className="text-muted-foreground">
-                  Welcome to HybridX Hub ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, including any services like our fitness calculators, training plan sign-ups, and our app.
+                  HybridX Hub (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is run by Jon Lee and publishes hybridx.club: HYROX and hybrid
+                  training plans, books, free calculators and guides. We decide how and why the personal information described here is
+                  used, which makes us the &quot;controller&quot; under UK data protection law. You can reach us at{' '}
+                  <a className="underline" href="mailto:training@hybridx.club">training@hybridx.club</a>. The HybridX app at
+                  app.hybridx.club is our own separate service; this policy covers this website.
                 </p>
               </section>
 
-              <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">2. Information We Collect</h2>
-                <p className="text-muted-foreground mb-4">We may collect information about you in a variety of ways. The information we may collect on the Site includes:</p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+              <section id="what-we-collect">
+                <h2 className="text-2xl font-headline text-primary mb-3">2. What we collect, why, and on what basis</h2>
+                <p className="text-muted-foreground mb-4">
+                  We collect only what each of these needs. Most of the site, including the calculators, works without giving us any
+                  personal information at all.
+                </p>
+                <ul className="list-disc list-inside space-y-3 text-muted-foreground">
                   <li>
-                    <strong>Personal Data:</strong> Personally identifiable information, such as your name and email address, that you voluntarily give to us when you sign up for our training plans or mailing lists.
+                    <strong>Sign-ups and free downloads</strong> (the free plan, books and guides, race cards and similar): your name,
+                    your email address and, where the form asks, a race date. We use them to give you the file or plan you asked for
+                    and, where you agreed on the form, to send training emails. Our basis is your consent for the emails, which you can
+                    withdraw at any time with the unsubscribe link in each one, and our legitimate interest in delivering what you asked
+                    for. A few downloads are sent only after you confirm your address with a button in an email, so that nobody can sign
+                    you up but you. The free plan is built in your browser, but the race you chose, its date and how you chose it are stored with your sign-up, so the emails can count down to your race.
                   </li>
                   <li>
-                    <strong>Data from Calculators:</strong> Information you provide to our fitness calculators, such as age, weight, height, gender, lift numbers, and race times. This data is processed in your browser to provide you with results and may be used in an aggregated, anonymous form for service improvement.
+                    <strong>Messages to us</strong> (the contact form and the plan finder&apos;s &quot;Talk to us&quot;): your name, email
+                    address and message, used to reply to you. Our basis is our legitimate interest in answering people who write to us.
                   </li>
                   <li>
-                    <strong>Derivative Data (Analytics):</strong> Information our servers automatically collect when you access the Site, such as your IP address, browser type, operating system, access times, and the pages you have viewed directly before and after accessing the Site. We use Google Analytics for this purpose.
+                    <strong>Calculators:</strong> what you type into a calculator (age, weight, lifts, race times) is worked out in your
+                    browser and is not sent to us. There are two exceptions, the split-time calculator&apos;s elevation advice and the treadmill
+                    workout converter: the text or route details you enter there are sent through our server to Google&apos;s Gemini
+                    service to produce the answer. They are not joined to your name or email address, and we do not use them to
+                    profile you. Please leave out health details and anything that identifies you.
+                  </li>
+                  <li>
+                    <strong>Keeping the site safe:</strong> when a form or one of those two tools is used, we make a one-way scrambled
+                    code from your IP address and keep it for an hour, with a count of how often it has been used, to stop one source
+                    flooding us with sign-ups or requests. An hourly clean-up then deletes it. The code cannot be turned back into your address. Our basis is our legitimate interest in keeping the service
+                    working and free from abuse. Our host also keeps ordinary server logs.
+                  </li>
+                  <li>
+                    <strong>Analytics:</strong> only if you accept the banner; see section 5.
+                  </li>
+                  <li>
+                    <strong>Plan finder, purchases and the online store:</strong> see sections 6 and 7 and the store section below.
                   </li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">3. How We Use Your Information</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">3. Who receives it</h2>
                 <p className="text-muted-foreground">
-                  Having accurate information about you permits us to provide you with a smooth, efficient, and customized experience. Specifically, we may use information collected about you via the Site to:
+                  We do not sell your personal information. We share it only with the services that help us run the site, who may use
+                  it only for us:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
-                  <li>Deliver your personalized training plan via email.</li>
-                  <li>Send you our newsletter or other marketing communications that you have opted into.</li>
-                  <li>Monitor and analyze usage and trends to improve your experience with the Site.</li>
-                  <li>Generate anonymized, aggregated data for internal analysis and service improvement.</li>
+                  <li>
+                    <strong>Google</strong> (Firebase App Hosting and database, where sign-ups and messages are stored; Google Analytics
+                    if you accept it; the Gemini service for the two tools in section 2).
+                  </li>
+                  <li>
+                    <strong>Brevo</strong>, which sends the emails you ask for, and <strong>our mailing system</strong> in the HybridX app,
+                    which we run ourselves and which keeps your subscription details and your choices, including who has unsubscribed.
+                  </li>
+                  <li>
+                    <strong>Stripe</strong> for card payments, <strong>Ecwid</strong> (Lightspeed Commerce) for the apparel store, and{' '}
+                    <strong>Anthropic</strong> for the monthly summary of plan finder notes (sections 6 and 7 and the store section say
+                    what each receives).
+                  </li>
+                  <li>
+                    <strong>Authorities or advisers</strong>, where the law requires it or to protect our rights or other people&apos;s safety.
+                  </li>
                 </ul>
-              </section>
-              
-              <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">4. Disclosure of Your Information</h2>
-                <p className="text-muted-foreground">
-                  We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties. We may share information we have collected about you in certain situations:
+                <p className="text-muted-foreground mt-4">
+                  <strong>Links to other sites.</strong> Our books are sold by Amazon, and some links to them are affiliate links: if you buy, we
+                  earn a small commission at no cost to you. When you follow one, Amazon&apos;s own privacy notice applies to what it
+                  collects. Amazon does not tell us who you are. Links to Instagram and other sites work the same way.
                 </p>
-                 <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
-                  <li>
-                    <strong>By Law or to Protect Rights:</strong> If we believe the release of information about you is necessary to respond to legal process, to investigate or remedy potential violations of our policies, or to protect the rights, property, and safety of others.
-                  </li>
-                  <li>
-                    <strong>Third-Party Service Providers:</strong> We may share your data with third-party service providers that perform services for us or on our behalf, including data analysis (Google Analytics) and email delivery (for training plans and newsletters).
-                  </li>
-                </ul>
+              </section>
+
+              <section id="transfers">
+                <h2 className="text-2xl font-headline text-primary mb-3">4. Transfers outside the UK</h2>
+                <p className="text-muted-foreground">
+                  Some of the services above, Google, Stripe, Anthropic and Lightspeed in particular, process information in the United
+                  States and other countries. Where they do, they rely on a legal transfer mechanism recognised in the UK, such as the UK
+                  Government&apos;s data bridge, the UK addendum to the standard contractual clauses, or the international data transfer
+                  agreement, so that your information has equivalent protection. You can ask us for details.
+                </p>
+              </section>
+
+              <section id="store">
+                <h2 className="text-2xl font-headline text-primary mb-3">Our online store (Ecwid)</h2>
+                <p className="text-muted-foreground">
+                  The apparel shelves at <code>/store</code> are run by Ecwid, an online store service from Lightspeed Commerce. They
+                  load only after you press &quot;Load the store&quot;. Once loaded, Ecwid receives your IP address and browser details
+                  and sets its own cookies so that your basket and checkout work, and it handles the order, your delivery details and
+                  your payment as our service provider. The consent banner on this site does not cover the store: pressing the button is
+                  how you choose to use it. If you do not press it, nothing is sent to Ecwid.
+                </p>
               </section>
 
               <section id="cookies">
@@ -131,8 +188,71 @@ export default function PrivacyPolicyPage() {
                 </p>
               </section>
 
+              <section id="retention">
+                <h2 className="text-2xl font-headline text-primary mb-3">9. How long we keep it</h2>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                  <li>
+                    <strong>Subscription details:</strong> while you are subscribed. When you unsubscribe we keep your email address on a
+                    list of people not to email, so that we do not email you again; if you ask us to delete your information we remove
+                    the rest.
+                  </li>
+                  <li>
+                    <strong>Messages:</strong> 12 months after the last change to the conversation, or 30 days once we have closed it,
+                    and then deleted.
+                  </li>
+                  <li>
+                    <strong>Order records:</strong> six years after the end of the tax year of the purchase (section 7).
+                  </li>
+                  <li>
+                    <strong>Plan finder answers and notes:</strong> as section 6 describes; notes are deleted after 90 days.
+                  </li>
+                  <li>
+                    <strong>Abuse-prevention codes:</strong> an hour, then cleared by the next hourly clean-up.
+                  </li>
+                  <li>
+                    <strong>Analytics:</strong> Google Analytics keeps its data for the retention period set in our Google Analytics
+                    account; ask us if you want to know what it is set to.
+                  </li>
+                </ul>
+              </section>
+
+              <section id="your-rights">
+                <h2 className="text-2xl font-headline text-primary mb-3">10. Your rights</h2>
+                <p className="text-muted-foreground">
+                  You can ask us to show you the personal information we hold about you, to correct it, to delete it, to restrict how we
+                  use it, or to give it to you in a portable form. You can object to our use of it where we rely on legitimate interests,
+                  and you can withdraw consent at any time (unsubscribing does so for emails, and the cookie settings button above does so
+                  for analytics) without affecting what we did before. We do not make decisions about you by automated means that have
+                  legal or similarly significant effects.
+                </p>
+                <p className="text-muted-foreground mt-4">
+                  Email{' '}
+                  <a className="underline" href="mailto:training@hybridx.club">training@hybridx.club</a> and we will reply within one month.
+                  If you are not happy with how we have handled your information, you have the right to complain to the UK Information
+                  Commissioner&apos;s Office at{' '}
+                  <a className="underline" href="https://ico.org.uk/make-a-complaint/" rel="noopener noreferrer">ico.org.uk/make-a-complaint</a>{' '}
+                  or on 0303 123 1113. We would like the chance to put things right first.
+                </p>
+              </section>
+
+              <section id="children">
+                <h2 className="text-2xl font-headline text-primary mb-3">11. Children</h2>
+                <p className="text-muted-foreground">
+                  The site is not aimed at children under 13 and we do not knowingly collect their information. If you think a child has
+                  given us theirs, tell us and we will delete it.
+                </p>
+              </section>
+
+              <section id="changes">
+                <h2 className="text-2xl font-headline text-primary mb-3">12. Changes to this policy</h2>
+                <p className="text-muted-foreground">
+                  If we change how we use your information we will update this page and the date at the top, and where the change matters
+                  to you we will tell you directly.
+                </p>
+              </section>
+
               <section>
-                <h2 className="text-2xl font-headline text-primary mb-3">9. Contact Us</h2>
+                <h2 className="text-2xl font-headline text-primary mb-3">13. Contact us</h2>
                 <p className="text-muted-foreground">
                   If you have questions or comments about this Privacy Policy, please contact us at: training@hybridx.club
                 </p>

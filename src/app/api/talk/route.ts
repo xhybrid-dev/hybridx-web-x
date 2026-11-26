@@ -103,10 +103,14 @@ export async function POST(request: Request) {
   const lines: [string, string][] = [
     ['Name', t.name],
     ['Email', t.email],
-    ['Training for', t.goal],
-    ['Training week', t.week || '(not given)'],
-    ['What is in the way', t.message || '(not given)'],
-    ['Plan finder answers', t.answers || '(not attached)'],
+    ...(t.source === 'page'
+      ? ([['About', t.goal], ['Message', t.message || '(not given)']] as [string, string][])
+      : ([
+          ['Training for', t.goal],
+          ['Training week', t.week || '(not given)'],
+          ['What is in the way', t.message || '(not given)'],
+          ['Plan finder answers', t.answers || '(not attached)'],
+        ] as [string, string][])),
   ];
   if (recommended) lines.push(['Recommended', recommended]);
   try {
@@ -117,7 +121,10 @@ export async function POST(request: Request) {
       replyTo: t.email,
       transactional: true,
       ignoreSuppression: true,
-      subject: `Plan finder: ${t.name} wants to talk (${t.goal.slice(0, 60)})`,
+      subject:
+        t.source === 'page'
+          ? `Contact form: ${t.name} (${t.goal.slice(0, 60)})`
+          : `Plan finder: ${t.name} wants to talk (${t.goal.slice(0, 60)})`,
       text:
         lines.map(([k, v]) => `${k}: ${v}`).join('\n') +
         `\n\nReply to this email to answer them. The message is also in the admin under Plan finder > Leads (${id}).`,

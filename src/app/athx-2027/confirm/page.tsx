@@ -56,7 +56,7 @@ export default async function AthxConfirmPage({
 
   return (
     <div className={styles.page}>
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero}>
           <div className={styles.container}>
             {errorCopy ? (
@@ -81,6 +81,13 @@ export default async function AthxConfirmPage({
             HYBRID<span>X</span> CLUB
           </p>
           <p className={styles.caption}>hybridx.club</p>
+
+          <div className={styles.footerLinks}>
+            <a href="/privacy-policy">Privacy notice</a>
+            <a href="/terms">Terms</a>
+            <a href="/athx-2027">The ATHX 2027 page</a>
+            <a href="/">HybridX Club</a>
+          </div>
           <p className={styles.legal}>
             Unofficial and independently produced. Not affiliated with or endorsed by ATHX Games.
           </p>

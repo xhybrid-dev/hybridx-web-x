@@ -23,6 +23,16 @@
 //      passed as published (src/lib/guides/store.ts). Visitors see them from
 //      the slot itself either way; this keeps Firestore saying so too.
 //
+//   4b. **Announce guides.** Tells Bing and the other IndexNow engines about a guide that has gone
+//   live or changed (src/lib/indexnow.ts). Production only.
+//
+//   4c. **Check the live site.** A few pages a tick, plus the site-wide checks (the www redirect,
+//   robots.txt, the sitemap, the 404, the security headers), read the way a search engine reads
+//   them; one email when something breaks (src/lib/site-health/). Production only.
+//
+//   4d. **Delete what has expired.** Contact messages and the plan finder's raw visit batches past their
+//   retention (src/lib/retention.ts), so the privacy policy's promise does not rest on a Firestore TTL policy.
+//
 //   5. **Draft guides.** One step of the drafting engine
 //      (src/lib/guides/engine/run.ts): checks, a review, a revision or a new
 //      draft, then any review email that is due. Off unless
@@ -45,15 +55,19 @@ import { NextResponse } from 'next/server';
 import { drainOutbox } from '@/lib/lead-outbox';
 import { refreshComplaintMirror } from '@/lib/suppression-mirror';
 import { pruneRateLimits } from '@/lib/rate-limit';
+import { pruneRetainedData } from '@/lib/retention';
 import { blankOldNotes, runDailyRollups } from '@/lib/plan-finder/store';
 import { runMonthlyReview } from '@/lib/plan-finder/monthly-review';
 import { publishDueGuides } from '@/lib/guides/store';
 import { applyAcceptedLinks } from '@/lib/guides/backlinks';
 import { runEngineStep } from '@/lib/guides/engine/run';
 import { liveDeps } from '@/lib/guides/engine/live';
+import { liveIndexNow } from '@/lib/indexnow';
+import { liveSiteHealth } from '@/lib/site-health/live';
 import { runSearchHarvest } from '@/lib/guides/harvest/run';
 import { liveHarvestDeps } from '@/lib/guides/harvest/live';
 
+import { bearerMatches } from '@/lib/bearer';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
@@ -68,7 +82,7 @@ export async function GET(request: Request) {
     return new NextResponse('Not configured', { status: 503 });
   }
 
-  if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!bearerMatches(request.headers.get('authorization'), secret)) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
@@ -79,7 +93,7 @@ export async function GET(request: Request) {
   // Guides go live at their slot whether or not this runs (the public pages
   // decide that when they are read); this records them as published, and puts
   // in the links from older articles Jon accepted once their target is live.
-  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search] = await Promise.allSettled([
+  const [outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow, health, retention] = await Promise.allSettled([
     drainOutbox(),
     refreshComplaintMirror(),
     pruneRateLimits(),
@@ -90,6 +104,9 @@ export async function GET(request: Request) {
     applyAcceptedLinks(),
     runEngineStep(liveDeps),
     runSearchHarvest(liveHarvestDeps),
+    liveIndexNow(),
+    liveSiteHealth(),
+    pruneRetainedData(),
   ]);
 
   const result = {
@@ -133,9 +150,21 @@ export async function GET(request: Request) {
       search.status === 'fulfilled'
         ? search.value
         : { error: String((search.reason as Error)?.message ?? search.reason) },
+    indexNow:
+      indexNow.status === 'fulfilled'
+        ? indexNow.value
+        : { error: String((indexNow.reason as Error)?.message ?? indexNow.reason) },
+    siteHealth:
+      health.status === 'fulfilled'
+        ? health.value
+        : { error: String((health.reason as Error)?.message ?? health.reason) },
+    retention:
+      retention.status === 'fulfilled'
+        ? retention.value
+        : { error: String((retention.reason as Error)?.message ?? retention.reason) },
   };
 
-  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search].some((r) => r.status === 'rejected')) {
+  if ([outbox, mirror, limits, rollups, notes, review, guides, links, engine, search, indexNow, health, retention].some((r) => r.status === 'rejected')) {
     console.error('[cron/marketing-maintenance] partial failure:', result);
   }
 

@@ -7,6 +7,7 @@
 
 import { redirect } from 'next/navigation';
 import { getAdminSession } from '@/lib/admin-auth';
+import { SEASON } from '@/lib/facts';
 import {
   ReviewError,
   approve,
@@ -20,12 +21,13 @@ import {
 import { EngineSettingsSchema } from '@/lib/guides/slots';
 import { LinkDecisionError, decideProposal } from '@/lib/guides/backlinks';
 import { engineOn } from '@/lib/guides/engine/run';
-import { addTopic, ensureQueueSeeded, isInQueue, moveTopic, requeueEngineSkipped, requeueTopic, skipTopic } from '@/lib/guides/queue';
+import { addTopic, duplicateOfQuestion, ensureQueueSeeded, isInQueue, moveTopic, requeueEngineSkipped, requeueTopic, skipTopic } from '@/lib/guides/queue';
 import {
   addComment,
   getGuide,
   resolveComment,
   saveEngineSettings,
+  markGuideChecked,
   saveGuide,
   updateGuideState,
 } from '@/lib/guides/store';
@@ -95,6 +97,16 @@ export async function rejectGuide(form: FormData) {
   await step(slug, () => reject(slug, String(form.get('reason') ?? '')), 'rejected');
 }
 
+/** "Still correct": records that Jon has looked at a published guide and it needs no change. */
+export async function markGuideCheckedAction(form: FormData) {
+  await requireAdmin();
+  const slug = slugOf(form);
+  const guide = await getGuide(slug);
+  if (!guide || guide.status !== 'published') redirect(`${BASE}/freshness?error=${encodeURIComponent('Only a published guide can be checked.')}`);
+  await markGuideChecked(slug, SEASON);
+  redirect(`${BASE}/freshness?done=checked`);
+}
+
 export async function retireGuide(form: FormData) {
   await requireAdmin();
   const slug = slugOf(form);
@@ -151,6 +163,8 @@ export async function createGuide(form: FormData) {
     if (await isInQueue(title)) {
       redirect(`${BASE}/new?error=${encodeURIComponent('That question is already in the queue. It will be drafted from there.')}`);
     }
+    const repeats = await duplicateOfQuestion(title);
+    if (repeats) redirect(`${BASE}/new?error=${encodeURIComponent(repeats)}`);
     await addTopic(title, pillar, new Date(), String(form.get('brief') ?? ''));
     redirect(`${BASE}/topics?done=added`);
   }
@@ -183,7 +197,8 @@ export async function saveGuideEdit(slug: string, payload: EditPayload): Promise
   if (!canEdit(current.status)) return { ok: false, errors: [`A ${current.status} article cannot be edited.`] };
 
   const { revision: _r, updatedAt: _u, ...rest } = current;
-  const next = { ...rest, title: payload.title, description: payload.description, point: payload.point, pillar: payload.pillar, blocks: payload.blocks };
+  // Jon has read it to edit it, so it now stands against this season's rules.
+  const next = { ...rest, title: payload.title, description: payload.description, point: payload.point, pillar: payload.pillar, blocks: payload.blocks, season: SEASON };
   const check = GuideSchema.safeParse({ ...next, revision: current.revision + 1, updatedAt: new Date().toISOString() });
   if (!check.success) {
     return {
@@ -249,6 +264,8 @@ export async function addTopicAction(form: FormData) {
   if (await isInQueue(question)) {
     redirect(`${BASE}/topics?error=${encodeURIComponent('That question is already in the queue.')}`);
   }
+  const repeats = await duplicateOfQuestion(question);
+  if (repeats) redirect(`${BASE}/topics?error=${encodeURIComponent(repeats)}`);
   await addTopic(question, pillar, new Date(), String(form.get('brief') ?? ''));
   redirect(`${BASE}/topics?done=added`);
 }

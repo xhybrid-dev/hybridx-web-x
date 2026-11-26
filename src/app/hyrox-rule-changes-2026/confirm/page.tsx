@@ -6,13 +6,17 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import TrackedLink from '@/components/TrackedLink';
 import { APP_SIGNUP_URL } from '@/lib/app-links';
-import { AlertCircle, ArrowRight, Printer } from 'lucide-react';
+import { AlertCircle, ArrowRight } from 'lucide-react';
 import { verifyLeadToken } from '@/lib/lead-tokens';
-import { markLeadConfirmed } from '@/lib/leads';
-import ConfirmedDownload from '@/components/hyrox-rules/ConfirmedDownload';
-import { magnetDownloadPath, requireMagnet } from '@/lib/magnets';
+import RaceCardConfirm from '@/components/hyrox-rules/RaceCardConfirm';
+import { requireMagnet } from '@/lib/magnets';
 
 const MAGNET = requireMagnet('hyrox_rules_card');
+
+// The page renders; it does not confirm. Consent is granted by the button in
+// RaceCardConfirm, which POSTs. Mail scanners fetch every link in a message, so
+// a confirmation made while this page renders is one a machine can complete.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Your race day rules card',
@@ -47,16 +51,6 @@ export default async function ConfirmRaceCardPage({
   const { token, error } = await searchParams;
   const verified = verifyLeadToken(token, MAGNET.slug);
 
-  // Record the confirmation. Best effort: a Firestore problem must not stand
-  // between a confirmed subscriber and the file they came for.
-  if (verified.valid) {
-    try {
-      await markLeadConfirmed(MAGNET.slug, verified.email, [MAGNET.tag]);
-    } catch (err) {
-      console.error('[race-card] Failed to mark lead confirmed:', err);
-    }
-  }
-
   const reason = verified.valid ? null : error || verified.reason;
   const errorCopy = reason ? (ERROR_COPY[reason] ?? ERROR_COPY['bad-signature']) : null;
 
@@ -64,7 +58,7 @@ export default async function ConfirmRaceCardPage({
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <section className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-black py-16 text-white md:py-24">
           <div
             aria-hidden="true"
@@ -77,24 +71,7 @@ export default async function ConfirmRaceCardPage({
           <div className="container relative z-10 mx-auto max-w-3xl px-6">
             {verified.valid ? (
               <>
-                <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/20 px-4 py-1.5 font-headline text-sm font-semibold text-accent">
-                  Email confirmed
-                </span>
-                <h1 className="mb-4 font-headline text-3xl font-extrabold leading-tight md:text-5xl">
-                  Here is your race day rules card
-                </h1>
-                <p className="mb-8 font-body text-lg text-white/75">
-                  Thanks for confirming. The card is yours below, and this link will keep working if
-                  you need it again closer to your race.
-                </p>
-
-                <ConfirmedDownload downloadUrl={magnetDownloadPath(MAGNET.slug, token ?? '')} />
-
-                <p className="mt-6 flex items-start gap-2 font-body text-sm leading-relaxed text-white/60">
-                  <Printer className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                  Print A4 landscape, single sided, at 100% scale, then fold with the print facing
-                  outwards.
-                </p>
+                <RaceCardConfirm token={token ?? ''} />
 
                 <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-4">
                   <Image

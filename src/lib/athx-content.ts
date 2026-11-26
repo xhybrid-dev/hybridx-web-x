@@ -69,17 +69,57 @@ export interface AthxUkDate {
   city: string;
   /** En-dash range or single date, as printed. */
   dates: string;
+  /** The first day of the event, YYYY-MM-DD. */
+  start: string;
 }
 
 /** Every UK and Ireland date for 2027. London is first: the earliest, and the
  *  one the 12-week training block in §5.8/§5.9 is timed against. */
 export const ATHX_UK_DATES: readonly AthxUkDate[] = [
-  { city: 'London', dates: '23–24 January' },
-  { city: 'Glasgow', dates: '5–6 June' },
-  { city: 'Dublin', dates: '12–13 June' },
-  { city: 'Birmingham', dates: '20–22 August' },
-  { city: 'Liverpool', dates: '9–10 October' },
+  { city: 'London', dates: '23–24 January', start: '2027-01-23' },
+  { city: 'Glasgow', dates: '5–6 June', start: '2027-06-05' },
+  { city: 'Dublin', dates: '12–13 June', start: '2027-06-12' },
+  { city: 'Birmingham', dates: '20–22 August', start: '2027-08-20' },
+  { city: 'Liverpool', dates: '9–10 October', start: '2027-10-09' },
 ] as const;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** A YYYY-MM-DD day as a UTC midnight, so day sums ignore daylight saving. */
+function dayNumber(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / DAY_MS;
+}
+
+function longDate(dayNo: number): string {
+  const d = new Date(dayNo * DAY_MS);
+  return `${d.getUTCDate()} ${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+/**
+ * What the Timing section says about the twelve-week block, worked out from today.
+ * It used to say "starts in early November", which was true in August and then was
+ * not, and the page cannot be rebuilt by hand every week. The block is 84 days with
+ * the event on its last day, as the books' 84 daily pages are.
+ */
+export function athxTimingNote(today: Date, dates: readonly AthxUkDate[] = ATHX_UK_DATES): string {
+  const todayNo = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / DAY_MS;
+  const blockStart = (start: string) => dayNumber(start) - 83;
+  const upcoming = dates.filter((d) => dayNumber(d.start) >= todayNo);
+  if (upcoming.length === 0) return 'Weeks in the build. The 2027 UK and Ireland dates have all passed; the 2028 dates will be added when they are announced.';
+
+  const first = upcoming[0];
+  if (blockStart(first.start) >= todayNo) {
+    return `Weeks in the build. If you're targeting ${first.city}, ${first.dates}, a twelve-week block starts on ${longDate(blockStart(first.start))}.`;
+  }
+  const weeks = Math.floor((dayNumber(first.start) - todayNo) / 7);
+  const next = upcoming.find((d) => blockStart(d.start) >= todayNo);
+  const base = `Weeks in the build. ${first.city}, ${first.dates}, is ${weeks} ${weeks === 1 ? 'week' : 'weeks'} away, which is closer than a full twelve-week block.`;
+  return next
+    ? `${base} For ${next.city}, ${next.dates}, a twelve-week block starts on ${longDate(blockStart(next.start))}.`
+    : base;
+}
 
 /** A sample of the wider 2027 European calendar. Not exhaustive — the guide
  *  itself says "and others" — so this is illustrative, not a claim of completeness. */

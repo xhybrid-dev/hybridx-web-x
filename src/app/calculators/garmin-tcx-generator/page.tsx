@@ -5,11 +5,12 @@ import TreadmillTcxGeneratorForm from '@/components/calculators/TreadmillTcxGene
 import CalculatorCTA from '@/components/calculators/CalculatorCTA';
 import type { Metadata } from 'next';
 
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from '@/lib/seo';
 export const metadata: Metadata = {
   alternates: { canonical: '/calculators/garmin-tcx-generator' },
-  title: 'Free Garmin FIT & TCX Generator for Treadmill Workouts | HybridX Hub',
+  title: 'Free Treadmill FIT & TCX Workout Generator',
   description:
-    'Rebuild treadmill interval sessions your watch mangled. Define intervals, paces and inclines, keep your real heart rate, and export a FIT or TCX file Garmin Connect and Strava accept — free and fully in your browser.',
+    'Rebuild treadmill intervals your watch mangled: set paces and inclines, keep your real heart rate and export a FIT or TCX file for Garmin Connect or Strava.',
   keywords: [
     'fit file generator',
     'tcx generator',
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
     'manual activity file garmin',
   ],
   openGraph: {
+    ...OG_DEFAULTS,
     title: 'Free Garmin FIT & TCX Generator for Treadmill Workouts',
     description:
       'Rebuild the treadmill session your watch should have recorded and export a FIT or TCX file for Garmin Connect or Strava — splits, inclines and real heart rate included.',
@@ -29,6 +31,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: {
+    ...TWITTER_DEFAULTS,
     card: 'summary_large_image',
     title: 'Free Garmin FIT & TCX Generator for Treadmill Workouts',
     description:
@@ -40,7 +43,7 @@ export default function GarminTcxGeneratorPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-10">
             <h1 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-3">

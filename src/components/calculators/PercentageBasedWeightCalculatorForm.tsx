@@ -40,7 +40,6 @@ export default function PercentageBasedWeightCalculatorForm() {
     setCalculatedWeight(null);
     setIsCalculating(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate calculation
 
     const oneRepMaxNum = parseFloat(oneRepMax);
     const percentageNum = parseFloat(percentage);
@@ -137,11 +136,11 @@ export default function PercentageBasedWeightCalculatorForm() {
         <Card className="mt-6 shadow-md border-primary/30 bg-primary/5">
           <CardHeader className="pb-2 pt-4 text-center">
             <CardTitle className="text-xl md:text-2xl font-semibold text-primary flex items-center justify-center">
-              <TrendingUp className="mr-2 h-6 w-6 text-accent" /> Weight to Lift
+              <TrendingUp className="mr-2 h-6 w-6 text-accent-ink" /> Weight to Lift
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center pb-4">
-            <p className="text-3xl md:text-4xl font-bold text-accent">{calculatedWeight}</p>
+            <p className="text-3xl md:text-4xl font-bold text-accent-ink">{calculatedWeight}</p>
             <p className="text-xs text-muted-foreground mt-2">
               This is {percentage}% of your 1RM ({oneRepMax}). Ensure you use the same unit (kg/lbs) as your 1RM input.
             </p>
